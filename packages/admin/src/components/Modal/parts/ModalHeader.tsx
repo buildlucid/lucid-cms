@@ -25,7 +25,7 @@ export const ModalHeader: Component<ModalHeaderProps> = (props) => {
 		<div
 			data-modal-header
 			class={classNames(
-				"flex items-start justify-between gap-4 px-4 md:px-6 py-4 md:py-6",
+				"flex items-start justify-between gap-4 px-4 md:px-6 py-4 md:py-5",
 				props.class,
 			)}
 		>

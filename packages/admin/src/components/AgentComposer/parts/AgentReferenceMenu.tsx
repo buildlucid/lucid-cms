@@ -129,7 +129,7 @@ const AgentReferenceMenu: Component<{
 						aria-label={T()("agent.composer.add")}
 						title={T()("agent.composer.add")}
 					>
-						<TbOutlinePlus size={11} />
+						<TbOutlinePlus size={12} />
 					</Menu.Trigger>
 					<Menu.Content>
 						<Show when={props.onUpload || props.onGenerate || canMedia()}>

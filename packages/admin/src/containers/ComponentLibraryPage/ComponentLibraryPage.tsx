@@ -54,6 +54,7 @@ import HaloIcon from "@/components/HaloIcon/HaloIcon";
 import Image from "@/components/Image/Image";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import Input, { type InputType } from "@/components/Input/Input";
+import Kbd from "@/components/Kbd/Kbd";
 import Link, {
 	type LinkShape,
 	type LinkSize,
@@ -93,6 +94,7 @@ import Switch from "@/components/Switch/Switch";
 import Table from "@/components/Table/Table";
 import Tabs from "@/components/Tabs/Tabs";
 import Textarea from "@/components/Textarea/Textarea";
+import Tooltip, { type TooltipPlacement } from "@/components/Tooltip/Tooltip";
 import UserDisplay, {
 	type UserDisplaySize,
 	type UserDisplayVariant,
@@ -151,6 +153,12 @@ const LINK_SHAPES = valuesOf<LinkShape>({
 	standard: true,
 	square: true,
 	circle: true,
+});
+const TOOLTIP_PLACEMENTS = valuesOf<TooltipPlacement>({
+	top: true,
+	bottom: true,
+	left: true,
+	right: true,
 });
 const CHECKBOX_VARIANTS = valuesOf<CheckboxVariant>({
 	default: true,
@@ -920,7 +928,7 @@ const ComponentLibraryPage: Component = () => {
 									type="color"
 									value={fieldValue()}
 									onInput={(event) => setFieldValue(event.currentTarget.value)}
-									class="h-10 w-full rounded-md border border-border bg-input"
+									class="h-9 w-full rounded-md border border-border bg-input"
 								/>
 								<Field.Error />
 								<Field.Description>
@@ -1076,6 +1084,28 @@ const ComponentLibraryPage: Component = () => {
 								value={inputValue()}
 								onChange={setInputValue}
 							/>
+						</InfoRow.Content>
+					</InfoRow.Root>
+
+					{/* ---------------------------------------------- Kbd */}
+					<InfoRow.Root
+						title={"Kbd"}
+						description={"variant — a key or key combination"}
+					>
+						<InfoRow.Content title={"Variants"}>
+							<div class="flex flex-col gap-2">
+								<Row label={'variant="default"'}>
+									<Kbd>⌘</Kbd>
+									<Kbd>K</Kbd>
+									<Kbd>esc</Kbd>
+								</Row>
+								<Row label={'variant="inverse"'}>
+									<span class="flex items-center gap-1 rounded-md bg-secondary px-2 py-1">
+										<Kbd variant="inverse">⌘</Kbd>
+										<Kbd variant="inverse">K</Kbd>
+									</span>
+								</Row>
+							</div>
 						</InfoRow.Content>
 					</InfoRow.Root>
 
@@ -1991,6 +2021,63 @@ const ComponentLibraryPage: Component = () => {
 								value={textareaValue()}
 								onChange={setTextareaValue}
 							/>
+						</InfoRow.Content>
+					</InfoRow.Root>
+
+					{/* ---------------------------------------------- Tooltip */}
+					<InfoRow.Root
+						title={"Tooltip"}
+						description={
+							"content, shortcut, placement, as — a hint on hover or keyboard focus"
+						}
+					>
+						<InfoRow.Content title={"On a button"}>
+							<div class="flex flex-col gap-2">
+								<Row label={"Button tooltip"}>
+									<Button
+										variant="outline"
+										size="sm"
+										tooltip="Refresh the list"
+									>
+										Refresh
+									</Button>
+								</Row>
+								<Row label={"shortcut"}>
+									<Button
+										variant="outline"
+										size="sm"
+										shape="square"
+										tooltip="Edit"
+										shortcut="E"
+									>
+										<TbOutlinePencil />
+									</Button>
+								</Row>
+							</div>
+						</InfoRow.Content>
+						<InfoRow.Content title={"Placements"}>
+							<div class="flex flex-wrap items-center gap-2">
+								<For each={TOOLTIP_PLACEMENTS}>
+									{(placement) => (
+										<Tooltip
+											content={`placement="${placement}"`}
+											placement={placement}
+											class="rounded-md border border-border bg-card px-3 py-1.5 text-sm hover:bg-card-hover focus-ring"
+										>
+											{placement}
+										</Tooltip>
+									)}
+								</For>
+							</div>
+						</InfoRow.Content>
+						<InfoRow.Content title={"As a span"}>
+							<Tooltip
+								as="span"
+								content="Shown for text that isn't a control"
+								class="text-sm text-body underline decoration-dotted underline-offset-4"
+							>
+								Hover this text
+							</Tooltip>
 						</InfoRow.Content>
 					</InfoRow.Root>
 

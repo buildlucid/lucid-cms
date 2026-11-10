@@ -12,6 +12,7 @@ import {
 } from "solid-js";
 import { Portal } from "solid-js/web";
 import { createCopy } from "@/components/Copy/copyValue";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import T from "@/translations";
 import {
 	renderAgentMarkdown,
@@ -76,17 +77,17 @@ const CopyCode: Component<{ block: HTMLElement }> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<button
+		<Tooltip
 			type="button"
-			class="absolute top-2 right-2 flex size-6 items-center justify-center rounded-md bg-input text-muted opacity-0 shadow-[-12px_0_8px_var(--lucid-input),8px_0_0_var(--lucid-input)] transition-[opacity,color] hover:text-body focus:outline-hidden focus-visible:opacity-100 focus-visible:ring-1 focus-visible:ring-primary pointer-coarse:opacity-100 [.agent-code:hover_&]:opacity-100 [.agent-markdown-bubble_&]:bg-card [.agent-markdown-bubble_&]:shadow-[-12px_0_8px_var(--lucid-card),8px_0_0_var(--lucid-card)]"
+			class="absolute top-2 right-2 flex size-6 items-center justify-center rounded-md bg-input text-muted opacity-0 shadow-[-12px_0_8px_var(--lucid-input),8px_0_0_var(--lucid-input)] transition-[opacity,color] hover:text-body focus-ring focus-visible:opacity-100 pointer-coarse:opacity-100 [.agent-code:hover_&]:opacity-100 [.agent-markdown-bubble_&]:bg-card [.agent-markdown-bubble_&]:shadow-[-12px_0_8px_var(--lucid-card),8px_0_0_var(--lucid-card)]"
 			aria-label={T()("agent.message.copy.code")}
-			title={T()("agent.message.copy.code")}
+			content={T()("agent.message.copy.code")}
 			onClick={() => void copy()}
 		>
-			<Show when={copied()} fallback={<TbOutlineCopy size={11} />}>
-				<TbOutlineCheck size={11} class="text-success" />
+			<Show when={copied()} fallback={<TbOutlineCopy size={12} />}>
+				<TbOutlineCheck size={12} class="text-success" />
 			</Show>
-		</button>
+		</Tooltip>
 	);
 };
 

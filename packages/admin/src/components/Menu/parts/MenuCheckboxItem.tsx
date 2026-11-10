@@ -36,7 +36,7 @@ const MenuCheckboxItem: Component<MenuCheckboxItemProps> = (props) => {
 		>
 			<span
 				class={classNames(
-					"flex size-4 shrink-0 items-center justify-center rounded border border-border bg-input",
+					"flex size-4 shrink-0 items-center justify-center rounded-sm border border-border bg-input",
 					{ "order-last": props.icon !== undefined },
 				)}
 			>

@@ -67,7 +67,7 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 	return (
 		<div
 			class={classNames(
-				"relative w-[min(400px,calc(100vw-2rem))] overflow-hidden rounded-lg border border-border bg-card shadow-lg",
+				"relative w-[min(400px,calc(100vw-2rem))] overflow-hidden rounded-lg border border-border bg-card shadow-floating",
 				{
 					"animate-enter": props.toast.visible,
 					"animate-leave": !props.toast.visible,
@@ -146,7 +146,7 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 			</div>
 			<button
 				data-drawer-ignore
-				class="absolute top-2.5 right-2.5 flex size-7 items-center justify-center rounded-md text-muted transition-colors duration-200 hover:bg-background-hover hover:text-icon focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+				class="absolute top-2.5 right-2.5 flex size-7 items-center justify-center rounded-md text-muted transition-colors hover:bg-background-hover hover:text-icon focus-ring"
 				onClick={() => toast.dismiss(props.toast.id)}
 				type="button"
 				aria-label={T()("common.close")}

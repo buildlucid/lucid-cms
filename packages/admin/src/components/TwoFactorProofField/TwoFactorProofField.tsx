@@ -93,7 +93,7 @@ const TwoFactorProofField: Component<TwoFactorProofFieldProps> = (props) => {
 			<button
 				type="button"
 				class={classNames(
-					"self-start text-left text-sm hover:text-primary-hover duration-200 transition-colors disabled:cursor-not-allowed disabled:opacity-80",
+					"self-start text-left text-sm hover:text-primary-hover transition-colors disabled:cursor-not-allowed disabled:opacity-50",
 					{
 						"mt-1": props.theme === "inset",
 						"mt-2.5": props.theme === "basic",

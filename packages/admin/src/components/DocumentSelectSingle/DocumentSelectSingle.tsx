@@ -81,7 +81,7 @@ const DocumentSelectSingle: Component<DocumentSelectSingleProps> = (props) => {
 						<span class="pointer-events-none absolute inset-0 rounded-lg peer-focus-visible:outline-2 peer-focus-visible:-outline-offset-2 peer-focus-visible:outline-primary-low-border" />
 						<div class="flex items-start gap-3 px-3 py-2.5">
 							<span
-								class="flex h-5 w-5 min-w-5 items-center justify-center rounded-md border border-border bg-input text-secondary-foreground transition-colors duration-200"
+								class="flex h-5 w-5 min-w-5 items-center justify-center rounded-md border border-border bg-input text-secondary-foreground transition-colors"
 								classList={{
 									"border-secondary-hover bg-secondary": props.selected,
 								}}
@@ -113,7 +113,7 @@ const DocumentSelectSingle: Component<DocumentSelectSingleProps> = (props) => {
 											}}
 											title={`${field.label}: ${field.value}`}
 										>
-											<p class="truncate text-[11px] font-medium text-muted mb-0!">
+											<p class="truncate text-2xs font-medium text-muted mb-0!">
 												{field.label}
 											</p>
 											<p class="mt-0.5 truncate text-xs text-subtitle mb-0!">

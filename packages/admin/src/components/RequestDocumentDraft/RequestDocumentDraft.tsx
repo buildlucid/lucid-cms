@@ -58,7 +58,7 @@ const RequestDocumentDraft: Component<{
 					shape="square"
 					class="transition-opacity md:opacity-0 md:group-hover/draft:opacity-100 md:focus-visible:opacity-100"
 					aria-label={T()("requests.create.clear.document")}
-					title={T()("requests.create.clear.document")}
+					tooltip={T()("requests.create.clear.document")}
 					onClick={props.onRemove}
 				>
 					<TbOutlineX size={14} />

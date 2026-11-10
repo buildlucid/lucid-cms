@@ -30,7 +30,7 @@ const ComparisonVersionSelect: Component<{
 	return (
 		<Menu.Root>
 			<Menu.Trigger
-				class="flex h-7 min-w-0 items-center gap-1.5 rounded-md px-2 text-sm text-title transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+				class="flex h-7 min-w-0 items-center gap-1.5 rounded-md px-2 text-sm text-title transition-colors hover:bg-card-hover focus-ring"
 				aria-label={props.label}
 			>
 				<span class="truncate">{selected()?.label ?? props.placeholder}</span>

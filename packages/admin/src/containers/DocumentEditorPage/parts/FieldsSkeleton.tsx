@@ -9,11 +9,11 @@ const FieldsSkeleton: Component = () => {
 			<div class="flex flex-col gap-6 border-b border-border p-4 md:p-6">
 				<div class="flex flex-col gap-2">
 					<span class="skeleton block h-4 w-24" />
-					<span class="skeleton block h-10 w-full" />
+					<span class="skeleton block h-9 w-full" />
 				</div>
 				<div class="flex flex-col gap-2">
 					<span class="skeleton block h-4 w-32" />
-					<span class="skeleton block h-10 w-full" />
+					<span class="skeleton block h-9 w-full" />
 				</div>
 				<div class="flex flex-col gap-2">
 					<span class="skeleton block h-4 w-20" />

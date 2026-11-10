@@ -879,7 +879,7 @@ const DocumentEditorPage: Component<{
 																})}
 														<button
 															type="button"
-															class="ml-3 rounded-sm font-medium text-warning-foreground underline underline-offset-2 decoration-warning-foreground/50 hover:text-warning-foreground hover:decoration-warning-foreground focus:ring-warning-foreground focus-visible:ring-1"
+															class="ml-3 rounded-sm font-medium text-warning-foreground underline underline-offset-2 decoration-warning-foreground/50 hover:text-warning-foreground hover:decoration-warning-foreground focus-ring"
 															disabled={editors.takingOver()}
 															aria-busy={editors.takingOver()}
 															onClick={() => void editors.takeOver()}

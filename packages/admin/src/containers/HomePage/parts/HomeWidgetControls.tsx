@@ -2,6 +2,7 @@ import classnames from "classnames";
 import { TbOutlineEyeOff, TbOutlineGripVertical } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
 import type { HomeWidgetSize } from "@/components/HomeWidgets/types";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import T from "@/translations";
 
 const sizeLabels = {
@@ -12,7 +13,7 @@ const sizeLabels = {
 } as const satisfies Record<HomeWidgetSize, { short: string; long: string }>;
 
 const controlClass =
-	"flex h-6 items-center justify-center rounded text-xs transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary";
+	"flex h-6 items-center justify-center rounded-sm text-xs transition-colors focus-ring";
 
 /**
  * The bar above a widget while the overview is being customised: its name and
@@ -65,7 +66,7 @@ const HomeWidgetControls: Component<{
 				aria-label={T()("home.widget.move", { name: props.label })}
 				onKeyDown={onGripKeyDown}
 			>
-				<TbOutlineGripVertical size={11} />
+				<TbOutlineGripVertical size={12} />
 			</button>
 			<span class="min-w-0 grow truncate text-xs text-body">{props.label}</span>
 			<fieldset class="flex shrink-0 items-center gap-0.5">
@@ -74,10 +75,10 @@ const HomeWidgetControls: Component<{
 				</legend>
 				<For each={props.sizes}>
 					{(size) => (
-						<button
+						<Tooltip
 							type="button"
 							aria-pressed={props.size === size}
-							title={T()(sizeLabels[size].long)}
+							content={T()(sizeLabels[size].long)}
 							aria-label={T()(sizeLabels[size].long)}
 							onClick={() => props.onResize(size)}
 							class={classnames(controlClass, "min-w-6 px-1.5", {
@@ -86,23 +87,23 @@ const HomeWidgetControls: Component<{
 							})}
 						>
 							{T()(sizeLabels[size].short)}
-						</button>
+						</Tooltip>
 					)}
 				</For>
 			</fieldset>
 			<span class="h-4 w-px shrink-0 bg-border" aria-hidden="true" />
-			<button
+			<Tooltip
 				type="button"
 				class={classnames(
 					controlClass,
 					"w-6 shrink-0 text-icon hover:text-title",
 				)}
 				aria-label={T()("home.widget.hide", { name: props.label })}
-				title={T()("home.widget.hide", { name: props.label })}
+				content={T()("home.widget.hide", { name: props.label })}
 				onClick={() => props.onHide()}
 			>
 				<TbOutlineEyeOff size={12} />
-			</button>
+			</Tooltip>
 		</div>
 	);
 };

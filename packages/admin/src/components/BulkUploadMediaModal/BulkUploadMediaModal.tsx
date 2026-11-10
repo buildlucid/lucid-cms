@@ -391,7 +391,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 								{T()("media.upload.bulk.drop.title")}{" "}
 								<button
 									type="button"
-									class="font-medium text-primary"
+									class="rounded-sm font-medium text-primary hover:text-primary-hover"
 									onClick={openFileBrowser}
 								>
 									{T()("media.upload.drop.here")}
@@ -488,7 +488,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 						</For>
 						<button
 							type="button"
-							class="mt-2 flex min-h-14 items-center justify-center rounded-md border border-dashed border-border px-4 text-sm font-medium text-body transition-colors hover:border-primary hover:bg-primary-low focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+							class="mt-2 flex min-h-14 items-center justify-center rounded-md border border-dashed border-border px-4 text-sm font-medium text-body transition-colors hover:border-primary hover:bg-primary-low focus-ring"
 							onClick={openFileBrowser}
 							disabled={isProcessing()}
 						>

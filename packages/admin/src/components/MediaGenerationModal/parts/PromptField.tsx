@@ -31,7 +31,7 @@ const PromptField: Component<{
 	return (
 		<Field.Root id={props.id} errors={props.errors}>
 			<Field.Label>{props.label}</Field.Label>
-			<div class="rounded-md border border-border bg-input transition-colors duration-200 focus-within:border-primary">
+			<div class="rounded-md border border-border bg-input transition-colors focus-field">
 				<textarea
 					id={props.id}
 					name={props.name}
@@ -68,9 +68,9 @@ const PromptField: Component<{
 						class="shrink-0"
 						disabled={props.submitDisabled}
 						aria-label={T()("ai.media.generate.modal.generate")}
-						title={T()("ai.media.generate.modal.generate")}
+						tooltip={T()("ai.media.generate.modal.generate")}
 					>
-						<TbOutlineArrowUp size={11} />
+						<TbOutlineArrowUp size={12} />
 					</Button>
 				</div>
 			</div>

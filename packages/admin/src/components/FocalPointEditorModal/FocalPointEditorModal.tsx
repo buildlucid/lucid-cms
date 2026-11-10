@@ -216,7 +216,7 @@ const FocalPointEditorModal: Component<{
 							)}
 							style={pinStyle()}
 						>
-							<div class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white shadow-sm">
+							<div class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white shadow-raised">
 								<div class="h-2.5 w-2.5 rounded-full bg-white" />
 							</div>
 						</div>

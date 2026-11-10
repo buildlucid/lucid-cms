@@ -11,6 +11,7 @@ import Input from "@/components/Input/Input";
 import { LineChart } from "@/components/LineChart/LineChart";
 import Select from "@/components/Select/Select";
 import Skeleton from "@/components/Skeleton/Skeleton";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import UserSelectDrawer from "@/components/UserSelectDrawer/UserSelectDrawer";
 import api from "@/services/api";
@@ -335,7 +336,7 @@ export const AiUsageChart: Component = () => {
 						<button
 							type="button"
 							id="ai-usage-chart-user"
-							class="flex h-10 w-full items-center gap-2 rounded-md border border-border bg-input py-2 pl-3 pr-8 text-left text-sm transition-colors duration-200 focus:border-primary focus:outline-hidden"
+							class="flex h-9 w-full items-center gap-2 rounded-md border border-border bg-input py-2 pl-3 pr-8 text-left text-sm transition-colors focus-field"
 							onClick={() => setUserPickerOpen(true)}
 							aria-haspopup="dialog"
 							aria-expanded={userPickerOpen()}
@@ -361,15 +362,15 @@ export const AiUsageChart: Component = () => {
 							</Show>
 						</button>
 						<Show when={user()}>
-							<button
+							<Tooltip
 								type="button"
-								class="absolute right-2 top-1/2 -translate-y-1/2 text-subtitle transition-colors duration-200 hover:text-danger"
+								class="absolute right-2 top-1/2 -translate-y-1/2 text-subtitle transition-colors hover:text-danger"
 								onClick={() => setUser(undefined)}
 								aria-label={T()("common.clear")}
-								title={T()("common.clear")}
+								content={T()("common.clear")}
 							>
 								<TbOutlineX size={14} />
-							</button>
+							</Tooltip>
 						</Show>
 					</div>
 					<UserSelectDrawer

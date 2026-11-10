@@ -96,16 +96,12 @@ const EditorField: Component<EditorFieldProps> = (props) => {
 				</div>
 			</Show>
 			<div
-				class={classnames(
-					"relative overflow-hidden transition-colors duration-200",
-					{
-						"rounded-md border border-border bg-input focus-within:border-primary":
-							!seamless(),
-						"bg-transparent": seamless(),
-						"border-border border-b": seamless() && hasErrors(),
-						"cursor-not-allowed opacity-80 pointer-events-none": props.disabled,
-					},
-				)}
+				class={classnames("relative overflow-hidden transition-colors", {
+					"rounded-md border border-border bg-input focus-field": !seamless(),
+					"bg-transparent": seamless(),
+					"border-border border-b": seamless() && hasErrors(),
+					"cursor-not-allowed opacity-80 pointer-events-none": props.disabled,
+				})}
 			>
 				<Show when={editor()}>
 					{(instance) => (

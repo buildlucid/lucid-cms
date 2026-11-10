@@ -121,11 +121,11 @@ const AgentRoutineCard: Component<{
 								<li>
 									<button
 										type="button"
-										class="-mx-1.5 flex w-[calc(100%+0.75rem)] items-center gap-2.5 rounded-md p-1.5 text-start hover:bg-card-hover focus-visible:outline-2 focus-visible:outline-primary"
+										class="-mx-1.5 flex w-[calc(100%+0.75rem)] items-center gap-2.5 rounded-md p-1.5 text-start hover:bg-card-hover focus-ring"
 										onClick={() => props.onSelectRun(run.id)}
 									>
 										<span
-											class="flex h-9 w-7 shrink-0 items-center justify-center rounded border border-border text-muted"
+											class="flex h-9 w-7 shrink-0 items-center justify-center rounded-sm border border-border text-muted"
 											aria-hidden="true"
 										>
 											<TbOutlineRepeat size={10} />
@@ -140,7 +140,7 @@ const AgentRoutineCard: Component<{
 											>
 												{dateHelpers.formatTimestamp(run.createdAt)}
 											</time>
-											<span class="block truncate text-[11px] text-muted">
+											<span class="block truncate text-2xs text-muted">
 												{(run.summary && markdownPreview(run.summary)) ||
 													T()("agent.routine.run.no.summary")}
 											</span>

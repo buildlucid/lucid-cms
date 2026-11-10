@@ -91,14 +91,14 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 				>
 					<TbOutlineBell class="size-3.5" />
 					<Show when={unread() > 0}>
-						<span class="absolute -top-0.5 -inset-e-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium leading-none tabular-nums text-primary-foreground ring-2 ring-sidebar">
+						<span class="absolute -top-0.5 -inset-e-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-3xs font-medium leading-none tabular-nums text-primary-foreground ring-2 ring-sidebar animate-check-in">
 							{unread() > 99 ? "99+" : unread()}
 						</span>
 					</Show>
 				</Popover.Trigger>
 				<Popover.Content
 					//* capped to the space Kobalte measures, so only the list scrolls and the footer stays in view
-					class="z-60 flex w-88 max-w-[calc(100vw-2rem)] max-h-(--kb-popper-content-available-height) flex-col rounded-md border border-border bg-popover shadow-md animate-dropdown focus:outline-hidden"
+					class="z-60 flex w-88 max-w-[calc(100vw-2rem)] max-h-(--kb-popper-content-available-height) flex-col floating-panel focus:outline-hidden"
 					onOpenAutoFocus={(event) => event.preventDefault()}
 				>
 					<div class="max-h-96 min-h-0 overflow-y-auto scrollbar p-1">
@@ -131,7 +131,7 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 										setReadAllOpen(true);
 									}}
 									aria-label={T()("notifications.mark.all.read")}
-									title={T()("notifications.mark.all.read")}
+									tooltip={T()("notifications.mark.all.read")}
 								>
 									<TbOutlineChecks class="size-3" />
 								</Button>

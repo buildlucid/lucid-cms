@@ -72,7 +72,7 @@ const AgentScreenBadge: Component<{
 				tabIndex={0}
 				aria-label={label()}
 				class={classnames(
-					"focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+					"focus-ring",
 					props.variant === "pill"
 						? "inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-full border border-border bg-input px-2.5 py-0.5 text-xs text-subtitle"
 						: "flex size-6 items-center justify-center rounded-md transition-colors hover:bg-card hover:text-body",
@@ -90,7 +90,7 @@ const AgentScreenBadge: Component<{
 				</Show>
 			</Tooltip.Trigger>
 			<Tooltip.Portal>
-				<Tooltip.Content class="z-60 w-64 max-w-[calc(100vw-2rem)] rounded-md border border-border bg-popover p-3 shadow-md animate-dropdown">
+				<Tooltip.Content class="floating-panel z-60 w-64 max-w-[calc(100vw-2rem)] p-3">
 					<p class="text-pretty text-xs font-medium text-title">{label()}</p>
 					<p class="mt-0.5 text-pretty text-xs text-body">{hint()}</p>
 				</Tooltip.Content>

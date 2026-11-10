@@ -155,7 +155,7 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 									shape: "square",
 								})
 							: {
-									"outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center transition-colors": true,
+									"focus-ring rounded-md flex justify-center items-center transition-colors": true,
 									"bg-input border border-border hover:bg-background-hover":
 										props.variant !== "ghost",
 									"text-muted hover:text-subtitle hover:bg-background/50":

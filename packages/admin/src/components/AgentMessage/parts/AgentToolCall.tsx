@@ -67,7 +67,7 @@ export const AgentToolIcon: Component<{
 					</Switch>
 				</Match>
 				<Match when={status() === "failed"}>
-					<TbOutlineX size={11} />
+					<TbOutlineX size={12} />
 				</Match>
 				<Match when={status() === "retried"}>
 					<TbOutlineRefresh size={10} />
@@ -101,7 +101,7 @@ const AgentToolCall: Component<{
 			<button
 				type="button"
 				class={classnames(
-					"group flex min-w-0 items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+					"group flex min-w-0 items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition-colors focus-ring",
 					props.selected
 						? "bg-card text-title"
 						: "text-muted hover:bg-card hover:text-body",
@@ -118,7 +118,7 @@ const AgentToolCall: Component<{
 				{(href) => (
 					<A
 						href={href()}
-						class="flex shrink-0 items-center gap-1 rounded-md px-1.5 py-1 text-xs text-muted transition-colors hover:bg-card hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+						class="flex shrink-0 items-center gap-1 rounded-md px-1.5 py-1 text-xs text-muted transition-colors hover:bg-card hover:text-body focus-ring"
 						aria-label={T()("agent.tool.open.label", { tool: label() })}
 					>
 						{T()("agent.tool.open")}

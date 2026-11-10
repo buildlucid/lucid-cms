@@ -120,7 +120,7 @@ const Input: Component<InputProps> = (props) => {
 					type={inputType()}
 					value={local.value}
 					class={classnames(
-						"w-full focus:outline-hidden px-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-80 bg-input border border-border h-10 rounded-md focus:border-primary duration-200 transition-colors",
+						"w-full focus-field px-2.5 text-sm placeholder:text-muted text-subtitle disabled:cursor-not-allowed disabled:opacity-50 bg-input border border-border h-9 rounded-md transition-colors",
 						{
 							"pr-8": local.type === "password",
 						},
@@ -133,15 +133,15 @@ const Input: Component<InputProps> = (props) => {
 				<Show when={local.type === "password"}>
 					<button
 						type="button"
-						class="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary duration-200 transition-colors"
+						class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-sm text-muted hover:text-title transition-colors"
 						onClick={() => setPasswordVisible(!passwordVisible())}
 						tabIndex={-1}
 					>
 						<Show
 							when={passwordVisible()}
-							fallback={<TbOutlineEye size={18} class="text-muted" />}
+							fallback={<TbOutlineEye size={14} />}
 						>
-							<TbOutlineEyeOff size={18} class="text-muted" />
+							<TbOutlineEyeOff size={14} />
 						</Show>
 					</button>
 				</Show>

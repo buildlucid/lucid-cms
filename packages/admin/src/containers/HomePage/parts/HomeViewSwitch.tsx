@@ -39,7 +39,7 @@ const HomeViewSwitch: Component<{ class?: string }> = (props) => {
 	return (
 		<fieldset
 			class={classnames(
-				"inline-flex h-9 shrink-0 items-stretch gap-0.5 rounded-md border border-border bg-input p-0.5",
+				"inline-flex h-8 shrink-0 items-stretch gap-0.5 rounded-md border border-border bg-input p-0.5",
 				props.class,
 			)}
 		>
@@ -51,9 +51,10 @@ const HomeViewSwitch: Component<{ class?: string }> = (props) => {
 						aria-pressed={getHomeView() === view.value}
 						onClick={() => select(view.value)}
 						class={classnames(
-							"flex items-center gap-1.5 rounded-[5px] px-2.5 text-xs transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+							"flex items-center gap-1.5 rounded-sm px-2.5 text-xs transition-colors focus-ring",
 							{
-								"bg-card text-title shadow-xs": getHomeView() === view.value,
+								"bg-card text-title shadow-raised":
+									getHomeView() === view.value,
 								"text-muted hover:text-body": getHomeView() !== view.value,
 							},
 						)}

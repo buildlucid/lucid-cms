@@ -34,7 +34,7 @@ export const NavigationVersion: Component<{
 		<Show
 			when={updateAvailable()}
 			fallback={
-				<small class="py-1 text-[10px] leading-none text-muted">
+				<small class="py-1 text-3xs leading-none text-muted">
 					v{packageJson.version}
 				</small>
 			}
@@ -42,7 +42,7 @@ export const NavigationVersion: Component<{
 			<A
 				href="/admin/system/diagnostics"
 				title={T()("diagnostics.packages.updates.available")}
-				class="inline-flex items-center gap-1.5 rounded-sm py-1 text-[10px] leading-none text-muted transition-colors hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+				class="inline-flex items-center gap-1.5 rounded-sm py-1 text-3xs leading-none text-muted transition-colors hover:text-title focus-ring"
 				onClick={() => props.onNavigate?.()}
 			>
 				<StatusIndicator

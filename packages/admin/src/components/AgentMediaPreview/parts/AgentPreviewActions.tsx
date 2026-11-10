@@ -7,6 +7,7 @@ import {
 } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import { createCopy } from "@/components/Copy/copyValue";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
@@ -51,28 +52,28 @@ const AgentPreviewActions: Component<{
 	// Render
 	return (
 		<div class={classnames("flex items-center gap-1", props.class)}>
-			<button
+			<Tooltip
 				type="button"
 				class={buttonClass}
 				aria-label={copyLabel()}
-				title={copyLabel()}
+				content={copyLabel()}
 				onClick={() => void copy()}
 			>
 				<Show when={copied()} fallback={<TbOutlineLink size={10} />}>
 					<TbOutlineCheck size={10} />
 				</Show>
-			</button>
+			</Tooltip>
 			<Show when={canRead()}>
-				<button
+				<Tooltip
 					type="button"
 					class={buttonClass}
 					aria-label={T()("agent.preview.download", { name: name() })}
-					title={T()("agent.preview.download", { name: name() })}
+					content={T()("agent.preview.download", { name: name() })}
 					disabled={requestDownload.action.isPending}
 					onClick={() => requestDownload.action.mutate({ id: props.media.id })}
 				>
 					<TbOutlineDownload size={10} />
-				</button>
+				</Tooltip>
 			</Show>
 		</div>
 	);

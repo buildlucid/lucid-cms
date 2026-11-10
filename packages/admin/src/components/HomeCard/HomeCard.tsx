@@ -69,7 +69,7 @@ const HomeCard: Component<HomeCardProps> = (props) => {
 						{props.title}
 					</h2>
 					<Show when={(props.count ?? 0) > 0}>
-						<span class="rounded-full bg-primary-low px-1.5 text-[11px] leading-4 tabular-nums text-primary-low-foreground">
+						<span class="rounded-full bg-primary-low px-1.5 text-2xs leading-4 tabular-nums text-primary-low-foreground">
 							{props.count}
 						</span>
 					</Show>

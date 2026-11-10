@@ -57,7 +57,7 @@ const DocumentSidebarSection: Component<DocumentSidebarSectionProps> = (
 	return (
 		<Collapsible.Root open={open()} onOpenChange={setOpen}>
 			<section>
-				<Collapsible.Trigger class="group flex w-full items-center gap-2 rounded-md text-left focus:outline-hidden focus-visible:ring-1 ring-primary">
+				<Collapsible.Trigger class="group flex w-full items-center gap-2 rounded-md text-left focus-ring">
 					<span class="flex size-4 shrink-0 items-center justify-center text-icon transition-colors group-hover:text-icon-hover [&_svg]:size-3">
 						{props.icon}
 					</span>
@@ -77,7 +77,9 @@ const DocumentSidebarSection: Component<DocumentSidebarSectionProps> = (
 						)}
 					/>
 				</Collapsible.Trigger>
-				<Collapsible.Content class="mt-4">{props.children}</Collapsible.Content>
+				<Collapsible.Content class="collapsible-content">
+					<div class="pt-4">{props.children}</div>
+				</Collapsible.Content>
 			</section>
 		</Collapsible.Root>
 	);

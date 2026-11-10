@@ -23,6 +23,7 @@ import PasskeySettings from "@/components/PasskeySettings/PasskeySettings";
 import PendingEmailChangeNotice from "@/components/PendingEmailChangeNotice/PendingEmailChangeNotice";
 import Select from "@/components/Select/Select";
 import Switch from "@/components/Switch/Switch";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import TwoFactorSettings from "@/components/TwoFactorSettings/TwoFactorSettings";
 import UpdateAccountDetailsModal from "@/components/UpdateAccountDetailsModal/UpdateAccountDetailsModal";
 import UpdatePasswordModal from "@/components/UpdatePasswordModal/UpdatePasswordModal";
@@ -296,17 +297,17 @@ export const AccountContent: Component = () => {
 									}}
 								/>
 								{/* covers the avatar, with an edit badge on its corner */}
-								<button
+								<Tooltip
 									type="button"
-									class="group absolute inset-0 rounded-full outline-none focus-visible:ring-1 focus-visible:ring-primary"
-									title={profilePictureLabel()}
+									class="group absolute inset-0 rounded-full focus-ring"
+									content={profilePictureLabel()}
 									aria-label={profilePictureLabel()}
 									onClick={() => setProfilePicturePanelOpen(true)}
 								>
 									<span class="absolute -right-0.5 -bottom-0.5 flex size-6 items-center justify-center rounded-full border border-border bg-card text-icon transition-colors group-hover:text-title">
 										<TbOutlinePencil class="size-3" />
 									</span>
-								</button>
+								</Tooltip>
 							</div>
 							<div class="min-w-0">
 								<p class="truncate text-sm font-medium text-title">

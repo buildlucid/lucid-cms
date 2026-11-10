@@ -61,7 +61,7 @@ const CollectionsWidget: Component<{ size: HomeWidgetSize }> = () => {
 						<li class="flex items-center gap-1">
 							<A
 								href={getCollectionNavigationHref(collection)}
-								class="flex min-w-0 grow items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+								class="flex min-w-0 grow items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-card-hover focus-ring"
 							>
 								<DocumentThumb multiple={collection.mode === "multiple"} />
 								<span class="flex min-w-0 flex-col">
@@ -92,9 +92,9 @@ const CollectionsWidget: Component<{ size: HomeWidgetSize }> = () => {
 									title={T()("actions.create.dynamic", {
 										name: label(collection, "singular"),
 									})}
-									class="mr-1 flex size-7 shrink-0 items-center justify-center rounded-md text-icon transition-colors hover:bg-card-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+									class="mr-1 flex size-7 shrink-0 items-center justify-center rounded-md text-icon transition-colors hover:bg-card-hover hover:text-title focus-ring"
 								>
-									<TbOutlinePlus size={11} />
+									<TbOutlinePlus size={12} />
 								</A>
 							</Show>
 						</li>
@@ -106,7 +106,7 @@ const CollectionsWidget: Component<{ size: HomeWidgetSize }> = () => {
 					type="button"
 					aria-expanded={expanded()}
 					onClick={() => setExpanded((open) => !open)}
-					class="mx-2 mt-1 flex items-center gap-1.5 self-start rounded-md px-1 py-1 text-xs text-muted transition-colors hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+					class="mx-2 mt-1 flex items-center gap-1.5 self-start rounded-md px-1 py-1 text-xs text-muted transition-colors hover:text-body focus-ring"
 				>
 					{expanded()
 						? T()("common.show_less")

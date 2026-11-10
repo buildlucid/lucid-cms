@@ -7,6 +7,7 @@ import {
 	mergeProps,
 	splitProps,
 } from "solid-js";
+import { getButtonClasses } from "@/components/Button/classes";
 import {
 	checkPermission,
 	type PermissionRequirement,
@@ -83,43 +84,14 @@ const Link: Component<LinkProps> = (props) => {
 	// ----------------------------------------
 	// Memos
 	const access = createMemo(() => checkPermission(local.permission));
-	const classes = createMemo(() => {
-		const square = local.shape !== "standard";
-
-		return classnames(
-			"flex items-center justify-center min-w-max text-center focus:outline-hidden focus-visible:ring-1 duration-200 transition-colors rounded-md relative",
-			{
-				// Variants
-				"bg-primary hover:bg-primary-hover text-primary-foreground ring-primary":
-					local.variant === "primary",
-				"bg-secondary hover:bg-secondary-hover text-secondary-foreground ring-primary":
-					local.variant === "secondary",
-				"bg-input border border-border hover:border-transparent hover:bg-secondary-hover text-subtitle hover:text-secondary-foreground ring-primary":
-					local.variant === "outline",
-				"bg-danger hover:bg-danger-hover text-danger-foreground ring-primary":
-					local.variant === "danger",
-				"bg-transparent border border-border hover:bg-danger-hover ring-primary hover:text-danger-foreground":
-					local.variant === "danger-outline",
-				"text-muted hover:text-subtitle hover:bg-background/50 ring-primary":
-					local.variant === "ghost",
-
-				// Shape
-				"rounded-full!": local.shape === "circle",
-
-				// Sizes
-				"px-2 h-7 text-xs": local.size === "xs" && !square,
-				"px-3 h-9 text-sm": local.size === "sm" && !square,
-				"px-4 py-2 h-10 text-sm": local.size === "md" && !square,
-				"px-6 py-3 h-12 text-base": local.size === "lg" && !square,
-				"w-7 h-7 p-0 min-w-[28px]!": local.size === "xs" && square,
-				"w-9 h-9 p-0 min-w-[36px]!": local.size === "sm" && square,
-				"w-10 h-10 p-0 min-w-[40px]!": local.size === "md" && square,
-				"w-12 h-12 p-0 min-w-[48px]!": local.size === "lg" && square,
-
-				"opacity-80 cursor-not-allowed": !access().permitted,
-			},
-		);
-	});
+	const classes = createMemo(() =>
+		getButtonClasses({
+			variant: local.variant,
+			size: local.size,
+			shape: local.shape,
+			permitted: access().permitted,
+		}),
+	);
 
 	// ----------------------------------------
 	// Functions

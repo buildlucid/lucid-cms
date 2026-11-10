@@ -117,7 +117,7 @@ const AgentToolPanel: Component<{
 					<Pill size="xs" variant={statusVariants[status()]}>
 						{T()(`agent.tool.status.${status()}`)}
 					</Pill>
-					<code class="rounded bg-input px-1.5 py-0.5 text-[11px] text-body">
+					<code class="rounded-sm bg-input px-1.5 py-0.5 text-2xs text-body">
 						{props.part.name}
 					</code>
 				</div>
@@ -192,7 +192,7 @@ const AgentToolPanel: Component<{
 						<Match when={searchOutput()}>
 							{(output) => (
 								<div class="-mt-3 flex flex-col gap-2.5">
-									<p class="text-[11px] text-muted">
+									<p class="text-2xs text-muted">
 										{T()("agent.web.sources.count", {
 											count: output().results.length,
 										})}

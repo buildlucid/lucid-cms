@@ -19,7 +19,7 @@ const AgentReferenceRow: Component<{
 	// Functions
 	const classes = () =>
 		classnames(
-			"flex min-w-0 items-center gap-2.5 rounded-md py-1.5 ps-1.5 text-start transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+			"flex min-w-0 items-center gap-2.5 rounded-md py-1.5 ps-1.5 text-start transition-colors hover:bg-card-hover focus-ring",
 			props.class,
 		);
 	const content = () => (
@@ -29,7 +29,7 @@ const AgentReferenceRow: Component<{
 					"block shrink-0 overflow-hidden border border-border",
 					props.reference.type === "media"
 						? "size-9 rounded-md"
-						: "h-9 w-7 rounded",
+						: "h-9 w-7 rounded-sm",
 				)}
 			>
 				<AgentReferenceThumb reference={props.reference} />
@@ -49,7 +49,7 @@ const AgentReferenceRow: Component<{
 					</Show>
 				</span>
 				<Show when={props.details}>
-					<span class="block truncate text-[11px] text-muted">
+					<span class="block truncate text-2xs text-muted">
 						{props.details}
 					</span>
 				</Show>

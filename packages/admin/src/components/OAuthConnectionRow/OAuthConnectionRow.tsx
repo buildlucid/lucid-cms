@@ -117,7 +117,7 @@ const OAuthConnectionRow: Component<{
 								</span>
 								<button
 									type="button"
-									class="inline-flex items-center gap-1 rounded text-xs text-body hover:text-title"
+									class="inline-flex items-center gap-1 rounded-sm text-xs text-body hover:text-title"
 									aria-expanded={detailsOpen()}
 									onClick={() => setDetailsOpen(!detailsOpen())}
 								>

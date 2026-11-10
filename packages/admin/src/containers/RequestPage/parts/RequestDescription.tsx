@@ -75,7 +75,7 @@ export const RequestDescription: Component<{
 							size="xs"
 							shape="square"
 							aria-label={T()("requests.description.edit")}
-							title={T()("requests.description.edit")}
+							tooltip={T()("requests.description.edit")}
 							onClick={startEditing}
 						>
 							<TbOutlinePencil size={12} />

@@ -107,9 +107,9 @@ export const RequestRichTextEditor: Component<{
 		<form
 			ref={form}
 			class={classNames(
-				"relative grid grid-cols-1 overflow-hidden border border-border transition-colors focus-within:border-primary",
+				"relative grid grid-cols-1 overflow-hidden border border-border transition-colors focus-field",
 				{
-					"rounded-2xl bg-card shadow-sm": props.variant === "floating",
+					"rounded-2xl bg-card shadow-raised": props.variant === "floating",
 					"rounded-lg bg-input": props.variant === "inline",
 				},
 			)}
@@ -149,10 +149,10 @@ export const RequestRichTextEditor: Component<{
 							shape="circle"
 							size="xs"
 							variant="ghost"
-							class="ms-auto me-0.5 shrink-0 border border-border focus-visible:ring-inset"
+							class="ms-auto me-0.5 shrink-0 border border-border -outline-offset-2!"
 							onClick={() => close()()}
 							aria-label={T()("common.close")}
-							title={T()("common.close")}
+							tooltip={T()("common.close")}
 						>
 							<TbOutlineX size={12} />
 						</Button>
@@ -163,15 +163,15 @@ export const RequestRichTextEditor: Component<{
 					shape="circle"
 					size="xs"
 					variant="secondary"
-					class={classNames("shrink-0 focus-visible:ring-inset", {
+					class={classNames("shrink-0 -outline-offset-2!", {
 						"ms-auto": !props.onClose,
 					})}
 					loading={props.submitting}
 					disabled={blocked()}
 					aria-label={props.submitLabel}
-					title={props.submitLabel}
+					tooltip={props.submitLabel}
 				>
-					<TbOutlineArrowUp size={11} />
+					<TbOutlineArrowUp size={12} />
 				</Button>
 			</div>
 		</form>

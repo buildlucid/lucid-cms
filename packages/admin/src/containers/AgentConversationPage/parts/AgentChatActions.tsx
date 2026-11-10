@@ -22,7 +22,7 @@ const AgentChatActions: Component<{
 						label={T()("agent.routine.card.toggle")}
 						open={card().open}
 						onToggle={card().onToggle}
-						icon={<TbOutlineRepeat size={11} />}
+						icon={<TbOutlineRepeat size={12} />}
 					/>
 				)}
 			</Show>
@@ -30,7 +30,7 @@ const AgentChatActions: Component<{
 				label={T()("agent.chat.details.toggle")}
 				open={props.details.open}
 				onToggle={props.details.onToggle}
-				icon={<TbOutlineInfoCircle size={11} />}
+				icon={<TbOutlineInfoCircle size={12} />}
 			/>
 			<ActionMenu
 				variant="ghost"
@@ -78,7 +78,7 @@ const SidebarToggle: Component<{
 				variant={props.open ? "outline" : "ghost"}
 				aria-pressed={props.open}
 				aria-label={props.label}
-				title={props.label}
+				tooltip={props.label}
 				onClick={() => props.onToggle()}
 			>
 				{props.icon}

@@ -115,7 +115,7 @@ const AgentReferencesV1: Component<{
 		<Show when={references.isLoading || references.isError || items().length}>
 			<section class="rounded-2xl border border-border bg-card">
 				<div class="flex items-center gap-2 px-3.5 py-2">
-					<TbOutlineLink size={11} class="shrink-0 text-muted" />
+					<TbOutlineLink size={12} class="shrink-0 text-muted" />
 					<span class="min-w-0 grow truncate text-xs text-muted">
 						{T()("agent.references.added")}
 					</span>

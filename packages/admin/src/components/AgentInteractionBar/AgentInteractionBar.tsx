@@ -49,14 +49,14 @@ const AgentInteractionBar: Component<{
 									? "agent.interaction.details.hide"
 									: "agent.interaction.details.show",
 							)}
-							title={T()(
+							tooltip={T()(
 								details().open
 									? "agent.interaction.details.hide"
 									: "agent.interaction.details.show",
 							)}
 							onClick={() => details().onToggle()}
 						>
-							<TbOutlineCode size={11} />
+							<TbOutlineCode size={12} />
 						</Button>
 					)}
 				</Show>
@@ -71,7 +71,7 @@ const AgentInteractionBar: Component<{
 								? "agent.interaction.return"
 								: "agent.interaction.redirect",
 						)}
-						title={T()(
+						tooltip={T()(
 							props.redirecting
 								? "agent.interaction.return"
 								: "agent.interaction.redirect",
@@ -80,9 +80,9 @@ const AgentInteractionBar: Component<{
 					>
 						<Show
 							when={props.redirecting}
-							fallback={<TbOutlineMessage size={11} />}
+							fallback={<TbOutlineMessage size={12} />}
 						>
-							<TbOutlineRotate size={11} />
+							<TbOutlineRotate size={12} />
 						</Show>
 					</Button>
 				</Show>
@@ -93,7 +93,7 @@ const AgentInteractionBar: Component<{
 						size="xs"
 						shape="circle"
 						aria-label={T()("agent.question.stop")}
-						title={T()("agent.question.stop")}
+						tooltip={T()("agent.question.stop")}
 						onClick={() => props.onStop?.()}
 					>
 						<TbOutlinePlayerStop size={10} />

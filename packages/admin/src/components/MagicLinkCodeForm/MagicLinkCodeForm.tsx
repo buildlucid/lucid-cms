@@ -156,7 +156,7 @@ const MagicLinkCodeForm: Component<MagicLinkCodeFormProps> = (props) => {
 					>
 						<button
 							type="button"
-							class="font-medium text-subtitle hover:text-primary-hover duration-200 transition-colors disabled:cursor-not-allowed disabled:opacity-80"
+							class="font-medium text-subtitle hover:text-primary-hover transition-colors disabled:cursor-not-allowed disabled:opacity-50"
 							onClick={resend}
 							disabled={sendMagicLink.action.isPending || captcha.isPending()}
 						>
@@ -165,7 +165,7 @@ const MagicLinkCodeForm: Component<MagicLinkCodeFormProps> = (props) => {
 					</Show>
 				</p>
 				<A
-					class="text-sm hover:text-primary-hover duration-200 transition-colors"
+					class="text-sm hover:text-primary-hover transition-colors"
 					href={`/admin/login${location.search}`}
 				>
 					{T()("common.back.to.login")}

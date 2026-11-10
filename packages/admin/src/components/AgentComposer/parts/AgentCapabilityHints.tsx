@@ -29,7 +29,7 @@ const CapabilityHint: Component<{
 				as="span"
 				tabIndex={0}
 				class={classnames(
-					"flex size-7 cursor-help items-center justify-center rounded-md transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary",
+					"flex size-7 cursor-help items-center justify-center rounded-md transition-colors focus-ring-inset",
 					props.active
 						? "text-subtitle hover:text-title"
 						: "text-muted opacity-50",
@@ -39,7 +39,7 @@ const CapabilityHint: Component<{
 				{props.icon}
 			</Tooltip.Trigger>
 			<Tooltip.Portal>
-				<Tooltip.Content class="z-60 w-64 max-w-[calc(100vw-2rem)] rounded-md border border-border bg-popover p-3 shadow-md animate-dropdown">
+				<Tooltip.Content class="floating-panel z-60 w-64 max-w-[calc(100vw-2rem)] p-3">
 					<p class="text-pretty text-xs font-medium text-title">
 						{props.title}
 					</p>
@@ -81,9 +81,9 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 					icon={
 						<Show
 							when={mimeTypes().length > 0}
-							fallback={<TbOutlineEyeOff size={11} />}
+							fallback={<TbOutlineEyeOff size={12} />}
 						>
-							<TbOutlineEye size={11} />
+							<TbOutlineEye size={12} />
 						</Show>
 					}
 					title={T()(
@@ -101,7 +101,7 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 				/>
 				<CapabilityHint
 					active={web() !== undefined}
-					icon={<TbOutlineWorld size={11} />}
+					icon={<TbOutlineWorld size={12} />}
 					title={web() ?? T()("agent.capabilities.web.none")}
 					description={T()(
 						web() === undefined
@@ -111,7 +111,7 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 				/>
 				<CapabilityHint
 					active={props.capabilities?.media.generate.image === true}
-					icon={<TbOutlinePhotoAi size={11} />}
+					icon={<TbOutlinePhotoAi size={12} />}
 					title={T()(
 						props.capabilities?.media.generate.image
 							? "agent.capabilities.image"
@@ -125,7 +125,7 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 				/>
 				<CapabilityHint
 					active={props.capabilities?.media.generate.audio === true}
-					icon={<TbOutlineVolume size={11} />}
+					icon={<TbOutlineVolume size={12} />}
 					title={T()(
 						props.capabilities?.media.generate.audio
 							? "agent.capabilities.audio"

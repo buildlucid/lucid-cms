@@ -130,7 +130,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 				tabIndex={0}
 				id={previewTriggerId()}
 				data-preview-focus-open={brickOpen()}
-				class="flex cursor-pointer items-center gap-3 px-4 py-4 transition-colors hover:bg-card-hover/60 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary md:px-6 md:py-5"
+				class="flex cursor-pointer items-center gap-3 px-4 py-4 transition-colors hover:bg-card-hover/60 focus-ring-inset md:px-6 md:py-5"
 				onClick={toggleDropdown}
 				onKeyDown={(e) => {
 					if (e.target !== e.currentTarget) return;

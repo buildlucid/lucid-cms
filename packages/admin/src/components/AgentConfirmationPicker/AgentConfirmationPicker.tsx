@@ -4,6 +4,7 @@ import { type Component, For, Show } from "solid-js";
 import { composerLabelTriggerClasses } from "@/components/ComposerTriggerLabel/classes";
 import ComposerTriggerLabel from "@/components/ComposerTriggerLabel/ComposerTriggerLabel";
 import Menu from "@/components/Menu/Menu";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import T from "@/translations";
 
 const modes = [
@@ -33,7 +34,7 @@ const AgentConfirmationPicker: Component<{
 						disabled={props.disabled}
 					>
 						<ComposerTriggerLabel
-							icon={<TbOutlineShieldHalf size={11} class="shrink-0" />}
+							icon={<TbOutlineShieldHalf size={12} class="shrink-0" />}
 							label={T()(`agent.confirmation.mode.${props.value}`)}
 						/>
 					</Menu.Trigger>
@@ -60,21 +61,21 @@ const AgentConfirmationPicker: Component<{
 			}
 		>
 			{(routine) => (
-				<button
+				<Tooltip
 					type="button"
 					class={composerLabelTriggerClasses}
-					title={T()("agent.routine.confirmations.open")}
+					content={T()("agent.routine.confirmations.open")}
 					aria-label={T()("agent.routine.confirmations.open")}
 					disabled={routine().disabled}
 					onClick={() => routine().onEdit()}
 				>
 					<ComposerTriggerLabel
-						icon={<TbOutlineShieldHalf size={11} class="shrink-0" />}
+						icon={<TbOutlineShieldHalf size={12} class="shrink-0" />}
 						label={T()("agent.confirmation.mode.tool-defaults")}
 						alwaysShowLabel={true}
 						chevron="right"
 					/>
-				</button>
+				</Tooltip>
 			)}
 		</Show>
 	);

@@ -182,7 +182,7 @@ const LucidConnection: Component = () => {
 									size="sm"
 									variant="ghost"
 									shape="square"
-									title={T()("connection.verify.action")}
+									tooltip={T()("connection.verify.action")}
 									aria-label={T()("connection.verify.action")}
 									permission={Permissions.ConnectionUpdate}
 									loading={verify.action.isPending}

@@ -443,7 +443,7 @@ const DocumentsPage: Component = () => {
 							aria-label={
 								orderMode() ? undefined : T()("documents.order.mode.action")
 							}
-							title={
+							tooltip={
 								orderMode() ? undefined : T()("documents.order.mode.action")
 							}
 							onClick={() => {
@@ -454,7 +454,7 @@ const DocumentsPage: Component = () => {
 								}
 							}}
 						>
-							<TbOutlineSortDescending size={13} />
+							<TbOutlineSortDescending size={14} />
 							<Show when={orderMode()}>
 								<span>{T()("documents.order.mode.exit")}</span>
 							</Show>

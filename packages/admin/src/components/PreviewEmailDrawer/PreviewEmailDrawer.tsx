@@ -83,7 +83,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 						<div class="absolute bottom-3 left-3 z-10 pointer-events-none max-w-[calc(100%-1.5rem)]">
 							<Pill
 								variant="warning-subtle"
-								class="items-center gap-1.5 max-w-full shadow-sm"
+								class="items-center gap-1.5 max-w-full shadow-raised"
 							>
 								<TbOutlineAlertTriangle size={10} />
 								<span class="truncate">

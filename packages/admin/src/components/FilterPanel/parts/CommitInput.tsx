@@ -75,7 +75,7 @@ export const CommitInput: Component<{
 			input holds the committed hex value */}
 			<div class="relative w-full">
 				<div
-					class="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded border border-border cursor-pointer"
+					class="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-sm border border-border cursor-pointer"
 					style={{ "background-color": local() || undefined }}
 					onClick={() => hiddenColorInputRef?.click()}
 					onKeyDown={(e) => {
@@ -102,7 +102,7 @@ export const CommitInput: Component<{
 					aria-hidden="true"
 				/>
 				<input
-					class="focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-80 text-sm text-title pl-10 pr-3 py-2 bg-input border border-border h-10 w-full rounded-md focus:border-primary duration-200 transition-colors placeholder:text-muted"
+					class="focus-field disabled:cursor-not-allowed disabled:opacity-50 text-sm text-title pl-10 pr-3 py-2 bg-input border border-border h-9 w-full rounded-md transition-colors placeholder:text-muted"
 					id={props.id}
 					name={props.name}
 					type="text"

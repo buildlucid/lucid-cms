@@ -12,7 +12,7 @@ const AgentUploadFile: Component<{
 	// Render
 	return (
 		<div
-			class="group relative w-24 rounded-lg border bg-card p-1 shadow-sm"
+			class="group relative w-24 rounded-lg border bg-card p-1 shadow-raised"
 			classList={{
 				"border-border": props.upload.error === undefined,
 				"border-danger-low-border": props.upload.error !== undefined,
@@ -56,7 +56,7 @@ const AgentUploadFile: Component<{
 					</span>
 				</Show>
 			</span>
-			<span class="block truncate px-0.5 pt-1 text-[11px] text-title">
+			<span class="block truncate px-0.5 pt-1 text-2xs text-title">
 				{props.upload.name}
 			</span>
 			<AgentReferenceRemoveButton

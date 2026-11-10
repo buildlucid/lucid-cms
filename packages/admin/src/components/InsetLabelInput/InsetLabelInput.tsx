@@ -63,9 +63,9 @@ export const InsetLabelInput: Component<{
 		<div class={"w-full"}>
 			<div
 				class={classnames(
-					"flex flex-col transition-colors duration-200 ease-in-out relative bg-input rounded-md border border-border",
+					"flex flex-col transition-colors relative bg-input rounded-md border border-border",
 					{
-						"border-primary": inputFocus(),
+						"focus-field-active": inputFocus(),
 						"border-danger": props.errors?.message !== undefined,
 					},
 				)}
@@ -83,7 +83,7 @@ export const InsetLabelInput: Component<{
 				<input
 					ref={input}
 					class={classnames(
-						"focus:outline-hidden px-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-80 bg-transparent pb-2 pt-1 rounded-b-md",
+						"focus:outline-hidden px-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-50 bg-transparent pb-2 pt-1 rounded-b-md",
 						{
 							"pr-8": props.type === "password",
 							"pt-2": props.copy?.label === undefined,
@@ -116,7 +116,7 @@ export const InsetLabelInput: Component<{
 				<Show when={props.type === "password"}>
 					<button
 						type="button"
-						class="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary duration-200 transition-colors"
+						class="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary transition-colors"
 						onClick={() => {
 							setPasswordVisible(!passwordVisible());
 						}}

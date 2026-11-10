@@ -23,7 +23,7 @@ const NodeRemoveButton: Component<NodeRemoveButtonProps> = (props) => {
 				props.onRemove();
 			}}
 			aria-label={props.label}
-			title={props.label}
+			tooltip={props.label}
 			data-lucid-rich-text-node-remove=""
 		>
 			<TbOutlineX size={12} />

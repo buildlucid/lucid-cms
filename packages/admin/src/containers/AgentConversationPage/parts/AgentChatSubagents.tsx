@@ -98,7 +98,7 @@ const SubagentLink: Component<{
 		<A
 			href={`/admin/agent/chats/${props.conversation.id}`}
 			aria-current={props.current ? "page" : undefined}
-			class="group -mx-1 flex gap-2 rounded-md px-1 py-1 text-start focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+			class="group -mx-1 flex gap-2 rounded-md px-1 py-1 text-start focus-ring"
 		>
 			<span
 				class="flex h-4 w-3.25 shrink-0 items-center text-muted"
@@ -116,7 +116,7 @@ const SubagentLink: Component<{
 						/>
 					}
 				>
-					<TbOutlineMessage size={13} />
+					<TbOutlineMessage size={14} />
 				</Show>
 			</span>
 			<span class="min-w-0 grow">
@@ -130,7 +130,7 @@ const SubagentLink: Component<{
 				>
 					{props.conversation.title}
 				</span>
-				<span class="block truncate text-[11px] leading-4 text-muted">
+				<span class="block truncate text-2xs leading-4 text-muted">
 					{getAgentName(props.conversation.agentKey)}
 					<Show when={status()}>
 						{(status) => (

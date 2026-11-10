@@ -1,5 +1,6 @@
 import classnames from "classnames";
 import type { Component, JSX } from "solid-js";
+import Tooltip from "@/components/Tooltip/Tooltip";
 
 const ToolbarButton: Component<{
 	isActive: boolean;
@@ -12,12 +13,12 @@ const ToolbarButton: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<button
+		<Tooltip
 			type="button"
 			class={classnames("flex items-center justify-center", {
-				"h-7 min-w-7 px-1.5 rounded-md text-xs transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed outline-none focus-visible:ring-1 focus-visible:ring-primary border":
+				"h-7 min-w-7 px-1.5 rounded-md text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-ring border":
 					props.mode === "pill",
-				"p-1.5 rounded transition-colors duration-150 border disabled:opacity-50 disabled:cursor-not-allowed":
+				"p-1.5 rounded-sm transition-colors border disabled:opacity-50 disabled:cursor-not-allowed":
 					props.mode === "default",
 				"bg-primary-low text-primary-low-foreground border-primary-low-border":
 					props.isActive,
@@ -27,10 +28,10 @@ const ToolbarButton: Component<{
 			onMouseDown={(e) => e.preventDefault()}
 			onClick={() => props.onClick()}
 			disabled={props.disabled}
-			title={props.title}
+			content={props.title}
 		>
 			{props.children}
-		</button>
+		</Tooltip>
 	);
 };
 

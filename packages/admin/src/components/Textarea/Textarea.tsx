@@ -91,7 +91,7 @@ const Textarea: Component<TextareaProps> = (props) => {
 				value={local.value}
 				rows={rest.rows ?? 6}
 				class={classnames(
-					"focus:outline-hidden text-sm text-subtitle font-medium w-full block disabled:cursor-not-allowed disabled:opacity-80 bg-input border border-border rounded-md p-2 focus:border-primary duration-200 transition-colors",
+					"focus-field text-sm text-subtitle w-full block placeholder:text-muted disabled:cursor-not-allowed disabled:opacity-50 bg-input border border-border rounded-md px-2.5 py-2 transition-colors",
 					local.resize ? "resize-y" : "resize-none",
 				)}
 				aria-describedby={

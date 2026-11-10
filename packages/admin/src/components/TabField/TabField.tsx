@@ -47,7 +47,7 @@ export const TabField: Component<{
 				),
 				class: classNames({
 					"border border-transparent": errorCount === 0,
-					"border border-danger-low-border bg-danger-low focus-visible:ring-danger!":
+					"border border-danger-low-border bg-danger-low focus-visible:outline-danger!":
 						errorCount > 0,
 				}),
 			};

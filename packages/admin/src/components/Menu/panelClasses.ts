@@ -22,7 +22,7 @@ export interface MenuPanelAppearance {
 
 export const menuPanelClasses = (props: MenuPanelAppearance) =>
 	classNames(
-		"z-60 min-w-56 max-w-(--kb-popper-content-available-width) overflow-y-auto bg-popover border border-border rounded-md p-1.5 shadow-md animate-dropdown focus:outline-hidden scrollbar",
+		"floating-panel z-60 min-w-52 max-w-(--kb-popper-content-available-width) overflow-y-auto p-1.5 focus:outline-hidden scrollbar",
 		props.compact
 			? "max-h-[min(15rem,var(--kb-popper-content-available-height))]"
 			: "max-h-(--kb-popper-content-available-height)",

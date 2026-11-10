@@ -31,6 +31,7 @@ import FocalPointEditorModal, {
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import MediaStatusPreview from "@/components/MediaStatusPreview/MediaStatusPreview";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
@@ -280,7 +281,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 								<button
 									type="button"
 									onClick={openFileBrowser}
-									class="text-primary font-medium"
+									class="rounded-sm text-primary font-medium hover:text-primary-hover"
 								>
 									{T()("media.upload.drop.here")}
 								</button>
@@ -296,7 +297,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 									<button
 										type="button"
 										onClick={undoToCurrentFile}
-										class="text-muted font-medium text-sm flex items-center mt-2"
+										class="rounded-sm text-muted font-medium text-sm flex items-center mt-2 hover:text-title"
 									>
 										<TbOutlineRotate class="mr-2 text-sm" />
 										<Switch fallback={"keep current file"}>
@@ -339,10 +340,10 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 			>
 				{(mediaGeneration) => (
 					<div class="mt-2">
-						<button
+						<Tooltip
 							type="button"
 							class={classNames(
-								"relative inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-border bg-input px-3 text-sm font-medium text-subtitle transition-colors duration-200 hover:bg-secondary-hover hover:text-secondary-foreground focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-70",
+								"relative inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-border bg-input px-3 text-sm font-medium text-subtitle transition-colors hover:border-body/25 hover:bg-card-hover hover:text-title focus-ring disabled:cursor-not-allowed disabled:opacity-50",
 								{
 									"cursor-not-allowed opacity-70":
 										mediaGeneration().state.disabled,
@@ -352,7 +353,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 								mediaGeneration().state.disabled &&
 								!mediaGeneration().state.disabledClickable
 							}
-							title={mediaGeneration().state.tooltip}
+							content={mediaGeneration().state.tooltip}
 							aria-label={mediaGeneration().state.label}
 							aria-disabled={
 								mediaGeneration().state.disabled ? "true" : undefined
@@ -367,9 +368,9 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 							<Show when={mediaGeneration().state.loading}>
 								<span class="loading-overlay" aria-hidden="true" />
 							</Show>
-							<TbOutlineWand size={13} aria-hidden="true" />
+							<TbOutlineWand size={14} aria-hidden="true" />
 							<span>{mediaGeneration().state.label}</span>
-						</button>
+						</Tooltip>
 					</div>
 				)}
 			</Show>
@@ -653,13 +654,13 @@ const PreviewActionButton: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<button
+		<Tooltip
 			type="button"
 			disabled={props.action.disabled}
-			title={props.action.label}
+			content={props.action.label}
 			aria-label={props.action.label}
 			aria-busy={props.action.loading ? "true" : undefined}
-			class="pointer-events-auto relative inline-flex h-7 max-w-32 items-center gap-1.5 rounded-md border border-border bg-input px-2 text-xs font-medium text-subtitle shadow-sm transition-colors duration-200 hover:bg-background-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
+			class="pointer-events-auto relative inline-flex h-7 max-w-32 items-center gap-1.5 rounded-md border border-border bg-input px-2 text-xs font-medium text-subtitle shadow-raised transition-colors hover:bg-background-hover hover:text-title focus-ring disabled:cursor-not-allowed disabled:opacity-50"
 			onClick={(event) => {
 				event.preventDefault();
 				event.stopPropagation();
@@ -672,6 +673,6 @@ const PreviewActionButton: Component<{
 			</Show>
 			<ActionIcon icon={props.action.icon} size={13} />
 			<span class="truncate">{props.action.label}</span>
-		</button>
+		</Tooltip>
 	);
 };

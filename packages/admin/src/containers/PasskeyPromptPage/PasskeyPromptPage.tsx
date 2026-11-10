@@ -93,7 +93,7 @@ const PasskeyPromptPage: Component = () => {
 						</Button>
 						<button
 							type="button"
-							class="block mx-auto mt-6 text-center text-sm hover:text-primary-hover duration-200 transition-colors disabled:opacity-50"
+							class="block mx-auto mt-6 text-center text-sm hover:text-primary-hover transition-colors disabled:opacity-50"
 							disabled={createPasskey.action.isPending}
 							onClick={skip}
 						>

@@ -79,7 +79,7 @@ const AgentToolGroup: Component<{
 				<button
 					type="button"
 					class={classnames(
-						"-ms-2 flex max-w-full items-center gap-2 rounded-md px-2 py-1 text-start text-xs text-muted transition-colors hover:bg-card hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+						"-ms-2 flex max-w-full items-center gap-2 rounded-md px-2 py-1 text-start text-xs text-muted transition-colors hover:bg-card hover:text-body focus-ring",
 						{ "agent-shimmer": props.working },
 					)}
 					aria-expanded={expanded()}
@@ -94,7 +94,7 @@ const AgentToolGroup: Component<{
 						{T()("agent.tool.group.calls", { count: props.group.parts.length })}
 					</span>
 					<Show when={counts().failed}>
-						<span class="shrink-0 rounded bg-danger/10 px-1 text-danger tabular-nums">
+						<span class="shrink-0 rounded-sm bg-danger/10 px-1 text-danger tabular-nums">
 							{T()("agent.tool.group.failed", { count: counts().failed })}
 						</span>
 					</Show>

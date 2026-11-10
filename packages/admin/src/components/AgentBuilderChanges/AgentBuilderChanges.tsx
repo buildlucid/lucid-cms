@@ -6,6 +6,7 @@ import type { Collection } from "@types";
 import classnames from "classnames";
 import { TbOutlinePencil } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import {
 	type BuilderFocus,
 	useAgentSession,
@@ -178,7 +179,7 @@ const AgentBuilderChanges: Component<{
 	return (
 		<section class="rounded-2xl border border-border bg-card">
 			<div class="flex items-center gap-2 px-3.5 py-2">
-				<TbOutlinePencil size={11} class="shrink-0 text-muted" />
+				<TbOutlinePencil size={12} class="shrink-0 text-muted" />
 				<span class="min-w-0 grow truncate text-xs text-muted">
 					{T()("agent.builder.changes.title")}
 				</span>
@@ -190,7 +191,7 @@ const AgentBuilderChanges: Component<{
 				<Show when={undoable()}>
 					<button
 						type="button"
-						class="shrink-0 rounded-sm text-xs text-primary underline-offset-2 hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+						class="shrink-0 rounded-sm text-xs text-primary underline-offset-2 hover:underline focus-ring"
 						onClick={undo}
 					>
 						{T()("agent.builder.changes.undo")}
@@ -201,14 +202,14 @@ const AgentBuilderChanges: Component<{
 				<For each={visibleRows()}>
 					{(row) => (
 						<li>
-							<button
+							<Tooltip
 								type="button"
 								disabled={!row.target}
-								title={
+								content={
 									row.target ? T()("agent.builder.changes.show") : undefined
 								}
 								class={classnames(
-									"flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary enabled:hover:bg-card-hover",
+									"flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition-colors focus-ring enabled:hover:bg-card-hover",
 									row.nested ? "ps-5 text-body" : "text-title",
 								)}
 								onClick={() => show(row)}
@@ -222,7 +223,7 @@ const AgentBuilderChanges: Component<{
 								<Show when={row.status}>
 									{(status) => (
 										<span
-											class={classnames("shrink-0 rounded px-1", {
+											class={classnames("shrink-0 rounded-sm px-1", {
 												"bg-success-low text-success-low-foreground":
 													status() === "added",
 												"bg-danger-low text-danger-low-foreground":
@@ -234,7 +235,7 @@ const AgentBuilderChanges: Component<{
 										</span>
 									)}
 								</Show>
-							</button>
+							</Tooltip>
 						</li>
 					)}
 				</For>
@@ -242,7 +243,7 @@ const AgentBuilderChanges: Component<{
 			<Show when={rows().length > shownRows}>
 				<button
 					type="button"
-					class="w-full rounded-b-2xl border-t border-border px-3.5 py-2 text-start text-xs text-muted transition-colors hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+					class="w-full rounded-b-2xl border-t border-border px-3.5 py-2 text-start text-xs text-muted transition-colors hover:text-body focus-ring"
 					aria-expanded={expanded()}
 					onClick={() => setExpanded((value) => !value)}
 				>

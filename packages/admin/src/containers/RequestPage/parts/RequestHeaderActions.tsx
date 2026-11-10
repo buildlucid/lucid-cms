@@ -126,7 +126,7 @@ export const RequestHeaderActions: Component<{
 							<Menu.Root placement="bottom-end">
 								<Menu.Trigger
 									class={classNames(
-										"flex h-9 w-9 items-center justify-center bg-secondary text-secondary-foreground ring-primary transition-colors duration-200 hover:bg-secondary-hover focus:outline-none focus-visible:ring-1",
+										"flex h-9 w-9 items-center justify-center bg-secondary text-secondary-foreground focus-ring transition-colors hover:bg-secondary-hover",
 										{
 											"rounded-r-md border-l border-black/10":
 												interfaceDirection.isLTR(),

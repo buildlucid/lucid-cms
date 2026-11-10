@@ -170,16 +170,16 @@ const AgentChatThread: Component<{
 									variant="secondary"
 									size="xs"
 									shape="circle"
-									class="group pointer-events-auto shadow-md"
+									class="group pointer-events-auto shadow-floating"
 									aria-label={T()("agent.chat.latest")}
-									title={T()("agent.chat.latest")}
+									tooltip={T()("agent.chat.latest")}
 									onClick={() => props.scroll.scrollToEnd("smooth")}
 								>
 									<Show
 										when={
 											props.chat.working() && !props.chat.pendingInteraction()
 										}
-										fallback={<TbOutlineArrowDown size={11} />}
+										fallback={<TbOutlineArrowDown size={12} />}
 									>
 										<Spinner
 											size="sm"
@@ -187,7 +187,7 @@ const AgentChatThread: Component<{
 											class="group-hover:hidden group-focus-visible:hidden"
 										/>
 										<TbOutlineArrowDown
-											size={11}
+											size={12}
 											class="hidden group-hover:block group-focus-visible:block"
 										/>
 									</Show>

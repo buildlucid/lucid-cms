@@ -109,7 +109,7 @@ const AgentChatDetailsCard: Component<{
 								type: "agent",
 								id: props.conversation.id,
 							})}
-							class="rounded text-xs text-body underline-offset-2 transition-colors hover:text-title hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+							class="rounded-sm text-xs text-body underline-offset-2 transition-colors hover:text-title hover:underline focus-ring"
 						>
 							{T()("agent.chat.details.usage.view")}
 						</A>
@@ -163,7 +163,7 @@ const AgentChatDetailsCard: Component<{
 						<Show when={sources().length > shownSources}>
 							<button
 								type="button"
-								class="self-start rounded text-[11px] text-muted transition-colors hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+								class="self-start rounded-sm text-2xs text-muted transition-colors hover:text-body focus-ring"
 								aria-expanded={showAll()}
 								onClick={() => setShowAll((value) => !value)}
 							>

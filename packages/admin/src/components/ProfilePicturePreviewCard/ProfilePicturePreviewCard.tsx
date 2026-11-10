@@ -141,7 +141,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 				<button
 					type="button"
 					class={classNames(
-						"rectangle-background relative flex w-full items-center justify-center border-b border-border p-4 focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary",
+						"rectangle-background relative flex w-full items-center justify-center border-b border-border p-4 focus-ring-inset",
 						{
 							"h-52": props.previewHeight !== "large",
 							"h-72": props.previewHeight === "large",

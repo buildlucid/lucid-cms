@@ -97,7 +97,7 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 		<KobalteCheckbox.Root
 			data-checkbox
 			class={classnames("group flex items-center gap-2.5", {
-				"relative min-h-9 max-w-full cursor-pointer rounded-md border px-3 py-1.5 text-sm transition-colors duration-200":
+				"relative min-h-9 max-w-full cursor-pointer rounded-md border px-3 py-1.5 text-sm transition-colors":
 					boxed(),
 				"bg-input text-subtitle": boxed() && !filled(),
 				"border-border":
@@ -105,10 +105,7 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 				"border-danger-low-border bg-danger-low":
 					boxed() && !filled() && props.errors !== undefined && !focused(),
 				"border-primary": boxed() && focused(),
-				"hover:bg-secondary-hover hover:text-secondary-foreground":
-					boxed() && !filled() && coloured(),
-				"hover:border-body/25 hover:bg-card-hover":
-					boxed() && !filled() && !coloured(),
+				"hover:border-body/25 hover:bg-card-hover": boxed() && !filled(),
 				"border-primary bg-primary text-primary-foreground hover:bg-primary-hover":
 					filled() && props.variant === "button-primary",
 				"border-secondary bg-secondary text-secondary-foreground hover:bg-secondary-hover":
@@ -142,7 +139,7 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 				data-checkbox-control
 				onClick={(event) => event.stopPropagation()}
 				class={classnames(
-					"inline-flex h-5 w-5 min-w-5 items-center justify-center rounded-md border transition-colors duration-200",
+					"inline-flex size-4 min-w-4 items-center justify-center rounded-sm border transition-colors",
 					{
 						//* stretches the hit area over the whole box, so any part of it toggles
 						"after:absolute after:inset-0 after:content-['']": boxed(),
@@ -153,13 +150,13 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 					},
 				)}
 			>
-				<KobalteCheckbox.Indicator class="w-full h-full relative">
+				<KobalteCheckbox.Indicator class="relative h-full w-full animate-check-in">
 					<div class="absolute inset-0 flex justify-center items-center">
 						<Show
 							when={props.indeterminate}
-							fallback={<TbOutlineCheck size={10} />}
+							fallback={<TbOutlineCheck size={9} />}
 						>
-							<TbOutlineMinus size={10} />
+							<TbOutlineMinus size={9} />
 						</Show>
 					</div>
 				</KobalteCheckbox.Indicator>
@@ -168,7 +165,7 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 				<KobalteCheckbox.Label
 					data-checkbox-label
 					class={classnames(
-						"flex min-w-0 items-center gap-1 text-sm transition-colors duration-200",
+						"flex min-w-0 items-center gap-1 text-sm transition-colors",
 						{
 							truncate: boxed(),
 							"ease-in-out text-body": !boxed(),
@@ -211,7 +208,7 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 								{root()}
 							</Tooltip.Trigger>
 							<Tooltip.Portal>
-								<Tooltip.Content class="z-70 w-72 max-w-[calc(100vw-2rem)] rounded-md border border-border bg-card px-3 py-2 shadow-xs">
+								<Tooltip.Content class="floating-panel z-70 w-72 max-w-[calc(100vw-2rem)] px-3 py-2">
 									<p class="text-sm text-body">{tooltip()}</p>
 								</Tooltip.Content>
 							</Tooltip.Portal>

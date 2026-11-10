@@ -80,7 +80,7 @@ const PasskeySettings: Component<PasskeySettingsProps> = (props) => {
 						variant="outline"
 						size="sm"
 						type="button"
-						title={addUnavailableReason()}
+						tooltip={addUnavailableReason()}
 						disabled={addUnavailableReason() !== undefined}
 						loading={createPasskey.action.isPending}
 						onClick={() => createPasskey.action.mutate()}
@@ -100,7 +100,7 @@ const PasskeySettings: Component<PasskeySettingsProps> = (props) => {
 									badge={
 										passkey.backedUp ? (
 											<span
-												class="text-[11px] leading-4 font-medium text-subtitle"
+												class="text-2xs leading-4 font-medium text-subtitle"
 												title={T()("account.passkeys.synced.tooltip")}
 											>
 												{T()("account.passkeys.synced")}
@@ -114,7 +114,7 @@ const PasskeySettings: Component<PasskeySettingsProps> = (props) => {
 												variant="ghost"
 												size="xs"
 												shape="square"
-												title={T()("account.passkeys.rename.action")}
+												tooltip={T()("account.passkeys.rename.action")}
 												aria-label={T()("account.passkeys.rename.action")}
 												onClick={() => {
 													setRenaming(passkey);

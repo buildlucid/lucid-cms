@@ -34,7 +34,7 @@ const BuilderSplitHandle: Component<{ split: UseBuilderSplit }> = (props) => {
 			<span
 				aria-hidden="true"
 				class={classNames(
-					"pointer-events-none sticky top-[calc(50dvh-1.25rem)] mt-[calc(50dvh-5rem)] h-10 w-1 shrink-0 rounded-full transition-colors duration-150",
+					"pointer-events-none sticky top-[calc(50dvh-1.25rem)] mt-[calc(50dvh-5rem)] h-10 w-1 shrink-0 rounded-full transition-colors",
 					props.split.dragging()
 						? "bg-primary"
 						: "bg-transparent group-hover/handle:bg-muted group-focus-visible/handle:bg-primary",

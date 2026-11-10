@@ -40,7 +40,7 @@ const AgentDetailsDialog: Component<{
 		>
 			<Dialog.Portal>
 				<Dialog.Overlay
-					class="fixed inset-0 cursor-pointer bg-overlay animate-overlay-hide duration-200 transition-colors data-expanded:animate-overlay-show"
+					class="fixed inset-0 cursor-pointer bg-overlay animate-overlay-hide transition-colors data-expanded:animate-overlay-show"
 					style={{ "z-index": layer() - 10 }}
 				/>
 				<div class="fixed inset-0" style={{ "z-index": layer() }}>

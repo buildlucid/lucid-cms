@@ -64,7 +64,7 @@ const NotificationRow: Component<NotificationRowProps> = (props) => {
 				rel={external() ? "noopener noreferrer" : undefined}
 				type={props.notification.href ? undefined : "button"}
 				onClick={openNotification}
-				class="flex min-w-0 grow items-center gap-3 rounded-md px-2 py-2 text-start transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary"
+				class="flex min-w-0 grow items-center gap-3 rounded-md px-2 py-2 text-start transition-colors hover:bg-card-hover focus-ring-inset"
 			>
 				<NotificationThumb notification={props.notification} />
 				<span class="flex min-w-0 grow flex-col">
@@ -78,7 +78,7 @@ const NotificationRow: Component<NotificationRowProps> = (props) => {
 						>
 							{props.notification.title}
 						</span>
-						<span class="flex shrink-0 items-center gap-2 text-[11px] leading-4 text-muted">
+						<span class="flex shrink-0 items-center gap-2 text-2xs leading-4 text-muted">
 							<span class="whitespace-nowrap">
 								{dateHelpers.formatRelativeDate(props.notification.updatedAt)}
 							</span>
@@ -108,7 +108,7 @@ const NotificationRow: Component<NotificationRowProps> = (props) => {
 			{/* on coarse pointers the actions sit beside the row rather than over it */}
 			<div
 				class={classnames(
-					"flex shrink-0 items-center gap-0.5 pointer-fine:absolute pointer-fine:end-2 pointer-fine:top-1/2 pointer-fine:-translate-y-1/2 pointer-fine:rounded-md pointer-fine:p-0.5 pointer-fine:shadow-xs pointer-fine:opacity-0 pointer-fine:transition-opacity pointer-fine:group-hover:opacity-100 pointer-fine:focus-within:opacity-100",
+					"flex shrink-0 items-center gap-0.5 pointer-fine:absolute pointer-fine:end-2 pointer-fine:top-1/2 pointer-fine:-translate-y-1/2 pointer-fine:rounded-md pointer-fine:p-0.5 pointer-fine:shadow-raised pointer-fine:opacity-0 pointer-fine:transition-opacity pointer-fine:group-hover:opacity-100 pointer-fine:focus-within:opacity-100",
 					props.surface === "popover"
 						? "pointer-fine:bg-popover"
 						: "pointer-fine:bg-card",
@@ -119,7 +119,7 @@ const NotificationRow: Component<NotificationRowProps> = (props) => {
 					variant="ghost"
 					shape="square"
 					aria-label={readLabel()}
-					title={readLabel()}
+					tooltip={readLabel()}
 					onClick={() =>
 						props.onUpdate({ ids: [props.notification.id], read: unread() })
 					}
@@ -133,7 +133,7 @@ const NotificationRow: Component<NotificationRowProps> = (props) => {
 					variant="ghost"
 					shape="square"
 					aria-label={T()("notifications.archive")}
-					title={T()("notifications.archive")}
+					tooltip={T()("notifications.archive")}
 					onClick={() => props.onArchive(props.notification.id)}
 				>
 					<TbOutlineArchive class="size-3" />

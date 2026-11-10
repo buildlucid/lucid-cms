@@ -195,7 +195,7 @@ const AgentChatTimeline: Component<{
 				<Show when={preview()}>
 					{(current) => (
 						<div
-							class="absolute inset-s-full w-72 -translate-y-1/2 rounded-lg border border-border bg-popover px-3 py-2 shadow-md motion-safe:animate-fade-in motion-safe:transition-[top] motion-safe:duration-150 motion-safe:ease-out"
+							class="absolute inset-s-full w-72 -translate-y-1/2 rounded-lg border border-border bg-popover px-3 py-2 shadow-floating motion-safe:animate-fade-in motion-safe:transition-[top] motion-safe:duration-150 motion-safe:ease-out"
 							style={{ top: `${cardTop()}px` }}
 						>
 							<p class="line-clamp-1 text-xs font-medium text-title">

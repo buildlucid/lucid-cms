@@ -110,7 +110,7 @@ const NotificationTypeSettings: Component<NotificationTypeSettingsProps> = (
 					<>
 						<button
 							type="button"
-							class="mt-2 flex max-w-full items-center gap-1.5 text-xs text-muted transition-colors hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary rounded-md"
+							class="mt-2 flex max-w-full items-center gap-1.5 text-xs text-muted transition-colors hover:text-body focus-ring rounded-md"
 							aria-expanded={rolesOpen()}
 							onClick={() => setRolesOpen((open) => !open)}
 						>

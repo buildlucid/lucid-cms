@@ -37,7 +37,8 @@
 	--lucid-card-hover: oklch(20% 0 0);
 	--lucid-popover: oklch(19% 0 0);
 	--lucid-input: oklch(19.5% 0 0);
-	--lucid-overlay: oklch(10% 0 0 / 0.9);
+	--lucid-overlay: oklch(0% 0 0 / 0.6);
+	--lucid-shadow: 0.4;
 	--lucid-border: oklch(100% 0 0 / 0.075);
 	--lucid-title: oklch(93.5% 0 0);
 	--lucid-subtitle: oklch(84% 0 0);

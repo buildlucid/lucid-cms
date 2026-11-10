@@ -126,7 +126,7 @@ const TimelineCard: Component<{
 			<div class="relative">
 				<span
 					class={classNames(
-						"absolute -left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors duration-200",
+						"absolute -left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors",
 						{
 							"border-primary-low-border bg-primary-low": props.isSelected,
 							"border-secondary/60 bg-background": !props.isSelected,
@@ -135,7 +135,7 @@ const TimelineCard: Component<{
 				/>
 				<span
 					class={classNames(
-						"absolute -left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full transition-colors duration-200",
+						"absolute -left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full transition-colors",
 						{
 							"bg-primary": props.isSelected,
 							"bg-secondary": !props.isSelected,
@@ -146,7 +146,7 @@ const TimelineCard: Component<{
 					type="button"
 					max-w-72
 					class={classNames(
-						"group relative flex w-full text-left overflow-hidden rounded-md border border-border p-3 md:p-4 transition-colors duration-200 outline-none bg-card focus-visible:ring-1 focus-visible:ring-primary",
+						"group relative flex w-full text-left overflow-hidden rounded-md border border-border p-3 md:p-4 transition-colors focus-ring bg-card",
 						{
 							"hover:bg-card-hover": !isUnpublishedEnvironment(),
 							"opacity-70 cursor-not-allowed": isUnpublishedEnvironment(),

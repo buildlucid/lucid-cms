@@ -80,7 +80,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 			/>
 			<Show when={props.showForgotPassword}>
 				<A
-					class="block text-sm mt-1 hover:text-primary-hover duration-200 transition-colors"
+					class="block text-sm mt-1 hover:text-primary-hover transition-colors"
 					type="button"
 					href="/admin/forgot-password"
 				>

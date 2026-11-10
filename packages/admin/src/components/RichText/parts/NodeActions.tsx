@@ -29,7 +29,7 @@ const NodeActions: Component<NodeActionsProps> = (props) => {
 				onClick={props.onEdit}
 				disabled={props.editDisabled}
 				aria-label={props.editLabel}
-				title={props.editLabel}
+				tooltip={props.editLabel}
 			>
 				<TbOutlinePencil size={12} />
 			</Button>

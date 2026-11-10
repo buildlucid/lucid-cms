@@ -37,7 +37,7 @@ export const FormLabel: Component<LabelProps> = (props) => {
 					<label
 						for={props.id}
 						class={classnames(
-							"flex min-w-0 items-center gap-1 transition-colors duration-200 ease-in-out",
+							"flex min-w-0 items-center gap-1 transition-colors",
 							{
 								"text-primary-hover!": props.focused,
 							},

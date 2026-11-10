@@ -436,7 +436,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			/>
 			<form
 				class={classnames(
-					"@container/composer relative rounded-2xl border bg-card shadow-sm transition-colors focus-within:border-primary",
+					"@container/composer relative rounded-2xl border bg-card shadow-raised transition-colors focus-field",
 					props.header ? "border-primary-low-border" : "border-border",
 				)}
 				onSubmit={(event) => {
@@ -530,10 +530,10 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 									shape="circle"
 									size="xs"
 									variant="secondary"
-									class="shrink-0 focus-visible:ring-inset"
+									class="shrink-0 -outline-offset-2!"
 									onClick={() => props.onStop?.()}
 									aria-label={T()("agent.composer.stop")}
-									title={T()("agent.composer.stop")}
+									tooltip={T()("agent.composer.stop")}
 								>
 									<TbOutlinePlayerStop size={10} />
 								</Button>
@@ -543,7 +543,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 								type="submit"
 								shape="circle"
 								size="xs"
-								class="shrink-0 focus-visible:ring-inset"
+								class="shrink-0 -outline-offset-2!"
 								disabled={
 									blank() ||
 									uploads.uploading() ||
@@ -555,13 +555,13 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 								aria-label={T()(
 									props.busy ? "agent.composer.queue" : "agent.composer.send",
 								)}
-								title={T()(
+								tooltip={T()(
 									props.busy && props.queueable
 										? "agent.composer.hint.busy"
 										: "agent.composer.send",
 								)}
 							>
-								<TbOutlineArrowUp size={11} />
+								<TbOutlineArrowUp size={12} />
 							</Button>
 						</Show>
 					</div>

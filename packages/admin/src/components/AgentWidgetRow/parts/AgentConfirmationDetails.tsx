@@ -45,7 +45,7 @@ const AgentConfirmationDetails: Component<{
 								</Pill>
 							</Show>
 						</div>
-						<code class="text-[11px] text-muted">{confirmation.toolName}</code>
+						<code class="text-2xs text-muted">{confirmation.toolName}</code>
 						<JSONPreview json={confirmation.input} />
 					</section>
 				)}

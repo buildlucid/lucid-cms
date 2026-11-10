@@ -256,8 +256,8 @@ export const NavigationMenuContent: Component<{
 						>
 							<Switch>
 								<Match when={collections.isLoading}>
-									<li class="skeleton block h-8 w-full mb-0.5" />
-									<li class="skeleton block h-8 w-full mb-0.5" />
+									<li class="skeleton block h-7 w-full mb-0.5" />
+									<li class="skeleton block h-7 w-full mb-0.5" />
 									<li class="skeleton block h-8 w-full" />
 								</Match>
 								<Match when={collections.isError}>

@@ -47,7 +47,7 @@ const DeployText: Component<{
 		</span>
 		<span
 			class={classNames(
-				"block truncate text-[11px] tabular-nums transition-colors duration-300",
+				"block truncate text-2xs tabular-nums transition-colors duration-300",
 				getDeployDetailClass(props.summary.tone),
 			)}
 		>
@@ -84,7 +84,7 @@ const RunButton: Component<{ deploy: Deploy; onRun: () => void }> = (props) => (
 		permission={getDeployPermission(props.deploy.key, "run")}
 		disabled={!props.deploy.enabled}
 		aria-label={getDeployRunLabel(props.deploy)}
-		title={getDeployRunLabel(props.deploy)}
+		tooltip={getDeployRunLabel(props.deploy)}
 		onClick={props.onRun}
 	>
 		<TbOutlineRocket class="size-3.5" />
@@ -105,10 +105,10 @@ const DeployRow: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="mb-2 flex items-center gap-2 rounded-xl pe-1.5 transition-colors duration-150 hover:bg-background-hover">
+		<div class="mb-2 flex items-center gap-2 rounded-xl pe-1.5 transition-colors hover:bg-background-hover">
 			<A
 				href={getDeployHref(props.deploy.key)}
-				class="flex min-w-0 flex-1 rounded-xl py-2 ps-3 outline-none focus-visible:ring-1 focus-visible:ring-primary"
+				class="flex min-w-0 flex-1 rounded-xl py-2 ps-3 focus-ring"
 				onClick={() => props.onNavigate?.()}
 			>
 				<DeployText
@@ -137,10 +137,10 @@ const DeployMenuItem: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="flex items-center gap-1 rounded-md pe-1 transition-colors duration-200 hover:bg-card-hover">
+		<div class="flex items-center gap-1 rounded-md pe-1 transition-colors hover:bg-card-hover">
 			<A
 				href={getDeployHref(props.deploy.key)}
-				class="flex min-w-0 flex-1 flex-col rounded-md px-2 py-1.5 outline-none focus-visible:ring-1 focus-visible:ring-primary"
+				class="flex min-w-0 flex-1 flex-col rounded-md px-2 py-1.5 focus-ring"
 				onClick={props.onNavigate}
 			>
 				<span class="truncate text-sm text-title">{props.deploy.name}</span>
@@ -222,7 +222,7 @@ export const NavigationDeploys: Component<{
 								gutter={8}
 							>
 								<Popover.Trigger
-									class="mb-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-start outline-none transition-colors duration-150 hover:bg-background-hover focus-visible:ring-1 focus-visible:ring-primary data-expanded:bg-background-hover"
+									class="mb-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-start focus-ring transition-colors hover:bg-background-hover data-expanded:bg-background-hover"
 									aria-label={T()("deploys.menu.open")}
 								>
 									<DeployText

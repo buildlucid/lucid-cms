@@ -38,7 +38,7 @@ const HeadingMenu: Component<{
 		>
 			<Menu.Trigger
 				class={classNames(
-					"inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs transition-colors duration-150 outline-none focus-visible:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50",
+					"inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs transition-colors focus-ring disabled:cursor-not-allowed disabled:opacity-50",
 					{
 						"bg-primary-low text-primary-low-foreground border-primary-low-border":
 							props.mode === "toolbar" || props.activeHeading > 0,

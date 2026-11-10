@@ -135,7 +135,7 @@ const AgentImageSettings: AgentWidgetComponent<AdminOptions | undefined> = (
 					<Show when={data()?.editMediaId}>
 						{(id) => (
 							<div class="flex items-center gap-3 rounded-md border border-border bg-input p-2">
-								<div class="rectangle-background relative size-14 shrink-0 overflow-hidden rounded">
+								<div class="rectangle-background relative size-14 shrink-0 overflow-hidden rounded-sm">
 									<Show when={source.data?.data}>
 										{(media) => (
 											<MediaPreview

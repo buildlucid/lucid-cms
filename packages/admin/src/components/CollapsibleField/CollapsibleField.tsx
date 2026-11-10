@@ -158,7 +158,7 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 			<button
 				type="button"
 				class={classNames(
-					"w-full cursor-pointer bg-input px-3 py-2.5 text-left transition-colors duration-200 hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary flex justify-between items-center gap-3",
+					"w-full cursor-pointer bg-input px-3 py-2.5 text-left transition-colors hover:bg-card-hover focus-ring-inset flex justify-between items-center gap-3",
 					{
 						"bg-linear-to-r from-danger-low to-input": errorCount() > 0,
 					},

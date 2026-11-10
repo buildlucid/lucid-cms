@@ -22,56 +22,67 @@
 	/* Typography */
 
 	h1 {
-		@apply text-base md:text-lg tracking-wider font-bold text-title;
+		@apply text-lg font-semibold text-title;
 	}
 
 	h2 {
-		@apply text-base font-bold text-title;
+		@apply text-base font-semibold text-title;
 	}
 
-	h3 {
-		@apply text-base font-medium text-title;
-	}
-
-	h4 {
-		@apply text-base font-medium text-title font-body;
-	}
-
-	h5 {
-		@apply text-base font-medium text-title font-body;
-	}
-
+	h3,
+	h4,
+	h5,
 	h6 {
-		@apply text-base font-medium text-title font-body;
+		@apply text-sm font-medium text-title font-body;
 	}
 
+	/* size, tracking and line height come from the text utilities, so a paragraph reads the same as any other element */
 	p,
 	li,
 	a {
-		@apply text-base font-normal tracking-wide leading-relaxed text-body font-body;
+		@apply font-normal text-body font-body;
+	}
+
+	a {
+		@apply hover:text-primary-hover;
 	}
 
 	a,
 	button {
-		@apply hover:text-primary-hover duration-200 transition-colors ease-in-out focus:outline-hidden focus-visible:ring-1 focus:ring-primary;
+		@apply transition-colors;
 	}
 
 	button {
 		@apply cursor-pointer;
 	}
 
+	/* Focus */
+
+	/* the keyboard focus ring, matching the `focus-ring` utility, for links and buttons that don't style their own */
+	:where(a, button, summary, [role="button"], [role="tab"]):focus-visible {
+		outline: 2px solid var(--lucid-primary);
+		outline-offset: 2px;
+	}
+
 	/* Icons */
 
-	/* Tabler icons leave 2px of padding in their 24px grid. Scaling them up
-	   fills the box like a glyph, so `size` reads true without changing layout. */
+	/* Compensates for Tabler's internal padding without changing layout size. */
 	svg[viewBox="0 0 24 24"][stroke-linejoin="round"] {
 		scale: 1.2;
+		/* an icon that turns to show state, such as a chevron on an open section, turns smoothly */
+		transition: rotate 200ms var(--ease-out-quint);
 	}
 
 	/* Other */
 
 	body {
-		@apply bg-background text-body font-body;
+		@apply bg-background text-sm text-body font-body antialiased;
+	}
+
+	/* figures line up in columns wherever they are compared */
+	table,
+	time {
+		font-variant-numeric: tabular-nums;
 	}
 
 	::-moz-selection {
@@ -86,5 +97,36 @@
 	input[type="datetime-local"]::-webkit-calendar-picker-indicator,
 	input[type="time"]::-webkit-calendar-picker-indicator {
 		@apply opacity-60;
+	}
+
+	/* Motion */
+
+	/* things that slide, scale or pop into place fade in instead */
+	@media (prefers-reduced-motion: reduce) {
+		:root {
+			--animate-enter: animation-fade-in 100ms ease-out;
+			--animate-leave: animation-fade-out 100ms ease-in forwards;
+			--animate-dropdown: animation-fade-in 100ms ease-out;
+			--animate-pop-in: animation-fade-in 100ms ease-out;
+			--animate-pop-out: animation-fade-out 100ms ease-in forwards;
+			--animate-check-in: none;
+			--animate-collapsible-open: none;
+			--animate-collapsible-close: none;
+			--animate-from-left: animation-fade-in 100ms ease-out;
+			--animate-from-right: animation-fade-in 100ms ease-out;
+			--animate-rise-in: animation-fade-in 100ms ease-out;
+			--animate-slide-from-right-in: animation-fade-in 100ms ease-out;
+			--animate-slide-from-right-out: animation-fade-out 100ms ease-in forwards;
+			--animate-slide-from-left-in: animation-fade-in 100ms ease-out;
+			--animate-slide-from-left-out: animation-fade-out 100ms ease-in forwards;
+			--animate-slide-from-bottom-in: animation-fade-in 100ms ease-out;
+			--animate-slide-from-bottom-out: animation-fade-out 100ms ease-in forwards;
+			--animate-modal-show: animation-fade-in 100ms ease-out;
+			--animate-modal-hide: animation-fade-out 100ms ease-in forwards;
+		}
+
+		.pressable:active {
+			scale: none;
+		}
 	}
 }

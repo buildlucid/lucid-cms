@@ -40,7 +40,7 @@ export const DegreeRangeControl: Component<DegreeRangeControlProps> = (
 					value={props.value}
 					disabled={props.disabled}
 					aria-label={props.label}
-					class="degree-range-input min-w-0 flex-1 disabled:cursor-not-allowed disabled:opacity-60"
+					class="degree-range-input min-w-0 flex-1 disabled:cursor-not-allowed disabled:opacity-50"
 					style={{ "--degree-range-progress": `${progress()}%` }}
 					onInput={(event) => {
 						props.onChange(Number(event.currentTarget.value));
@@ -55,7 +55,7 @@ export const DegreeRangeControl: Component<DegreeRangeControlProps> = (
 						value={props.value}
 						disabled={props.disabled}
 						aria-label={props.label}
-						class="w-full bg-transparent text-right text-sm text-title outline-hidden disabled:opacity-60"
+						class="w-full bg-transparent text-right text-sm text-title outline-hidden disabled:opacity-50"
 						onInput={(event) => {
 							props.onChange(Number(event.currentTarget.value));
 						}}

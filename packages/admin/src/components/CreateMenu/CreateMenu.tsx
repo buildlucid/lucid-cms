@@ -114,7 +114,7 @@ const CreateMenu: Component<{
 					variant="primary"
 					size="sm"
 					shape="square"
-					title={action.label}
+					tooltip={action.label}
 					aria-label={action.label}
 					//* left clickable so a disabled action can explain itself, as the menu does
 					aria-disabled={action.disabled ? "true" : undefined}
@@ -149,7 +149,7 @@ const CreateMenu: Component<{
 			<Match when={visibleActions().length > 1}>
 				<Menu.Root open={menuOpen()} onOpenChange={setMenuOpen}>
 					<Menu.Trigger
-						class="w-9 min-w-9 h-9 bg-primary hover:bg-primary-hover text-primary-foreground border border-transparent outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center transition-colors"
+						class="size-8 min-w-8 bg-primary hover:bg-primary-hover text-primary-foreground focus-ring pressable rounded-md flex justify-center items-center"
 						onClick={(e) => e.stopPropagation()}
 						title={T()("common.create")}
 						aria-label={T()("common.create")}

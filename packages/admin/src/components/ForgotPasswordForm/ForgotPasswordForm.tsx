@@ -67,7 +67,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 			</Form>
 			<Show when={props.showBackToLogin}>
 				<A
-					class="block mt-6 text-center text-sm hover:text-primary-hover duration-200 transition-colors"
+					class="block mt-6 text-center text-sm hover:text-primary-hover transition-colors"
 					href="/admin/login"
 				>
 					{T()("common.back.to.login")}

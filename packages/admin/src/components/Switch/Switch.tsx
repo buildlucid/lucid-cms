@@ -153,7 +153,7 @@ const Switch: Component<SwitchProps> = (props) => {
 				{...ariaProps}
 				type="button"
 				data-switch-control
-				class="h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-inset focus-visible:ring-1 transition-colors duration-200 group bg-input ring-border focus-visible:ring-primary"
+				class="h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus-ring ring-1 ring-inset transition-colors group bg-input ring-border"
 				onClick={() => {
 					checkboxRef?.click();
 				}}
@@ -168,7 +168,7 @@ const Switch: Component<SwitchProps> = (props) => {
 				<span
 					ref={falseSpanRef}
 					class={classnames(
-						"flex-1 py-1 px-3 h-full flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-sm",
+						"flex-1 py-1 px-3 h-full flex items-center justify-center text-center z-10 relative transition-colors text-sm",
 						!props.value && "text-secondary-foreground",
 						props.value && "text-subtitle",
 					)}
@@ -178,7 +178,7 @@ const Switch: Component<SwitchProps> = (props) => {
 				<span
 					ref={trueSpanRef}
 					class={classnames(
-						"flex-1 px-3 h-full py-1 flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-sm",
+						"flex-1 px-3 h-full py-1 flex items-center justify-center text-center z-10 relative transition-colors text-sm",
 						props.value && "text-secondary-foreground",
 						!props.value && "text-subtitle",
 					)}

@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { TbOutlineFilter, TbOutlineX } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 
@@ -52,7 +53,7 @@ const FilterToggle: Component<FilterToggleProps> = (props) => {
 			<button
 				type="button"
 				class={classNames(
-					"gap-2 pl-2 pr-3 h-9 text-sm border border-transparent flex items-center outline-primary focus:outline-1 disabled:cursor-not-allowed disabled:bg-secondary-disabled disabled:text-secondary-disabled-foreground duration-200 transition-colors",
+					"gap-2 pl-2 pr-3 h-8 text-sm font-medium border border-transparent flex items-center focus-ring disabled:cursor-not-allowed disabled:bg-secondary-disabled disabled:text-secondary-disabled-foreground transition-colors",
 					tone(),
 					resettable() ? "rounded-l-md" : "rounded-md",
 				)}
@@ -64,18 +65,18 @@ const FilterToggle: Component<FilterToggleProps> = (props) => {
 				<span>{T()("common.filter")}</span>
 			</button>
 			<Show when={resettable()}>
-				<button
+				<Tooltip
 					type="button"
 					class={classNames(
-						"flex h-9 w-8 items-center justify-center rounded-r-md border-l border-primary-foreground/20 outline-primary focus:outline-1 duration-200 transition-colors",
+						"flex h-8 w-7 items-center justify-center rounded-r-md border-l border-primary-foreground/20 focus-ring transition-colors",
 						tone(),
 					)}
 					aria-label={T()("actions.reset.filters")}
-					title={T()("actions.reset.filters")}
+					content={T()("actions.reset.filters")}
 					onClick={() => props.onReset?.()}
 				>
 					<TbOutlineX size={12} />
-				</button>
+				</Tooltip>
 			</Show>
 		</div>
 	);

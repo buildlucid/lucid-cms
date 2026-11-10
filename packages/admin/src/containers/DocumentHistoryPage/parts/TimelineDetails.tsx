@@ -395,7 +395,7 @@ const InspectorSection: Component<{
 	return (
 		<Collapsible.Root open={open()} onOpenChange={setOpen}>
 			<section class="rounded-md border border-border bg-card p-4">
-				<Collapsible.Trigger class="group flex w-full items-center justify-between gap-3 rounded-md text-left focus:outline-hidden focus-visible:ring-1 ring-primary">
+				<Collapsible.Trigger class="group flex w-full items-center justify-between gap-3 rounded-md text-left focus-ring">
 					<div class="flex min-w-0 items-center gap-2 text-title">
 						<span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-input text-body">
 							{props.icon}
@@ -417,7 +417,9 @@ const InspectorSection: Component<{
 						/>
 					</div>
 				</Collapsible.Trigger>
-				<Collapsible.Content class="mt-3">{props.children}</Collapsible.Content>
+				<Collapsible.Content class="collapsible-content">
+					<div class="pt-3">{props.children}</div>
+				</Collapsible.Content>
 			</section>
 		</Collapsible.Root>
 	);

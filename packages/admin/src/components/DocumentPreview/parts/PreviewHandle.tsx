@@ -127,7 +127,7 @@ export const PreviewHandle: Component<{
 	return (
 		<div
 			ref={props.ref}
-			class="pointer-events-auto absolute top-0 left-0 flex items-center gap-px rounded-md border border-border bg-background p-px shadow-md transition-opacity duration-100 animate-dropdown"
+			class="pointer-events-auto absolute top-0 left-0 flex items-center gap-px rounded-md border border-border bg-background p-px shadow-floating transition-opacity duration-100 animate-dropdown"
 			classList={{ "opacity-0": props.hidden }}
 			style={{
 				translate: `${Math.round(props.position.x)}px ${Math.round(props.position.y)}px`,
@@ -157,7 +157,7 @@ export const PreviewHandle: Component<{
 				variant="ghost"
 				size="xs"
 				shape="square"
-				title={labels().after}
+				tooltip={labels().after}
 				aria-label={labels().after}
 				disabled={!props.canAdd}
 				onClick={(event) => props.onAdd(event.altKey ? "before" : "after")}

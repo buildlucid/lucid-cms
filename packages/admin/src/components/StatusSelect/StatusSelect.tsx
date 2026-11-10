@@ -58,7 +58,7 @@ const StatusSelect = <T extends string>(props: {
 		>
 			<Menu.Root placement="bottom-end">
 				<Menu.Trigger
-					class={`${pillClass} transition-colors hover:bg-card-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-60`}
+					class={`${pillClass} transition-colors hover:bg-card-hover hover:text-title focus-ring disabled:opacity-50`}
 					disabled={props.loading}
 					aria-label={props.label}
 					title={props.title ?? props.label}

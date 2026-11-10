@@ -34,7 +34,7 @@ export const NavigationSection: Component<{
 		<Collapsible.Root open={open()} onOpenChange={setOpen} class="mt-3">
 			<Collapsible.Trigger
 				class={classNames(
-					"group flex h-7 w-full items-center gap-2 rounded-md px-2 text-start text-xs font-medium transition-colors duration-200 hover:text-title outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+					"group flex h-7 w-full items-center gap-2 rounded-md px-2 text-start text-xs font-medium transition-colors hover:text-title focus-ring",
 					props.active && !open() ? "text-title" : "text-body",
 				)}
 			>
@@ -59,7 +59,7 @@ export const NavigationSection: Component<{
 					)}
 				/>
 			</Collapsible.Trigger>
-			<Collapsible.Content>
+			<Collapsible.Content class="collapsible-content">
 				<ul class="mt-1">{props.children}</ul>
 			</Collapsible.Content>
 		</Collapsible.Root>

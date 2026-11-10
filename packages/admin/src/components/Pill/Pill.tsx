@@ -6,6 +6,7 @@ import {
 	type JSXElement,
 	splitProps,
 } from "solid-js";
+import Tooltip from "@/components/Tooltip/Tooltip";
 
 /** The `yellow`, `green`, `blue` and `purple` variants match the workflow stage colours. */
 export type PillVariant =
@@ -100,12 +101,12 @@ const Pill: Component<PillProps> = (props) => {
 		classnames(
 			"inline-flex items-center justify-center rounded-full font-medium whitespace-nowrap",
 			interactive() &&
-				"transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60",
+				"transition-colors focus-ring disabled:cursor-not-allowed disabled:opacity-50",
 			local.class,
 			{
 				// Sizes
 				"px-2.5 py-0.5 text-xs leading-4": local.size !== "xs",
-				"px-1.5 py-0 text-[11px] leading-4": local.size === "xs",
+				"px-1.5 py-0 text-2xs leading-4": local.size === "xs",
 
 				// Variants
 				"bg-primary text-primary-foreground": variant() === "primary",
@@ -159,16 +160,15 @@ const Pill: Component<PillProps> = (props) => {
 		>;
 
 		return (
-			<button
+			<Tooltip
 				{...buttonProps}
 				data-pill
-				// oxlint-disable-next-line react/button-has-type -- falls back to "button" when no type is passed
 				type={buttonProps.type ?? "button"}
 				class={classes()}
-				title={local.tooltip}
+				content={local.tooltip}
 			>
 				{local.children}
-			</button>
+			</Tooltip>
 		);
 	}
 

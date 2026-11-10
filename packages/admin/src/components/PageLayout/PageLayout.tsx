@@ -80,9 +80,9 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 		>
 			<div
 				class={classnames(
-					"flex flex-col md:flex-row md:justify-between items-start gap-x-8 gap-y-4 px-4 md:px-6 pt-4 md:pt-6 pb-4 rounded-t-xl",
+					"flex flex-col md:flex-row md:justify-between items-start gap-x-8 gap-y-4 px-4 md:px-6 pt-4 md:pt-5 pb-4 rounded-t-xl",
 					{
-						"md:pb-6": !props.children,
+						"md:pb-5": !props.children,
 					},
 				)}
 			>
@@ -94,7 +94,7 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 								<div class="text-base" aria-hidden="true">
 									<span class="skeleton block w-40">&nbsp;</span>
 								</div>
-								<p class="mt-1 max-w-3xl text-sm" aria-hidden="true">
+								<p class="mt-0.5 max-w-3xl text-sm" aria-hidden="true">
 									<span class="skeleton block w-full max-w-80">&nbsp;</span>
 								</p>
 							</>
@@ -104,7 +104,9 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 							<h1 class="text-base">{props.title}</h1>
 						</Show>
 						<Show when={props.description}>
-							<p class="mt-1 max-w-3xl text-sm">{props.description}</p>
+							<p class="mt-0.5 max-w-3xl text-sm text-muted">
+								{props.description}
+							</p>
 						</Show>
 					</Show>
 				</div>

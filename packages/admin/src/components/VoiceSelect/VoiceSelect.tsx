@@ -2,6 +2,7 @@ import type { MediaGenerationVoice } from "@types";
 import { TbOutlinePlayerPlay, TbOutlinePlayerStop } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, onCleanup } from "solid-js";
 import Select from "@/components/Select/Select";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import T, { getLocale } from "@/translations";
 import {
 	claimAudioPlayback,
@@ -124,12 +125,12 @@ const VoiceSelect: Component<{
 			onHighlight={(option) => (option ? play(option) : stop())}
 			label={T()("ai.media.audio.generate.voice.label")}
 			labelEnd={
-				<button
+				<Tooltip
 					type="button"
-					class="relative flex size-5 items-center justify-center rounded-md text-muted transition-colors duration-200 before:absolute before:-inset-1 before:rounded-md before:content-[''] hover:text-title focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
+					class="relative flex size-5 items-center justify-center rounded-md text-muted transition-colors before:absolute before:-inset-1 before:rounded-md before:content-[''] hover:text-title focus-ring disabled:cursor-not-allowed disabled:opacity-50"
 					disabled={!selected()}
 					aria-label={previewLabel()}
-					title={previewLabel()}
+					content={previewLabel()}
 					onClick={() => {
 						const option = selected();
 						if (playing() !== undefined || !option) stop();
@@ -137,11 +138,11 @@ const VoiceSelect: Component<{
 					}}
 				>
 					{playing() === undefined ? (
-						<TbOutlinePlayerPlay size={11} aria-hidden="true" />
+						<TbOutlinePlayerPlay size={12} aria-hidden="true" />
 					) : (
-						<TbOutlinePlayerStop size={11} aria-hidden="true" />
+						<TbOutlinePlayerStop size={12} aria-hidden="true" />
 					)}
-				</button>
+				</Tooltip>
 			}
 			disabled={props.disabled}
 		/>

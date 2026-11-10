@@ -151,7 +151,7 @@ export const PreviewToolbar: Component<{
 				variant="toolbar"
 				size="xs"
 				shape="square"
-				title={T()("preview.edit.label")}
+				tooltip={T()("preview.edit.label")}
 				aria-label={T()("preview.edit.label")}
 				aria-pressed={props.editMode()}
 				class="aria-pressed:text-primary aria-pressed:hover:text-primary-hover"
@@ -165,7 +165,7 @@ export const PreviewToolbar: Component<{
 					variant="toolbar"
 					size="xs"
 					shape="square"
-					title={T()("common.refresh")}
+					tooltip={T()("common.refresh")}
 					aria-label={T()("common.refresh")}
 					disabled={!props.hasPage()}
 					onClick={() => props.onRefresh()}
@@ -177,7 +177,7 @@ export const PreviewToolbar: Component<{
 					variant="toolbar"
 					size="xs"
 					shape="square"
-					title={T()("preview.open")}
+					tooltip={T()("preview.open")}
 					aria-label={T()("preview.open")}
 					loading={props.actionLoading()}
 					disabled={!props.hasPage()}

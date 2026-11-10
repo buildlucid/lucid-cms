@@ -1,9 +1,6 @@
 /*
- * Colour strengths: `X` is solid, `X-medium` is a 40% tint for small marks
- * such as status dots and progress fills, and `X-low` is a 12% tint for
- * surfaces such as pills and notices. Tints are opaque mixes with the card
- * colour, so only `X` needs setting per theme. Component `*-subtle` variants
- * choose `medium` or `low` depending on the component.
+ * X is solid; X-medium mixes 40% with the card colour, X-low 12%. Themes only set X. Subtle
+ * variants select medium or low by component.
  */
 @theme static {
 	--lucid-primary: oklch(63.964% 0.14408 135.726);
@@ -191,7 +188,9 @@
 	--lucid-card-hover: oklch(94.8% 0.003 286);
 	--lucid-popover: oklch(100% 0 0);
 	--lucid-input: oklch(98.4% 0.002 286);
-	--lucid-overlay: oklch(10% 0 0 / 0.68);
+	--lucid-overlay: oklch(10% 0 0 / 0.4);
+	/* how strong shadows are: the alpha of the widest layer */
+	--lucid-shadow: 0.1;
 	--lucid-border: oklch(21% 0.006 286 / 0.15);
 	--lucid-title: oklch(16.5% 0.006 286);
 	--lucid-subtitle: oklch(29% 0.01 286);

@@ -21,12 +21,12 @@ const AuthSkeleton: Component<AuthSkeletonProps> = (props) => {
 				<Index each={Array.from({ length: props.fields ?? 1 })}>
 					{() => <span class="skeleton block h-15.5 w-full" />}
 				</Index>
-				<span class="skeleton mt-5 block h-12 w-full" />
+				<span class="skeleton mt-5 block h-11 w-full" />
 			</div>
 			<Show when={(props.options ?? 0) > 0}>
 				<div class="flex flex-col gap-4">
 					<Index each={Array.from({ length: props.options ?? 0 })}>
-						{() => <span class="skeleton block h-12 w-full" />}
+						{() => <span class="skeleton block h-11 w-full" />}
 					</Index>
 				</div>
 			</Show>

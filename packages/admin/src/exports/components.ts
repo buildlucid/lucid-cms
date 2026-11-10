@@ -136,6 +136,7 @@ export {
 	type InputProps,
 	type InputType,
 } from "../components/Input/Input.js";
+export { default as Kbd, type KbdProps } from "../components/Kbd/Kbd.js";
 export {
 	default as Link,
 	type LinkProps,
@@ -287,6 +288,13 @@ export {
 	default as Textarea,
 	type TextareaProps,
 } from "../components/Textarea/Textarea.js";
+export {
+	default as Tooltip,
+	type TooltipButtonProps,
+	type TooltipPlacement,
+	type TooltipProps,
+	type TooltipSpanProps,
+} from "../components/Tooltip/Tooltip.js";
 export {
 	default as UserDisplay,
 	type UserDisplayProps,

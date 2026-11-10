@@ -28,7 +28,7 @@ const HomeCustomizeBar: Component<{
 		<div class="pointer-events-none fixed right-agent-panel bottom-4 left-0 z-36 flex items-center justify-center px-4 md:bottom-6 md:left-sidebar">
 			<div class="pointer-events-auto flex items-center gap-1 rounded-md border border-border bg-card p-2">
 				<Menu.Root placement="top">
-					<Menu.Trigger class="flex h-9 items-center gap-2 rounded-md border border-border bg-input px-3 text-sm text-subtitle transition-colors hover:border-transparent hover:bg-secondary-hover hover:text-secondary-foreground focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary">
+					<Menu.Trigger class="flex h-8 items-center gap-2 rounded-md border border-border bg-input px-2.5 text-sm text-subtitle transition-colors hover:border-body/25 hover:bg-card-hover hover:text-title focus-ring">
 						{T()("home.customize.widgets")}
 						<TbOutlineChevronUp size={9} />
 					</Menu.Trigger>
@@ -54,7 +54,7 @@ const HomeCustomizeBar: Component<{
 					size="sm"
 					shape="square"
 					aria-label={T()("home.customize.reset")}
-					title={T()("home.customize.reset")}
+					tooltip={T()("home.customize.reset")}
 					onClick={() => props.onReset()}
 				>
 					<TbOutlineRotate size={12} />
@@ -64,7 +64,7 @@ const HomeCustomizeBar: Component<{
 					size="sm"
 					shape="square"
 					aria-label={T()("common.cancel")}
-					title={T()("common.cancel")}
+					tooltip={T()("common.cancel")}
 					onClick={() => props.onCancel()}
 				>
 					<TbOutlineX size={14} />
@@ -74,10 +74,10 @@ const HomeCustomizeBar: Component<{
 					size="sm"
 					shape="square"
 					aria-label={T()("common.done")}
-					title={T()("common.done")}
+					tooltip={T()("common.done")}
 					onClick={() => props.onDone()}
 				>
-					<TbOutlineCheck size={13} />
+					<TbOutlineCheck size={14} />
 				</Button>
 			</div>
 		</div>

@@ -256,7 +256,7 @@ const AgentWidget: Component<{
 				<Match when={true}>
 					<section
 						class={classnames({
-							"flex max-h-[60vh] flex-col overflow-hidden rounded-2xl border border-primary-low-border bg-card shadow-sm transition-colors focus-within:border-primary":
+							"flex max-h-[60vh] flex-col overflow-hidden rounded-2xl border border-primary-low-border bg-card shadow-raised transition-colors focus-field":
 								props.view === "composer",
 							"rounded-2xl border border-border bg-card p-3":
 								props.view === "inline" && pending(),
@@ -370,14 +370,14 @@ const AgentWidget: Component<{
 													? "agent.interaction.details.hide"
 													: "agent.interaction.details.show",
 											)}
-											title={T()(
+											tooltip={T()(
 												showInput()
 													? "agent.interaction.details.hide"
 													: "agent.interaction.details.show",
 											)}
 											onClick={() => setShowInput((open) => !open)}
 										>
-											<TbOutlineCode size={11} />
+											<TbOutlineCode size={12} />
 										</Button>
 									</Show>
 								</Show>

@@ -357,16 +357,16 @@ const UpsertOAuthClientDrawer: Component<{
 												required={true}
 											/>
 										</div>
-										<div class="flex h-10 items-center gap-2.5">
+										<div class="flex h-9 items-center gap-2.5">
 											<Button
 												type="button"
 												variant="danger-outline"
 												size="sm"
 												shape="square"
-												class="h-10! w-10! min-w-[40px]!"
+												class="size-9! min-w-9!"
 												onClick={() => removeRedirectUri(index)}
 												disabled={redirectUris().length === 1}
-												title={T()("common.remove")}
+												tooltip={T()("common.remove")}
 												aria-label={T()("common.remove")}
 											>
 												<TbOutlineX class="size-3.5" />
@@ -376,10 +376,10 @@ const UpsertOAuthClientDrawer: Component<{
 												variant="outline"
 												size="sm"
 												shape="square"
-												class="h-10! w-10! min-w-[40px]!"
+												class="size-9! min-w-9!"
 												onClick={() => addRedirectUri(index)}
 												disabled={redirectUris().length >= 20}
-												title={T()("oauth.clients.redirect.add")}
+												tooltip={T()("oauth.clients.redirect.add")}
 												aria-label={T()("oauth.clients.redirect.add")}
 											>
 												<TbOutlinePlus class="size-3.5" />

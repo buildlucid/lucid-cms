@@ -73,7 +73,7 @@ const AgentMediaPreviewV1: Component<{
 	};
 	const tileClasses = (media: Media) =>
 		classnames(
-			"relative block size-full overflow-hidden rounded-lg border bg-card-hover focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary",
+			"relative block size-full overflow-hidden rounded-lg border bg-card-hover focus-ring",
 			attachments()?.isAttached(media.id) ? "border-primary" : "border-border",
 			{ "rectangle-background": hasVisual(media) },
 		);

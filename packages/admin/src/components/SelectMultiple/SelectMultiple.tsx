@@ -177,7 +177,7 @@ function SelectMultiple<
 					data-select-multiple-trigger
 					id={props.id}
 					class={classnames(
-						"focus:outline-hidden overflow-hidden text-sm text-subtitle w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input border border-border flex min-h-10 rounded-md focus:border-primary duration-200 transition-colors",
+						"focus-field overflow-hidden text-sm text-subtitle w-full justify-between disabled:cursor-not-allowed disabled:opacity-50 bg-input border border-border flex min-h-9 rounded-md transition-colors",
 						{
 							"items-center px-2": !stacked(),
 							"gap-2 p-2": stacked(),
@@ -201,7 +201,7 @@ function SelectMultiple<
 								<span
 									data-select-multiple-value
 									class={classnames(
-										"group relative flex min-w-0 max-w-full items-center gap-1 text-sm transition-colors duration-200 focus:outline-hidden",
+										"group relative flex min-w-0 max-w-full items-center gap-1 text-sm transition-colors focus:outline-hidden",
 										{
 											"overflow-hidden rounded-md px-2 py-0.5 bg-secondary hover:bg-secondary-hover text-secondary-foreground":
 												!stacked(),
@@ -231,7 +231,7 @@ function SelectMultiple<
 															tabIndex={0}
 															data-select-multiple-remove
 															aria-label={`${T()("common.remove")} ${value.label}`}
-															class="flex size-4 shrink-0 cursor-pointer items-center justify-center rounded text-current hover:bg-danger hover:text-danger-foreground focus:outline-hidden focus-visible:ring-1 ring-danger"
+															class="flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-sm text-current hover:bg-danger hover:text-danger-foreground focus-ring"
 															onPointerDown={(event) => event.stopPropagation()}
 															onClick={(event) => {
 																event.stopPropagation();
@@ -283,7 +283,7 @@ function SelectMultiple<
 								<div class="relative">
 									<input
 										type="text"
-										class="bg-input px-2 rounded-md w-full border border-border text-sm text-subtitle font-medium h-9 focus:outline-hidden focus:border-primary"
+										class="bg-input px-2 rounded-md w-full border border-border text-sm text-subtitle font-medium h-9 focus-field"
 										placeholder={search().placeholder || T()("common.search")}
 										value={search().value}
 										onInput={(event) =>

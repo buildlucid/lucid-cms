@@ -18,14 +18,14 @@ export const TabsScrollButton: Component<{
 			class={classNames(
 				"pointer-events-none absolute inset-y-1 z-20 flex w-12 items-center from-card from-45% to-transparent",
 				props.edge === "start"
-					? "inset-s-1 justify-start rounded-s bg-linear-to-r rtl:bg-linear-to-l"
-					: "inset-e-1 justify-end rounded-e bg-linear-to-l rtl:bg-linear-to-r",
+					? "inset-s-1 justify-start rounded-s-sm bg-linear-to-r rtl:bg-linear-to-l"
+					: "inset-e-1 justify-end rounded-e-sm bg-linear-to-l rtl:bg-linear-to-r",
 			)}
 		>
 			<button
 				type="button"
 				tabIndex={-1}
-				class="pointer-events-auto flex size-6 items-center justify-center rounded text-muted transition-colors hover:bg-card-hover hover:text-title"
+				class="pointer-events-auto flex size-6 items-center justify-center rounded-sm text-muted transition-colors hover:bg-card-hover hover:text-title"
 				onClick={() => props.onClick()}
 			>
 				<Show

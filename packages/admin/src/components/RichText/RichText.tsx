@@ -176,7 +176,7 @@ const RichText: Component<RichTextProps> = (props) => {
 			<div
 				data-rich-text
 				class={classnames(
-					"relative overflow-hidden rounded-md border border-border bg-input transition-colors duration-200 focus-within:border-primary",
+					"relative overflow-hidden rounded-md border border-border bg-input transition-colors focus-field",
 					{
 						"cursor-not-allowed opacity-80 pointer-events-none": props.disabled,
 					},

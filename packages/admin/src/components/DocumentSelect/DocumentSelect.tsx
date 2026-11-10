@@ -536,7 +536,7 @@ const DocumentSortableItem: Component<{
 					props.document.value.collectionKey
 				}-${props.document.value.id}`,
 			}}
-			class={classNames("group transition-colors duration-200 transform-gpu", {
+			class={classNames("group transition-colors transform-gpu", {
 				"ring-1 ring-inset ring-danger": props.hasError,
 				"opacity-60": props.dragDrop.getDragging()?.ref === props.dragId,
 				"ring-1 ring-inset ring-primary":

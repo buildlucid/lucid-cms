@@ -13,6 +13,7 @@ import {
 } from "solid-js";
 import HoverRevealBar from "@/components/HoverRevealBar/HoverRevealBar";
 import NotificationBell from "@/components/NotificationBell/NotificationBell";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import { useHoverReveal } from "@/hooks/useHoverReveal/useHoverReveal";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
@@ -145,13 +146,13 @@ export const Navigation: Component = () => {
 						<SiteLink size="md" />
 						<AgentPanelToggle size="md" />
 						<NotificationBell size="md" />
-						<button
+						<Tooltip
 							type="button"
-							class="size-9 rounded-lg text-icon hover:text-icon-hover flex items-center justify-center transition-colors outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+							class="size-9 rounded-lg text-icon hover:text-icon-hover flex items-center justify-center transition-colors focus-ring"
 							onClick={() => setMobileMenuOpen((open) => !open)}
 							aria-label={menuButtonLabel()}
 							aria-expanded={mobileMenuOpen()}
-							title={menuButtonLabel()}
+							content={menuButtonLabel()}
 						>
 							<Show
 								when={mobileMenuOpen()}
@@ -159,7 +160,7 @@ export const Navigation: Component = () => {
 							>
 								<TbOutlineX class="size-4" />
 							</Show>
-						</button>
+						</Tooltip>
 					</div>
 				</div>
 			</header>
@@ -278,7 +279,7 @@ export const Navigation: Component = () => {
 							<NavigationLogo />
 							<button
 								type="button"
-								class="size-9 rounded-lg text-title/80 hover:text-title flex items-center justify-center transition-colors outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+								class="size-9 rounded-lg text-title/80 hover:text-title flex items-center justify-center transition-colors focus-ring"
 								aria-label={T()("common.close")}
 								onClick={() => setMobileMenuOpen(false)}
 							>

@@ -19,7 +19,7 @@ export const ImportDropZone: Component<{
 		<button
 			type="button"
 			class={classNames(
-				"flex min-h-72 flex-col items-center justify-center rounded-md border-2 border-dashed p-6 text-center transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+				"flex min-h-72 flex-col items-center justify-center rounded-md border-2 border-dashed p-6 text-center transition-colors focus-ring",
 				{
 					"border-primary bg-primary-low": dragOver(),
 					"border-border": !dragOver(),

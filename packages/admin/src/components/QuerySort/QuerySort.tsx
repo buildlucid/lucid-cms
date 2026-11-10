@@ -50,7 +50,7 @@ const SortItem: Component<SortItemProps> = (props) => {
 			end={
 				<div
 					class={classNames(
-						"w-5 h-5 min-w-5 rounded-md flex items-center justify-center transition-colors duration-200",
+						"w-5 h-5 min-w-5 rounded-md flex items-center justify-center transition-colors",
 						{
 							"bg-secondary": sort() !== undefined,
 							"bg-card-hover": sort() === undefined,
@@ -108,7 +108,7 @@ const QuerySort: Component<QuerySortProps> = (props) => {
 				data-query-sort
 				disabled={props.disabled}
 				class={classNames(
-					"flex h-9 items-center gap-2 rounded-md border border-transparent bg-secondary pr-3 pl-2 text-sm text-secondary-foreground hover:bg-secondary-hover disabled:cursor-not-allowed disabled:bg-secondary-disabled disabled:text-secondary-disabled-foreground",
+					"flex h-8 items-center gap-2 font-medium rounded-md border border-transparent bg-secondary pr-3 pl-2 text-sm text-secondary-foreground hover:bg-secondary-hover disabled:cursor-not-allowed disabled:bg-secondary-disabled disabled:text-secondary-disabled-foreground",
 					props.class,
 				)}
 			>

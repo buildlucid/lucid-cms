@@ -119,7 +119,7 @@ export const PublishTrigger: Component<{
 				onClick={handleSaveClick}
 				disabled={props.saveDisabled}
 				class={classNames(
-					"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2 ring-primary",
+					"flex items-center justify-center min-w-max text-center focus-ring transition-colors relative gap-2",
 					props.saveDisabled || props.savePermission === false
 						? "cursor-not-allowed bg-secondary-disabled text-secondary-disabled-foreground"
 						: "bg-secondary hover:bg-secondary-hover text-secondary-foreground",
@@ -139,7 +139,7 @@ export const PublishTrigger: Component<{
 				<Menu.Root>
 					<Menu.Trigger
 						class={classNames(
-							"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2 ring-primary",
+							"flex items-center justify-center min-w-max text-center focus-ring transition-colors relative gap-2",
 							isDisabled() || props.permission === false
 								? "cursor-not-allowed bg-secondary-disabled text-secondary-disabled-foreground"
 								: "bg-secondary hover:bg-secondary-hover text-secondary-foreground",

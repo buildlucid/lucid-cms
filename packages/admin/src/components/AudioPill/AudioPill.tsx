@@ -13,6 +13,7 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import T from "@/translations";
 import {
 	claimAudioPlayback,
@@ -29,7 +30,7 @@ const bars = [
 const rates: readonly number[] = [1, 1.5, 2];
 
 const controlClass =
-	"flex h-6 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-card-hover hover:text-title focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-primary";
+	"flex h-6 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-card-hover hover:text-title focus-ring";
 
 /**
  * Plays audio with compact controls or shows generation progress when `src` is absent.
@@ -169,7 +170,7 @@ const AudioPill: Component<
 						/>
 						<button
 							type="button"
-							class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+							class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-hover focus-ring"
 							aria-label={T()(
 								playing()
 									? "ai.media.audio.player.pause"
@@ -192,7 +193,7 @@ const AudioPill: Component<
 					</p>
 					<Show when={time()}>
 						{(value) => (
-							<span class="shrink-0 text-[11px] text-muted tabular-nums">
+							<span class="shrink-0 text-2xs text-muted tabular-nums">
 								{value()}
 							</span>
 						)}
@@ -245,23 +246,23 @@ const AudioPill: Component<
 			<Show when={!generating()}>
 				{/* hidden on narrow pills, so the waveform keeps its room */}
 				<div class="-me-2 hidden shrink-0 items-center gap-0.5 @2xs:flex">
-					<button
+					<Tooltip
 						type="button"
 						class={classnames(
 							controlClass,
-							"min-w-8 px-1.5 text-[11px] tabular-nums",
+							"min-w-8 px-1.5 text-2xs tabular-nums",
 						)}
 						aria-label={speedLabel()}
-						title={speedLabel()}
+						content={speedLabel()}
 						onClick={cycleRate}
 					>
 						{rate()}×
-					</button>
-					<button
+					</Tooltip>
+					<Tooltip
 						type="button"
 						class={classnames(controlClass, "w-6")}
 						aria-label={muteLabel()}
-						title={muteLabel()}
+						content={muteLabel()}
 						onClick={() => {
 							if (audio) audio.muted = !audio.muted;
 						}}
@@ -272,7 +273,7 @@ const AudioPill: Component<
 						>
 							<TbOutlineVolumeOff size={14} aria-hidden="true" />
 						</Show>
-					</button>
+					</Tooltip>
 				</div>
 			</Show>
 		</div>

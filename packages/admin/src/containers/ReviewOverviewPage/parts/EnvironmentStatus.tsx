@@ -14,7 +14,7 @@ export type EnvironmentCounts = Pick<
 >;
 
 const linkClass =
-	"rounded-sm text-xs leading-none text-muted transition-colors hover:text-title hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary";
+	"rounded-sm text-xs leading-none text-muted transition-colors hover:text-title hover:underline focus-ring";
 
 /** Shows environment counts against latest with optional status links, or one document's status for single collections. */
 const EnvironmentStatus: Component<{

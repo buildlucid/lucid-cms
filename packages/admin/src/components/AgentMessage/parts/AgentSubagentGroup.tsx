@@ -54,7 +54,7 @@ const AgentSubagentGroup: Component<{
 	return (
 		<section class="rounded-2xl border border-border bg-card">
 			<div class="flex items-center gap-2 px-3.5 py-2">
-				<TbOutlineSubtask size={11} class="shrink-0 text-muted" />
+				<TbOutlineSubtask size={12} class="shrink-0 text-muted" />
 				<span class="min-w-0 grow truncate text-xs text-muted">
 					{T()("agent.subagent.title")}
 				</span>
@@ -95,7 +95,7 @@ const SubagentRow: Component<{
 		<li>
 			<A
 				href={`/admin/agent/chats/${props.conversationId}`}
-				class="flex min-w-0 items-center gap-2.5 rounded-md p-1.5 text-start transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+				class="flex min-w-0 items-center gap-2.5 rounded-md p-1.5 text-start transition-colors hover:bg-card-hover focus-ring"
 			>
 				<AgentChatThumb />
 				<div class="min-w-0 flex-1">
@@ -112,7 +112,7 @@ const SubagentRow: Component<{
 						</span>
 					</Show>
 					<Show when={props.loading || props.subagent}>
-						<span class="block truncate text-[11px] text-muted">
+						<span class="block truncate text-2xs text-muted">
 							{[
 								getAgentName(props.agentKey),
 								props.subagent?.pending

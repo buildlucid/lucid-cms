@@ -348,7 +348,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			// @ts-expect-error
 			use:draggable
 			class={classNames(
-				"bg-card hover:bg-background-hover border rounded-md group overflow-hidden relative transition-colors duration-200",
+				"bg-card hover:bg-background-hover border rounded-md group overflow-hidden relative transition-colors",
 				mediaStatusBorderClass(props.media.status),
 				{
 					"cursor-pointer": canEdit() || props.showingDeleted?.(),
@@ -384,7 +384,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					{/* oxlint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- stops the card opening when the checkbox is clicked; the checkbox inside handles the keyboard */}
 					<div
 						class={classNames(
-							"absolute top-3 left-3 z-30 flex size-7 items-center justify-center rounded-md border border-border bg-card shadow-sm transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100",
+							"absolute top-3 left-3 z-30 flex size-7 items-center justify-center rounded-md border border-border bg-card shadow-raised transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100",
 							{ "opacity-0": !showCheckbox() },
 						)}
 						onClick={(e) => e.stopPropagation()}
@@ -406,7 +406,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 				<Show when={ownershipLabel()}>
 					{(label) => (
 						<span
-							class="absolute bottom-2 left-2 z-30 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-subtitle shadow-sm"
+							class="absolute bottom-2 left-2 z-30 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-subtitle shadow-raised"
 							role="img"
 							aria-label={label()}
 							title={`${label()}. ${
@@ -417,9 +417,9 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 						>
 							<Show
 								when={ownership().type === "system"}
-								fallback={<TbOutlineUserShield size={11} />}
+								fallback={<TbOutlineUserShield size={12} />}
 							>
-								<TbOutlineSettings size={11} />
+								<TbOutlineSettings size={12} />
 							</Show>
 						</span>
 					)}

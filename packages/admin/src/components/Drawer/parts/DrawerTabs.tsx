@@ -81,7 +81,7 @@ export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 						<button
 							type="button"
 							class={classNames(
-								"border-b-2 -mb-px text-sm font-medium pb-2 focus:outline-hidden ring-inset focus-visible:ring-1 ring-primary transition-colors duration-200",
+								"border-b-2 -mb-px text-sm font-medium pb-2 focus-ring-inset transition-colors",
 								{
 									"border-primary text-title": props.value === item.value,
 									"border-transparent text-body hover:border-primary":

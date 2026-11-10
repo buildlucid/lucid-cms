@@ -55,7 +55,7 @@ const Alert: Component<AlertProps> = (props) => {
 					"w-full bg-background border rounded-md p-4":
 						appearance() === "block",
 					"w-full border-b px-4 py-4 md:px-6": appearance() === "bar",
-					"rounded-full px-4 py-2 shadow-lg": appearance() === "pill",
+					"rounded-full px-4 py-2 shadow-floating": appearance() === "pill",
 					"bg-info text-info-foreground": filled() && variant() === "info",
 					"bg-success text-success-foreground":
 						filled() && variant() === "success",

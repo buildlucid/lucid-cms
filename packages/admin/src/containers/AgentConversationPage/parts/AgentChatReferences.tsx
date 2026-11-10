@@ -15,6 +15,7 @@ import AgentReferenceRow from "@/components/AgentReferenceRow/AgentReferenceRow"
 import AgentReferenceThumb from "@/components/AgentReferenceThumb/AgentReferenceThumb";
 import DeployReferenceStatus from "@/components/DeployReferenceStatus/DeployReferenceStatus";
 import Skeleton from "@/components/Skeleton/Skeleton";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import ViewMediaDrawer from "@/components/ViewMediaDrawer/ViewMediaDrawer";
 import api from "@/services/api";
 import T, { translateAdminCopy } from "@/translations";
@@ -172,21 +173,21 @@ const AgentChatReferences: Component<{
 							<For each={visibleMedia()}>
 								{(reference) => (
 									<li class="group relative">
-										<button
+										<Tooltip
 											type="button"
-											class="block aspect-square w-full overflow-hidden rounded-md border border-border transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-primary"
-											title={`${reference.label} · ${sourceLabel(reference)}`}
+											class="block aspect-square w-full overflow-hidden rounded-md border border-border transition-opacity hover:opacity-80 focus-ring"
+											content={`${reference.label} · ${sourceLabel(reference)}`}
 											onClick={() => setMediaId(reference.mediaId)}
 										>
 											<AgentReferenceThumb reference={reference} />
 											<span class="sr-only">{reference.label}</span>
-										</button>
+										</Tooltip>
 										<Show
 											when={!reference.managed}
 											fallback={
 												<span
 													role="img"
-													class="absolute flex size-5 items-center justify-center rounded border border-border bg-input text-subtitle opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100 inset-e-1 top-1"
+													class="absolute flex size-5 items-center justify-center rounded-sm border border-border bg-input text-subtitle opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100 inset-e-1 top-1"
 													aria-label={T()("agent.references.managed", {
 														label: reference.label,
 													})}
@@ -235,7 +236,7 @@ const AgentChatReferences: Component<{
 												fallback={
 													<span
 														role="img"
-														class="absolute flex size-5 items-center justify-center rounded border border-border bg-input text-subtitle opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100 inset-e-0 top-1/2 -translate-y-1/2"
+														class="absolute flex size-5 items-center justify-center rounded-sm border border-border bg-input text-subtitle opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100 inset-e-0 top-1/2 -translate-y-1/2"
 														aria-label={T()("agent.references.managed", {
 															label: reference.label,
 														})}
@@ -262,7 +263,7 @@ const AgentChatReferences: Component<{
 					<Show when={hidden() > 0}>
 						<button
 							type="button"
-							class="self-start rounded text-[11px] text-muted hover:text-body focus-visible:outline-2 focus-visible:outline-primary"
+							class="self-start rounded-sm text-2xs text-muted hover:text-body focus-ring"
 							aria-expanded={showAll()}
 							onClick={() => setShowAll((value) => !value)}
 						>

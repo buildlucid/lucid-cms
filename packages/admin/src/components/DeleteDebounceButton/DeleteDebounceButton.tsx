@@ -32,7 +32,7 @@ const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 			size="xs"
 			shape="square"
 			class={classNames(
-				"transition-all duration-200 focus:outline-hidden focus-visible:ring-1 ring-primary disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed",
+				"transition-all duration-200 focus-ring disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed",
 				{
 					"text-muted hover:text-danger": getConfirmRemove() === 0,
 					"text-danger-hover animate-pulse": getConfirmRemove() === 1,
@@ -54,7 +54,7 @@ const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 					? T()("common.confirmations.delete")
 					: T()("common.delete")
 			}
-			title={props.title}
+			tooltip={props.title}
 			disabled={props.disabled}
 		>
 			<TbOutlineTrash size={14} />

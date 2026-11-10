@@ -80,7 +80,7 @@ const AddBrickModal: Component<AddBrickProps> = (props) => {
 				/>
 				<Show when={getSearchQuery()}>
 					<button
-						class="absolute top-0 right-4 h-full flex items-center justify-center cursor-pointer"
+						class="absolute top-0 right-4 h-full flex items-center justify-center cursor-pointer text-muted hover:text-title"
 						onClick={() => {
 							setSearchQuery("");
 						}}
@@ -100,7 +100,7 @@ const AddBrickModal: Component<AddBrickProps> = (props) => {
 								<li class="w-full">
 									<button
 										class={classNames(
-											"flex items-center font-medium w-full p-2.5 rounded-md transition-colors duration-200 hover:text-title text-sm",
+											"flex items-center font-medium w-full p-2.5 rounded-md transition-colors hover:text-title text-sm",
 											{
 												"bg-card": brickConfig.key === getHighlightedBrick(),
 												"bg-background":

@@ -28,7 +28,7 @@ export const CopyInput: Component<CopyInputProps> = (props) => {
 			)}
 		>
 			<input
-				class="h-12 flex-1 bg-transparent pr-2.5 pl-10 text-sm font-medium text-subtitle focus:outline-hidden"
+				class="h-10 flex-1 bg-transparent pr-2.5 pl-10 text-sm font-medium text-subtitle focus:outline-hidden"
 				type="text"
 				value={props.value}
 				disabled={true}
@@ -38,7 +38,7 @@ export const CopyInput: Component<CopyInputProps> = (props) => {
 				type="button"
 				onClick={() => void copy()}
 				class={classNames(
-					"absolute top-1/2 left-2.5 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md bg-input transition-colors duration-200 focus:ring-0 focus-visible:ring-1",
+					"absolute top-1/2 left-2.5 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md bg-input transition-colors focus-ring",
 					{
 						"text-body hover:text-title": !copied(),
 						"text-success hover:text-success!": copied(),

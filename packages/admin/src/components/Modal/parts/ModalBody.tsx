@@ -22,7 +22,7 @@ export const ModalBody: Component<ModalBodyProps> = (props) => {
 				"isolate",
 				{
 					// The header already supplies the gap when one is present.
-					"px-4 md:px-6 py-4 md:py-6 [[data-modal-header]+&]:pt-0":
+					"px-4 md:px-6 py-4 md:py-5 [[data-modal-header]+&]:pt-0":
 						props.padding === undefined || props.padding === "md",
 				},
 				props.class,

@@ -217,7 +217,7 @@ const TwoFactorPage: Component = () => {
 									/>
 								</Show>
 								<A
-									class="block mt-6 text-center text-sm hover:text-primary-hover duration-200 transition-colors"
+									class="block mt-6 text-center text-sm hover:text-primary-hover transition-colors"
 									href={`/admin/login${loginSearch()}`}
 								>
 									{T()("common.back.to.login")}

@@ -136,7 +136,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 					<p
 						id={`${fieldId()}-label`}
 						data-preview-focus-label
-						class="block min-w-0 text-sm font-medium text-subtitle transition-colors duration-200 ease-in-out"
+						class="block min-w-0 text-sm font-medium text-subtitle transition-colors"
 					>
 						{helpers.getLocaleValue({
 							value: fieldConfig().details?.label,
@@ -210,7 +210,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 									<button
 										type="button"
 										class={classNames(
-											"w-full bg-input hover:bg-secondary-hover transition-colors duration-200 px-3 py-2.5 flex items-center justify-center gap-2 text-sm text-body hover:text-secondary-foreground ring-inset",
+											"w-full bg-input hover:bg-card-hover transition-colors px-3 py-2.5 flex items-center justify-center gap-2 text-sm text-body hover:text-title",
 											{
 												"cursor-not-allowed opacity-50 hover:bg-card":
 													disabled(),
@@ -243,7 +243,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 								onClick={addGroup}
 								disabled={disabled()}
 								aria-label={T()("actions.add.entry")}
-								title={T()("actions.add.entry")}
+								tooltip={T()("actions.add.entry")}
 							>
 								<TbOutlinePlus size={12} />
 							</Button>

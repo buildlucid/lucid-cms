@@ -48,9 +48,9 @@ export const ImportRow: Component<ImportRowProps> = (props) => {
 					<Switch
 						fallback={
 							props.icon === "media" ? (
-								<TbOutlinePhoto size={15} />
+								<TbOutlinePhoto size={16} />
 							) : (
-								<TbOutlineFileText size={15} />
+								<TbOutlineFileText size={16} />
 							)
 						}
 					>
@@ -58,10 +58,10 @@ export const ImportRow: Component<ImportRowProps> = (props) => {
 							<Spinner size="xs" />
 						</Match>
 						<Match when={props.failed}>
-							<TbOutlineAlertTriangle size={15} class="text-danger" />
+							<TbOutlineAlertTriangle size={16} class="text-danger" />
 						</Match>
 						<Match when={props.done}>
-							<TbOutlineCheck size={15} class="text-success" />
+							<TbOutlineCheck size={16} class="text-success" />
 						</Match>
 					</Switch>
 				</span>

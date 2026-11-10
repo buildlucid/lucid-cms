@@ -35,7 +35,7 @@ const ViewAllLink: Component<ViewAllLinkProps> = (props) => {
 	// Functions
 	const classes = () =>
 		classnames(
-			"group flex items-center gap-1.5 rounded-md px-1 text-xs text-muted transition-colors hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+			"group flex items-center gap-1.5 rounded-md px-1 text-xs text-muted transition-colors hover:text-body focus-ring",
 			props.class,
 		);
 	const content = () => (

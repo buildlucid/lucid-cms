@@ -38,7 +38,7 @@ const AgentReferenceFile: Component<{
 	// Render
 	return (
 		<div
-			class="agent-reference-file group relative w-24 rounded-lg border border-border bg-card p-1 shadow-sm"
+			class="agent-reference-file group relative w-24 rounded-lg border border-border bg-card p-1 shadow-raised"
 			style={{ "--agent-reference-tilt": tilt() }}
 			title={title()}
 		>
@@ -49,7 +49,7 @@ const AgentReferenceFile: Component<{
 				<AgentReferenceThumb reference={props.reference} />
 			</span>
 			<span class="flex items-center gap-1 px-0.5 pt-1">
-				<span class="min-w-0 flex-1 truncate text-[11px] text-title">
+				<span class="min-w-0 flex-1 truncate text-2xs text-title">
 					{label()}
 				</span>
 				<Show when={props.readable !== undefined}>

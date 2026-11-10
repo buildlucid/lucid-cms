@@ -237,7 +237,7 @@ const AgentRoutineEventsField: Component<{
 									size="xs"
 									shape="square"
 									class="shrink-0 rounded-full! opacity-0 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100"
-									title={T()("agent.routine.events.remove")}
+									tooltip={T()("agent.routine.events.remove")}
 									aria-label={T()("agent.routine.events.remove")}
 									onClick={() =>
 										props.onChange(

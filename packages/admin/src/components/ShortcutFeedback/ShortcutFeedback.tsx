@@ -26,7 +26,7 @@ const ShortcutFeedback: Component = () => {
 		>
 			<span
 				class={classNames(
-					"rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-title shadow-md transition-[opacity,translate] duration-200 motion-reduce:transition-opacity",
+					"rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-title shadow-floating transition-[opacity,translate] duration-200 motion-reduce:transition-opacity",
 					visible()
 						? "translate-y-0 opacity-100"
 						: "translate-y-2 opacity-0 motion-reduce:translate-y-0",

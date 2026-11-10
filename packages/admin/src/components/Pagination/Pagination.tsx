@@ -119,23 +119,23 @@ const Pagination: Component<PaginationProps> = (props) => {
 							count={lastPage()}
 							itemComponent={(itemProps) => (
 								<KobPagination.Item
-									class="h-9 w-9 flex text-sm items-center justify-center data-current:bg-secondary data-current:text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground duration-200 transition-colors bg-card"
+									class="size-8 flex text-sm items-center justify-center text-body data-current:bg-secondary data-current:text-secondary-foreground data-current:font-medium hover:bg-card-hover hover:text-title data-current:hover:bg-secondary data-current:hover:text-secondary-foreground transition-colors bg-card focus-ring-inset"
 									page={itemProps.page}
 								>
 									{itemProps.page}
 								</KobPagination.Item>
 							)}
 							ellipsisComponent={() => (
-								<KobPagination.Ellipsis class="h-9 w-9 text-muted flex items-center justify-center bg-card">
+								<KobPagination.Ellipsis class="size-8 text-muted flex items-center justify-center bg-card">
 									...
 								</KobPagination.Ellipsis>
 							)}
 						>
-							<KobPagination.Previous class="h-9 w-9 flex items-center justify-center text-body hover:bg-secondary hover:text-secondary-foreground duration-200 transition-colors disabled:opacity-50 bg-card">
+							<KobPagination.Previous class="size-8 flex items-center justify-center text-body hover:bg-card-hover hover:text-title transition-colors disabled:opacity-50 disabled:hover:bg-card bg-card focus-ring-inset">
 								<TbOutlineChevronLeft size={14} />
 							</KobPagination.Previous>
 							<KobPagination.Items />
-							<KobPagination.Next class="h-9 w-9 flex items-center justify-center text-body hover:bg-secondary hover:text-secondary-foreground duration-200 transition-colors disabled:opacity-50 bg-card">
+							<KobPagination.Next class="size-8 flex items-center justify-center text-body hover:bg-card-hover hover:text-title transition-colors disabled:opacity-50 disabled:hover:bg-card bg-card focus-ring-inset">
 								<TbOutlineChevronRight size={14} />
 							</KobPagination.Next>
 						</KobPagination.Root>

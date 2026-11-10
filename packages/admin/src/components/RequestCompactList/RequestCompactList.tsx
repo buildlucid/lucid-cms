@@ -34,11 +34,11 @@ const RequestCompactList: Component<{
 						<li>
 							<A
 								href={getRequestRoute({ requestId: request.id })}
-								class="-mx-1.5 flex min-w-0 items-center gap-2.5 rounded-md p-1.5 transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+								class="-mx-1.5 flex min-w-0 items-center gap-2.5 rounded-md p-1.5 transition-colors hover:bg-card-hover focus-ring"
 							>
 								<span
 									aria-hidden="true"
-									class="flex h-9 w-7 shrink-0 items-center justify-center rounded border border-border bg-input text-muted"
+									class="flex h-9 w-7 shrink-0 items-center justify-center rounded-sm border border-border bg-input text-muted"
 								>
 									<TbOutlineExternalLink size={10} />
 								</span>
@@ -46,7 +46,7 @@ const RequestCompactList: Component<{
 									<span class="truncate text-xs text-title">
 										{request.title}
 									</span>
-									<span class="flex items-center gap-1.5 truncate text-[11px] leading-4 text-muted">
+									<span class="flex items-center gap-1.5 truncate text-2xs leading-4 text-muted">
 										<StatusIndicator
 											size="xs"
 											variant={

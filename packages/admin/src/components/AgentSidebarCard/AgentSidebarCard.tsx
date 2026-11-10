@@ -8,6 +8,7 @@ import {
 	type ParentComponent,
 	Show,
 } from "solid-js";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import T from "@/translations";
 
 /** A closable sidebar card for chat details. */
@@ -67,21 +68,21 @@ const AgentSidebarCard: ParentComponent<{
 			<div class="flex items-start justify-between gap-2">
 				<div class="min-w-0">
 					<Show when={props.label}>
-						<p class="text-[11px] text-muted">{props.label}</p>
+						<p class="text-2xs text-muted">{props.label}</p>
 					</Show>
 					<h3 id={id} class="wrap-break-words text-sm font-medium text-title">
 						{props.title}
 					</h3>
 				</div>
-				<button
+				<Tooltip
 					type="button"
-					class="-mt-0.5 -me-1 flex size-6 shrink-0 items-center justify-center rounded-md text-icon transition-colors hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+					class="-mt-0.5 -me-1 flex size-6 shrink-0 items-center justify-center rounded-md text-icon transition-colors hover:text-icon-hover focus-ring"
 					aria-label={T()("common.close")}
-					title={T()("common.close")}
+					content={T()("common.close")}
 					onClick={() => props.onClose()}
 				>
 					<TbOutlineX size={12} />
-				</button>
+				</Tooltip>
 			</div>
 			{props.children}
 		</aside>

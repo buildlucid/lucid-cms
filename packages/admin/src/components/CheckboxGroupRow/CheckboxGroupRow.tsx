@@ -131,7 +131,7 @@ const CheckboxGroupRow: Component<CheckboxGroupRowProps> = (props) => {
 			</div>
 			<Show when={isOpen()}>
 				<div
-					class={classnames("pt-1 pb-4", {
+					class={classnames("pt-1 pb-4 animate-rise-in", {
 						"px-4 ps-12": props.padding !== "md",
 						"px-5 ps-13": props.padding === "md",
 					})}

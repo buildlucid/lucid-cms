@@ -17,7 +17,7 @@ const ColorCell: Component<ColorCellProps> = (props) => {
 				{(value) => (
 					<div class="flex min-w-0 items-center gap-2" title={value()}>
 						<span
-							class="size-4 shrink-0 rounded-full border border-border shadow-xs"
+							class="size-4 shrink-0 rounded-full border border-border shadow-raised"
 							style={{ "background-color": value() }}
 						/>
 						<span class="min-w-0 truncate text-sm">{value()}</span>

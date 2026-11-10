@@ -17,6 +17,7 @@ import {
 } from "solid-js";
 import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
 import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import UserSelectDrawer from "@/components/UserSelectDrawer/UserSelectDrawer";
 import type { FilterValue } from "@/hooks/useQueryState/useQueryState";
@@ -247,7 +248,7 @@ export const EntityValue: Component<{
 			<button
 				type="button"
 				id={props.id}
-				class="focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-80 flex items-center gap-2 text-sm text-left pl-3 pr-8 py-2 bg-input border border-border h-10 w-full rounded-md focus:border-primary duration-200 transition-colors"
+				class="focus-field disabled:cursor-not-allowed disabled:opacity-50 flex items-center gap-2 text-sm text-left pl-3 pr-8 py-2 bg-input border border-border h-9 w-full rounded-md transition-colors"
 				onClick={() => setPanelOpen(true)}
 				disabled={props.disabled}
 				aria-haspopup="dialog"
@@ -267,15 +268,15 @@ export const EntityValue: Component<{
 				</span>
 			</button>
 			<Show when={currentId() !== undefined && props.disabled !== true}>
-				<button
+				<Tooltip
 					type="button"
-					class="absolute right-2 top-1/2 -translate-y-1/2 text-subtitle hover:text-danger duration-200 transition-colors"
+					class="absolute right-2 top-1/2 -translate-y-1/2 text-subtitle hover:text-danger transition-colors"
 					onClick={clearValue}
-					title={T()("filter.section.entity.clear")}
+					content={T()("filter.section.entity.clear")}
 					aria-label={T()("filter.section.entity.clear")}
 				>
 					<TbOutlineX size={14} />
-				</button>
+				</Tooltip>
 			</Show>
 			<Switch>
 				<Match when={props.field.type === "user"}>
@@ -347,7 +348,7 @@ const MediaThumb: Component<{ media: MediaRelationRef }> = (props) => {
 	return (
 		<span class="h-6 w-6 min-w-6 rounded-sm border border-border overflow-hidden flex items-center justify-center bg-card">
 			<Switch
-				fallback={<TbOutlineFile size={11} class="text-icon opacity-60" />}
+				fallback={<TbOutlineFile size={12} class="text-icon opacity-60" />}
 			>
 				<Match when={props.media.type === "image"}>
 					<img
@@ -358,16 +359,16 @@ const MediaThumb: Component<{ media: MediaRelationRef }> = (props) => {
 					/>
 				</Match>
 				<Match when={props.media.type === "video"}>
-					<TbOutlineMovie size={11} class="text-icon opacity-60" />
+					<TbOutlineMovie size={12} class="text-icon opacity-60" />
 				</Match>
 				<Match when={props.media.type === "audio"}>
-					<TbOutlineFileMusic size={11} class="text-icon opacity-60" />
+					<TbOutlineFileMusic size={12} class="text-icon opacity-60" />
 				</Match>
 				<Match when={props.media.type === "document"}>
-					<TbOutlineFileText size={11} class="text-icon opacity-60" />
+					<TbOutlineFileText size={12} class="text-icon opacity-60" />
 				</Match>
 				<Match when={props.media.type === "archive"}>
-					<TbOutlineFileZip size={11} class="text-icon opacity-60" />
+					<TbOutlineFileZip size={12} class="text-icon opacity-60" />
 				</Match>
 			</Switch>
 		</span>

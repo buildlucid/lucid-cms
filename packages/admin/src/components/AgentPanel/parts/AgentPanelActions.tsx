@@ -136,7 +136,7 @@ const AgentPanelActions: Component<{
 						shape="square"
 						variant="toolbar"
 						aria-label={T()("agent.panel.pin")}
-						title={`${T()("agent.panel.pin")} (${formatForDisplay(shortcuts.toggleAgentPanel.hotkey)})`}
+						tooltip={`${T()("agent.panel.pin")} (${formatForDisplay(shortcuts.toggleAgentPanel.hotkey)})`}
 						onClick={() => pin()()}
 					>
 						<TbOutlinePin size={12} />
@@ -149,7 +149,7 @@ const AgentPanelActions: Component<{
 				variant="toolbar"
 				aria-label={T()("agent.panel.close")}
 				//* while peeking, the shortcut keeps it open rather than closing it
-				title={
+				tooltip={
 					props.onPin
 						? T()("agent.panel.close")
 						: `${T()("agent.panel.close")} (${formatForDisplay(shortcuts.toggleAgentPanel.hotkey)})`

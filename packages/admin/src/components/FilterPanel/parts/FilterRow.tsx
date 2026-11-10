@@ -167,15 +167,15 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					</Match>
 				</Switch>
 			</div>
-			<div class="h-10 flex items-center gap-2.5">
+			<div class="h-9 flex items-center gap-2.5">
 				<Button
 					variant="danger-outline"
 					size="sm"
 					shape="square"
 					type="button"
-					class="w-10! h-10! min-w-10!"
+					class="size-9! min-w-9!"
 					onClick={props.onRemove}
-					title={removeRowTitle()}
+					tooltip={removeRowTitle()}
 					aria-label={removeRowTitle()}
 				>
 					<TbOutlineX size={14} />
@@ -185,10 +185,10 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					size="sm"
 					shape="square"
 					type="button"
-					class="w-10! h-10! min-w-10!"
+					class="size-9! min-w-9!"
 					onClick={props.onAddRow}
 					disabled={!props.canAddRow}
-					title={addRowTitle()}
+					tooltip={addRowTitle()}
 					aria-label={addRowTitle()}
 				>
 					<TbOutlinePlus size={14} />

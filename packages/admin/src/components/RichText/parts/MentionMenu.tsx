@@ -20,7 +20,7 @@ const MentionMenu: Component<{
 		<div
 			role="listbox"
 			aria-label={T()("editor.rich.text.mentions")}
-			class="scrollbar max-h-60 w-64 overflow-y-auto rounded-md border border-border bg-popover p-1.5 shadow-md animate-dropdown"
+			class="floating-panel scrollbar max-h-60 w-64 overflow-y-auto p-1.5"
 		>
 			<Show
 				when={props.options.length > 0}

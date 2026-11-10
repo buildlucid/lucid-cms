@@ -101,7 +101,7 @@ export const RequestRichTextContent: Component<{
 			</div>
 			<Popover.Portal>
 				<Popover.Content
-					class="z-60 w-max max-w-72 rounded-md border border-border bg-popover px-2.5 py-2 shadow-md animate-dropdown focus:outline-hidden"
+					class="floating-panel z-60 w-max max-w-72 px-2.5 py-2 focus:outline-hidden"
 					onMouseEnter={() => clearTimeout(timer)}
 					onMouseLeave={() => schedule(false, CLOSE_DELAY)}
 					onOpenAutoFocus={(event) => event.preventDefault()}

@@ -20,7 +20,7 @@ export const RequestCommentThread: Component<{
 	return (
 		<li class="relative flex gap-3 py-3">
 			<span class="relative z-1 mt-3 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-background text-icon">
-				<TbOutlineMessageCircle size={11} />
+				<TbOutlineMessageCircle size={12} />
 			</span>
 			<article class="min-w-0 grow divide-y divide-border rounded-lg border border-border bg-card">
 				<div class="p-4">

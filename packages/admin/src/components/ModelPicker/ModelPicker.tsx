@@ -103,7 +103,7 @@ const ModelPicker: Component<{
 			<Popover.Portal>
 				<Popover.Content
 					//* capped to the space Kobalte measures, so only the model list scrolls and the footer stays in view
-					class="z-70 flex w-72 max-w-[calc(100vw-2rem)] max-h-(--kb-popper-content-available-height) flex-col rounded-md border border-border bg-popover shadow-md animate-dropdown focus:outline-hidden"
+					class="z-70 flex w-72 max-w-[calc(100vw-2rem)] max-h-(--kb-popper-content-available-height) flex-col floating-panel focus:outline-hidden"
 					//* the panel takes focus rather than the first model, so Tab still moves through it without a stray focus ring
 					onOpenAutoFocus={(event) => {
 						event.preventDefault();

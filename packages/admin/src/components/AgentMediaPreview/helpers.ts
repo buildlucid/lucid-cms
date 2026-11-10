@@ -4,7 +4,7 @@ import T from "@/translations";
 import helpers from "@/utils/helpers";
 
 export const previewButtonClass =
-	"flex size-6 items-center justify-center rounded-full border shadow-sm transition-opacity focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary";
+	"flex size-6 items-center justify-center rounded-full border shadow-raised transition-opacity focus-ring";
 
 export const hasVisual = (media: Media) =>
 	media.type === "image" || (media.type === "video" && media.poster !== null);

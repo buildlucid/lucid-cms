@@ -17,7 +17,7 @@ const ShowDeletedToggle: Component<{
 			class="gap-2"
 			aria-pressed={props.value}
 			aria-label={props.value ? undefined : T()("actions.show.deleted")}
-			title={props.value ? undefined : T()("actions.show.deleted")}
+			tooltip={props.value ? undefined : T()("actions.show.deleted")}
 			onClick={() => props.onChange(!props.value)}
 		>
 			<TbOutlineTrash size={12} />

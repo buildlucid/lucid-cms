@@ -136,7 +136,7 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 									<Match when={question()}>
 										<dl class="flex flex-col gap-3 text-xs">
 											<div class="flex flex-col gap-1">
-												<dt class="text-[11px] text-muted">
+												<dt class="text-2xs text-muted">
 													{T()("agent.question.label")}
 												</dt>
 												<dd class="whitespace-pre-wrap wrap-break-word text-title">
@@ -146,7 +146,7 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 											<Show when={response()}>
 												{(answered) => (
 													<div class="flex flex-col gap-1">
-														<dt class="text-[11px] text-muted">
+														<dt class="text-2xs text-muted">
 															{T()("agent.question.answer")}
 														</dt>
 														<dd class="whitespace-pre-wrap wrap-break-word text-body">
@@ -184,7 +184,7 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 															>
 																{status()}
 															</Pill>
-															<code class="rounded bg-input px-1.5 py-0.5 text-[11px] text-body">
+															<code class="rounded-sm bg-input px-1.5 py-0.5 text-2xs text-body">
 																{confirmation().toolName}
 															</code>
 														</div>

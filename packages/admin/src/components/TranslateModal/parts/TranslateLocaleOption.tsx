@@ -25,7 +25,7 @@ const TranslateLocaleOption: Component<{
 					<button
 						type="button"
 						aria-label={`${T()("common.remove")} ${props.label}`}
-						class="ml-auto flex size-5 shrink-0 items-center justify-center rounded text-body opacity-0 transition-all group-hover:opacity-100 hover:bg-danger hover:text-danger-foreground focus:opacity-100 focus:outline-hidden focus-visible:ring-1 ring-danger"
+						class="ml-auto flex size-5 shrink-0 items-center justify-center rounded-sm text-body opacity-0 transition-all group-hover:opacity-100 hover:bg-danger hover:text-danger-foreground focus:opacity-100 focus-ring"
 						onPointerDown={(event) => {
 							event.preventDefault();
 							event.stopPropagation();

@@ -167,7 +167,7 @@ const OAuthConsentPage: Component = () => {
 			{/* Invalid, expired or completed request */}
 			<Match when={request.isError}>
 				<div class="mx-auto w-full max-w-md">
-					<div class="rounded-xl border border-border bg-card p-6 text-center shadow-lg sm:p-8">
+					<div class="rounded-xl border border-border bg-card p-6 text-center shadow-floating sm:p-8">
 						<h1 class="text-base! tracking-normal!">
 							{invalidScopeRequest()
 								? T()("oauth.consent.error.scopes.title")
@@ -267,7 +267,7 @@ const OAuthConsentPage: Component = () => {
 										type="button"
 										aria-pressed={principalType() === "user"}
 										class={classNames(
-											"group relative rounded-md border p-3 pr-8 text-left transition-colors focus-visible:ring-1 focus-visible:ring-primary",
+											"group relative rounded-md border p-3 pr-8 text-left transition-colors focus-ring",
 											{
 												"border-primary-low-border bg-primary-low":
 													principalType() === "user",
@@ -281,7 +281,7 @@ const OAuthConsentPage: Component = () => {
 											<strong class="block text-xs font-semibold text-title">
 												{T()("oauth.consent.connect.as.me")}
 											</strong>
-											<span class="mt-0.5 block text-[11px] leading-4 text-body">
+											<span class="mt-0.5 block text-2xs leading-4 text-body">
 												{T()("oauth.consent.connect.as.me.description")}
 											</span>
 										</span>
@@ -305,7 +305,7 @@ const OAuthConsentPage: Component = () => {
 											type="button"
 											aria-pressed={principalType() === "system"}
 											class={classNames(
-												"group relative rounded-md border p-3 pr-8 text-left transition-colors focus-visible:ring-1 focus-visible:ring-primary",
+												"group relative rounded-md border p-3 pr-8 text-left transition-colors focus-ring",
 												{
 													"border-primary-low-border bg-primary-low":
 														principalType() === "system",
@@ -319,7 +319,7 @@ const OAuthConsentPage: Component = () => {
 												<strong class="block text-xs font-semibold text-title">
 													{T()("oauth.consent.connect.as.system")}
 												</strong>
-												<span class="mt-0.5 block text-[11px] leading-4 text-body">
+												<span class="mt-0.5 block text-2xs leading-4 text-body">
 													{T()("oauth.consent.connect.as.system.description")}
 												</span>
 											</span>
@@ -358,7 +358,7 @@ const OAuthConsentPage: Component = () => {
 									>
 										<TbOutlineAlertTriangle class="mt-0.75 size-2.5 shrink-0 text-warning-low-foreground" />
 									</Show>
-									<p class="m-0 text-[10px] leading-4">
+									<p class="m-0 text-3xs leading-4">
 										{principalType() === "system"
 											? T()("oauth.consent.system.warning")
 											: T()("oauth.consent.user.notice")}
@@ -384,14 +384,14 @@ const OAuthConsentPage: Component = () => {
 											<TbOutlineAlertTriangle class="mt-0.75 size-2.5 shrink-0 text-warning-low-foreground" />
 											<button
 												type="button"
-												class="flex min-w-0 flex-1 items-start justify-between gap-2 rounded text-left hover:text-title! focus:outline-hidden focus-visible:ring-1 focus-visible:ring-warning"
+												class="flex min-w-0 flex-1 items-start justify-between gap-2 rounded-sm text-left hover:text-title! focus-ring"
 												aria-expanded={unavailableScopesOpen()}
 												aria-controls="unavailable-oauth-scopes"
 												onClick={() =>
 													setUnavailableScopesOpen(!unavailableScopesOpen())
 												}
 											>
-												<span class="text-[10px] leading-4">
+												<span class="text-3xs leading-4">
 													{T()(
 														unavailableScopes().length === 1
 															? "oauth.consent.scopes.reduced"
@@ -432,7 +432,7 @@ const OAuthConsentPage: Component = () => {
 									<For each={scopeGroups()}>
 										{(group) => (
 											<div class="border-b border-border p-3 last:border-b-0">
-												<h3 class="mb-1.5 text-[11px] font-semibold text-title">
+												<h3 class="mb-1.5 text-2xs font-semibold text-title">
 													{translateAdminCopy(group.details.name)}
 												</h3>
 												<ul class="space-y-1.5">
@@ -443,12 +443,12 @@ const OAuthConsentPage: Component = () => {
 																	<TbOutlineCheck class="size-1.5" />
 																</span>
 																<span class="min-w-0">
-																	<strong class="block text-[11px] font-medium leading-4 text-subtitle">
+																	<strong class="block text-2xs font-medium leading-4 text-subtitle">
 																		{translateAdminCopy(scope.details.name)}
 																	</strong>
 																	<Show when={scope.details.description}>
 																		{(description) => (
-																			<span class="block text-[10px] leading-4 text-body">
+																			<span class="block text-3xs leading-4 text-body">
 																				{translateAdminCopy(description())}
 																			</span>
 																		)}
@@ -473,7 +473,7 @@ const OAuthConsentPage: Component = () => {
 							<footer class="flex flex-col-reverse gap-3 bg-input/20 p-4 lg:flex-row lg:items-center lg:justify-between">
 								<div class="flex max-w-xs items-start gap-2">
 									<TbOutlineShieldHalf class="mt-0.75 size-2.5 shrink-0 text-muted" />
-									<p class="m-0 text-[10px] leading-4 text-muted">
+									<p class="m-0 text-3xs leading-4 text-muted">
 										{T()("oauth.consent.security.notice", {
 											hostname: clientHostname(),
 										})}

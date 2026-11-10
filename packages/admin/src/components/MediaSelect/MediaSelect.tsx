@@ -313,7 +313,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 											</Show>
 										</div>
 									</Show>
-									<div class="flex flex-wrap items-center gap-2 ">
+									<div class="flex flex-wrap items-center gap-2  ">
 										<Show when={primarySelectedMedia()?.meta.fileSize}>
 											<Pill variant="outline">
 												{helpers.bytesToSize(
@@ -442,7 +442,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 																aria-label={T()("media.select.action", {
 																	type: props.type || "media",
 																})}
-																title={T()("media.select.action", {
+																tooltip={T()("media.select.action", {
 																	type: props.type || "media",
 																})}
 															>
@@ -480,7 +480,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										onClick={openMediaUploadPanel}
 										disabled={props.disabled || !canAddMore()}
 										class="capitalize @max-[26rem]:w-9 @max-[26rem]:px-0"
-										title={T()("media.upload.action")}
+										tooltip={T()("media.upload.action")}
 									>
 										<TbOutlineUpload
 											size={14}
@@ -540,7 +540,7 @@ const MediaSortableItem: Component<{
 				"view-transition-name": `media-select-item-${props.media.id}`,
 			}}
 			class={classNames(
-				"group overflow-hidden rounded-md border bg-card ring-inset transition-colors duration-200 transform-gpu @max-[26rem]:flex @max-[26rem]:items-center @max-[26rem]:bg-input",
+				"group overflow-hidden rounded-md border bg-card ring-inset transition-colors transform-gpu @max-[26rem]:flex @max-[26rem]:items-center @max-[26rem]:bg-input",
 				{
 					"border-border": !props.hasError,
 					"border-danger ring-1 ring-inset ring-danger": props.hasError,

@@ -33,7 +33,7 @@ const PreviousPathsButton: Component = () => {
 			{/* as tall as the path line; `before` widens the touch target */}
 			<button
 				type="button"
-				class="relative ms-auto flex h-5 shrink-0 items-center gap-1 rounded-md px-0.5 text-xs text-muted transition-colors duration-200 hover:text-subtitle focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary before:absolute before:-inset-1 before:rounded-md before:content-['']"
+				class="relative ms-auto flex h-5 shrink-0 items-center gap-1 rounded-md px-0.5 text-xs text-muted transition-colors hover:text-subtitle focus-ring before:absolute before:-inset-1 before:rounded-md before:content-['']"
 				aria-label={label()}
 				aria-busy={previous.paths.isLoading ? "true" : undefined}
 				title={label()}

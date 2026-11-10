@@ -28,7 +28,7 @@ const FileReadViewV1: Component<{
 	// Render
 	return (
 		<div class="flex flex-col gap-2.5">
-			<p class="text-[11px] text-muted">
+			<p class="text-2xs text-muted">
 				{props.output.filename ??
 					T()("agent.preview.item", { id: props.output.mediaId })}
 				{" · "}

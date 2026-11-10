@@ -55,13 +55,13 @@ const AgentWaitingChats: Component<{
 						class="flex items-center gap-2 text-xs font-normal text-muted"
 					>
 						{T()("agent.home.waiting")}
-						<span class="rounded-full bg-warning-low px-1.5 text-[11px] leading-4 tabular-nums text-warning-low-foreground">
+						<span class="rounded-full bg-warning-low px-1.5 text-2xs leading-4 tabular-nums text-warning-low-foreground">
 							{total()}
 						</span>
 					</h3>
 					<A
 						href={historyHref()}
-						class="group flex items-center gap-1.5 rounded-md px-1 text-xs text-muted transition-colors hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+						class="group flex items-center gap-1.5 rounded-md px-1 text-xs text-muted transition-colors hover:text-body focus-ring"
 					>
 						{T()("agent.home.waiting.all")}
 						<TbOutlineArrowRight
@@ -76,7 +76,7 @@ const AgentWaitingChats: Component<{
 							<li>
 								<A
 									href={`/admin/agent/chats/${conversation.id}`}
-									class="group -mx-1 flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+									class="group -mx-1 flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-card-hover focus-ring"
 								>
 									<span
 										class="size-1.5 shrink-0 rounded-full bg-warning"

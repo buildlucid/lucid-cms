@@ -5,6 +5,7 @@ import {
 } from "solid-icons/tb";
 import { type Component, createMemo, type JSXElement, Show } from "solid-js";
 import Button from "@/components/Button/Button";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import T from "@/translations";
 
@@ -45,19 +46,19 @@ const DetailsColumn: Component<{ children: JSXElement }> = (props) => {
 			<Show
 				when={!collapsed()}
 				fallback={
-					<button
+					<Tooltip
 						ref={expandButton}
 						type="button"
 						aria-label={T()("builder.details.expand")}
-						title={T()("builder.details.expand")}
+						content={T()("builder.details.expand")}
 						aria-expanded={false}
 						onClick={() => setOpen(true)}
-						class="group absolute inset-0 flex cursor-pointer justify-center text-icon transition-colors duration-200 hover:bg-card-hover hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary"
+						class="group absolute inset-0 flex cursor-pointer justify-center text-icon transition-colors hover:bg-card-hover hover:text-icon-hover focus-ring-inset"
 					>
 						<span class="sticky top-[calc(50dvh+var(--document-header-bar-height,0px)/2-1.375rem)] mt-[calc(50dvh-5rem)] flex size-7 items-center justify-center">
 							<TbOutlineLayoutSidebarRightExpand size={12} />
 						</span>
-					</button>
+					</Tooltip>
 				}
 			>
 				<div class="scrollbar sticky top-(--document-header-bar-height) max-h-[calc(100dvh-var(--document-header-bar-height,0px)-1rem)] w-82.5 animate-fade-in overflow-y-auto">
@@ -71,7 +72,7 @@ const DetailsColumn: Component<{ children: JSXElement }> = (props) => {
 							variant="toolbar"
 							size="xs"
 							shape="square"
-							title={T()("builder.details.collapse")}
+							tooltip={T()("builder.details.collapse")}
 							aria-label={T()("builder.details.collapse")}
 							aria-expanded={true}
 							onClick={() => setOpen(false)}

@@ -8,23 +8,12 @@ import {
 	createSignal,
 	createUniqueId,
 	For,
-	type JSXElement,
 	on,
 	Show,
 } from "solid-js";
+import Kbd from "@/components/Kbd/Kbd";
 import T from "@/translations";
 import type { PreviewBrickOption } from "@/utils/preview-editing";
-
-/** A key in the picker's keyboard hints. */
-const Key: Component<{ children: JSXElement }> = (props) => {
-	// ----------------------------------------
-	// Render
-	return (
-		<kbd class="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border bg-background px-1 font-sans text-[11px] text-subtitle">
-			{props.children}
-		</kbd>
-	);
-};
 
 /** A searchable list of bricks to add, opened from a brick's handle in the preview. */
 export const PreviewBrickPicker: Component<{
@@ -130,7 +119,7 @@ export const PreviewBrickPicker: Component<{
 							}
 						});
 					}}
-					class="z-70 flex w-96 max-w-[calc(100vw-2rem)] max-h-[min(26rem,var(--kb-popper-content-available-height))] flex-col overflow-hidden rounded-lg border border-border bg-popover shadow-lg animate-dropdown focus:outline-hidden"
+					class="z-70 flex w-96 max-w-[calc(100vw-2rem)] max-h-[min(26rem,var(--kb-popper-content-available-height))] flex-col overflow-hidden floating-panel focus:outline-hidden"
 				>
 					<div class="relative shrink-0 border-b border-border">
 						<TbOutlineSearch
@@ -199,15 +188,15 @@ export const PreviewBrickPicker: Component<{
 						aria-hidden="true"
 					>
 						<span class="flex items-center gap-1.5">
-							<Key>↑↓</Key>
+							<Kbd>↑↓</Kbd>
 							{T()("preview.edit.bricks.keys.move")}
 						</span>
 						<span class="flex items-center gap-1.5">
-							<Key>↵</Key>
+							<Kbd>↵</Kbd>
 							{T()("preview.edit.bricks.keys.add")}
 						</span>
 						<span class="flex items-center gap-1.5">
-							<Key>esc</Key>
+							<Kbd>esc</Kbd>
 							{T()("preview.edit.bricks.keys.close")}
 						</span>
 					</div>

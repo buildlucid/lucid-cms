@@ -136,7 +136,7 @@ const Slider: Component<SliderProps> = (props) => {
 			aria-describedby={
 				props.description ? `${props.id}-description` : undefined
 			}
-			class="no-number-spinner h-8 min-w-12 shrink-0 appearance-none rounded-sm border border-transparent bg-transparent px-1 text-center text-sm font-medium tabular-nums text-title outline-hidden transition-colors duration-150 hover:border-border/50 hover:bg-input/30 focus:border-primary focus:bg-input/40 focus:ring-1 focus:ring-primary-low disabled:cursor-not-allowed disabled:opacity-60"
+			class="no-number-spinner h-8 min-w-12 shrink-0 appearance-none rounded-sm border border-transparent bg-transparent px-1 text-center text-sm font-medium tabular-nums text-title focus-field transition-colors hover:border-border/50 hover:bg-input/30 focus:bg-input/40 disabled:cursor-not-allowed disabled:opacity-50"
 			style={{ width: `calc(${valueCharacters()}ch + 1rem)` }}
 			onChange={(event) => {
 				updateValue(index, Number(event.currentTarget.value));
@@ -204,7 +204,7 @@ const Slider: Component<SliderProps> = (props) => {
 									aria-describedby={
 										props.description ? `${props.id}-description` : undefined
 									}
-									class="top-1/2 z-20 -mt-2.5 size-5 rounded-full border-2 border-primary bg-background shadow-md outline-hidden transition-shadow duration-150 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-primary-low-border"
+									class="top-1/2 z-20 -mt-2.5 size-5 rounded-full border-2 border-primary bg-background shadow-raised outline-hidden transition-shadow duration-150 hover:shadow-floating focus-visible:ring-2 focus-visible:ring-primary-low-border"
 								/>
 							)}
 						</Index>

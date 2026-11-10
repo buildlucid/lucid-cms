@@ -224,7 +224,7 @@ const ReauthenticateModal: Component = () => {
 					<Show when={method() !== undefined}>
 						<button
 							type="button"
-							class="text-sm hover:text-primary-hover duration-200 transition-colors disabled:cursor-not-allowed disabled:opacity-80"
+							class="text-sm hover:text-primary-hover transition-colors disabled:cursor-not-allowed disabled:opacity-50"
 							disabled={reauthenticate.action.isPending}
 							onClick={logInAgain}
 						>

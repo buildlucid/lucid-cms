@@ -35,7 +35,7 @@ const HealthChecksSection: Component<{
 					size="xs"
 					shape="square"
 					class="-my-1"
-					title={label}
+					tooltip={label}
 					aria-label={label}
 					loading={props.state.checks.running(key)}
 					onClick={() => props.state.checks.run([key])}

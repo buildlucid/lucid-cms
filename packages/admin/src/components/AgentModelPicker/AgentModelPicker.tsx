@@ -171,7 +171,7 @@ const AgentModelPicker: Component<{
 												/>
 											)}
 										</For>
-										<KobalteSlider.Thumb class="top-1/2 -mt-3 size-6 transition-[left] duration-200 ease-out rounded-full border border-border bg-title shadow-md outline-hidden focus-visible:ring-2 focus-visible:ring-primary">
+										<KobalteSlider.Thumb class="top-1/2 -mt-3 size-6 transition-[left] duration-200 ease-out rounded-full border border-border bg-title shadow-raised focus-ring">
 											<KobalteSlider.Input />
 										</KobalteSlider.Thumb>
 									</KobalteSlider.Track>

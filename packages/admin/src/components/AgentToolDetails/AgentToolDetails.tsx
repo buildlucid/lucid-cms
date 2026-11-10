@@ -13,24 +13,30 @@ const AgentToolDetails: Component<{
 	// Render
 	return (
 		<Collapsible.Root defaultOpen={props.defaultOpen}>
-			<Collapsible.Trigger class="group flex items-center gap-1 self-start rounded text-[11px] text-muted transition-colors hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary">
+			<Collapsible.Trigger class="group flex items-center gap-1 self-start rounded-sm text-2xs text-muted transition-colors hover:text-body focus-ring">
 				{T()("agent.tool.details")}
 				<TbOutlineChevronRight
 					size={8}
 					class="transition-transform duration-200 group-data-expanded:rotate-90"
 				/>
 			</Collapsible.Trigger>
-			<Collapsible.Content class="mt-3 flex flex-col gap-4">
-				<For
-					each={props.sections.filter((section) => section.value !== undefined)}
-				>
-					{(section) => (
-						<section class="flex flex-col gap-2">
-							<h4 class="text-xs font-medium text-subtitle">{section.label}</h4>
-							<JSONPreview json={section.value} />
-						</section>
-					)}
-				</For>
+			<Collapsible.Content class="collapsible-content">
+				<div class="flex flex-col gap-4 pt-3">
+					<For
+						each={props.sections.filter(
+							(section) => section.value !== undefined,
+						)}
+					>
+						{(section) => (
+							<section class="flex flex-col gap-2">
+								<h4 class="text-xs font-medium text-subtitle">
+									{section.label}
+								</h4>
+								<JSONPreview json={section.value} />
+							</section>
+						)}
+					</For>
+				</div>
 			</Collapsible.Content>
 		</Collapsible.Root>
 	);

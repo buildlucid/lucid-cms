@@ -10,6 +10,7 @@ import {
 } from "solid-icons/tb";
 import { type Component, createMemo, For, type JSX, Show } from "solid-js";
 import Spinner from "@/components/Spinner/Spinner";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import T from "@/translations";
 import { markdownPreview } from "@/utils/agent-markdown";
 
@@ -36,15 +37,15 @@ const RowAction: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<button
+		<Tooltip
 			type="button"
-			class="flex size-6 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-card-hover hover:text-title focus-visible:outline-2 focus-visible:outline-primary"
+			class="flex size-6 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-card-hover hover:text-title focus-ring"
 			aria-label={props.label}
-			title={props.label}
+			content={props.label}
 			onClick={() => props.onClick()}
 		>
 			{props.children}
-		</button>
+		</Tooltip>
 	);
 };
 
@@ -102,7 +103,7 @@ const InputRow: Component<
 			icon={
 				<Show
 					when={props.input.status === "claimed"}
-					fallback={<TbOutlineClock size={11} />}
+					fallback={<TbOutlineClock size={12} />}
 				>
 					<Spinner size="xs" variant="subtle" />
 				</Show>
@@ -119,7 +120,7 @@ const InputRow: Component<
 						label={T()("agent.queue.steer")}
 						onClick={() => props.onSteer(props.input)}
 					>
-						<TbOutlineBolt size={11} />
+						<TbOutlineBolt size={12} />
 					</RowAction>
 				</Show>
 				<Show when={props.onEdit}>
@@ -128,7 +129,7 @@ const InputRow: Component<
 							label={T()("agent.queue.edit")}
 							onClick={() => onEdit()(props.input)}
 						>
-							<TbOutlinePencil size={11} />
+							<TbOutlinePencil size={12} />
 						</RowAction>
 					)}
 				</Show>

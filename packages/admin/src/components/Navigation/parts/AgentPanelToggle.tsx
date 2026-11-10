@@ -2,6 +2,7 @@ import { formatForDisplay } from "@tanstack/solid-hotkeys";
 import classnames from "classnames";
 import { TbOutlineRobot } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
 import T from "@/translations";
 import {
@@ -38,13 +39,13 @@ export const AgentPanelToggle: Component<{
 	// Render
 	return (
 		<Show when={session.panel.allowed()}>
-			<button
+			<Tooltip
 				type="button"
 				class={getNavigationActionClasses(props)}
 				disabled={!session.panel.available()}
 				aria-pressed={open()}
 				aria-label={label()}
-				title={
+				content={
 					session.panel.available()
 						? `${label()} (${formatForDisplay(shortcuts.toggleAgentPanel.hotkey)})`
 						: label()
@@ -65,7 +66,7 @@ export const AgentPanelToggle: Component<{
 						/>
 					)}
 				</Show>
-			</button>
+			</Tooltip>
 		</Show>
 	);
 };

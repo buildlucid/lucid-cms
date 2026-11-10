@@ -273,7 +273,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					}
 				}}
 				class={classNames(
-					"flex cursor-pointer items-center justify-between gap-3 rounded-[calc(var(--radius-md)-1px)] px-4 py-3 transition-colors hover:bg-card-hover/60 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary",
+					"flex cursor-pointer items-center justify-between gap-3 rounded-[calc(var(--radius-md)-1px)] px-4 py-3 transition-colors hover:bg-card-hover/60 focus-ring-inset",
 					{
 						"rounded-b-none": brickOpen(),
 					},
@@ -282,7 +282,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				<div class="flex min-w-0 flex-1 items-center gap-2">
 					<button
 						type="button"
-						class="text-muted hover:text-primary-hover transition-colors duration-200 cursor-grab active:cursor-grabbing focus:outline-hidden focus-visible:ring-1 ring-primary disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed"
+						class="text-muted hover:text-primary-hover transition-colors cursor-grab active:cursor-grabbing focus-ring disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed"
 						onClick={(e) => e.stopPropagation()}
 						onDragStart={(e) =>
 							props.dragDrop.onDragStart(e, {

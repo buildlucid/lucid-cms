@@ -193,7 +193,7 @@ const MediaSharePage: Component = () => {
 																	onClick={() => {
 																		setShowVideoPreview(true);
 																	}}
-																	class="absolute inset-0 flex items-center justify-center bg-black/15 text-white transition-colors hover:bg-black/25 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+																	class="absolute inset-0 flex items-center justify-center bg-black/15 text-white transition-colors hover:bg-black/25 focus-ring"
 																>
 																	<span class="w-14 h-14 rounded-full bg-black/60 border border-white/25 flex items-center justify-center">
 																		<TbOutlinePlayerPlay class="ml-1 w-5 h-5" />

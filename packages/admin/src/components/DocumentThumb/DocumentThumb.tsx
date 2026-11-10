@@ -15,12 +15,14 @@ const DocumentThumb: Component<{ multiple?: boolean; requested?: boolean }> = (
 	return (
 		<span class="relative h-9 w-7 shrink-0" aria-hidden="true">
 			<Show when={props.multiple}>
-				<span class="absolute inset-0 translate-x-1 -translate-y-0.5 rotate-6 rounded border border-border bg-input/60" />
+				<span class="absolute inset-0 translate-x-1 -translate-y-0.5 rotate-6 rounded-sm border border-border bg-input/60" />
 			</Show>
 			<span
 				class={classnames(
-					"absolute inset-0 flex flex-col gap-0.75 rounded border border-border p-1.5",
-					props.requested ? "border-dashed bg-input/40" : "bg-input shadow-xs",
+					"absolute inset-0 flex flex-col gap-0.75 rounded-sm border border-border p-1.5",
+					props.requested
+						? "border-dashed bg-input/40"
+						: "bg-input shadow-raised",
 				)}
 			>
 				<span class="h-0.5 w-3/4 rounded-full bg-border" />

@@ -1,5 +1,6 @@
 import { TbOutlinePhotoPlus } from "solid-icons/tb";
 import type { Component } from "solid-js";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import T from "@/translations";
 
 const BugReportAttachButton: Component<{
@@ -27,17 +28,17 @@ const BugReportAttachButton: Component<{
 					event.currentTarget.value = "";
 				}}
 			/>
-			<button
+			<Tooltip
 				type="button"
-				class="ms-auto flex items-center justify-center rounded border border-transparent p-1.5 text-body transition-colors duration-150 hover:bg-background-hover hover:text-title focus-visible:ring-1 focus-visible:ring-primary outline-none disabled:cursor-not-allowed disabled:opacity-50"
+				class="ms-auto flex items-center justify-center rounded-sm border border-transparent p-1.5 text-body transition-colors hover:bg-background-hover hover:text-title focus-ring disabled:cursor-not-allowed disabled:opacity-50"
 				disabled={props.disabled}
 				aria-label={T()("bug.report.images.add")}
-				title={T()("bug.report.images.add")}
+				content={T()("bug.report.images.add")}
 				onMouseDown={(event) => event.preventDefault()}
 				onClick={() => fileInput?.click()}
 			>
 				<TbOutlinePhotoPlus size={12} />
-			</button>
+			</Tooltip>
 		</>
 	);
 };

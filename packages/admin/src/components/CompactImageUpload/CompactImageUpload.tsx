@@ -169,7 +169,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 				<button
 					type="button"
 					class={classNames(
-						"grid size-24 shrink-0 place-items-center overflow-hidden rounded-lg border bg-background focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+						"grid size-24 shrink-0 place-items-center overflow-hidden rounded-lg border bg-background focus-ring",
 						{
 							"border-border": state() !== "empty",
 							"rectangle-background": state() !== "empty",
@@ -234,7 +234,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 										size="sm"
 										onClick={imageCrop().callbacks.open}
 										disabled={props.disabled || imageCrop().state.disabled}
-										title={imageCrop().state.tooltip}
+										tooltip={imageCrop().state.tooltip}
 									>
 										<TbOutlineCrop class="mr-1.5 size-3" />
 										{T()("media.crop.action")}

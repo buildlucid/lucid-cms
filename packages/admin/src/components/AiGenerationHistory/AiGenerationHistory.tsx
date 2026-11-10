@@ -67,7 +67,7 @@ export const AiGenerationHistory: Component<GenerationHistoryProps> = (
 									<button
 										type="button"
 										class={classnames(
-											"relative flex min-w-0 w-full items-start gap-2 rounded-md px-1.5 py-2 text-left transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60",
+											"relative flex min-w-0 w-full items-start gap-2 rounded-md px-1.5 py-2 text-left transition-colors focus-ring disabled:cursor-not-allowed disabled:opacity-50",
 											{
 												"text-title": selected(),
 												"text-body hover:text-title": !selected(),
@@ -79,7 +79,7 @@ export const AiGenerationHistory: Component<GenerationHistoryProps> = (
 									>
 										<span
 											class={classnames(
-												"relative z-10 mt-1 flex h-4 min-w-4 items-center justify-center rounded-full border bg-background transition-colors duration-200",
+												"relative z-10 mt-1 flex h-4 min-w-4 items-center justify-center rounded-full border bg-background transition-colors",
 												{
 													"border-primary": selected(),
 													"border-border": !selected(),
@@ -88,7 +88,7 @@ export const AiGenerationHistory: Component<GenerationHistoryProps> = (
 										>
 											<span
 												class={classnames(
-													"h-1.5 w-1.5 rounded-full transition-colors duration-200",
+													"h-1.5 w-1.5 rounded-full transition-colors",
 													{
 														"bg-primary": selected(),
 														"bg-muted": !selected(),
@@ -102,7 +102,7 @@ export const AiGenerationHistory: Component<GenerationHistoryProps> = (
 											</span>
 											<Show when={item.meta}>
 												{(meta) => (
-													<span class="mt-0.5 block truncate text-[11px] leading-4 text-muted">
+													<span class="mt-0.5 block truncate text-2xs leading-4 text-muted">
 														{meta()}
 													</span>
 												)}
@@ -127,7 +127,7 @@ export const AiGenerationHistory: Component<GenerationHistoryProps> = (
 									</span>
 									<Show when={props.loadingMeta}>
 										{(meta) => (
-											<span class="mt-0.5 block truncate text-[11px] leading-4 text-muted">
+											<span class="mt-0.5 block truncate text-2xs leading-4 text-muted">
 												{meta()}
 											</span>
 										)}

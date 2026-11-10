@@ -9,6 +9,7 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import type {
 	PreviewRepeaterCapacity,
@@ -458,14 +459,14 @@ export const PreviewOverlay: Component<{
 				}
 			>
 				{(repeater) => (
-					<button
+					<Tooltip
 						ref={addItem}
 						type="button"
-						class="pointer-events-auto absolute top-0 left-0 flex h-7 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 text-xs font-medium text-title shadow-md transition-colors duration-200 hover:bg-background-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:text-muted disabled:hover:bg-background animate-dropdown"
+						class="pointer-events-auto absolute top-0 left-0 flex h-7 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 text-xs font-medium text-title shadow-floating transition-colors hover:bg-background-hover focus-ring disabled:cursor-not-allowed disabled:text-muted disabled:hover:bg-background animate-dropdown"
 						style={{
 							translate: `calc(${Math.round((repeater().rect.x + repeater().rect.width / 2) * props.scale)}px - 50%) calc(${Math.round((repeater().rect.y + repeater().rect.height) * props.scale)}px - 50%)`,
 						}}
-						title={repeaterTitle()}
+						content={repeaterTitle()}
 						disabled={repeaterCapacity()?.canAdd !== true}
 						onClick={() =>
 							props.onChange(repeater().target, {
@@ -483,7 +484,7 @@ export const PreviewOverlay: Component<{
 								</span>
 							)}
 						</Show>
-					</button>
+					</Tooltip>
 				)}
 			</Show>
 			<Show
@@ -508,7 +509,7 @@ export const PreviewOverlay: Component<{
 						<Show when={current().point}>
 							{(point) => (
 								<div
-									class="absolute top-0 left-0 flex h-8 max-w-60 -rotate-1 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm text-title shadow-md"
+									class="absolute top-0 left-0 flex h-8 max-w-60 -rotate-1 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm text-title shadow-floating"
 									style={{
 										translate: `${Math.round(point().x + 14)}px ${Math.round(point().y + 10)}px`,
 									}}

@@ -72,7 +72,7 @@ const AgentRoutineInstructions: Component<
 			<Field.Label>{T()("agent.routine.task.label")}</Field.Label>
 			<div
 				ref={container}
-				class="rounded-md border border-border bg-input transition-colors duration-200 focus-within:border-primary"
+				class="rounded-md border border-border bg-input transition-colors focus-field"
 			/>
 			<Show when={editor()}>
 				{(instance) => <AgentMarkdownPill editor={instance()} />}

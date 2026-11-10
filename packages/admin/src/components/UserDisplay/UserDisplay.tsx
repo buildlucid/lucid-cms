@@ -41,10 +41,10 @@ export const userAvatarClasses = (props: {
 			"border border-border": props.bordered,
 			"h-16 w-16 min-w-16 text-sm":
 				props.variant === "icon" && props.size === "lg",
-			"h-10 w-10 min-w-10 text-[10px]":
+			"h-10 w-10 min-w-10 text-3xs":
 				(props.variant === "icon" && props.size === "md") ||
 				(props.variant === "stacked" && props.size === "lg"),
-			"h-8 w-8 min-w-8 text-[10px]":
+			"h-8 w-8 min-w-8 text-3xs":
 				props.variant === "stacked" && props.size === "md",
 			"h-7 w-7 min-w-7 text-[8px]":
 				(props.variant === "icon" && props.size === "sm") ||
@@ -56,7 +56,7 @@ export const userAvatarClasses = (props: {
 				props.variant === "horizontal" && props.size === "xs",
 			"me-2 h-7 w-7 min-w-7 text-[8px]":
 				props.variant === "horizontal" && props.size === "sm",
-			"me-2.5 h-8 w-8 min-w-8 text-[10px]":
+			"me-2.5 h-8 w-8 min-w-8 text-3xs":
 				props.variant === "horizontal" &&
 				(props.size === "md" || props.size === "lg"),
 		},
@@ -145,7 +145,7 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 							<Show when={props.user.firstName}>
 								<p
 									class={classNames("truncate", {
-										"text-[11px] leading-tight":
+										"text-2xs leading-tight":
 											size() === "sm" || size() === "xs",
 										"text-xs": size() !== "sm" && size() !== "xs",
 									})}

@@ -105,7 +105,7 @@ const AgentTranscriptRow: Component<AgentTranscriptRowProps> = (props) => {
 				<button
 					type="button"
 					class={classnames(
-						"group -ms-2 flex max-w-full items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+						"group -ms-2 flex max-w-full items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition-colors focus-ring",
 						selected()
 							? "bg-card text-title"
 							: "text-muted hover:bg-card hover:text-body",

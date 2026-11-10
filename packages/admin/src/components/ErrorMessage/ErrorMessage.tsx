@@ -26,7 +26,7 @@ const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 							props.theme === "background", // on background color
 						"bg-card rounded-r-md border-l-4 border-l-danger p-2.5 border-border border mb-4 last:mb-0":
 							props.theme === "container", // on container color
-						"inline-flex min-h-10 items-center gap-3 rounded-md border border-danger-low-border bg-danger-low px-3 py-2":
+						"inline-flex min-h-9 items-center gap-3 rounded-md border border-danger-low-border bg-danger-low px-3 py-2":
 							props.theme === "inline",
 					},
 					props.classes,

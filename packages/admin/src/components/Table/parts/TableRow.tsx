@@ -131,7 +131,7 @@ const TableRow: Component<TableRowProps> = (props) => {
 		<tr
 			data-table-row
 			class={classNames(
-				"duration-200 transition-colors",
+				" transition-colors",
 				{
 					"cursor-pointer":
 						firstPermittedAction() !== undefined || props.onClick,

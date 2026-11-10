@@ -118,7 +118,7 @@ const AgentQuestionPanel: Component<AgentQuestionPanelProps> = (props) => {
 			aria-busy={submitting()}
 			class={classnames(
 				//* a primary edge marks that the agent is waiting on an answer, and turns solid on focus like the chat box
-				"overflow-hidden rounded-2xl border border-primary-low-border bg-card shadow-sm transition-colors focus-within:border-primary",
+				"overflow-hidden rounded-2xl border border-primary-low-border bg-card shadow-raised transition-colors focus-field",
 				props.class,
 			)}
 		>
@@ -145,7 +145,7 @@ const AgentQuestionPanel: Component<AgentQuestionPanelProps> = (props) => {
 									type="button"
 									disabled={submitting()}
 									class={classnames(
-										"flex w-full items-center gap-3 rounded-xl px-2 py-1.5 text-start transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-60",
+										"flex w-full items-center gap-3 rounded-xl px-2 py-1.5 text-start transition-colors focus-ring disabled:opacity-50",
 										{ "bg-card-hover": active() === index() },
 									)}
 									aria-current={active() === index() || undefined}
@@ -205,11 +205,11 @@ const AgentQuestionPanel: Component<AgentQuestionPanelProps> = (props) => {
 						type="submit"
 						shape="circle"
 						size="xs"
-						class="focus-visible:ring-inset"
+						class="-outline-offset-2!"
 						disabled={blank() || submitting()}
 						aria-label={T()("agent.composer.send")}
 					>
-						<TbOutlineArrowUp size={11} />
+						<TbOutlineArrowUp size={12} />
 					</Button>
 				</form>
 			</div>

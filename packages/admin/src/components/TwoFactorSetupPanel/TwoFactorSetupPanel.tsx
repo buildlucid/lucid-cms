@@ -81,7 +81,7 @@ const TwoFactorSetupPanel: Component<TwoFactorSetupPanelProps> = (props) => {
 					>
 						<button
 							type="button"
-							class="group mt-1.5 flex w-full cursor-copy items-center justify-between gap-3 rounded-md border border-border bg-card px-2.5 py-1.5 text-left focus-visible:border-primary focus-visible:outline-hidden"
+							class="group mt-1.5 flex w-full cursor-copy items-center justify-between gap-3 rounded-md border border-border bg-card px-2.5 py-1.5 text-left focus-ring"
 							aria-label={T()("auth.two.factor.setup.key.copy")}
 							onClick={() => void copy()}
 						>
@@ -91,7 +91,7 @@ const TwoFactorSetupPanel: Component<TwoFactorSetupPanelProps> = (props) => {
 							<Show
 								when={copied()}
 								fallback={
-									<TbOutlineCopy class="size-3.5 shrink-0 text-icon transition-colors duration-200 group-hover:text-primary" />
+									<TbOutlineCopy class="size-3.5 shrink-0 text-icon transition-colors group-hover:text-primary" />
 								}
 							>
 								<TbOutlineCheck class="size-3.5 shrink-0 text-success" />
@@ -100,7 +100,7 @@ const TwoFactorSetupPanel: Component<TwoFactorSetupPanelProps> = (props) => {
 						{/* scanning doesn't work when the app is on the same phone */}
 						<a
 							href={props.setup?.uri}
-							class="mt-3 hidden items-center gap-1.5 text-sm font-medium text-subtitle hover:text-primary-hover duration-200 transition-colors pointer-coarse:flex"
+							class="mt-3 hidden items-center gap-1.5 text-sm font-medium text-subtitle hover:text-primary-hover transition-colors pointer-coarse:flex"
 						>
 							<TbOutlineExternalLink class="size-4" />
 							{T()("auth.two.factor.setup.open.app")}

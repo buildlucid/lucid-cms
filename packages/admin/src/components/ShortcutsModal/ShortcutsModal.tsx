@@ -1,5 +1,6 @@
 import { createHotkey, formatForDisplay } from "@tanstack/solid-hotkeys";
 import { type Component, createSignal, For } from "solid-js";
+import Kbd from "@/components/Kbd/Kbd";
 import Modal from "@/components/Modal/Modal";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import T, { type TranslationKeys } from "@/translations";
@@ -55,11 +56,7 @@ const ShortcutsModal: Component = () => {
 															parts: true,
 														})}
 													>
-														{(key) => (
-															<kbd class="inline-flex h-6 min-w-6 items-center justify-center rounded-md border border-border border-b-2 bg-background px-1.5 font-sans text-xs font-medium text-title">
-																{key}
-															</kbd>
-														)}
+														{(key) => <Kbd>{key}</Kbd>}
 													</For>
 												</dd>
 											</div>

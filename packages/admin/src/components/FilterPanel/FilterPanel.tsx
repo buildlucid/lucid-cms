@@ -922,7 +922,7 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 						size="sm"
 						type="button"
 						class="gap-1.5"
-						title={T()("filter.section.add.group")}
+						tooltip={T()("filter.section.add.group")}
 						aria-label={T()("filter.section.add.group")}
 						onClick={() => addDraft("new")}
 					>

@@ -41,14 +41,14 @@ const SegmentedControl = <T extends string>(props: {
 			)}
 		>
 			<Show when={props.options.some((option) => option.value === props.value)}>
-				<KobSegmentedControl.Indicator class="absolute left-0.5 rounded-sm bg-background shadow-xs inset-ring inset-ring-border transition-[transform,width] duration-200 ease-out dark:bg-input dark:shadow-none dark:inset-ring-0" />
+				<KobSegmentedControl.Indicator class="absolute left-0.5 rounded-sm bg-background shadow-raised inset-ring inset-ring-border transition-[transform,width] duration-200 ease-out dark:bg-input dark:shadow-none dark:inset-ring-0" />
 			</Show>
 			<For each={props.options}>
 				{(option) => (
 					<KobSegmentedControl.Item
 						value={option.value}
 						title={option.label}
-						class="relative z-10 h-full w-7 rounded-sm text-icon transition-colors duration-200 hover:text-icon-hover has-[input:focus-visible]:ring-1 has-[input:focus-visible]:ring-primary data-checked:text-title"
+						class="relative z-10 h-full w-7 rounded-sm text-icon transition-colors hover:text-icon-hover has-[input:focus-visible]:ring-1 has-[input:focus-visible]:ring-primary data-checked:text-title"
 					>
 						<KobSegmentedControl.ItemInput />
 						<KobSegmentedControl.ItemLabel class="flex size-full cursor-pointer items-center justify-center">

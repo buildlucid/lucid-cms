@@ -79,7 +79,7 @@ const ActorDisplay: Component<ActorDisplayProps> = (props) => {
 						</Show>
 					</HoverCard.Trigger>
 					<HoverCard.Portal>
-						<HoverCard.Content class="z-60 w-max max-w-72 rounded-md border border-border bg-popover px-2.5 py-2 shadow-md animate-dropdown">
+						<HoverCard.Content class="floating-panel z-60 w-max max-w-72 px-2.5 py-2">
 							<div class="flex items-center gap-2.5">
 								<AgentAvatar variant="icon" size="sm" />
 								<div class="min-w-0">

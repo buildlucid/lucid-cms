@@ -19,6 +19,7 @@ import {
 	splitProps,
 } from "solid-js";
 import Field from "@/components/Field/Field";
+import Kbd from "@/components/Kbd/Kbd";
 import Menu from "@/components/Menu/Menu";
 import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
@@ -229,10 +230,10 @@ function Select<Option extends SelectOption = SelectOption>(
 					id={props.id}
 					{...ariaProps}
 					class={classNames(
-						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input border border-border flex items-center rounded-md focus:border-primary duration-200 transition-colors",
+						"focus-field overflow-hidden px-2.5 text-sm text-subtitle w-full justify-between disabled:cursor-not-allowed disabled:opacity-50 bg-input border border-border flex items-center rounded-md transition-colors",
 						{
-							"h-10": props.size !== "sm",
-							"h-9": props.size === "sm",
+							"h-9": props.size !== "sm",
+							"h-8": props.size === "sm",
 							"border-danger": props.invalid,
 						},
 					)}
@@ -246,9 +247,7 @@ function Select<Option extends SelectOption = SelectOption>(
 									props.shortcutDisplay === "full")
 							}
 						>
-							<span class="text-xs bg-background px-2 py-1 rounded-md mr-1 border border-border">
-								{props.shortcut}
-							</span>
+							<Kbd class="mr-1.5">{props.shortcut}</Kbd>
 						</Show>
 						{renderSelectedValue()}
 					</div>
@@ -271,7 +270,7 @@ function Select<Option extends SelectOption = SelectOption>(
 							<button
 								type="button"
 								disabled={props.disabled}
-								class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-muted hover:bg-danger hover:text-danger-foreground duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-danger"
+								class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-muted hover:bg-danger hover:text-danger-foreground transition-colors focus-ring"
 								onClick={(e) => {
 									e.stopPropagation();
 									if (props.disabled) {
@@ -300,7 +299,7 @@ function Select<Option extends SelectOption = SelectOption>(
 							<div class="relative">
 								<input
 									type="text"
-									class="bg-input px-2 rounded-md w-full border border-border text-sm text-subtitle font-medium h-10 focus:outline-hidden focus:border-primary"
+									class="bg-input px-2 rounded-md w-full border border-border text-sm text-subtitle h-8 placeholder:text-muted focus-field"
 									placeholder={
 										props.search?.placeholder || T()("common.search")
 									}
@@ -321,7 +320,7 @@ function Select<Option extends SelectOption = SelectOption>(
 										<div class="absolute right-2 top-0 bottom-0 flex items-center">
 											<button
 												type="button"
-												class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full mr-1 text-muted hover:bg-danger hover:text-danger-foreground duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-danger"
+												class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full mr-1 text-muted hover:bg-danger hover:text-danger-foreground transition-colors focus-ring"
 												onClick={clearSearch}
 												onKeyDown={(e) => {
 													if (

@@ -21,7 +21,7 @@ export const PreviewFieldBar: Component<{
 	// Render
 	return (
 		<div
-			class="pointer-events-auto absolute top-0 left-0 flex items-center gap-px rounded-md border border-border bg-background p-px shadow-md transition-opacity duration-100 animate-dropdown"
+			class="pointer-events-auto absolute top-0 left-0 flex items-center gap-px rounded-md border border-border bg-background p-px shadow-floating transition-opacity duration-100 animate-dropdown"
 			classList={{ "pointer-events-none opacity-0": props.hidden }}
 			style={{
 				translate: `max(4px, calc(${Math.round(props.position.x)}px - 100%)) ${Math.round(props.position.y)}px`,
@@ -39,7 +39,7 @@ export const PreviewFieldBar: Component<{
 						variant="ghost"
 						size="xs"
 						shape="square"
-						title={T()("preview.edit.field.edit", { name: props.name })}
+						tooltip={T()("preview.edit.field.edit", { name: props.name })}
 						aria-label={T()("preview.edit.field.edit", { name: props.name })}
 						onClick={() => edit()()}
 					>
@@ -54,7 +54,7 @@ export const PreviewFieldBar: Component<{
 						variant="ghost"
 						size="xs"
 						shape="square"
-						title={T()("preview.edit.ask")}
+						tooltip={T()("preview.edit.ask")}
 						aria-label={T()("preview.edit.ask")}
 						onClick={() => ask()()}
 					>

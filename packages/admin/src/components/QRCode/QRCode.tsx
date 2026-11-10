@@ -19,7 +19,7 @@ const QRCode: Component<QRCodeProps> = (props) => {
 		<div
 			role="img"
 			aria-label={props.label}
-			class="size-full rounded-md bg-white p-2.5 shadow-xs ring-1 ring-black/5 [&>svg]:block [&>svg]:size-full"
+			class="size-full rounded-md bg-white p-2.5 shadow-raised ring-1 ring-black/5 [&>svg]:block [&>svg]:size-full"
 			innerHTML={svg()}
 		/>
 	);

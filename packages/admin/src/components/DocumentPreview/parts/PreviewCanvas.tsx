@@ -380,7 +380,7 @@ export const PreviewCanvas: Component<{
 					<button
 						type="button"
 						aria-label={T()("preview.resize.viewport.left")}
-						class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+						class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus-ring"
 						onPointerDown={(event) => startViewportResize("left", event)}
 					>
 						<span class="flex items-center gap-0.5" aria-hidden="true">
@@ -389,7 +389,7 @@ export const PreviewCanvas: Component<{
 						</span>
 					</button>
 					<div
-						class="relative h-full overflow-clip bg-white shadow-sm"
+						class="relative h-full overflow-clip bg-white shadow-raised"
 						style={{ width: `${visualWidth()}px` }}
 					>
 						<div
@@ -419,7 +419,7 @@ export const PreviewCanvas: Component<{
 					<button
 						type="button"
 						aria-label={T()("preview.resize.viewport.right")}
-						class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+						class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus-ring"
 						onPointerDown={(event) => startViewportResize("right", event)}
 					>
 						<span class="flex items-center gap-0.5" aria-hidden="true">

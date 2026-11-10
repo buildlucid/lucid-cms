@@ -8,6 +8,7 @@ import {
 	splitProps,
 } from "solid-js";
 import { getButtonClasses } from "@/components/Button/classes";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import {
 	checkPermission,
 	type PermissionRequirement,
@@ -28,7 +29,12 @@ export type ButtonSize = "xs" | "sm" | "md" | "lg";
 
 export type ButtonShape = "standard" | "square" | "circle";
 
-export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends Omit<
+	JSX.ButtonHTMLAttributes<HTMLButtonElement>,
+	"type"
+> {
+	/** @default "button" */
+	type?: "button" | "submit" | "reset";
 	/** @default "primary" */
 	variant?: ButtonVariant;
 	/** @default "md" */
@@ -37,6 +43,10 @@ export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>
 	shape?: ButtonShape;
 	/** Pulses an overlay over the button and disables it. */
 	loading?: boolean;
+	/** A short hint shown on hover or keyboard focus. It also names a button that only holds an icon. */
+	tooltip?: string;
+	/** A keyboard shortcut shown in the tooltip. */
+	shortcut?: string;
 	/**
 	 * Permission keys the user needs, or a boolean when access is checked
 	 * elsewhere. Without permission, clicking shows a toast instead.
@@ -83,6 +93,8 @@ const Button: Component<ButtonProps> = (props) => {
 		"size",
 		"shape",
 		"loading",
+		"tooltip",
+		"shortcut",
 		"permission",
 		"class",
 		"children",
@@ -121,6 +133,35 @@ const Button: Component<ButtonProps> = (props) => {
 
 	// ----------------------------------------
 	// Render
+	const content = () => (
+		<>
+			<Show when={local.loading}>
+				<span class="loading-overlay" aria-hidden="true" />
+			</Show>
+			{local.children}
+		</>
+	);
+
+	//* a button either has a tooltip or it doesn't, so this is decided once
+	if (props.tooltip !== undefined) {
+		return (
+			<Tooltip
+				{...rest}
+				content={local.tooltip}
+				shortcut={local.shortcut}
+				data-button
+				class={classnames(classes(), local.class, {
+					"pointer-events-none": local.loading,
+				})}
+				onClick={buttonOnClick}
+				disabled={local.disabled || local.loading}
+				aria-busy={local.loading ? "true" : undefined}
+			>
+				{content()}
+			</Tooltip>
+		);
+	}
+
 	return (
 		// oxlint-disable-next-line react/button-has-type -- type defaults to "button" through mergeProps
 		<button
@@ -133,10 +174,7 @@ const Button: Component<ButtonProps> = (props) => {
 			disabled={local.disabled || local.loading}
 			aria-busy={local.loading ? "true" : undefined}
 		>
-			<Show when={local.loading}>
-				<span class="loading-overlay" aria-hidden="true" />
-			</Show>
-			{local.children}
+			{content()}
 		</button>
 	);
 };

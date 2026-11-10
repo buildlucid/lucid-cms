@@ -83,7 +83,7 @@ export const RequestActivity: Component<{
 				actions={
 					<Menu.Root placement="bottom-end">
 						<Menu.Trigger
-							class="flex size-7 items-center justify-center rounded-md text-body ring-0 outline-none hover:bg-background-hover focus-visible:ring-1 focus-visible:ring-primary"
+							class="flex size-7 items-center justify-center rounded-md text-body focus-ring hover:bg-background-hover"
 							title={T()("requests.activity.filters")}
 						>
 							<span class="sr-only">{T()("requests.activity.filters")}</span>

@@ -140,11 +140,11 @@ export const ViewSelector: Component<{
 	// Render
 	return (
 		<Menu.Root>
-			<Menu.Trigger class="group flex min-w-0 max-w-full items-center gap-2 text-base font-medium text-title rounded-md transition-colors outline-none focus-visible:ring-2 ring-primary">
+			<Menu.Trigger class="group flex min-w-0 max-w-full items-center gap-2 text-base font-medium text-title rounded-md transition-colors focus-ring">
 				<StatusIndicator variant={currentStatusVariant()} size="md" />
 				{/* long names, eg. a request's proposal, stay on one line on narrow screens */}
 				<span
-					class="group-hover:text-body transition-colors duration-200 line-clamp-1 text-start"
+					class="group-hover:text-body transition-colors line-clamp-1 text-start"
 					classList={{ capitalize: currentOption()?.type !== "proposal" }}
 					title={currentOptionLabel()}
 				>
@@ -180,14 +180,14 @@ export const ViewSelector: Component<{
 														when={item.type === "environment"}
 														fallback={
 															<TbOutlineCaretLeft
-																size={11}
+																size={12}
 																class="text-icon"
 																aria-label={T()("documents.compare.opens.left")}
 															/>
 														}
 													>
 														<TbOutlineCaretRight
-															size={11}
+															size={12}
 															class="text-icon"
 															aria-label={T()("documents.compare.opens.right")}
 														/>

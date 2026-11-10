@@ -55,7 +55,7 @@ export const getNavigationActionClasses = (props: {
 	size?: "sm" | "md";
 }) =>
 	classnames(
-		"relative flex items-center justify-center text-icon transition-colors hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary aria-pressed:text-icon-hover data-expanded:text-icon-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-icon",
+		"relative flex items-center justify-center text-icon transition-colors hover:text-icon-hover focus-ring aria-pressed:text-icon-hover data-expanded:text-icon-hover disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-icon",
 		props.variant === "tile"
 			? "h-8 w-full rounded-lg border border-border bg-input hover:bg-card-hover aria-pressed:bg-card-hover data-expanded:bg-card-hover dark:hover:bg-card dark:aria-pressed:bg-card dark:data-expanded:bg-card disabled:hover:bg-input dark:disabled:hover:bg-input"
 			: [

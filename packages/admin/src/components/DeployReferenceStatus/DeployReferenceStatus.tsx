@@ -71,7 +71,7 @@ const DeployReferenceStatus: Component<{
 								getDeployDetailClass(summary()?.tone ?? "muted"),
 							)}
 						>
-							<TbOutlineClock size={11} />
+							<TbOutlineClock size={12} />
 						</span>
 					)}
 				</Show>

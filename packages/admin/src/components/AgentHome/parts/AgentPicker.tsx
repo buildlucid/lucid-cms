@@ -21,7 +21,7 @@ const AgentPicker: Component<{
 				title={translateAdminCopy(props.selected.name)}
 			>
 				<ComposerTriggerLabel
-					icon={<TbOutlineRobot size={11} class="shrink-0" />}
+					icon={<TbOutlineRobot size={12} class="shrink-0" />}
 					label={translateAdminCopy(props.selected.name)}
 				/>
 			</Menu.Trigger>

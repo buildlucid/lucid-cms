@@ -125,7 +125,7 @@ const AgentChatHeader: Component<{
 											<A
 												href={`/admin/agent/chats/${parent().id}`}
 												title={parent().title}
-												class="max-w-48 truncate rounded-sm text-sm text-body transition-colors hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+												class="max-w-48 truncate rounded-sm text-sm text-body transition-colors hover:text-title focus-ring"
 											>
 												{parent().title}
 											</A>
@@ -150,7 +150,7 @@ const AgentChatHeader: Component<{
 								<A
 									href={`/admin/agent/chats/${conversation().id}`}
 									title={T()("agent.panel.expand")}
-									class="rounded-sm text-sm font-medium text-title transition-colors hover:text-primary-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+									class="rounded-sm text-sm font-medium text-title transition-colors hover:text-primary-hover focus-ring"
 								>
 									{displayTitle()}
 								</A>

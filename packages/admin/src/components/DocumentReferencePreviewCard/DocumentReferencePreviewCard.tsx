@@ -85,7 +85,7 @@ const DocumentReferencePreviewCard: Component<
 								}}
 								title={`${field.label}: ${field.value}`}
 							>
-								<p class="truncate text-[11px] font-medium text-muted mb-0!">
+								<p class="truncate text-2xs font-medium text-muted mb-0!">
 									{field.label}
 								</p>
 								<p class="mt-0.5 truncate text-xs text-subtitle mb-0!">

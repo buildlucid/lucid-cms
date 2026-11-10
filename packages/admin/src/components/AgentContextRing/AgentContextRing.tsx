@@ -69,7 +69,7 @@ const AgentContextRing: Component<AgentContextRingProps> = (props) => {
 			gutter={8}
 		>
 			<Popover.Trigger
-				class="flex size-7 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary"
+				class="flex size-7 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-card-hover focus-ring-inset"
 				aria-label={T()("agent.context.label", {
 					percent: props.context.percent,
 				})}
@@ -104,7 +104,7 @@ const AgentContextRing: Component<AgentContextRingProps> = (props) => {
 			</Popover.Trigger>
 			<Popover.Portal>
 				<Popover.Content
-					class="z-60 w-72 rounded-md border border-border bg-popover p-3 shadow-md animate-dropdown focus:outline-hidden"
+					class="floating-panel z-60 w-72 p-3 focus:outline-hidden"
 					onOpenAutoFocus={(event) => event.preventDefault()}
 					onPointerEnter={hover(true)}
 					onPointerLeave={hover(false)}

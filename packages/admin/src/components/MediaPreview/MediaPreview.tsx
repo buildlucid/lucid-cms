@@ -132,7 +132,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 												loading="lazy"
 											/>
 											<div class="absolute inset-0 z-20 flex items-center justify-center">
-												<div class="flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-black/45 text-white shadow-sm backdrop-blur-xs">
+												<div class="flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-black/45 text-white shadow-raised backdrop-blur-xs">
 													<TbOutlinePlayerPlay class="ml-0.5 h-4 w-4" />
 												</div>
 											</div>

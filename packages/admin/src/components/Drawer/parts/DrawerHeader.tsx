@@ -29,7 +29,7 @@ export const DrawerHeader: Component<DrawerHeaderProps> = (props) => {
 				{
 					"mb-4 border-b border-border": props.border ?? true,
 					"mx-4 py-4": padding() === "sm",
-					"mx-4 md:mx-6 py-4 md:pt-6": padding() === "md",
+					"mx-4 md:mx-6 py-4 md:pt-5": padding() === "md",
 				},
 				props.class,
 			)}
@@ -39,7 +39,7 @@ export const DrawerHeader: Component<DrawerHeaderProps> = (props) => {
 			<div
 				class={classNames("absolute inset-e-0", {
 					"top-4": padding() === "sm",
-					"top-4 md:top-6": padding() === "md",
+					"top-4 md:top-5": padding() === "md",
 				})}
 			>
 				<DrawerCloseButton />

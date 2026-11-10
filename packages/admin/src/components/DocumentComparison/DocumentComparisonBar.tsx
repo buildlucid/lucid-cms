@@ -76,7 +76,7 @@ const DocumentComparisonBar: Component<{
 						size="xs"
 						shape="square"
 						aria-label={T()("documents.compare.close")}
-						title={T()("documents.compare.close")}
+						tooltip={T()("documents.compare.close")}
 						onClick={() => props.comparison.close()}
 					>
 						<TbOutlineX size={12} />

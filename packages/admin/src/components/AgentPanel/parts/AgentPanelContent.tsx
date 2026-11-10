@@ -125,7 +125,7 @@ const AgentPanelContent: Component<{
 												props.peek.revealed,
 										},
 									)
-								: classNames("md:shadow-lg xl:shadow-none", {
+								: classNames("md:shadow-floating xl:shadow-none", {
 										"motion-safe:animate-from-right": opening().slides,
 									}),
 						)}

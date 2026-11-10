@@ -69,7 +69,7 @@ export const RequestCommentForm: Component<{
 					class={classNames(
 						"relative flex w-full min-w-0 items-center text-left text-sm text-muted transition-colors focus:outline-hidden",
 						{
-							"gap-3 rounded-2xl border border-border bg-card px-3 py-2.5 shadow-sm hover:border-primary/60 focus-visible:border-primary":
+							"gap-3 rounded-2xl border border-border bg-card px-3 py-2.5 shadow-raised hover:border-primary/60 focus-visible:border-primary":
 								props.variant === "floating",
 							"gap-2.5 rounded-md hover:text-body focus-visible:text-body":
 								props.variant === "inline",

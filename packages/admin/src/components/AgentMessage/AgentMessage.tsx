@@ -32,6 +32,7 @@ import type { AgentWidgetSubmitResult } from "@/components/AgentWidget/types";
 import AgentWidgetRow from "@/components/AgentWidgetRow/AgentWidgetRow";
 import AudioPill from "@/components/AudioPill/AudioPill";
 import { createCopy } from "@/components/Copy/copyValue";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
 import { messageText } from "@/utils/agent-chat";
@@ -214,7 +215,7 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 							{(from) => (
 								<A
 									href={`/admin/agent/chats/${from().conversationId}`}
-									class="rounded text-xs text-muted underline-offset-2 hover:text-title hover:underline focus-visible:outline-2 focus-visible:outline-primary"
+									class="rounded-sm text-xs text-muted underline-offset-2 hover:text-title hover:underline focus-ring"
 								>
 									{T()("agent.subagent.from", {
 										agent: getAgentName(from().agentKey),
@@ -459,28 +460,28 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 							<AgentScreenBadge screen={part().screen} variant="icon" />
 						)}
 					</Show>
-					<button
+					<Tooltip
 						type="button"
-						class="flex size-6 items-center justify-center rounded-md transition-colors hover:bg-card hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+						class="flex size-6 items-center justify-center rounded-md transition-colors hover:bg-card hover:text-body focus-ring"
 						aria-label={T()("agent.message.copy")}
-						title={T()("agent.message.copy")}
+						content={T()("agent.message.copy")}
 						onClick={() => void copy()}
 					>
-						<Show when={copied()} fallback={<TbOutlineCopy size={11} />}>
-							<TbOutlineCheck size={11} class="text-success" />
+						<Show when={copied()} fallback={<TbOutlineCopy size={12} />}>
+							<TbOutlineCheck size={12} class="text-success" />
 						</Show>
-					</button>
+					</Tooltip>
 					<Show when={!user() && props.onBranch}>
 						{(onBranch) => (
-							<button
+							<Tooltip
 								type="button"
-								class="flex size-6 items-center justify-center rounded-md transition-colors hover:bg-card hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+								class="flex size-6 items-center justify-center rounded-md transition-colors hover:bg-card hover:text-body focus-ring"
 								aria-label={T()("agent.message.branch")}
-								title={T()("agent.message.branch")}
+								content={T()("agent.message.branch")}
 								onClick={() => onBranch()()}
 							>
-								<TbOutlineGitBranch size={11} />
-							</button>
+								<TbOutlineGitBranch size={12} />
+							</Tooltip>
 						)}
 					</Show>
 				</div>

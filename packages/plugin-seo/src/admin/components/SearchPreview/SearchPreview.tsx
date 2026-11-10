@@ -21,7 +21,7 @@ const SearchPreview: Component<SearchPreviewProps> = (props) => {
 	return (
 		<section aria-label={t("plugin.seo.preview.search")}>
 			<div
-				class="rounded-md border border-[#dadce0] bg-white p-4 shadow-sm"
+				class="rounded-md border border-[#dadce0] bg-white p-4 shadow-raised"
 				style={{ "font-family": "Arial, sans-serif" }}
 			>
 				<div class="mb-3 flex items-center gap-3">

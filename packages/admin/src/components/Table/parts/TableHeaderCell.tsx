@@ -52,7 +52,7 @@ const TableHeaderCell: Component<TableHeaderCellProps> = (props) => {
 				data-table-header-cell
 				data-column={props.column}
 				class={classNames(
-					"text-left relative gap-2.5 px-4 bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
+					"text-left font-normal relative gap-2.5 px-4 bg-clip-padding border-b border-border transition-colors whitespace-nowrap",
 					{
 						"hover:bg-card":
 							props.sortable &&
@@ -80,14 +80,14 @@ const TableHeaderCell: Component<TableHeaderCellProps> = (props) => {
 					<Match when={props.label !== undefined}>
 						<Switch>
 							<Match when={props.sortable !== true}>
-								<div class="flex items-center min-h-12.5 gap-2.5">
-									<span class="text-sm text-body">{props.icon}</span>
-									<span class="text-sm text-body">{props.label}</span>
+								<div class="flex h-9 items-center gap-2 text-xs font-medium text-muted">
+									<span>{props.icon}</span>
+									<span>{props.label}</span>
 								</div>
 							</Match>
 							<Match when={props.sortable === true}>
 								<button
-									class="justify-between gap-2.5 flex items-center w-full min-h-12.5"
+									class="flex h-9 w-full items-center justify-between gap-2 text-xs font-medium text-muted hover:text-title focus-ring-inset"
 									onClick={() => {
 										if (props.queryState === undefined) return;
 										if (props.column === undefined) return;
@@ -105,24 +105,21 @@ const TableHeaderCell: Component<TableHeaderCellProps> = (props) => {
 									}}
 									type="button"
 								>
-									<div class="flex items-center gap-2.5">
-										<span class="text-sm text-body">{props.icon}</span>
-										<span class="text-sm text-body">{props.label}</span>
+									<div class="flex items-center gap-2">
+										<span>{props.icon}</span>
+										<span>{props.label}</span>
 									</div>
 									<Switch>
 										<Match when={sort() === "desc" || sort() === "asc"}>
 											<TbOutlineCaretUp
 												aria-hidden="true"
-												class={classNames("w-3 h-3 text-icon", {
-													"transform rotate-180": sort() === "desc",
+												class={classNames("w-3 h-3 transition-transform", {
+													"rotate-180": sort() === "desc",
 												})}
 											/>
 										</Match>
 										<Match when={sort() === undefined}>
-											<TbOutlineMinus
-												aria-hidden="true"
-												class="w-3 h-3 text-icon ml-2"
-											/>
+											<TbOutlineMinus aria-hidden="true" class="w-3 h-3 ml-2" />
 										</Match>
 									</Switch>
 								</button>

@@ -1,5 +1,6 @@
 import { TbOutlineCheck, TbOutlineX } from "solid-icons/tb";
 import type { Component } from "solid-js";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import T from "@/translations";
 
 /**
@@ -20,10 +21,10 @@ const AiDraftReviewPill: Component<{
 				{props.label}
 			</span>
 			<div class="flex items-center">
-				<button
+				<Tooltip
 					type="button"
-					class="flex h-5 min-w-5 items-center justify-center text-muted transition-colors duration-200 hover:bg-card-hover hover:text-success focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
-					title={T()("common.accept")}
+					class="flex h-5 min-w-5 items-center justify-center text-muted transition-colors hover:bg-card-hover hover:text-success focus-ring disabled:cursor-not-allowed disabled:opacity-50"
+					content={T()("common.accept")}
 					aria-label={T()("common.accept")}
 					disabled={props.disabled}
 					onClick={(event) => {
@@ -33,11 +34,11 @@ const AiDraftReviewPill: Component<{
 					}}
 				>
 					<TbOutlineCheck size={10} aria-hidden="true" />
-				</button>
-				<button
+				</Tooltip>
+				<Tooltip
 					type="button"
-					class="flex h-5 min-w-5 items-center justify-center text-muted transition-colors duration-200 hover:bg-card-hover hover:text-danger focus:outline-hidden focus-visible:ring-1 focus-visible:ring-danger disabled:cursor-not-allowed disabled:opacity-60"
-					title={T()("common.reject")}
+					class="flex h-5 min-w-5 items-center justify-center text-muted transition-colors hover:bg-card-hover hover:text-danger focus-ring disabled:cursor-not-allowed disabled:opacity-50"
+					content={T()("common.reject")}
 					aria-label={T()("common.reject")}
 					disabled={props.disabled}
 					onClick={(event) => {
@@ -47,7 +48,7 @@ const AiDraftReviewPill: Component<{
 					}}
 				>
 					<TbOutlineX size={10} aria-hidden="true" />
-				</button>
+				</Tooltip>
 			</div>
 		</div>
 	);

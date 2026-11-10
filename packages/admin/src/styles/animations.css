@@ -21,6 +21,56 @@
 		}
 	}
 
+	/* menus, popovers and tooltips grow from the edge they are anchored to */
+	@keyframes animation-pop-in {
+		from {
+			opacity: 0;
+			scale: 0.96;
+		}
+	}
+
+	@keyframes animation-pop-out {
+		to {
+			opacity: 0;
+			scale: 0.98;
+		}
+	}
+
+	/* a tick or dot landing in its control */
+	@keyframes animation-check-in {
+		from {
+			opacity: 0;
+			scale: 0.5;
+		}
+	}
+
+	/* sections that open and close. Kobalte measures the content's height for us */
+	@keyframes animation-collapsible-open {
+		from {
+			height: 0;
+			opacity: 0;
+			overflow: hidden;
+		}
+		to {
+			height: var(--kb-collapsible-content-height);
+			opacity: 1;
+			overflow: hidden;
+		}
+	}
+
+	@keyframes animation-collapsible-close {
+		from {
+			height: var(--kb-collapsible-content-height);
+			opacity: 1;
+			overflow: hidden;
+		}
+		to {
+			height: 0;
+			opacity: 0;
+			overflow: hidden;
+		}
+	}
+
 	@keyframes animation-dropdown {
 		0% {
 			transform: translateY(-5px);
@@ -197,11 +247,11 @@
 	@keyframes animate-modal-show {
 		from {
 			opacity: 0;
-			transform: scale(0.96);
+			transform: translateY(8px) scale(0.97);
 		}
 		to {
 			opacity: 1;
-			transform: scale(1);
+			transform: translateY(0) scale(1);
 		}
 	}
 
@@ -212,7 +262,7 @@
 		}
 		to {
 			opacity: 0;
-			transform: scale(0.96);
+			transform: scale(0.98);
 		}
 	}
 

@@ -321,7 +321,7 @@ const TableRoot = <TRow extends { id: TableRowId }>(
 						</div>
 					</Show>
 					<thead>
-						<tr class="h-10">
+						<tr>
 							<Show when={rowReorderEnabled()}>
 								<TableHeaderCell class="w-10" />
 							</Show>

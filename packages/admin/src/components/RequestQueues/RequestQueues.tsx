@@ -24,7 +24,7 @@ const RequestQueues: Component<{
 						<li>
 							<A
 								href={getRequestQueueRoute(queue)}
-								class="flex h-full flex-col gap-1 rounded-md border border-border bg-card px-3 py-2.5 transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+								class="flex h-full flex-col gap-1 rounded-md border border-border bg-card px-3 py-2.5 transition-colors hover:bg-card-hover focus-ring"
 							>
 								<span class="flex items-center gap-2 text-xs text-muted">
 									<StatusIndicator size="xs" variant={queue.indicator} />

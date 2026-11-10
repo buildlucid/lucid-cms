@@ -10,10 +10,8 @@ const PdfBadge: Component<{
 	return (
 		<span
 			class={classnames(
-				"rounded border border-danger-low-border bg-danger-low font-medium text-danger-low-foreground",
-				props.size === "md"
-					? "px-2.5 py-1 text-sm"
-					: "px-1.5 py-0.5 text-[11px]",
+				"rounded-sm border border-danger-low-border bg-danger-low font-medium text-danger-low-foreground",
+				props.size === "md" ? "px-2.5 py-1 text-sm" : "px-1.5 py-0.5 text-2xs",
 			)}
 		>
 			PDF

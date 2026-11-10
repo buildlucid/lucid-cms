@@ -110,7 +110,7 @@ export const RequestTargets: Component<{
 				<li>
 					<Menu.Root>
 						<Menu.Trigger
-							class="flex h-8 items-center gap-1.5 rounded-full border border-dashed border-border px-3 text-xs text-muted transition-colors hover:border-primary/60 hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-60"
+							class="flex h-8 items-center gap-1.5 rounded-full border border-dashed border-border px-3 text-xs text-muted transition-colors hover:border-primary/60 hover:text-body focus-ring disabled:opacity-50"
 							disabled={props.targets.update.action.isPending}
 						>
 							<TbOutlinePlus size={9} />

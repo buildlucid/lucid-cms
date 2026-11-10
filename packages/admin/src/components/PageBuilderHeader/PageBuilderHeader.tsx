@@ -880,7 +880,7 @@ export const PageBuilderHeader: Component<{
 						variant="toolbar"
 						size="xs"
 						shape="square"
-						title={`${T()("builder.undo")} (${formatForDisplay(shortcuts.undo.hotkey)})`}
+						tooltip={`${T()("builder.undo")} (${formatForDisplay(shortcuts.undo.hotkey)})`}
 						aria-label={T()("builder.undo")}
 						disabled={!edits().canUndo()}
 						class={editButtonClass}
@@ -893,7 +893,7 @@ export const PageBuilderHeader: Component<{
 						variant="toolbar"
 						size="xs"
 						shape="square"
-						title={`${T()("builder.redo")} (${formatForDisplay(shortcuts.redo.hotkey)})`}
+						tooltip={`${T()("builder.redo")} (${formatForDisplay(shortcuts.redo.hotkey)})`}
 						aria-label={T()("builder.redo")}
 						disabled={!edits().canRedo()}
 						class={editButtonClass}
@@ -924,12 +924,12 @@ export const PageBuilderHeader: Component<{
 									aria-label={T()("builder.locale.label", {
 										locale: `${locale().name} (${locale().code})`,
 									})}
-									class="flex size-7 shrink-0 items-center justify-center rounded-md text-icon outline-none focus-visible:ring-1 focus-visible:ring-primary"
+									class="flex size-7 shrink-0 items-center justify-center rounded-md text-icon focus-ring"
 								>
 									<TbOutlineLanguage size={12} />
 								</Tooltip.Trigger>
 								<Tooltip.Portal>
-									<Tooltip.Content class="z-60 rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs font-medium text-title shadow-md animate-dropdown">
+									<Tooltip.Content class="tooltip-panel">
 										{T()("builder.locale.label", {
 											locale: `${locale().name} (${locale().code})`,
 										})}

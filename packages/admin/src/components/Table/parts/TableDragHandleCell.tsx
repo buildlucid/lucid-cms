@@ -19,7 +19,7 @@ const TableDragHandleCell: Component<TableDragHandleCellProps> = (props) => {
 				onDragStart={props.onDragStart}
 				onDragEnd={props.onDragEnd}
 				onClick={(e) => e.stopPropagation()}
-				class="flex items-center justify-center size-6 rounded-md cursor-grab active:cursor-grabbing text-muted hover:text-subtitle focus:outline-none focus-visible:ring-1 ring-primary"
+				class="flex items-center justify-center size-6 rounded-md cursor-grab active:cursor-grabbing text-muted hover:text-subtitle focus-ring"
 				aria-label={T()("documents.order.drag.label")}
 			>
 				<TbOutlineGripHorizontal size={12} />

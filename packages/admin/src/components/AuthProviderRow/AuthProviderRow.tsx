@@ -78,7 +78,7 @@ const AuthProviderRow: Component<{
 					variant="ghost"
 					size="xs"
 					shape="square"
-					title={T()("auth.providers.link.action", {
+					tooltip={T()("auth.providers.link.action", {
 						provider: props.provider.name,
 					})}
 					aria-label={T()("auth.providers.link.action", {

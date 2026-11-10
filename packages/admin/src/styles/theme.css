@@ -77,42 +77,138 @@
 	--color-muted: var(--lucid-muted);
 	--color-icon: var(--lucid-icon);
 	--color-icon-hover: var(--lucid-icon-hover);
+	/*
+	 * Shadows for controls, floating surfaces and overlays. Each colour scheme sets their strength
+	 * through --lucid-shadow.
+	 */
+	--shadow-raised: 0 1px 2px 0 oklch(0% 0 0 / calc(var(--lucid-shadow) * 0.5));
+	--shadow-floating:
+		0 0 0 1px oklch(0% 0 0 / calc(var(--lucid-shadow) * 0.25)),
+		0 2px 4px -1px oklch(0% 0 0 / calc(var(--lucid-shadow) * 0.6)),
+		0 8px 20px -4px oklch(0% 0 0 / var(--lucid-shadow));
+	--shadow-overlay:
+		0 0 0 1px oklch(0% 0 0 / calc(var(--lucid-shadow) * 0.25)),
+		0 8px 16px -8px oklch(0% 0 0 / var(--lucid-shadow)),
+		0 32px 64px -16px oklch(0% 0 0 / calc(var(--lucid-shadow) * 2.2));
 }
 
 @theme {
 	--font-body: "Inter", sans-serif;
+	/*
+	 * Type scale: 14px body, 12px supporting text, 11px and 10px compact labels. Tracking tightens as
+	 * size increases.
+	 */
+	--text-3xs: 0.625rem;
+	--text-3xs--line-height: 0.875rem;
+	--text-2xs: 0.6875rem;
+	--text-2xs--line-height: 1rem;
+	--text-sm--letter-spacing: -0.006em;
+	--text-base--letter-spacing: -0.011em;
+	--text-lg--letter-spacing: -0.014em;
+	--text-xl--letter-spacing: -0.017em;
+	--text-2xl--letter-spacing: -0.019em;
 	--breakpoint-xs: 420px;
 	--breakpoint-3xl: 1600px;
 	--spacing-15: 15px;
 	--spacing-sidebar: 13.75rem;
 	/* The room the docked agent panel takes beside the content. Set in base.css while it is docked. */
 	--spacing-agent-panel: 0rem;
+	/*
+	 * State changes use the default duration, entrances use ease-out-quint, and large panels use
+	 * ease-emphasized.
+	 */
+	--default-transition-duration: 120ms;
 	--ease-emphasized: cubic-bezier(0.32, 0.72, 0, 1);
-	--animate-enter: animation-enter 0.2s ease;
-	--animate-leave: animation-leave 0.2s ease forwards;
+	--ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+	--animate-enter: animation-enter 280ms var(--ease-out-quint);
+	--animate-leave: animation-leave 160ms ease-in forwards;
 	--animate-dropdown: animation-dropdown 0.2s ease;
+	--animate-pop-in: animation-pop-in 160ms var(--ease-out-quint);
+	--animate-pop-out: animation-pop-out 100ms ease-in forwards;
+	--animate-check-in: animation-check-in 160ms var(--ease-out-quint);
+	--animate-collapsible-open: animation-collapsible-open 220ms
+		var(--ease-out-quint);
+	--animate-collapsible-close: animation-collapsible-close 160ms ease-in;
 	--animate-from-left: animation-from-left 0.2s ease;
 	--animate-from-right: animation-from-right 220ms ease-out;
 	--animate-fade-out: animation-fade-out 0.2s ease;
 	--animate-fade-in: animation-fade-in 0.2s ease;
-	--animate-rise-in: animation-rise-in 220ms ease-out;
+	--animate-rise-in: animation-rise-in 240ms var(--ease-out-quint);
 	--animate-progress: animation-progress 1.6s ease-in-out infinite;
 	--animate-wave: animation-wave 1.2s ease-in-out infinite;
 	/* A soft ring in the element's text colour, for status dots that want attention. */
 	--animate-status-pulse: animation-status-pulse 2.4s ease-out infinite;
-	--animate-slide-from-right-in: animate-slide-from-right-in 200ms ease;
-	--animate-slide-from-right-out: animate-slide-from-right-out 200ms ease 100ms
+	--animate-slide-from-right-in: animate-slide-from-right-in 320ms
+		var(--ease-emphasized);
+	--animate-slide-from-right-out: animate-slide-from-right-out 200ms ease-in
 		forwards;
-	--animate-slide-from-left-in: animate-slide-from-left-in 200ms ease;
-	--animate-slide-from-left-out: animate-slide-from-left-out 200ms ease 100ms
+	--animate-slide-from-left-in: animate-slide-from-left-in 320ms
+		var(--ease-emphasized);
+	--animate-slide-from-left-out: animate-slide-from-left-out 200ms ease-in
 		forwards;
-	--animate-slide-from-bottom-in: animate-slide-from-bottom-in 200ms ease;
-	--animate-slide-from-bottom-out: animate-slide-from-bottom-out 200ms ease
-		100ms forwards;
-	--animate-overlay-show: animate-overlay-show 0.2s ease;
-	--animate-overlay-hide: animate-overlay-hide 0.2s ease;
-	--animate-modal-show: animate-modal-show 0.2s ease;
-	--animate-modal-hide: animate-modal-hide 0.2s ease;
+	--animate-slide-from-bottom-in: animate-slide-from-bottom-in 360ms
+		var(--ease-emphasized);
+	--animate-slide-from-bottom-out: animate-slide-from-bottom-out 220ms ease-in
+		forwards;
+	--animate-overlay-show: animate-overlay-show 200ms ease-out;
+	--animate-overlay-hide: animate-overlay-hide 160ms ease-in forwards;
+	--animate-modal-show: animate-modal-show 220ms var(--ease-out-quint);
+	--animate-modal-hide: animate-modal-hide 140ms ease-in forwards;
+}
+
+/*
+ * Primary keyboard focus ring, 2px wide with a 2px offset. Use focus-ring-inset inside clipped
+ * controls.
+ */
+@utility focus-ring {
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+	&:focus-visible {
+		outline-color: var(--lucid-primary);
+	}
+}
+
+@utility focus-ring-inset {
+	outline: 2px solid transparent;
+	outline-offset: -2px;
+	&:focus-visible {
+		outline-color: var(--lucid-primary);
+	}
+}
+
+/* Text field focus: primary border and halo. */
+@utility focus-field {
+	outline: none;
+	transition-property: color, background-color, border-color, box-shadow;
+	transition-duration: var(--default-transition-duration);
+	transition-timing-function: var(--default-transition-timing-function);
+	&:focus-within {
+		border-color: var(--lucid-primary);
+		box-shadow: 0 0 0 3px
+			color-mix(in oklab, var(--lucid-primary) 16%, transparent);
+	}
+}
+
+/* The same field focus, driven by a parent that tracks focus itself. */
+@utility focus-field-active {
+	transition-property: color, background-color, border-color, box-shadow;
+	transition-duration: var(--default-transition-duration);
+	transition-timing-function: var(--default-transition-timing-function);
+	border-color: var(--lucid-primary);
+	box-shadow: 0 0 0 3px
+		color-mix(in oklab, var(--lucid-primary) 16%, transparent);
+}
+
+/* A control that gives a little under the pointer. */
+@utility pressable {
+	transition-property:
+		color, background-color, border-color, outline-color, box-shadow, opacity,
+		scale;
+	transition-duration: var(--default-transition-duration);
+	transition-timing-function: var(--default-transition-timing-function);
+	&:active:not(:disabled) {
+		scale: 0.97;
+	}
 }
 
 @utility grid-cols-main-layout {

@@ -28,7 +28,7 @@ const AgentErrorNotice: Component<{
 	return (
 		<section
 			role="alert"
-			class="rounded-xl border border-danger-low-border bg-card p-4 shadow-sm"
+			class="rounded-xl border border-danger-low-border bg-card p-4 shadow-raised"
 		>
 			<div class="flex items-start gap-4">
 				<div class="min-w-0 flex-1">
@@ -63,7 +63,7 @@ const AgentErrorNotice: Component<{
 									shape="square"
 									class="ms-auto"
 									aria-label={T()("agent.error.retry")}
-									title={T()("agent.error.retry")}
+									tooltip={T()("agent.error.retry")}
 									onClick={() => retry()()}
 								>
 									<TbOutlineRotateClockwise size={12} />

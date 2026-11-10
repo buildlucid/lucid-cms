@@ -40,7 +40,7 @@ const SelectionBar: Component<{
 	// Render
 	return (
 		<div class="fixed bottom-4 md:bottom-6 left-0 md:left-sidebar right-agent-panel flex justify-center items-center z-36 pointer-events-none px-4">
-			<div class="pointer-events-auto flex w-full max-w-100 items-center justify-between gap-3 rounded-md border border-border bg-card p-2">
+			<div class="pointer-events-auto flex w-full max-w-100 items-center justify-between gap-3 rounded-lg border border-border bg-card p-2 shadow-floating animate-rise-in">
 				<div class="flex min-w-0 items-center gap-1">
 					<Button
 						variant="ghost"
@@ -48,7 +48,7 @@ const SelectionBar: Component<{
 						shape="square"
 						onClick={() => props.onClear()}
 						aria-label={T()("common.reset")}
-						title={T()("common.reset")}
+						tooltip={T()("common.reset")}
 					>
 						<TbOutlineX size={12} />
 					</Button>

@@ -73,7 +73,7 @@ const AgentReferenceThumb: Component<{
 				{/* a page with the part the person picked marked out */}
 				<span class="flex h-full w-full flex-col gap-1 bg-input p-2">
 					<span class="h-1 w-3/4 rounded-full bg-border" />
-					<span class="flex h-3 w-full shrink-0 items-center rounded-[3px] bg-primary/15 px-1 ring-1 ring-primary/70">
+					<span class="flex h-3 w-full shrink-0 items-center rounded-sm bg-primary/15 px-1 ring-1 ring-primary/70">
 						<span class="h-1 w-2/3 rounded-full bg-primary/80" />
 					</span>
 					<span class="h-1 w-1/2 rounded-full bg-border" />

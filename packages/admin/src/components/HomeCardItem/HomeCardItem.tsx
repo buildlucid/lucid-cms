@@ -50,7 +50,7 @@ const HomeCardItem: Component<HomeCardItemProps> = (props) => {
 			type={props.href ? undefined : "button"}
 			onClick={props.onClick}
 			class={classnames(
-				"group flex w-full min-w-0 items-center gap-3 rounded-md px-2 py-2 text-start transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+				"group flex w-full min-w-0 items-center gap-3 rounded-md px-2 py-2 text-start transition-colors hover:bg-card-hover focus-ring",
 				props.class,
 			)}
 		>

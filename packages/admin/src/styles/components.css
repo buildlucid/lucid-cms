@@ -53,8 +53,46 @@
 			black calc(var(--inverted-corner-radius, var(--radius-xl)) + 0.3px)
 		);
 	}
+	/* the surface shared by menus, popovers and hover cards. It grows from the edge Kobalte anchors it to */
+	.floating-panel {
+		@apply rounded-lg border border-border bg-popover shadow-floating animate-pop-in;
+		transform-origin: var(
+			--kb-menu-content-transform-origin,
+			var(
+				--kb-popover-content-transform-origin,
+				var(
+					--kb-hovercard-content-transform-origin,
+					var(--kb-tooltip-content-transform-origin, center)
+				)
+			)
+		);
+	}
+
+	.floating-panel[data-closed] {
+		@apply animate-pop-out;
+	}
+
+	/* a short hint, in the inverse colours so it stands apart from the surfaces beneath it */
+	.tooltip-panel {
+		@apply pointer-events-none z-1000 flex max-w-64 items-center gap-1.5 rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground shadow-floating animate-pop-in;
+		transform-origin: var(--kb-tooltip-content-transform-origin, center);
+	}
+
+	.tooltip-panel[data-closed] {
+		@apply animate-pop-out;
+	}
+
+	/* a Kobalte collapsible's content, which slides open and shut */
+	.collapsible-content {
+		@apply animate-collapsible-close;
+	}
+
+	.collapsible-content[data-expanded] {
+		@apply animate-collapsible-open;
+	}
+
 	.dropdown-trigger {
-		@apply duration-200 transition-colors outline-primary focus:outline-1;
+		@apply transition-colors focus-ring;
 	}
 
 	.no-number-spinner {
@@ -76,7 +114,10 @@
 		@apply pointer-events-none absolute inset-0 z-10 rounded-[inherit] bg-current/15 animate-pulse;
 	}
 
-	/* InfoRow titles stack into a sticky bar below lg. Once it's stuck, content fades out beneath it, where scroll-state queries are supported */
+	/*
+	 * Below lg, sticky InfoRow titles fade underlying content where scroll-state queries are
+	 * supported.
+	 */
 	.info-row-heading {
 		container-type: scroll-state;
 	}
@@ -332,7 +373,7 @@
 		}
 
 		.image-cropper-controls {
-			@apply rounded-md border border-border shadow-xl backdrop-blur;
+			@apply rounded-md border border-border shadow-floating backdrop-blur;
 			position: absolute;
 			top: 0.75rem;
 			bottom: 0.75rem;

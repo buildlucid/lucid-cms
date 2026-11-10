@@ -61,7 +61,7 @@ const AgentRoutineToolConfirmations: Component<{
 							<li class="group flex items-center justify-between gap-3 px-3 py-2">
 								<label
 									for={`routine-tool-${tool.name}`}
-									class="min-w-0 truncate text-sm text-body transition-colors duration-200 ease-in-out group-focus-within:text-primary-hover"
+									class="min-w-0 truncate text-sm text-body transition-colors group-focus-within:text-primary-hover"
 								>
 									{translateAdminCopy(tool.title)}
 								</label>

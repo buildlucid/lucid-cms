@@ -103,7 +103,7 @@ const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
 									variant="ghost"
 									size="xs"
 									shape="square"
-									title={T()("account.two.factor.app.change.action")}
+									tooltip={T()("account.two.factor.app.change.action")}
 									aria-label={T()("account.two.factor.app.change.action")}
 									onClick={() => setSetupOpen(true)}
 								>
@@ -130,7 +130,7 @@ const TwoFactorSettings: Component<TwoFactorSettingsProps> = (props) => {
 									variant="ghost"
 									size="xs"
 									shape="square"
-									title={T()("account.two.factor.recovery.regenerate.action")}
+									tooltip={T()("account.two.factor.recovery.regenerate.action")}
 									aria-label={T()(
 										"account.two.factor.recovery.regenerate.action",
 									)}

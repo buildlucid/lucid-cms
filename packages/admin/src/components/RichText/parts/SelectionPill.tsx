@@ -161,7 +161,7 @@ const SelectionPill: Component<{
 					data-kb-top-layer
 					ref={pillRef}
 					class={classNames(
-						"fixed flex items-center gap-1 rounded-xl border border-border bg-card px-1.5 py-1 shadow-md backdrop-blur-sm transition-opacity duration-150",
+						"fixed flex items-center gap-1 rounded-xl border border-border bg-card px-1.5 py-1 shadow-floating backdrop-blur-sm transition-opacity duration-150",
 						{
 							"opacity-100 pointer-events-auto": visible(),
 							"opacity-0 pointer-events-none": !visible(),

@@ -40,7 +40,7 @@ const TableCell: Component<TableCellProps> = (props) => {
 			>
 				<div
 					class={classNames(
-						"min-h-[56.5px] py-2 text-base text-subtitle flex items-center",
+						"min-h-11 py-1.5 text-sm text-subtitle flex items-center",
 						{
 							"w-full":
 								typeof props.minWidth === "number" || props.width !== undefined,

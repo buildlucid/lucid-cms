@@ -64,7 +64,7 @@ const ConfirmActionButton: Component<ConfirmActionButtonProps> = (props) => {
 			variant={props.variant ?? "primary"}
 			size={props.size ?? "sm"}
 			shape={awaitingConfirmation() ? "standard" : props.shape}
-			title={props.label}
+			tooltip={props.label}
 			aria-label={awaitingConfirmation() ? undefined : props.label}
 			loading={props.loading}
 			class={props.class}

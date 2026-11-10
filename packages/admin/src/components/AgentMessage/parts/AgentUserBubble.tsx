@@ -72,7 +72,7 @@ const AgentUserBubble: Component<{
 					</Show>
 					<button
 						type="button"
-						class="rounded-sm text-sm text-muted transition-colors hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+						class="rounded-sm text-sm text-muted transition-colors hover:text-body focus-ring"
 						aria-expanded={expanded()}
 						aria-controls={id}
 						onClick={() => setExpanded((value) => !value)}

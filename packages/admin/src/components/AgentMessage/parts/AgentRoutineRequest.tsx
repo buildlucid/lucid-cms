@@ -53,12 +53,12 @@ const AgentRoutineRequest: Component<{
 			>
 				<button
 					type="button"
-					class="flex w-full items-center gap-2.5 rounded-2xl px-3.5 py-2.5 text-start focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+					class="flex w-full items-center gap-2.5 rounded-2xl px-3.5 py-2.5 text-start focus-ring"
 					aria-expanded={open()}
 					aria-controls={id}
 					onClick={() => setOpen((value) => !value)}
 				>
-					<TbOutlineRepeat size={11} class="shrink-0 text-muted" />
+					<TbOutlineRepeat size={12} class="shrink-0 text-muted" />
 					<span class="min-w-0 grow truncate text-sm text-title">
 						{props.name}
 						<span class="text-muted">

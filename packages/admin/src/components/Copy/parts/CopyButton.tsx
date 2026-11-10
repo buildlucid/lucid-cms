@@ -27,7 +27,7 @@ export const CopyButton: Component<CopyButtonProps> = (props) => {
 				void copy();
 			}}
 			class={classNames(
-				"flex max-w-full cursor-copy items-center whitespace-nowrap text-sm transition-colors duration-200",
+				"flex max-w-full cursor-copy items-center whitespace-nowrap text-sm transition-colors",
 				{
 					"text-body hover:text-primary-hover": !copied(),
 					"text-success": copied(),

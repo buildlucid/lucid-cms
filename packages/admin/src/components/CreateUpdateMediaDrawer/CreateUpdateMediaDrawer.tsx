@@ -1468,18 +1468,18 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 												<div class="flex items-center gap-1.5 flex-wrap mt-2">
 													<For each={posterMetaPills()}>
 														{(pill) => (
-															<Pill variant="outline" class="text-[10px]">
+															<Pill variant="outline" class="text-3xs">
 																{pill}
 															</Pill>
 														)}
 													</For>
 													<Show when={posterPreview()?.isNew}>
-														<Pill variant="primary-subtle" class="text-[10px]">
+														<Pill variant="primary-subtle" class="text-3xs">
 															{T()("media.poster.pending.upload")}
 														</Pill>
 													</Show>
 													<Show when={PosterFile.getCropRemoved()}>
-														<Pill variant="warning-subtle" class="text-[10px]">
+														<Pill variant="warning-subtle" class="text-3xs">
 															{T()("media.crop.pending.removed")}
 														</Pill>
 													</Show>
@@ -1494,7 +1494,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													size="xs"
 													shape="square"
 													onClick={previewPosterFile}
-													title={T()("common.preview")}
+													tooltip={T()("common.preview")}
 													aria-label={T()("common.preview")}
 												>
 													<TbOutlineSearch size={14} />
@@ -1505,7 +1505,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													size="xs"
 													shape="square"
 													onClick={() => setPosterFocalEditorOpen(true)}
-													title={T()("media.focal.point.edit")}
+													tooltip={T()("media.focal.point.edit")}
 													aria-label={T()("media.focal.point.edit")}
 												>
 													<TbOutlineTarget size={14} />
@@ -1517,7 +1517,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 														size="xs"
 														shape="square"
 														onClick={openPosterCropEditor}
-														title={T()("media.crop.action")}
+														tooltip={T()("media.crop.action")}
 														aria-label={T()("media.crop.action")}
 													>
 														<TbOutlineCrop size={14} />
@@ -1530,7 +1530,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 														size="xs"
 														shape="square"
 														onClick={PosterFile.removeCrop}
-														title={T()("media.crop.remove")}
+														tooltip={T()("media.crop.remove")}
 														aria-label={T()("media.crop.remove")}
 													>
 														<TbOutlineTrash size={14} />
@@ -1548,7 +1548,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 														event.stopPropagation();
 														void createPosterSnapshot();
 													}}
-													title={T()("media.poster.snapshot.create")}
+													tooltip={T()("media.poster.snapshot.create")}
 													aria-label={T()("media.poster.snapshot.create")}
 													loading={posterSnapshotLoading()}
 													disabled={
@@ -1574,7 +1574,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 															posterGenerationTargetId,
 														);
 													}}
-													title={mediaGeneration.getTooltip(
+													tooltip={mediaGeneration.getTooltip(
 														posterGenerationTarget,
 													)}
 													aria-label={mediaGeneration.getLabel(
@@ -1618,7 +1618,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 												size="xs"
 												shape="square"
 												onClick={openPosterFileBrowser}
-												title={T()("common.upload")}
+												tooltip={T()("common.upload")}
 												aria-label={T()("common.upload")}
 											>
 												<TbOutlineUpload size={14} />
@@ -1630,7 +1630,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													size="xs"
 													shape="square"
 													onClick={clearPosterFile}
-													title={T()("common.remove")}
+													tooltip={T()("common.remove")}
 													aria-label={T()("common.remove")}
 												>
 													<TbOutlineX size={14} />
@@ -1647,7 +1647,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													size="xs"
 													shape="square"
 													onClick={undoPosterFile}
-													title={T()("media.file.back.to.current")}
+													tooltip={T()("media.file.back.to.current")}
 													aria-label={T()("media.file.back.to.current")}
 												>
 													<TbOutlineRotate size={14} />

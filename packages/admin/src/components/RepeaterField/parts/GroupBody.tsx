@@ -197,7 +197,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				id={previewTriggerId()}
 				data-preview-focus-open={groupOpen()}
 				class={classNames(
-					"w-full bg-card hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary cursor-pointer px-3 py-3 flex justify-between items-center transition-colors duration-200",
+					"w-full bg-card hover:bg-card-hover focus-ring-inset cursor-pointer px-3 py-3 flex justify-between items-center transition-colors",
 					{
 						"bg-danger-low": errorCount() > 0,
 						"ring-1 ring-inset ring-primary":
@@ -219,7 +219,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				<div class="flex items-center min-w-0 gap-2">
 					<button
 						type="button"
-						class="text-muted hover:text-primary-hover transition-colors duration-200 cursor-grab active:cursor-grabbing focus:outline-hidden focus-visible:ring-1 ring-primary disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed"
+						class="text-muted hover:text-primary-hover transition-colors cursor-grab active:cursor-grabbing focus-ring disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
 							props.dragDrop.onDragStart(e, {
 								ref: ref(),

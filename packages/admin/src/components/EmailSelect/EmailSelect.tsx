@@ -273,7 +273,7 @@ const EmailSortableItem: Component<{
 				"view-transition-name": `email-select-item-${props.email.id}`,
 			}}
 			class={classNames(
-				"group flex items-center justify-between gap-3 rounded-md border bg-input px-3 py-2 transition-colors duration-200 transform-gpu",
+				"group flex items-center justify-between gap-3 rounded-md border bg-input px-3 py-2 transition-colors transform-gpu",
 				{
 					"border-border": !props.hasError,
 					"border-danger ring-1 ring-inset ring-danger": props.hasError,

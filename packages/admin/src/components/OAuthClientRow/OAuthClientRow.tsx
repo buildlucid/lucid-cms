@@ -122,7 +122,7 @@ const OAuthClientRow: Component<{
 								·
 							</span>
 							<code
-								class="min-w-0 truncate font-mono text-[11px] text-muted"
+								class="min-w-0 truncate font-mono text-2xs text-muted"
 								title={props.client.clientId}
 							>
 								{props.client.clientId}

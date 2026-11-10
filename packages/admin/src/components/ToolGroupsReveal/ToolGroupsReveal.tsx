@@ -24,7 +24,7 @@ const ToolGroupsReveal: Component<ToolGroupsRevealProps> = (props) => {
 		<div>
 			<button
 				type="button"
-				class="inline-flex items-center gap-1.5 rounded text-sm text-body hover:text-title"
+				class="inline-flex items-center gap-1.5 rounded-sm text-sm text-body hover:text-title"
 				aria-expanded={open()}
 				onClick={() => setOpen(!open())}
 			>

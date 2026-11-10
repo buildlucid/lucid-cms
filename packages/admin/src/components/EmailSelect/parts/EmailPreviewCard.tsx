@@ -159,7 +159,7 @@ export const EmailPreviewCard: Component<{
 				<Show when={canReadEmails()}>
 					<button
 						type="button"
-						class="absolute inset-0 cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+						class="absolute inset-0 cursor-pointer focus-ring focus-visible:-outline-offset-2"
 						onClick={() => setPreviewOpen(true)}
 						aria-label={T()("panels.email.preview.title")}
 					/>

@@ -128,7 +128,7 @@ export const AutoSaveStatusPill: Component<{
 				<div class="relative">
 					<div
 						class={classNames(
-							"inline-flex items-center rounded-full border px-2.5 py-1.5 text-xs font-medium shadow-sm backdrop-blur-sm transition-[opacity,transform,background-color,border-color,color] duration-300",
+							"inline-flex items-center rounded-full border px-2.5 py-1.5 text-xs font-medium shadow-raised backdrop-blur-sm transition-[opacity,transform,background-color,border-color,color] duration-300",
 							{
 								"border-primary-low-border bg-primary-low text-primary-low-foreground opacity-100":
 									showAutoSaveSavingState(),

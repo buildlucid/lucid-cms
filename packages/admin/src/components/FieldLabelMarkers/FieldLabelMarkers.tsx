@@ -7,6 +7,7 @@ import {
 	TbOutlineWorld,
 } from "solid-icons/tb";
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import { useFieldAccess } from "@/hooks/useFieldAccess/useFieldAccess";
 import { useFieldTranslation } from "@/hooks/useFieldTranslation/useFieldTranslation";
@@ -78,10 +79,10 @@ export const FieldLabelMarkers: Component<FieldLabelMarkersProps> = (props) => {
 						}
 					>
 						{(markChecked) => (
-							<button
+							<Tooltip
 								type="button"
-								class="inline-flex text-warning rounded-sm hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
-								title={T()("fields.translation.outdated.check")}
+								class="inline-flex text-warning rounded-sm hover:text-title focus-ring"
+								content={T()("fields.translation.outdated.check")}
 								aria-label={T()("fields.translation.outdated.check")}
 								onClick={(event) => {
 									event.preventDefault();
@@ -90,7 +91,7 @@ export const FieldLabelMarkers: Component<FieldLabelMarkersProps> = (props) => {
 								}}
 							>
 								<TbOutlineClockExclamation size={12} />
-							</button>
+							</Tooltip>
 						)}
 					</Show>
 				</Match>

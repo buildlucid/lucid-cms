@@ -184,7 +184,7 @@ const ImageGenerationForm: Component<{
 												variant="ghost"
 												size="xs"
 												shape="square"
-												title={T()("ai.media.image.generate.source.restore")}
+												tooltip={T()("ai.media.image.generate.source.restore")}
 												aria-label={T()(
 													"ai.media.image.generate.source.restore",
 												)}
@@ -199,7 +199,7 @@ const ImageGenerationForm: Component<{
 										variant="ghost"
 										size="xs"
 										shape="square"
-										title={T()("ai.media.image.generate.source.add")}
+										tooltip={T()("ai.media.image.generate.source.add")}
 										aria-label={T()("ai.media.image.generate.source.add")}
 										onClick={() => sourceInputRef?.click()}
 									>
@@ -244,7 +244,7 @@ const ImageGenerationForm: Component<{
 										variant="ghost"
 										size="xs"
 										shape="square"
-										title={T()("ai.media.image.generate.source.replace")}
+										tooltip={T()("ai.media.image.generate.source.replace")}
 										aria-label={T()("ai.media.image.generate.source.replace")}
 										onClick={() => sourceInputRef?.click()}
 									>
@@ -255,7 +255,7 @@ const ImageGenerationForm: Component<{
 										variant="danger-ghost"
 										size="xs"
 										shape="square"
-										title={T()("common.remove")}
+										tooltip={T()("common.remove")}
 										aria-label={T()("common.remove")}
 										onClick={() => props.onSourceChange(undefined)}
 									>
@@ -327,7 +327,7 @@ const ImageGenerationForm: Component<{
 										{optionLabel()}
 									</HoverCard.Trigger>
 									<HoverCard.Portal>
-										<HoverCard.Content class="z-70 bg-card w-80 mt-2 rounded-md border border-border p-3 shadow-xs">
+										<HoverCard.Content class="floating-panel z-70 w-80 p-3">
 											<p class="mb-1 text-sm font-semibold text-title">
 												{optionLabel()}
 											</p>

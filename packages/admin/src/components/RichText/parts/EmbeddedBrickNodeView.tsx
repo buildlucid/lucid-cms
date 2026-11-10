@@ -84,7 +84,7 @@ const EmbeddedBrickNodeView: Component<EmbeddedBrickNodeViewProps> = (
 									: T()("editor.rich.text.brick.unavailable")}
 							</p>
 							<Show when={brickKey()}>
-								<span class="shrink-0 truncate font-mono text-[11px] text-muted">
+								<span class="shrink-0 truncate font-mono text-2xs text-muted">
 									{brickKey()}
 								</span>
 							</Show>

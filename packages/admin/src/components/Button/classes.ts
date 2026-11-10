@@ -16,27 +16,27 @@ export const getButtonClasses = (props: {
 	const square = props.shape !== "standard";
 
 	return classnames(
-		"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative",
+		"flex items-center justify-center min-w-max text-center font-medium select-none focus-ring pressable rounded-md relative",
 		{
 			"disabled:cursor-not-allowed": !props.loading,
 			//* secondary has disabled colours of its own, which fading as well would muddy
-			"disabled:opacity-80": !props.loading && props.variant !== "secondary",
+			"disabled:opacity-50": !props.loading && props.variant !== "secondary",
 			// Variants
-			"bg-primary hover:bg-primary-hover text-primary-foreground ring-primary":
+			"bg-primary hover:bg-primary-hover text-primary-foreground":
 				props.variant === "primary",
-			"bg-secondary hover:bg-secondary-hover text-secondary-foreground ring-primary disabled:bg-secondary-disabled disabled:text-secondary-disabled-foreground":
+			"bg-secondary hover:bg-secondary-hover text-secondary-foreground disabled:bg-secondary-disabled disabled:text-secondary-disabled-foreground":
 				props.variant === "secondary",
-			"bg-input border border-border hover:border-transparent hover:bg-secondary-hover text-subtitle hover:text-secondary-foreground ring-primary":
+			"bg-input border border-border text-subtitle hover:border-body/25 hover:bg-card-hover hover:text-title data-expanded:border-body/25 data-expanded:bg-card-hover data-expanded:text-title":
 				props.variant === "outline",
-			"bg-danger hover:bg-danger-hover text-danger-foreground ring-primary":
+			"bg-danger hover:bg-danger-hover text-danger-foreground":
 				props.variant === "danger",
-			"bg-input border border-border hover:bg-danger-hover ring-primary text-subtitle hover:text-danger-foreground":
+			"bg-input border border-border text-subtitle hover:border-danger-low-border hover:bg-danger-low hover:text-danger-low-foreground":
 				props.variant === "danger-outline",
-			"text-muted hover:text-subtitle hover:bg-background/50 ring-primary":
+			"text-muted hover:text-title hover:bg-card-hover data-expanded:text-title data-expanded:bg-card-hover":
 				props.variant === "ghost",
-			"text-muted hover:text-danger-low-foreground hover:bg-danger-low ring-primary":
+			"text-muted hover:text-danger-low-foreground hover:bg-danger-low":
 				props.variant === "danger-ghost",
-			"text-icon hover:text-icon-hover hover:bg-background-hover data-expanded:bg-background-hover ring-primary":
+			"text-icon hover:text-icon-hover hover:bg-background-hover data-expanded:bg-background-hover":
 				props.variant === "toolbar",
 
 			// Shape
@@ -44,15 +44,15 @@ export const getButtonClasses = (props: {
 
 			// Sizes
 			"px-2 h-7 text-xs": props.size === "xs" && !square,
-			"px-3 h-9 text-sm": props.size === "sm" && !square,
-			"px-4 py-2 h-10 text-sm": props.size === "md" && !square,
-			"px-6 py-3 h-12 text-base": props.size === "lg" && !square,
-			"w-7 h-7 p-0 min-w-[28px]!": props.size === "xs" && square,
-			"w-9 h-9 p-0 min-w-[36px]!": props.size === "sm" && square,
-			"w-10 h-10 p-0 min-w-[40px]!": props.size === "md" && square,
-			"w-12 h-12 p-0 min-w-[48px]!": props.size === "lg" && square,
+			"px-2.5 h-8 text-sm": props.size === "sm" && !square,
+			"px-3.5 h-9 text-sm": props.size === "md" && !square,
+			"px-5 h-11 text-sm": props.size === "lg" && !square,
+			"size-7 p-0 min-w-7!": props.size === "xs" && square,
+			"size-8 p-0 min-w-8!": props.size === "sm" && square,
+			"size-9 p-0 min-w-9!": props.size === "md" && square,
+			"size-11 p-0 min-w-11!": props.size === "lg" && square,
 
-			"opacity-80 cursor-not-allowed": props.permitted === false,
+			"opacity-50 cursor-not-allowed": props.permitted === false,
 		},
 	);
 };

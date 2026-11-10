@@ -73,7 +73,7 @@ const CaptchaWidget: Component<{
 							class="text-danger-low-foreground! hover:bg-danger-low-border/60!"
 							onClick={props.captcha.retry}
 							aria-label={T()("common.try.again")}
-							title={T()("common.try.again")}
+							tooltip={T()("common.try.again")}
 						>
 							<TbOutlineRefresh size={16} />
 						</Button>

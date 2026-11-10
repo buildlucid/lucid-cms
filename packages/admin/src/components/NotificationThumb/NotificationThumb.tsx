@@ -30,7 +30,7 @@ const NotificationThumb: Component<NotificationThumbProps> = (props) => {
 	// Render
 	return (
 		<span
-			class="flex h-9 w-7 shrink-0 items-center justify-center rounded border border-border bg-input text-muted shadow-xs"
+			class="flex h-9 w-7 shrink-0 items-center justify-center rounded-sm border border-border bg-input text-muted shadow-raised"
 			aria-hidden="true"
 		>
 			<Dynamic

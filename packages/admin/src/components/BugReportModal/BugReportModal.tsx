@@ -231,7 +231,7 @@ const BugReportModal: Component<{
 									<Show when={report() !== undefined}>
 										<button
 											type="button"
-											class="rounded-sm text-xs text-muted transition-colors hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+											class="rounded-sm text-xs text-muted transition-colors hover:text-title focus-ring"
 											onClick={() => setReportOpen(true)}
 										>
 											{T()("bug.report.diagnostics.view")}

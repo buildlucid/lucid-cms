@@ -19,6 +19,7 @@ import { FormLabel } from "@/components/FormLabel/FormLabel";
 import Modal from "@/components/Modal/Modal";
 import Pill from "@/components/Pill/Pill";
 import Textarea from "@/components/Textarea/Textarea";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import api from "@/services/api";
 import aiModalsStore, {
 	type MediaAltGenerationTarget,
@@ -331,10 +332,10 @@ const MediaAltGenerationModalContent: Component<{
 															{localeLabel(locale)}
 														</label>
 														<Show when={canRevert()}>
-															<button
+															<Tooltip
 																type="button"
-																class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-muted transition-colors duration-200 hover:bg-input hover:text-title focus-visible:ring-1 focus-visible:ring-primary"
-																title={T()(
+																class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-input hover:text-title focus-ring"
+																content={T()(
 																	"ai.media.alt.generate.response.revert",
 																)}
 																aria-label={T()(
@@ -350,8 +351,8 @@ const MediaAltGenerationModalContent: Component<{
 																	);
 																}}
 															>
-																<TbOutlineRotate size={11} aria-hidden="true" />
-															</button>
+																<TbOutlineRotate size={12} aria-hidden="true" />
+															</Tooltip>
 														</Show>
 													</div>
 													<div class="p-3">

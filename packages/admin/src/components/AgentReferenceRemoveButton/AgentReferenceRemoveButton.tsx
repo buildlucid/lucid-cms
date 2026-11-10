@@ -2,6 +2,7 @@ import { debounce } from "@solid-primitives/scheduled";
 import classnames from "classnames";
 import { TbOutlineX } from "solid-icons/tb";
 import { type Component, createSignal, onCleanup } from "solid-js";
+import Tooltip from "@/components/Tooltip/Tooltip";
 
 /**
  * The small square danger outline that removes a reference, revealed on hover
@@ -33,17 +34,17 @@ const AgentReferenceRemoveButton: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<button
+		<Tooltip
 			type="button"
 			class={classnames(
-				"absolute flex size-5 items-center justify-center rounded border transition-[opacity,background-color,color] focus:outline-hidden focus-visible:opacity-100 focus-visible:ring-1 focus-visible:ring-primary group-hover:opacity-100 pointer-coarse:opacity-100",
+				"absolute flex size-5 items-center justify-center rounded-sm border transition-[opacity,background-color,color] focus-ring focus-visible:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100",
 				primed()
 					? "border-danger bg-danger-hover text-danger-foreground opacity-100"
 					: "border-border bg-input text-subtitle opacity-0 hover:border-danger hover:bg-danger-hover hover:text-danger-foreground",
 				props.class,
 			)}
 			aria-label={label()}
-			title={label()}
+			content={label()}
 			onClick={() => {
 				if (!props.confirmLabel || primed()) {
 					unprime.clear();
@@ -56,7 +57,7 @@ const AgentReferenceRemoveButton: Component<{
 			}}
 		>
 			<TbOutlineX size={9} />
-		</button>
+		</Tooltip>
 	);
 };
 
