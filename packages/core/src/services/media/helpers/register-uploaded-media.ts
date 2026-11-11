@@ -16,6 +16,7 @@ import getKeyVisibility from "../../../utils/media/get-key-visibility.js";
 import { getMediaOwnership } from "../../../utils/media/media-access.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import recordRoutineEvent from "../../agent/helpers/record-routine-event.js";
+import * as localeServices from "../../locales/index.js";
 import type createSingle from "../create-single.js";
 import notifyChange from "../notify-change.js";
 import type syncMedia from "../strategies/sync-media.js";
@@ -238,6 +239,15 @@ const registerUploadedMedia: ServiceFn<
 		transcript: textFields.includes("transcript") ? data.transcript : undefined,
 		mediaId: mediaRes.data.id,
 	});
+
+	//* unknown locales are refused here, rather than failing on the foreign key
+	const localesRes = await localeServices.checks.checkLocalesExist(context, {
+		localeCodes: translations.flatMap((translation) =>
+			translation.locale_code === null ? [] : [translation.locale_code],
+		),
+	});
+	if (localesRes.error) return localesRes;
+
 	if (translations.length > 0) {
 		const translationResults = await Promise.all(
 			translations.map((translation) =>

@@ -15,6 +15,8 @@ const startServer = async (options: {
 	directory: string;
 	/** Where the server writes the emails it sends. */
 	outbox: string;
+	/** Where the server stores uploaded media. */
+	uploads: string;
 }): Promise<{ url: string; stop(): Promise<void> }> => {
 	const { setup } = options;
 	const launcher = getLauncher(setup.runtime);
@@ -26,6 +28,7 @@ const startServer = async (options: {
 			HARNESS_DATABASE_URL: options.database.url,
 			HARNESS_URL: url,
 			HARNESS_OUTBOX: options.outbox,
+			HARNESS_UPLOADS: options.uploads,
 		},
 		log: path.join(options.directory, "server.log"),
 	};

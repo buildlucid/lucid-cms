@@ -873,7 +873,7 @@ test("accepts a fixed brick by ref and a single media ID, and explains media out
 	});
 	expect(message.split("\n")).toEqual([
 		"There was an error validating some fields.",
-		`bricks.seo.image[0]: Media #${personal} isn't in the media library. Personal uploads need moving to the library before they can be used in content.`,
+		`bricks.seo.image[0]: Media #${personal} can't be used here. It may have been deleted, or you may not have access to it. Personal uploads need moving to the library before they can be used in content.`,
 	]);
 
 	await run.write(directUpdate, {

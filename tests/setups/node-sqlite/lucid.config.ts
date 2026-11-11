@@ -7,6 +7,7 @@ import {
 	sharedConfig,
 	withSchemaStep,
 } from "../../shared/config.ts";
+import { media } from "../../shared/fragments/media.ts";
 import { outbox } from "../../shared/fragments/outbox.ts";
 
 export const env = harnessEnv;
@@ -19,5 +20,6 @@ export default defineConfig({
 		withSchemaStep(env, {
 			...sharedConfig({ url: env.HARNESS_URL }),
 			email: outbox(env.HARNESS_OUTBOX),
+			plugins: [media(env.HARNESS_UPLOADS)],
 		}),
 });

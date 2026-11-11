@@ -208,10 +208,10 @@ const DocumentEditorPage: Component<{
 		requestId: () => props.request?.()?.id ?? null,
 		label: documentLabel,
 		locales: docState.contentLocales,
-		editable: () => !uiState.isBuilderLocked(),
+		editable: () => !uiState.isContentLocked(),
 	});
 	const edits = useBuilderEdits({
-		enabled: () => !uiState.isBuilderLocked(),
+		enabled: () => !uiState.isContentLocked(),
 		collection: docState.collection,
 		collectionKey: docState.collectionKey,
 		documentId: docState.documentId,
@@ -317,7 +317,7 @@ const DocumentEditorPage: Component<{
 			//* - Without this guard, selecting a relation field can trigger a refetch that rehydrates store fields from stale server data and wipes local changes
 			//* - Content saved since, eg. by the agent, waits for the reader to reload or keep their edits
 			if (shouldMerge && hasUnsavedChanges) {
-				brickStore.set("locked", uiState.isBuilderLocked());
+				brickStore.set("locked", uiState.isContentLocked());
 				const saved = document?.contentId ?? null;
 				if (brickStore.get.baseContentId === null) {
 					brickStore.set("baseContentId", saved);
@@ -338,7 +338,7 @@ const DocumentEditorPage: Component<{
 				brickStore.get.setBricks(document, collection);
 			}
 			brickStore.get.setRefs(docState.refs());
-			brickStore.set("locked", uiState.isBuilderLocked());
+			brickStore.set("locked", uiState.isContentLocked());
 			brickStore.set("baseContentId", document?.contentId ?? null);
 			brickStore.set("contentChanged", false);
 			didHydrateStore = true;
@@ -391,8 +391,8 @@ const DocumentEditorPage: Component<{
 		),
 	);
 
-	//* another tab taking hold, or letting go, locks or unlocks the builder straight away
-	createEffect(() => brickStore.set("locked", uiState.isBuilderLocked()));
+	//* another tab taking hold, or letting go, locks or unlocks the fields straight away
+	createEffect(() => brickStore.set("locked", uiState.isContentLocked()));
 	//* once the person saves or drops the agent's or AI translation's changes, autosave carries on
 	createEffect(() => {
 		if (brickStore.get.reviewPending && !brickStore.getDocumentMutated()) {

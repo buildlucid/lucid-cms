@@ -21,7 +21,7 @@ import QuerySort from "@/components/QuerySort/QuerySort";
 import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
 import Table from "@/components/Table/Table";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
-import { Permissions } from "@/constants/permissions";
+import { Permissions, RoleReadRequirement } from "@/constants/permissions";
 import useQueryState, {
 	booleanFilter,
 	numberFilter,
@@ -128,11 +128,14 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 		},
 		enabled: () => searchParams.ready(),
 	});
+	const canReadRoles = () =>
+		userStore.get.meetsRequirement(RoleReadRequirement);
 	const roles = api.roles.useGetMultiple({
 		queryParams: {
 			include: { permissions: false },
 			perPage: -1,
 		},
+		enabled: canReadRoles,
 	});
 
 	const isLoading = createMemo(() => users.isLoading);
@@ -251,12 +254,16 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 								},
 							]
 						: []),
-					{
-						label: T()("common.role"),
-						key: "roleIds",
-						type: "select",
-						options: roleOptions(),
-					},
+					...(canReadRoles()
+						? [
+								{
+									label: T()("common.role"),
+									key: "roleIds",
+									type: "select" as const,
+									options: roleOptions(),
+								},
+							]
+						: []),
 					{
 						label: T()("users.status.locked.label"),
 						key: "isLocked",

@@ -1,5 +1,5 @@
 import { copy } from "../i18n/index.js";
-import type { PermissionGroup } from "./types.js";
+import type { PermissionGroup, PermissionRequirement } from "./types.js";
 
 export const Permissions = {
 	// User permissions
@@ -55,6 +55,15 @@ export const Permissions = {
 	ConnectionUpdate: "connection:update",
 	CacheClear: "cache:clear",
 } as const;
+
+/** Reading roles: people who manage roles, and people who give users roles, as they pick from them. */
+export const RoleReadRequirement = {
+	some: [
+		Permissions.RolesRead,
+		Permissions.UsersCreate,
+		Permissions.UsersUpdate,
+	],
+} as const satisfies PermissionRequirement;
 
 export const PermissionGroups = Object.freeze({
 	users: {

@@ -24,6 +24,8 @@ export type SetupEnvironment = {
 	work: string;
 	/** Where the setup's CMS writes the emails it sends, in every mode. */
 	outbox: string;
+	/** Where the setup's CMS stores uploaded media, on setups with the `media` fragment. */
+	uploads: string;
 	/** What is known without loading the setup's config, for lanes that run no CMS. */
 	baseCapabilities: Capability[];
 	/** Migrates and seeds the template database. */
@@ -54,6 +56,7 @@ const createEnvironment = (options: {
 	const { setup, directory } = options;
 	const work = path.join(directory, "work");
 	const outbox = path.join(work, "outbox");
+	const uploads = path.join(work, "uploads");
 	//* database names must be unique on a shared server
 	const prefix = `${getRunPrefix(options.runId)}_${setup.name}`
 		.replaceAll(/\W/g, "_")
@@ -106,6 +109,7 @@ const createEnvironment = (options: {
 			database: copy,
 			directory,
 			outbox,
+			uploads,
 		});
 		cleanups.push(server.stop);
 		return server.url;
@@ -114,6 +118,7 @@ const createEnvironment = (options: {
 	return {
 		work,
 		outbox,
+		uploads,
 		baseCapabilities,
 		database,
 		serve,

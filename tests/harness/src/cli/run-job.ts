@@ -74,6 +74,7 @@ const runJob = async (options: {
 					report: path.join(directory, `${name}.result.json`),
 					events,
 					outbox: environment.outbox,
+					uploads: environment.uploads,
 				},
 			};
 			await writeJson(contextPath, context);

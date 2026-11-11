@@ -14,6 +14,7 @@
 	"dependencies": {
 		"@lucidcms/cloudflare": "*",
 		"@lucidcms/core": "*",
+		"@lucidcms/filesystem": "*",
 		"@lucidcms/libsql": "*",
 		"@lucidcms/node": "*",
 		"@lucidcms/pages": "*",

@@ -8,6 +8,7 @@ import {
 	sharedConfig,
 	withSchemaStep,
 } from "../../shared/config.ts";
+import { media } from "../../shared/fragments/media.ts";
 import { outbox } from "../../shared/fragments/outbox.ts";
 
 export const env = harnessEnv;
@@ -20,7 +21,10 @@ export default defineConfig({
 		withSchemaStep(env, {
 			...sharedConfig({ url: env.HARNESS_URL }),
 			email: outbox(env.HARNESS_OUTBOX),
-			//* every test database keeps its own keys in the one KV file, so no cached response is shared
-			plugins: [sqliteKV({ namespace: env.HARNESS_DATABASE_URL })],
+			plugins: [
+				media(env.HARNESS_UPLOADS),
+				//* every test database keeps its own keys in the one KV file, so no cached response is shared
+				sqliteKV({ namespace: env.HARNESS_DATABASE_URL }),
+			],
 		}),
 });

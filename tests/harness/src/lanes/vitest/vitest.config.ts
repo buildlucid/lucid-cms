@@ -1,3 +1,4 @@
+import path from "node:path";
 import { defineConfig } from "vitest/config";
 import loadContext from "../../environment/load-context.ts";
 import { paths } from "../../utils/paths.ts";
@@ -15,6 +16,13 @@ export default defineConfig({
 		testTimeout: 30_000,
 		hookTimeout: 60_000,
 		passWithNoTests: true,
+		//* lanes start side by side, and Vitest wipes a shared cache when the lockfile changes while
+		//* others write to it, so each lane keeps its own. It lasts between runs, keeping them fast.
+		fsModuleCachePath: path.join(
+			paths.output,
+			"cache",
+			`${context.setup.name}-${context.lane}-${context.mode}`,
+		),
 		//* lanes run side by side, so each one keeps to its share of the machine
 		maxWorkers: context.workers,
 		server: {

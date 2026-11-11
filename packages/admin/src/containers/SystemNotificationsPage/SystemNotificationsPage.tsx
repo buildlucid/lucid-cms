@@ -3,8 +3,10 @@ import InfoRow from "@/components/InfoRow/InfoRow";
 import NotificationTypeSettings from "@/components/NotificationTypeSettings/NotificationTypeSettings";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import { RoleReadRequirement } from "@/constants/permissions";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { groupByCategory } from "@/utils/notifications";
 
@@ -16,11 +18,13 @@ const SystemNotificationsPage: Component = () => {
 	// ----------------------------------------
 	// Queries
 	const types = api.notifications.useGetTypes();
+	//* role recipients only show for people who can read roles
 	const roles = api.roles.useGetMultiple({
 		queryParams: {
 			include: { permissions: false },
 			perPage: -1,
 		},
+		enabled: () => userStore.get.meetsRequirement(RoleReadRequirement),
 	});
 
 	// ----------------------------------------

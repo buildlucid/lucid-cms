@@ -78,7 +78,7 @@ const createSession = (options: {
 		}
 
 		const headers = new Headers({ accept: "application/json" });
-		if (method !== "GET") {
+		if (method !== "GET" || input.csrf) {
 			headers.set(CSRF_HEADER, await getCsrf());
 		}
 		if (input.body !== undefined) {

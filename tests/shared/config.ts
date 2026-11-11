@@ -1,6 +1,7 @@
 import { z } from "@lucidcms/core";
 import type { EnvironmentVariables, LucidConfig } from "@lucidcms/core/types";
 import PageCollection from "./collections/page.ts";
+import RestrictedStoryCollection from "./collections/restricted-story.ts";
 import ReviewedStoryCollection from "./collections/reviewed-story.ts";
 import SettingsCollection from "./collections/settings.ts";
 import StoryCollection from "./collections/story.ts";
@@ -30,6 +31,8 @@ export const harnessEnv = z.object({
 	HARNESS_SCHEMA_STEP: z.string().optional(),
 	/** The folder the `outbox` fragment writes sent emails to. See `shared/fragments/outbox.ts`. */
 	HARNESS_OUTBOX: z.string().optional(),
+	/** The folder the `media` fragment stores uploads in. See `shared/fragments/media.ts`. */
+	HARNESS_UPLOADS: z.string().optional(),
 });
 
 export type HarnessEnv = z.infer<typeof harnessEnv>;
@@ -44,6 +47,7 @@ export const sharedCollections = [
 	SettingsCollection,
 	StoryCollection,
 	ReviewedStoryCollection,
+	RestrictedStoryCollection,
 ];
 
 /**
@@ -69,6 +73,8 @@ export const sharedConfig = (options: { url: string }) =>
 			},
 			//* every response reports its database queries, which tests and benchmarks read with `countQueries`
 			serverTiming: true,
+			//* the route list it serves is how permission tests find routes they don't cover
+			openAPI: { enabled: true },
 		},
 		collections: sharedCollections,
 	}) satisfies LucidConfig;

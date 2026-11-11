@@ -13,6 +13,7 @@ import {
 	ArticleCollection,
 	localization,
 } from "../../shared/fragments/localization.ts";
+import { media } from "../../shared/fragments/media.ts";
 import { outbox } from "../../shared/fragments/outbox.ts";
 import LandingPageCollection from "./collections/landing-page.ts";
 
@@ -32,6 +33,9 @@ export default defineConfig({
 				ArticleCollection,
 				LandingPageCollection,
 			],
-			plugins: [pages({ collections: [{ key: LandingPageCollection.key }] })],
+			plugins: [
+				media(env.HARNESS_UPLOADS),
+				pages({ collections: [{ key: LandingPageCollection.key }] }),
+			],
 		}),
 });

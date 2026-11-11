@@ -25,6 +25,7 @@ import {
 } from "../../utils/media/media-access.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
+import * as localeServices from "../locales/index.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import clearProcessedImage from "../processed-images/clear-single.js";
 import checkAwaitingSync from "./checks/check-awaiting-sync.js";
@@ -253,6 +254,14 @@ const updateSingle: ServiceFn<
 		transcript: textFields.includes("transcript") ? data.transcript : undefined,
 		mediaId: mediaRes.data.id,
 	});
+
+	//* unknown locales are refused here, rather than failing on the foreign key
+	const localesRes = await localeServices.checks.checkLocalesExist(context, {
+		localeCodes: translations.flatMap((translation) =>
+			translation.locale_code === null ? [] : [translation.locale_code],
+		),
+	});
+	if (localesRes.error) return localesRes;
 
 	if (data.posterId != null && finalType !== "video") {
 		return {

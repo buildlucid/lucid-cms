@@ -5,7 +5,7 @@ import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import SelectMultiple from "@/components/SelectMultiple/SelectMultiple";
-import { Permissions } from "@/constants/permissions";
+import { Permissions, RoleReadRequirement } from "@/constants/permissions";
 import api from "@/services/api";
 import type { Params as UpdateTypeSettingsParams } from "@/services/api/notifications/useUpdateTypeSettings";
 import { queryKeys } from "@/services/query-keys";
@@ -41,6 +41,12 @@ const NotificationTypeSettings: Component<NotificationTypeSettingsProps> = (
 	);
 	const audience = createMemo(() =>
 		props.type.audience.kind === "permission" ? props.type.audience : undefined,
+	);
+	//* picking roles needs the role list, which not everyone with settings access can read
+	const shownAudience = createMemo(() =>
+		userStore.get.meetsRequirement(RoleReadRequirement)
+			? audience()
+			: undefined,
 	);
 	const roleOptions = createMemo(() =>
 		props.roles.map((role) => ({ value: role.id, label: role.name })),
@@ -105,7 +111,7 @@ const NotificationTypeSettings: Component<NotificationTypeSettingsProps> = (
 					/>
 				</div>
 			</div>
-			<Show when={audience()}>
+			<Show when={shownAudience()}>
 				{(audience) => (
 					<>
 						<button

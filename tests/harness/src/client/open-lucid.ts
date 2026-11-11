@@ -5,8 +5,11 @@ import openTarget from "../targets/open-target.ts";
 import type { HostTargetOptions } from "../targets/types.ts";
 import { ADMIN, login } from "./admin.ts";
 import createSession from "./create-session.ts";
-import inviteUser, { type InviteOptions } from "./invite-user.ts";
-import type { Credentials, Session } from "./types.ts";
+import inviteUser, {
+	type InvitedUser,
+	type InviteOptions,
+} from "./invite-user.ts";
+import type { Session } from "./types.ts";
 
 /** The CMS under test, as tests see it. It works the same in every mode and setup. */
 export type Lucid = {
@@ -20,12 +23,10 @@ export type Lucid = {
 	/** A visitor signed in as the seeded super admin. Signs in once, then reuses the session. */
 	admin(): Promise<Session>;
 	/**
-	 * Invites a new user as the admin and signs them in, so a test can act as someone else, such
-	 * as to approve the admin's request. Each call is a new user. Needs `harness:outbox`.
+	 * Creates and signs in a new user. Requires `harness:outbox`. Optional `permissions` creates a
+	 * dedicated role with exactly those grants.
 	 */
-	user(
-		options?: InviteOptions,
-	): Promise<{ session: Session; credentials: Credentials }>;
+	user(options?: InviteOptions): Promise<InvitedUser>;
 	close(): Promise<void>;
 };
 

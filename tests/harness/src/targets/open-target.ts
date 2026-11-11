@@ -5,9 +5,8 @@ import bootHost from "./boot-host.ts";
 import type { HostTargetOptions, Target } from "./types.ts";
 
 /**
- * Opens the CMS a lane run should test.
- * In host mode that is a new in-process CMS on its own copy of the template database.
- * In served mode it is the server the runner already started.
+ * Opens an isolated in-process CMS in host mode, or connects to the runner's server in served
+ * mode.
  */
 const openTarget = async (
 	context: HarnessContext,
@@ -43,6 +42,7 @@ const openTarget = async (
 			configPath: context.setup.configPath,
 			databaseUrl: database.url,
 			outbox: context.paths.outbox,
+			uploads: context.paths.uploads,
 			adapterOverrides: options?.adapterOverrides,
 		});
 

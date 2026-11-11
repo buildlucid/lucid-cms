@@ -19,6 +19,8 @@ const bootHost = async (
 		schemaStep?: string;
 		/** Where the CMS writes the emails it sends, on setups with `harness:outbox`. */
 		outbox?: string;
+		/** Where the CMS stores uploaded media, on setups with the `media` fragment. */
+		uploads?: string;
 	} & HostTargetOptions,
 ): Promise<Target & { config: ResolvedLucidConfig }> => {
 	const loaded = await loadSetupConfig({
@@ -28,6 +30,7 @@ const bootHost = async (
 			HARNESS_URL: HOST_URL,
 			HARNESS_SCHEMA_STEP: options.schemaStep,
 			HARNESS_OUTBOX: options.outbox,
+			HARNESS_UPLOADS: options.uploads,
 		},
 	});
 	const { translationStore } = await prepareTranslations({

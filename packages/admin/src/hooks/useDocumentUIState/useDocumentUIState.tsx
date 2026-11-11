@@ -317,6 +317,14 @@ export function useDocumentUIState(props: {
 		return hasUpdateAccess();
 	});
 
+	/**
+	 * Locks fields when the builder is locked or changes cannot be saved. Header actions use
+	 * `isBuilderLocked`.
+	 */
+	const isContentLocked = createMemo(
+		() => isBuilderLocked() || !hasSavePermission(),
+	);
+
 	const hasAutoSavePermission = createMemo(() => {
 		if (props.version() === "proposal" && props.proposalEditable?.() !== true) {
 			return false;
@@ -441,6 +449,7 @@ export function useDocumentUIState(props: {
 		saveDisabled,
 		canPublishDocument,
 		isBuilderLocked,
+		isContentLocked,
 		isDocumentLocked,
 		isPublished,
 		showRevisionNavigation,

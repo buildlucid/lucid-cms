@@ -12,7 +12,7 @@ import CreateUserDrawer from "@/components/CreateUserDrawer/CreateUserDrawer";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { UserList } from "@/components/UserList/UserList";
-import { Permissions } from "@/constants/permissions";
+import { Permissions, RoleReadRequirement } from "@/constants/permissions";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import useQueryState, {
 	booleanFilter,
@@ -63,11 +63,14 @@ const UsersPage: Component = () => {
 
 	// ----------------------------------
 	// Queries
+	const canReadRoles = () =>
+		userStore.get.meetsRequirement(RoleReadRequirement);
 	const roles = api.roles.useGetMultiple({
 		queryParams: {
 			include: { permissions: false },
 			perPage: -1,
 		},
+		enabled: canReadRoles,
 	});
 
 	// ----------------------------------
@@ -152,12 +155,16 @@ const UsersPage: Component = () => {
 							trueLabel: T()("common.status.locked"),
 							falseLabel: T()("common.status.unlocked"),
 						},
-						{
-							label: T()("common.role"),
-							key: "roleIds",
-							type: "select",
-							options: roleOptions(),
-						},
+						...(canReadRoles()
+							? [
+									{
+										label: T()("common.role"),
+										key: "roleIds",
+										type: "select" as const,
+										options: roleOptions(),
+									},
+								]
+							: []),
 						{
 							label: T()("users.invitations.status.label"),
 							key: "invitationAccepted",

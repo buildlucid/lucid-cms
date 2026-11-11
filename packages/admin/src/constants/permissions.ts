@@ -39,6 +39,15 @@ export const Permissions = {
 	CacheClear: "cache:clear",
 } as const;
 
+/** Reading roles, as core's `RoleReadRequirement`: role managers, and people who give users roles. */
+export const RoleReadRequirement = {
+	some: [
+		Permissions.RolesRead,
+		Permissions.UsersCreate,
+		Permissions.UsersUpdate,
+	],
+} as const;
+
 export type CorePermission = (typeof Permissions)[keyof typeof Permissions];
 export type DocumentPermissionAction =
 	| "read"

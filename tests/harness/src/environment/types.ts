@@ -39,5 +39,7 @@ export type HarnessContext = {
 		events: string;
 		/** Where the setup's CMS writes the emails it sends, on setups with `harness:outbox`. */
 		outbox: string;
+		/** Where the setup's CMS stores uploaded media, on setups with the `media` fragment. */
+		uploads: string;
 	};
 };

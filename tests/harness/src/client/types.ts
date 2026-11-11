@@ -11,6 +11,8 @@ export type ApiRequest = {
 	query?: Record<string, QueryValue | QueryValue[]>;
 	/** Sent as JSON. */
 	body?: unknown;
+	/** Sends the CSRF token on a GET too, for routes that check it there. Other methods always send it. */
+	csrf?: boolean;
 };
 
 export type ApiResponse<Body> = {

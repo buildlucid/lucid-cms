@@ -11,6 +11,7 @@ import OAuthRoutes from "@/components/OAuthRoutes/OAuthRoutes";
 import PublicRoutes from "@/components/PublicRoutes/PublicRoutes";
 import { Permissions } from "@/constants/permissions";
 import agentGuard from "@/guards/AgentGuard/AgentGuard";
+import CollectionGuard from "@/guards/CollectionGuard/CollectionGuard";
 import ConditionGuard from "@/guards/ConditionGuard/ConditionGuard";
 import PermissionGuard from "@/guards/PermissionGuard/PermissionGuard";
 import { documentQueryOptions } from "@/hooks/useDocumentState/document-query";
@@ -261,17 +262,23 @@ const AppRouter: Component = () => {
 					<Route
 						path="/collections/:collectionKey"
 						preload={preloadRoutes(CollectionsDocumentsListRoute)}
-						component={() => <CollectionsDocumentsListRoute />}
+						component={() => (
+							<CollectionGuard>
+								<CollectionsDocumentsListRoute />
+							</CollectionGuard>
+						)}
 					/>
 					{/* Page builder */}
 					<Route
 						path="/collections/:collectionKey/latest/create"
 						preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
 						component={() => (
-							<CollectionDocumentPageBuilderRoute
-								mode="create"
-								version="latest"
-							/>
+							<CollectionGuard>
+								<CollectionDocumentPageBuilderRoute
+									mode="create"
+									version="latest"
+								/>
+							</CollectionGuard>
 						)}
 					/>
 					<Route
@@ -294,12 +301,20 @@ const AppRouter: Component = () => {
 							const queryClient = useQueryClient();
 							void queryClient.prefetchQuery(options);
 						}}
-						component={() => <CollectionDocumentPageBuilderRoute mode="edit" />}
+						component={() => (
+							<CollectionGuard>
+								<CollectionDocumentPageBuilderRoute mode="edit" />
+							</CollectionGuard>
+						)}
 					/>
 					<Route
 						path="/collections/:collectionKey/:documentId/history"
 						preload={preloadRoutes(CollectionsDocumentsHistoryRoute)}
-						component={() => <CollectionsDocumentsHistoryRoute />}
+						component={() => (
+							<CollectionGuard>
+								<CollectionsDocumentsHistoryRoute />
+							</CollectionGuard>
+						)}
 					/>
 					{/* Media */}
 					<Route

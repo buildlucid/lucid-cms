@@ -1,10 +1,11 @@
-import { test as base } from "@playwright/test";
+import { type BrowserContext, test as base, type Page } from "@playwright/test";
 import {
 	describeMissing,
 	findMissing,
 } from "../../capabilities/find-missing.ts";
 import type { Capability } from "../../capabilities/types.ts";
 import openLucid, { type Lucid } from "../../client/open-lucid.ts";
+import type { Session } from "../../client/types.ts";
 import { resolveDriver } from "../../databases/get-driver.ts";
 import loadContext from "../../environment/load-context.ts";
 import createMigrationTemplates from "../../migrations/create-migration-templates.ts";
@@ -15,11 +16,11 @@ import type {
 	Migrations,
 	Step,
 } from "../../migrations/types.ts";
+import toStorageState from "./storage-state.ts";
 
 /**
- * Playwright's `test` with the CMS under test as `lucid`, for preparing data over the API, and
- * `migrations` for tests that need the admin on a database they migrated themselves.
- * The browser starts signed in as the seeded admin.
+ * Playwright fixtures for CMS API access and migration databases. The browser starts signed in as
+ * the seeded admin.
  */
 /** Empty databases for a test to migrate itself, and a server to open the admin on one. */
 export type ServedMigrations = Migrations & {
@@ -31,9 +32,29 @@ export type ServedMigrations = Migrations & {
 };
 
 export const test = base.extend<
-	object,
+	{
+		/**
+		 * Opens a page for another session, such as `lucid.user()`, leaving the default page signed in
+		 * as admin.
+		 */
+		pageAs: (session: Session) => Promise<Page>;
+	},
 	{ lucid: Lucid; migrations: ServedMigrations }
 >({
+	pageAs: async ({ browser, lucid }, use) => {
+		const contexts: BrowserContext[] = [];
+		await use(async (session) => {
+			const context = await browser.newContext({
+				baseURL: lucid.url,
+				storageState: toStorageState(session, lucid.url),
+			});
+			contexts.push(context);
+			return context.newPage();
+		});
+		for (const context of contexts) {
+			await context.close();
+		}
+	},
 	lucid: [
 		// oxlint-disable-next-line no-empty-pattern -- Playwright reads a fixture's needs from this pattern
 		async ({}, use) => {

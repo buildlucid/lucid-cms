@@ -94,7 +94,10 @@ describe("creating documents", () => {
 - `lucid.admin()` is a session signed in as the seeded super admin.
 - `lucid.session()` is a new visitor with their own cookies and rate limits.
 - `lucid.user({ roleIds, superAdmin })` invites a new user as the admin, accepts the invitation from its email and signs them in, so a test can act as someone else. It needs `harness:outbox`. See `suites/integration/auth/invitations.test.ts`.
+- `lucid.user({ permissions })` also makes a role for that user alone, with exactly those permissions. It returns the user's `id` and the role's `roleId`, so a test can change what the user may do.
 - In served mode every test shares one server and database, so create the data you need and do not assume the database is empty.
+- The `migrations` fixture gives empty databases for tests that migrate themselves. See `suites/integration/migrations`.
+- Helpers for documents, media and permissions live in `shared/`. Each route the CMS serves needs a rule in `shared/permissions.ts`, as `suites/integration/permissions/routes.test.ts` fails on a route without one.
 
 ### Skip what a setup cannot do
 
@@ -120,6 +123,7 @@ Capabilities are read from each setup's config, so most need no upkeep:
 | `collection:page`, `locale:fr` | collections and locales     |
 | `auth:password`, `feature:ai`  | enabled options             |
 | `harness:outbox`               | the `outbox` fragment       |
+| `plugin:filesystem`            | the `media` fragment        |
 
 A setup can correct the list in its `setup.ts` with `capabilities: { add, remove }`.
 
@@ -129,54 +133,7 @@ A full run also lists any test that applied to no setup at all. That usually mea
 
 Files in `suites/e2e` end in `.spec.ts` and import from `#harness/playwright`. The browser starts signed in as the admin. The `lucid` fixture is there for preparing data over the API.
 
-### Migration tests
-
-The `lucid` fixture gives a database that is already migrated. A test that is about migrations asks the `migrations` fixture for an empty database, and migrates it itself.
-
-```ts
-import { describe, expect, requires, test } from "#harness/vitest";
-
-describe("adding a field", () => {
-  requires("mode:host");
-
-  test("keeps content", async ({ migrations }) => {
-    const database = await migrations.database();
-    await database.cli("article/base", "migrate", "--yes");
-    await database.cms("article/base", async (admin) => {
-      // create content over the API
-    });
-
-    const migrated = await database.cli("article/added", "migrate");
-    expect(migrated.code).toBe(0);
-  });
-});
-```
-
-- `migrations.database(prepare)` starts a database as `prepare` left it. `prepare` runs once per file and each call gets its own copy, so tests that start from the same state skip repeating it. `migratedTo(step)` prepares a database migrated to a step. Define other `prepare` functions once, outside the tests, as they are told apart by identity. See `withFirstArticle` in `suites/integration/migrations/articles.ts`.
-- Tests in a migration file can run at the same time, with `{ concurrent: true }` on their `describe`, as each one has its own database.
-- A **schema step** is a named version of a project's config, such as `article/base` and `article/added`. Steps live in `shared/migrations/steps.ts`. Each one adds its own collections, migrations or plugins to the setup's config, so the shared content model stays as it is.
-- `cli(step, ...args)` runs a real `lucidcms` command with the config at that step. It has no terminal, so a migration that needs approval fails unless the test passes `--yes` or `--allow-destructive`.
-- `cms(step, use)` starts the CMS in its own process for as long as `use` runs. Each call is a newly started server. Call `cli` inside `use` to migrate beside a running server.
-- `schema()` reads the tables the database has. `query()` runs SQL on it, with `sql` from `#harness/vitest`.
-- `generatedStep(fields)` from `#shared/migrations/collections/generated` names a step for any list of fields. The simulation in `suites/simulation/migrations` uses it to try random changes.
-- `recordDigest(task, value)` attaches a digest to a test. The report flags setups whose digests differ.
-- Browser tests get the same fixture, plus `migrations.serve(database, step)`. It starts the setup's built server on that database, so the admin can be opened on a database its config has moved ahead of. See `suites/e2e/migrations/pending.spec.ts`.
-
-Schema steps reach a config through `HARNESS_SCHEMA_STEP`, which Node setups read with `withSchemaStep()` from `shared/config.ts`. A new Node setup should wrap its config in it.
-
-### Document tests
-
-Tests about documents use two collections every setup registers, and the helpers in `shared/documents.ts`.
-
-- `story` has every field type, nested repeaters, builder and fixed bricks, revisions, and `staging` and `production` environments. `reviewed-story` needs an approved request to create, publish to production, unpublish from it or bin a document. The admin may approve their own requests there, as tests have one user.
-- `fullStory()` builds a story that uses all of it. `valuesOf()` reduces what was sent, or what was read back, to plain values, so a test can compare the two.
-- `createDocument`, `saveDocument`, `readDocument` and `publishDocument` throw when the CMS refuses them. Send the request yourself when the refusal is what the test is about.
-- `createContentReader()` makes an API key and returns a way to call the content API with it.
-- `query` takes a list to send a key more than once, as `filter[fields.title:in]` needs for several values.
-- Responses are only cached on setups with a KV store. Tests of the cache require `plugin:sqlite-kv`, which `node-libsql` has.
-- Every setup turns on `http.serverTiming`, so `countQueries(response)` reads how many database queries a request ran. See `suites/integration/documents/queries.test.ts`, which checks reads and saves don't run more queries as content grows.
-- A write also dispatches jobs other requests left waiting, so its query count is only exact when the database is the file's own. Count a write's queries in host mode.
-- A served database is shared, so put a marker in a field and filter by it when a test counts or lists documents. See `suites/integration/documents/listing.test.ts`.
+`pageAs(session)` opens a new page signed in as someone else, such as a user from `lucid.user()`. See `suites/e2e/permissions/access.spec.ts`. Only one person can have a document open for editing, so give each page its own document.
 
 ### Simulation tests
 
@@ -203,7 +160,7 @@ Files in `suites/performance` end in `.bench.ts` and import from `#harness/perfo
 
 ## Add a setup
 
-1. Create `setups/<name>/lucid.config.ts`. Spread `sharedConfig()` from `shared/config.ts` and read the database from `getDatabaseUrl(env)`. `sharedConfig()` is the bare minimum. Turn features on by adding fragments from `shared/fragments`, such as `localization`. Node setups also add `email: outbox(env.HARNESS_OUTBOX)`, which keeps sent emails for `lucid.user()`.
+1. Create `setups/<name>/lucid.config.ts`. Spread `sharedConfig()` from `shared/config.ts` and read the database from `getDatabaseUrl(env)`. `sharedConfig()` is the bare minimum. Turn features on by adding fragments from `shared/fragments`, such as `localization`. Node setups also add `email: outbox(env.HARNESS_OUTBOX)`, which keeps sent emails for `lucid.user()`, and the `media(env.HARNESS_UPLOADS)` plugin, which stores uploads. Node setups wrap their config in `withSchemaStep()`, which migration tests use to move between config versions.
 2. Create `setups/<name>/setup.ts`:
 
 ```ts

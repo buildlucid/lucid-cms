@@ -1,6 +1,6 @@
 import { Navigate } from "@solidjs/router";
 import type { PermissionRequirement } from "@types";
-import { type Component, createMemo, type JSXElement } from "solid-js";
+import { type Component, createMemo, type JSXElement, Show } from "solid-js";
 import userStore from "@/store/userStore/userStore";
 
 interface PermissionGuardProps {
@@ -9,14 +9,24 @@ interface PermissionGuardProps {
 	children: JSXElement;
 }
 
+/** Renders children while the reactive requirement is met; otherwise redirects home. */
 const PermissionGuard: Component<PermissionGuardProps> = (props) => {
+	// ----------------------------------------
+	// Memos
 	const hasPermission = createMemo(() =>
 		userStore.get.meetsRequirement(props.permission),
 	);
 
-	if (hasPermission()) return props.children;
-
-	return props.fallback ?? <Navigate href="/admin" />;
+	// ----------------------------------------
+	// Render
+	return (
+		<Show
+			when={hasPermission()}
+			fallback={props.fallback ?? <Navigate href="/admin" />}
+		>
+			{props.children}
+		</Show>
+	);
 };
 
 export default PermissionGuard;
