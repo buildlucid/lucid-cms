@@ -1,12 +1,9 @@
-import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { stripVTControlCharacters } from "node:util";
 import type { KyselyDB, ResolvedLucidConfig } from "@lucidcms/core/types";
 import { ADMIN, ensureAdmin, login } from "../client/admin.ts";
 import createSession from "../client/create-session.ts";
-import createEmptyDatabase from "../databases/create-empty-database.ts";
-import type { DatabaseDriver } from "../databases/types.ts";
 import type { HarnessContext } from "../environment/types.ts";
 import { HOST_URL } from "../targets/boot-host.ts";
 import loadSetupConfig from "../targets/load-setup-config.ts";
@@ -16,25 +13,23 @@ import startHost from "./start-host.ts";
 import type { MigrationDatabase, Step } from "./types.ts";
 
 /**
- * Creates an empty database for the setup, with the commands and readers a migration test needs.
- * `destroy` removes it.
+ * Gives a database the commands and readers a migration test needs. `name` must be unique in
+ * the run, as it names the database's command logs.
  */
-const createMigrationDatabase = async (options: {
+const createMigrationDatabase = (options: {
 	context: HarnessContext;
-	driver: DatabaseDriver;
-}): Promise<MigrationDatabase & { destroy(): Promise<void> }> => {
-	const { context } = options;
-	const name = `migration_${randomUUID().replaceAll("-", "")}`;
-	const database = await createEmptyDatabase(options.driver, {
-		directory: context.paths.work,
-		name,
-	});
+	name: string;
+	url: string;
+}): MigrationDatabase => {
+	const { context, name, url } = options;
 	const env = (step: Step) => ({
-		HARNESS_DATABASE_URL: database.url,
+		HARNESS_DATABASE_URL: url,
 		HARNESS_URL: HOST_URL,
 		...(step ? { HARNESS_SCHEMA_STEP: step } : {}),
 	});
 	let commands = 0;
+	//* loading a config takes a moment and reads are frequent, so it loads once per database
+	let config: ReturnType<typeof loadSetupConfig> | undefined;
 
 	/** Connects through the setup's own adapter, as the CMS does. */
 	const connect = async <Result>(
@@ -43,20 +38,21 @@ const createMigrationDatabase = async (options: {
 			adapter: ResolvedLucidConfig["db"],
 		) => Promise<Result>,
 	): Promise<Result> => {
-		const { config } = await loadSetupConfig({
+		config ??= loadSetupConfig({
 			configPath: context.setup.configPath,
 			env: env(null),
 		});
-		const connection = await config.db.connect(env(null));
+		const { config: loaded } = await config;
+		const connection = await loaded.db.connect(env(null));
 		try {
-			return await use(connection.client, config.db);
+			return await use(connection.client, loaded.db);
 		} finally {
 			await connection.destroy();
 		}
 	};
 
 	return {
-		url: database.url,
+		url,
 		cli: async (step, ...args) => {
 			const log = path.join(context.paths.work, `${name}-${++commands}.log`);
 			const code = await runCommand({
@@ -76,7 +72,7 @@ const createMigrationDatabase = async (options: {
 		cms: async (step, use) => {
 			const host = await startHost({
 				configPath: context.setup.configPath,
-				databaseUrl: database.url,
+				databaseUrl: url,
 				schemaStep: step ?? undefined,
 			});
 			try {
@@ -111,7 +107,6 @@ const createMigrationDatabase = async (options: {
 				.sort(byName);
 		},
 		query: (use) => connect((kysely) => use(kysely)),
-		destroy: database.destroy,
 	};
 };
 

@@ -5,6 +5,7 @@ import loadContext from "../environment/load-context.ts";
 import { test } from "../lanes/vitest/test.ts";
 import type { JsonValue } from "../utils/json.ts";
 import createRandom from "./create-random.ts";
+import getRunOptions from "./get-run-options.ts";
 import type { SimulationDefinition } from "./types.ts";
 
 const DEFAULT_MAX_ACTIONS = 20;
@@ -71,7 +72,7 @@ const simulation = <Model>(
 					await lucid.close();
 				}
 			}),
-			{ seed: context.seed, numRuns: context.simulationRuns },
+			getRunOptions(),
 		);
 
 		task.meta.harness = {

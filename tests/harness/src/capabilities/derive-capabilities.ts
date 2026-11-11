@@ -1,4 +1,5 @@
 import type { ResolvedLucidConfig } from "@lucidcms/core/types";
+import { OUTBOX_ADAPTER_KEY } from "../../../shared/fragments/outbox.ts";
 import type { Capability } from "./types.ts";
 
 /** Lists the names whose flag is on, as capabilities with the given prefix. */
@@ -35,6 +36,12 @@ const deriveCapabilities = (config: ResolvedLucidConfig): Capability[] => [
 		mcp: config.ai.mcp.enabled,
 		openAPI: config.http.openAPI.enabled,
 		localization: config.localization.locales.length > 0,
+	}),
+	...enabled("harness:", {
+		outbox:
+			typeof config.email.adapter === "object" &&
+			"key" in config.email.adapter &&
+			config.email.adapter.key === OUTBOX_ADAPTER_KEY,
 	}),
 ];
 

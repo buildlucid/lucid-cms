@@ -1,7 +1,13 @@
 import path from "node:path";
-import type { Reporter, TestCase, TestModule } from "vitest/node";
+import type {
+	Reporter,
+	TestCase,
+	TestModule,
+	TestSpecification,
+} from "vitest/node";
 import { isNotApplicable } from "../../capabilities/find-missing.ts";
 import loadContext from "../../environment/load-context.ts";
+import emitProgress from "../../progress/emit-progress.ts";
 import createTestId from "../../report/create-test-id.ts";
 import type { TestRecord, TestStatus } from "../../report/types.ts";
 import writeLaneResult from "../../report/write-lane-result.ts";
@@ -44,18 +50,61 @@ const getGroups = (test: TestCase): string[] => {
 	return groups;
 };
 
-/** Turns Vitest's results into the harness's report shape when a run ends. */
+/** A test file's path relative to the lane's folder, as reports and progress events name it. */
+const toFile = (module: TestModule): string =>
+	path.relative(path.join(paths.suites, loadContext().lane), module.moduleId);
+
+/**
+ * Turns Vitest's results into the harness's report shape when a run ends, and reports progress
+ * while it runs.
+ */
 class HarnessReporter implements Reporter {
+	onTestRunStart(specifications: ReadonlyArray<TestSpecification>): void {
+		emitProgress({ type: "files", total: specifications.length });
+	}
+
+	onTestModuleCollected(module: TestModule): void {
+		emitProgress({
+			type: "collected",
+			file: toFile(module),
+			tests: [...module.children.allTests()].length,
+		});
+	}
+
+	onTestCaseReady(test: TestCase): void {
+		emitProgress({
+			type: "test-start",
+			file: toFile(test.module),
+			name: test.fullName,
+		});
+	}
+
+	onTestCaseResult(test: TestCase): void {
+		const result = test.result();
+		const skipReason = result.state === "skipped" ? result.note : undefined;
+		emitProgress({
+			type: "test-end",
+			file: toFile(test.module),
+			name: test.fullName,
+			status: toStatus(result.state, skipReason),
+			durationMs: Math.round(test.diagnostic()?.duration ?? 0),
+			error: result.errors?.[0]?.message.split("\n")[0],
+		});
+	}
+
+	onTestModuleEnd(module: TestModule): void {
+		emitProgress({ type: "file-end", file: toFile(module) });
+	}
+
 	async onTestRunEnd(
 		modules: ReadonlyArray<TestModule>,
 		unhandledErrors: ReadonlyArray<SerializedError>,
 	): Promise<void> {
 		const { lane } = loadContext();
-		const laneDirectory = path.join(paths.suites, lane);
 
 		const toRecord = (test: TestCase): TestRecord => {
 			const result = test.result();
-			const file = path.relative(laneDirectory, test.module.moduleId);
+			const file = toFile(test.module);
 			const groups = getGroups(test);
 			const skipReason = result.state === "skipped" ? result.note : undefined;
 			const status = toStatus(result.state, skipReason);

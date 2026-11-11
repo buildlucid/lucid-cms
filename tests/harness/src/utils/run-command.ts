@@ -22,6 +22,9 @@ export type RunningCommand = {
 /** How long a command gets to shut down cleanly before it is killed. */
 const STOP_GRACE_MS = 3000;
 
+/** Every command this process started that is still running, so they can all be stopped at once. */
+const running = new Set<RunningCommand>();
+
 /** Starts a command with the harness's environment plus its own, sending output to a log file or the terminal. */
 export const startCommand = async (
 	options: CommandOptions,
@@ -35,8 +38,22 @@ export const startCommand = async (
 	const child = spawn(options.command, options.args, {
 		cwd: options.cwd,
 		env: { ...process.env, ...options.env },
-		stdio: log ? ["ignore", "pipe", "pipe"] : "inherit",
+		//* no input, as a command in its own process group may not read the terminal
+		stdio: ["ignore", log ? "pipe" : "inherit", log ? "pipe" : "inherit"],
+		//* its own process group, so stopping it also stops what it started, such as test workers
+		detached: true,
 	});
+	/** Signals the command and everything it started. */
+	const signal = (name: NodeJS.Signals) => {
+		if (!child.pid) {
+			return;
+		}
+		try {
+			process.kill(-child.pid, name);
+		} catch {
+			// the group has already gone
+		}
+	};
 	if (log) {
 		child.stdout?.pipe(log, { end: false });
 		child.stderr?.pipe(log, { end: false });
@@ -45,26 +62,39 @@ export const startCommand = async (
 	const exit = new Promise<number>((resolve, reject) => {
 		child.once("error", reject);
 		child.once("close", (code) => {
-			log?.end();
-			resolve(code ?? 1);
+			//* waits for the log to be written in full, as callers read it once the command ends
+			if (log) {
+				log.end(() => resolve(code ?? 1));
+			} else {
+				resolve(code ?? 1);
+			}
 		});
 	});
 
-	return {
+	const command: RunningCommand = {
 		exit,
 		stop: async () => {
+			signal("SIGTERM");
+			//* what it started may outlive it, so the group is signalled either way
 			if (child.exitCode !== null || child.signalCode !== null) {
 				return;
 			}
 
-			child.kill("SIGTERM");
-			const forced = setTimeout(() => child.kill("SIGKILL"), STOP_GRACE_MS);
+			const forced = setTimeout(() => signal("SIGKILL"), STOP_GRACE_MS);
 			await exit.catch(() => undefined);
 			clearTimeout(forced);
 		},
 	};
+	running.add(command);
+	void exit.finally(() => running.delete(command)).catch(() => undefined);
+	return command;
 };
 
 /** Runs a command to the end and returns its exit code. */
 export const runCommand = async (options: CommandOptions): Promise<number> =>
 	(await startCommand(options)).exit;
+
+/** Stops every command still running, such as when the run is cancelled. */
+export const stopAllCommands = async (): Promise<void> => {
+	await Promise.all([...running].map((command) => command.stop()));
+};

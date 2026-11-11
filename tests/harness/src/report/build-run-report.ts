@@ -40,6 +40,8 @@ const buildRunReport = (options: {
 	durationMs?: number;
 	seed: number;
 	lanes: LaneReport[];
+	/** Whether the run was cancelled. */
+	stopped?: boolean;
 	/** Whether the run covered every setup, lane and mode, so a test that applied nowhere is worth flagging. */
 	complete: boolean;
 }): RunReport => ({
@@ -54,6 +56,7 @@ const buildRunReport = (options: {
 	},
 	node: process.version,
 	ci: Boolean(process.env.CI),
+	...(options.stopped ? { stopped: true } : {}),
 	lanes: options.lanes.map(withoutLocalPaths),
 	mismatches: findMismatches(options.lanes),
 	neverRan: options.complete ? findNeverRan(options.lanes) : [],

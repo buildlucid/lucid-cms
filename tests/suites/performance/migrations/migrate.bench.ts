@@ -26,6 +26,23 @@ const time = async (
 	return run.durationMs;
 };
 
+/**
+ * Runs one untimed migration first, so the first sample does not pay for files the system has
+ * not read yet. It replaces a whole warm-up sample, which would run every command.
+ */
+const warmUp = async (context: BenchmarkContext): Promise<void> => {
+	const database = await context.database();
+	try {
+		await time(context, {
+			url: database.url,
+			args: ["migrate", "--yes"],
+			name: "migrate-warm-up",
+		});
+	} finally {
+		await database.destroy();
+	}
+};
+
 const duration = (label: string, value: number): Metric => ({
 	label,
 	unit: "ms",
@@ -33,8 +50,10 @@ const duration = (label: string, value: number): Metric => ({
 });
 
 /** Times the migrations every project runs: a new database, and the check that nothing is left to do. */
-benchmark({
+benchmark<void>({
 	id: "migrate",
+	warmups: 0,
+	prepare: warmUp,
 	sample: async (context) => {
 		const database = await context.database();
 		try {
@@ -63,9 +82,17 @@ benchmark({
 });
 
 /** Times collection migrations for a large content model: creating it, then one new field per collection. */
-benchmark({
+benchmark<void>({
 	id: "migrate.large",
-	sample: async (context): Promise<Record<string, Metric>> => {
+	warmups: 0,
+	prepare: async (context) => {
+		if (context.setup.runtime === "node") {
+			await warmUp(context);
+		}
+	},
+	sample: async (
+		context: BenchmarkContext,
+	): Promise<Record<string, Metric>> => {
 		//* schema steps reach a config through its environment, which only Node setups read
 		if (context.setup.runtime !== "node") {
 			return {};

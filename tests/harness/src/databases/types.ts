@@ -47,4 +47,9 @@ export type DatabaseDriver<State extends JsonObject = JsonObject> = {
 	/** Copies a template into a fresh database. Any process may call this. */
 	clone(state: State, location: DatabaseLocation): Promise<ProvisionedDatabase>;
 	destroyTemplate(state: State): Promise<void>;
+	/**
+	 * Removes every database whose name starts with `prefix`, for what a run's test processes
+	 * left when they were stopped. Engines whose databases are files in the run's folder need none.
+	 */
+	sweep?(prefix: string): Promise<void>;
 };

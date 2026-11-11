@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import createDatabaseName from "../databases/create-database-name.ts";
 import { getDriver } from "../databases/get-driver.ts";
 import type { HarnessContext } from "../environment/types.ts";
 import bootHost from "./boot-host.ts";
@@ -34,7 +34,7 @@ const openTarget = async (
 		target.template.state,
 		{
 			directory: context.paths.work,
-			name: `db_${randomUUID().replaceAll("-", "")}`,
+			name: createDatabaseName(context.runId, "db"),
 		},
 	);
 
@@ -42,6 +42,7 @@ const openTarget = async (
 		const host = await bootHost({
 			configPath: context.setup.configPath,
 			databaseUrl: database.url,
+			outbox: context.paths.outbox,
 			adapterOverrides: options?.adapterOverrides,
 		});
 

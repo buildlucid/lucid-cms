@@ -26,10 +26,13 @@
 		"@electric-sql/pglite-socket": "^0.2.19",
 		"@playwright/test": "^1.65.0",
 		"@types/node": "^24.19.2",
+		"cli-truncate": "^6.2.0",
 		"fast-check": "^4.10.2",
 		"kysely": "0.29.7",
+		"log-update": "^8.0.0",
 		"picocolors": "^1.1.1",
 		"postgres": "^4.0.0",
+		"string-width": "^8.3.0",
 		"typescript": "^6.0.3",
 		"vitest": "^5.0.5"
 	},

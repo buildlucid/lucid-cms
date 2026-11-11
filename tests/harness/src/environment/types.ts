@@ -28,10 +28,16 @@ export type HarnessContext = {
 	simulationRuns: number;
 	/** How many samples each benchmark takes. */
 	performanceRuns: number;
+	/** How many test workers the lane may use, so lanes running side by side share the machine. */
+	workers: number;
 	paths: {
 		/** A scratch folder for this lane's databases and files. */
 		work: string;
 		/** Where the lane writes its report. */
 		report: string;
+		/** Where the lane appends progress events while it runs. See `progress/types.ts`. */
+		events: string;
+		/** Where the setup's CMS writes the emails it sends, on setups with `harness:outbox`. */
+		outbox: string;
 	};
 };

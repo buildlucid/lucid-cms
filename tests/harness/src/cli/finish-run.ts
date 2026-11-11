@@ -1,4 +1,3 @@
-import pc from "picocolors";
 import hasFailures from "../report/has-failures.ts";
 import renderConsole from "../report/renderers/render-console.ts";
 import sendToPosthog from "../report/sinks/send-to-posthog.ts";
@@ -8,13 +7,21 @@ import writeRunReport from "../report/write-run-report.ts";
 /** Writes a finished run's reports, prints its summary and returns the process exit code. */
 const finishRun = async (
 	report: RunReport,
-	directory: string,
+	options: {
+		directory: string;
+		/** Earlier reports, newest first, which the summary compares with. */
+		previous: readonly RunReport[];
+	},
 ): Promise<number> => {
-	const files = await writeRunReport(report, directory);
+	await writeRunReport(report, options.directory);
 	await sendToPosthog(report);
 
-	console.log(renderConsole(report, directory));
-	console.log(pc.dim(`Report: ${files.html}`));
+	console.log(
+		renderConsole(report, {
+			...options,
+			width: process.stdout.columns ?? 120,
+		}),
+	);
 
 	return hasFailures(report) ? 1 : 0;
 };

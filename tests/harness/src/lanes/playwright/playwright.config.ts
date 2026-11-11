@@ -16,6 +16,8 @@ export default defineConfig({
 	globalSetup: path.join(import.meta.dirname, "global-setup.ts"),
 	reporter: [["list"], [path.join(import.meta.dirname, "reporter.ts")]],
 	fullyParallel: true,
+	//* lanes run side by side, so each one keeps to its share of the machine
+	workers: context.workers,
 	forbidOnly: Boolean(process.env.CI),
 	retries: process.env.CI ? 1 : 0,
 	use: {

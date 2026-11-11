@@ -5,7 +5,8 @@ import openTarget from "../targets/open-target.ts";
 import type { HostTargetOptions } from "../targets/types.ts";
 import { ADMIN, login } from "./admin.ts";
 import createSession from "./create-session.ts";
-import type { Session } from "./types.ts";
+import inviteUser, { type InviteOptions } from "./invite-user.ts";
+import type { Credentials, Session } from "./types.ts";
 
 /** The CMS under test, as tests see it. It works the same in every mode and setup. */
 export type Lucid = {
@@ -18,6 +19,13 @@ export type Lucid = {
 	session(): Session;
 	/** A visitor signed in as the seeded super admin. Signs in once, then reuses the session. */
 	admin(): Promise<Session>;
+	/**
+	 * Invites a new user as the admin and signs them in, so a test can act as someone else, such
+	 * as to approve the admin's request. Each call is a new user. Needs `harness:outbox`.
+	 */
+	user(
+		options?: InviteOptions,
+	): Promise<{ session: Session; credentials: Credentials }>;
 	close(): Promise<void>;
 };
 
@@ -30,6 +38,14 @@ const openLucid = async (
 	const session = () =>
 		createSession({ url: target.url, transport: target.transport });
 	let admin: Promise<Session> | undefined;
+	const signInAdmin = () => {
+		admin ??= (async () => {
+			const signedIn = session();
+			await login(signedIn, ADMIN);
+			return signedIn;
+		})();
+		return admin;
+	};
 
 	return {
 		setup: context.setup.name,
@@ -37,14 +53,14 @@ const openLucid = async (
 		capabilities: context.capabilities,
 		url: target.url,
 		session,
-		admin: () => {
-			admin ??= (async () => {
-				const signedIn = session();
-				await login(signedIn, ADMIN);
-				return signedIn;
-			})();
-			return admin;
-		},
+		admin: signInAdmin,
+		user: async (invite = {}) =>
+			inviteUser({
+				admin: await signInAdmin(),
+				visitor: session(),
+				outbox: context.paths.outbox,
+				invite,
+			}),
 		close: target.close,
 	};
 };

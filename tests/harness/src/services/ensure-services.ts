@@ -1,6 +1,5 @@
 import path from "node:path";
 import type { DatabaseKey } from "../databases/types.ts";
-import logger from "../utils/logger.ts";
 import { paths } from "../utils/paths.ts";
 import { runCommand } from "../utils/run-command.ts";
 import services from "./services.ts";
@@ -47,7 +46,12 @@ const start = async (service: Service, log: string): Promise<boolean> => {
  */
 const ensureServices = async (
 	databases: readonly DatabaseKey[],
-	options: { directory: string },
+	options: {
+		directory: string;
+		/** Says what is starting, for the run's progress. */
+		report(message: string): void;
+		warn(message: string): void;
+	},
 ): Promise<void> => {
 	for (const database of new Set(databases)) {
 		const service = services[database];
@@ -55,7 +59,7 @@ const ensureServices = async (
 			continue;
 		}
 
-		logger.step("services", `Starting ${service.name} in Docker`);
+		options.report(`Starting ${service.name} in Docker`);
 		const started = await start(
 			service,
 			path.join(options.directory, "services.log"),
@@ -63,10 +67,7 @@ const ensureServices = async (
 		if (started) {
 			Object.assign(process.env, service.env);
 		} else {
-			logger.error(
-				"services",
-				`Could not start ${service.name}. Is Docker running?`,
-			);
+			options.warn(`Could not start ${service.name}. Is Docker running?`);
 		}
 	}
 };

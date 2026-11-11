@@ -62,6 +62,17 @@ const postgresDriver = defineDriver<PostgresState>({
 		return { url: urlFor(database), destroy: () => drop(database) };
 	},
 	destroyTemplate: (state) => drop(state.database),
+	sweep: async (prefix) => {
+		const left = await withServer(
+			(sql) =>
+				sql<
+					{ datname: string }[]
+				>`SELECT datname FROM pg_database WHERE starts_with(datname, ${prefix})`,
+		);
+		for (const { datname } of left) {
+			await drop(datname);
+		}
+	},
 });
 
 export default postgresDriver;

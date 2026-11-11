@@ -28,6 +28,8 @@ export const harnessEnv = z.object({
 	HARNESS_URL: z.url().default("http://localhost:6543"),
 	/** The schema step migration tests load the config with. See `shared/migrations/steps.ts`. */
 	HARNESS_SCHEMA_STEP: z.string().optional(),
+	/** The folder the `outbox` fragment writes sent emails to. See `shared/fragments/outbox.ts`. */
+	HARNESS_OUTBOX: z.string().optional(),
 });
 
 export type HarnessEnv = z.infer<typeof harnessEnv>;

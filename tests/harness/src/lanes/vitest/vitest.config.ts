@@ -15,6 +15,8 @@ export default defineConfig({
 		testTimeout: 30_000,
 		hookTimeout: 60_000,
 		passWithNoTests: true,
+		//* lanes run side by side, so each one keeps to its share of the machine
+		maxWorkers: context.workers,
 		server: {
 			deps: {
 				//* Lucid's packages are linked from this repository, so Vitest would transform its own copy

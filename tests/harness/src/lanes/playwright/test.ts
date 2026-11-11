@@ -7,7 +7,8 @@ import type { Capability } from "../../capabilities/types.ts";
 import openLucid, { type Lucid } from "../../client/open-lucid.ts";
 import { resolveDriver } from "../../databases/get-driver.ts";
 import loadContext from "../../environment/load-context.ts";
-import createMigrationDatabase from "../../migrations/create-migration-database.ts";
+import createMigrationTemplates from "../../migrations/create-migration-templates.ts";
+import createMigrations from "../../migrations/create-migrations.ts";
 import serveBuilt from "../../migrations/serve-built.ts";
 import type {
 	MigrationDatabase,
@@ -47,32 +48,30 @@ export const test = base.extend<
 		// oxlint-disable-next-line no-empty-pattern -- Playwright reads a fixture's needs from this pattern
 		async ({}, use) => {
 			const context = loadContext();
-			const cleanups: Array<() => Promise<void>> = [];
+			const driver = resolveDriver(context.setup.database);
+			const templates = createMigrationTemplates({ context, driver });
+			const migrations = createMigrations({ context, driver, templates });
+			const servers: Array<() => Promise<void>> = [];
 
 			await use({
-				database: async () => {
-					const database = await createMigrationDatabase({
-						context,
-						driver: resolveDriver(context.setup.database),
-					});
-					cleanups.push(database.destroy);
-					return database;
-				},
+				database: migrations.database,
 				serve: async (database, step) => {
 					const server = await serveBuilt({
 						context,
 						databaseUrl: database.url,
 						step,
 					});
-					cleanups.push(server.stop);
+					servers.push(server.stop);
 					return server;
 				},
 			});
 
-			//* newest first, so servers stop before their databases go
-			for (const cleanup of cleanups.reverse()) {
-				await cleanup().catch(() => undefined);
+			//* servers stop before their databases go
+			for (const stop of servers) {
+				await stop().catch(() => undefined);
 			}
+			await migrations.destroy();
+			await templates.destroy();
 		},
 		{ scope: "worker" },
 	],

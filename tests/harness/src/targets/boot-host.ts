@@ -17,6 +17,8 @@ const bootHost = async (
 		databaseUrl: string;
 		/** The schema step to load the config with, for migration tests. */
 		schemaStep?: string;
+		/** Where the CMS writes the emails it sends, on setups with `harness:outbox`. */
+		outbox?: string;
 	} & HostTargetOptions,
 ): Promise<Target & { config: ResolvedLucidConfig }> => {
 	const loaded = await loadSetupConfig({
@@ -25,6 +27,7 @@ const bootHost = async (
 			HARNESS_DATABASE_URL: options.databaseUrl,
 			HARNESS_URL: HOST_URL,
 			HARNESS_SCHEMA_STEP: options.schemaStep,
+			HARNESS_OUTBOX: options.outbox,
 		},
 	});
 	const { translationStore } = await prepareTranslations({

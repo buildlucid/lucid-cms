@@ -15,7 +15,9 @@ export type Capability =
 	| `collection:${string}`
 	| `locale:${string}`
 	| `auth:${string}`
-	| `feature:${string}`;
+	| `feature:${string}`
+	/** Something the harness adds to a setup for tests, such as `harness:outbox` for sent emails. */
+	| `harness:${string}`;
 
 /** Capabilities to add to, or take away from, what the harness worked out by itself. */
 export type CapabilityChanges = {

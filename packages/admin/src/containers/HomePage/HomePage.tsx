@@ -47,7 +47,8 @@ const HomePage: Component = () => {
 				<PageLayout.Root>
 					<PageLayout.Body padding="md" class="blur-background">
 						<div data-home-view="ask" class="flex grow flex-col">
-							<div class="flex justify-end">
+							{/* Pulls up to the Overview header's md:pt-5 so the switch doesn't jump between views */}
+							<div class="flex justify-end md:-mt-1">
 								<HomeViewSwitch />
 							</div>
 							<AgentHome />

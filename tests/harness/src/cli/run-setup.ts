@@ -1,10 +1,9 @@
 import path from "node:path";
-import pc from "picocolors";
 import createEnvironment from "../environment/create-environment.ts";
-import summarize from "../report/summarize.ts";
+import type { Monitor } from "../monitor/create-monitor.ts";
 import type { LaneReport } from "../report/types.ts";
-import formatDuration from "../utils/format-duration.ts";
-import logger from "../utils/logger.ts";
+import createJobKey from "../utils/create-job-key.ts";
+import createLimiter, { type Limiter } from "../utils/create-limiter.ts";
 import runJob from "./run-job.ts";
 import type { Job, RunOptions, SetupPlan } from "./types.ts";
 
@@ -19,30 +18,10 @@ const failJob = (job: Job, error: unknown): LaneReport => ({
 	errors: [error instanceof Error ? error.message : String(error)],
 });
 
-const describeResult = (report: LaneReport): string => {
-	const summary = summarize([report]);
-	const failed = summary.failed > 0 || report.errors.length > 0;
-	const counts = [
-		summary.applicable > 0 ? `${summary.passed} passed` : null,
-		summary.failed > 0 ? `${summary.failed} failed` : null,
-		summary.skipped > 0 ? `${summary.skipped} skipped` : null,
-		summary.notApplicable > 0
-			? `${summary.notApplicable} not applicable`
-			: null,
-		report.measurements.length > 0
-			? `${report.measurements.length} measurements`
-			: null,
-		report.errors.length > 0 ? `${report.errors.length} errors` : null,
-	]
-		.filter((part) => part !== null)
-		.join(", ");
-
-	return `${failed ? pc.red("✗") : pc.green("✓")} ${report.lane} (${report.mode}) ${counts} ${pc.dim(formatDuration(report.durationMs))}`;
-};
-
 /**
- * Runs a setup's jobs in order and cleans up, whatever happens. A job that cannot be prepared,
- * such as after a failed migration or build, is reported as failed and the rest still run.
+ * Runs jobs as their prerequisites and slots become available, overlapping host tests with builds.
+ * Serializes served lanes to protect shared database measurements. Reports preparation failures
+ * and continues; always cleans up.
  */
 const runSetup = async (options: {
 	plan: SetupPlan;
@@ -51,6 +30,9 @@ const runSetup = async (options: {
 	directory: string;
 	run: RunOptions;
 	live: boolean;
+	slots: Limiter;
+	monitor: Monitor;
+	signal: AbortSignal;
 }): Promise<LaneReport[]> => {
 	const { setup, jobs } = options.plan;
 	const directory = path.join(options.directory, setup.name);
@@ -60,27 +42,41 @@ const runSetup = async (options: {
 		directory,
 	});
 
-	const reports: LaneReport[] = [];
-	try {
-		for (const job of jobs) {
-			const report = await runJob({
-				job,
-				environment,
-				runId: options.runId,
-				runDirectory: options.directory,
-				directory,
-				run: options.run,
-				live: options.live,
-			}).catch((error: unknown) => failJob(job, error));
+	//* waits for its turn on the server before taking a slot, so it holds no slot while it waits
+	const serverTurn = createLimiter(1);
+	const servedSlots: Limiter = (task, priority) =>
+		serverTurn(() => options.slots(task, priority), priority);
 
-			reports.push(report);
-			logger.step(setup.name, describeResult(report));
-		}
+	try {
+		return await Promise.all(
+			jobs.map(async (job) => {
+				const observer = options.monitor.job(
+					createJobKey({
+						setup: setup.name,
+						lane: job.lane.key,
+						mode: job.mode,
+					}),
+				);
+				const report = await runJob({
+					job,
+					environment,
+					runId: options.runId,
+					runDirectory: options.directory,
+					directory,
+					run: options.run,
+					live: options.live,
+					slots: job.mode === "served" ? servedSlots : options.slots,
+					observer,
+					signal: options.signal,
+				}).catch((error: unknown) => failJob(job, error));
+
+				observer.finish(report);
+				return report;
+			}),
+		);
 	} finally {
 		await environment.destroy();
 	}
-
-	return reports;
 };
 
 export default runSetup;

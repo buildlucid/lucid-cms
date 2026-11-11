@@ -1,4 +1,9 @@
-import { expect, type Session } from "#harness/vitest";
+import {
+	expect,
+	migratedTo,
+	type PrepareDatabase,
+	type Session,
+} from "#harness/vitest";
 import { ARTICLE_KEY } from "#shared/migrations/collections/article";
 
 const ARTICLES = `/api/v1/documents/${ARTICLE_KEY}`;
@@ -29,6 +34,9 @@ export const FIRST_ARTICLE = {
 		{ key: "rating", type: "number", value: 4 },
 	],
 } satisfies ArticleInput;
+
+/** The ID `FIRST_ARTICLE` has in a database made by `withFirstArticle`. */
+export const FIRST_ARTICLE_ID = 1;
 
 /** Sends a new article, and leaves the response for the test to judge. */
 export const postArticle = (admin: Session, article: ArticleInput) =>
@@ -95,4 +103,15 @@ export const readMigrationStatus = async (admin: Session) => {
 	expect(collection.status, "reading the collection").toBe(200);
 
 	return collection.body.data.migrationStatus;
+};
+
+/** Prepares a database at `article/base` with `FIRST_ARTICLE` stored, which most scenarios start from. */
+export const withFirstArticle: PrepareDatabase = async (database) => {
+	await migratedTo("article/base")(database);
+	const id = await database.cms("article/base", (admin) =>
+		createArticle(admin),
+	);
+	if (id !== FIRST_ARTICLE_ID) {
+		throw new Error(`The first article was stored as ${id}.`);
+	}
 };

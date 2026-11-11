@@ -8,7 +8,7 @@ export const ADMIN: Credentials = {
 };
 
 /** Throws with the response's details when a request the harness relies on fails. */
-const expectOk = (
+export const expectOk = (
 	action: string,
 	response: { ok: boolean; status: number; body: unknown },
 ) => {

@@ -1,10 +1,12 @@
 import path from "node:path";
 import applyChanges from "../capabilities/apply-changes.ts";
 import type { Capability } from "../capabilities/types.ts";
+import { getRunPrefix } from "../databases/create-database-name.ts";
 import { resolveDriver } from "../databases/get-driver.ts";
 import type { DatabaseTemplate } from "../databases/types.ts";
+import getLauncher from "../servers/get-launcher.ts";
 import type { Setup } from "../setup/types.ts";
-import logger from "../utils/logger.ts";
+import { HOST_URL } from "../targets/boot-host.ts";
 import prepareTemplate from "./prepare-template.ts";
 import startServer from "./start-server.ts";
 
@@ -20,6 +22,8 @@ export type PreparedDatabase = {
 export type SetupEnvironment = {
 	/** A scratch folder for databases and files made during the run. */
 	work: string;
+	/** Where the setup's CMS writes the emails it sends, in every mode. */
+	outbox: string;
 	/** What is known without loading the setup's config, for lanes that run no CMS. */
 	baseCapabilities: Capability[];
 	/** Migrates and seeds the template database. */
@@ -49,8 +53,9 @@ const createEnvironment = (options: {
 }): SetupEnvironment => {
 	const { setup, directory } = options;
 	const work = path.join(directory, "work");
+	const outbox = path.join(work, "outbox");
 	//* database names must be unique on a shared server
-	const prefix = `harness_${options.runId}_${setup.name}`
+	const prefix = `${getRunPrefix(options.runId)}_${setup.name}`
 		.replaceAll(/\W/g, "_")
 		.toLowerCase();
 	const cleanups: Array<() => Promise<void>> = [];
@@ -60,7 +65,6 @@ const createEnvironment = (options: {
 	);
 
 	const database = once(async (): Promise<PreparedDatabase> => {
-		logger.step(setup.name, "Preparing the database");
 		const driver = resolveDriver(setup.database);
 		const template = await prepareTemplate({
 			setup,
@@ -80,22 +84,36 @@ const createEnvironment = (options: {
 		};
 	});
 
+	//* a build reads the config but never connects, so it runs while the template is prepared
+	const build = once(() =>
+		getLauncher(setup.runtime).build({
+			setup,
+			env: { HARNESS_DATABASE_URL: "unused-by-builds", HARNESS_URL: HOST_URL },
+			log: path.join(directory, "server.log"),
+		}),
+	);
+
 	const serve = once(async (): Promise<string> => {
-		const { template } = await database();
-		logger.step(setup.name, "Building and starting the server");
+		const [{ template }] = await Promise.all([database(), build()]);
 		const copy = await resolveDriver(setup.database).clone(template.state, {
 			directory: work,
 			name: `${prefix}_served`,
 		});
 		cleanups.push(copy.destroy);
 
-		const server = await startServer({ setup, database: copy, directory });
+		const server = await startServer({
+			setup,
+			database: copy,
+			directory,
+			outbox,
+		});
 		cleanups.push(server.stop);
 		return server.url;
 	});
 
 	return {
 		work,
+		outbox,
 		baseCapabilities,
 		database,
 		serve,

@@ -7,12 +7,14 @@ import waitForServer from "../servers/wait-for-server.ts";
 import type { Setup } from "../setup/types.ts";
 import getFreePort from "../utils/get-free-port.ts";
 
-/** Builds a setup, starts its real server on a free port and waits until it is ready for tests. */
+/** Starts a setup's built server on a free port and waits until it is ready for tests. */
 const startServer = async (options: {
 	setup: Setup;
 	database: ProvisionedDatabase;
 	/** Where the server log goes. */
 	directory: string;
+	/** Where the server writes the emails it sends. */
+	outbox: string;
 }): Promise<{ url: string; stop(): Promise<void> }> => {
 	const { setup } = options;
 	const launcher = getLauncher(setup.runtime);
@@ -20,11 +22,14 @@ const startServer = async (options: {
 	const url = `http://127.0.0.1:${port}`;
 	const server = {
 		setup,
-		env: { HARNESS_DATABASE_URL: options.database.url, HARNESS_URL: url },
+		env: {
+			HARNESS_DATABASE_URL: options.database.url,
+			HARNESS_URL: url,
+			HARNESS_OUTBOX: options.outbox,
+		},
 		log: path.join(options.directory, "server.log"),
 	};
 
-	await launcher.build(server);
 	const running = await launcher.start({ ...server, port });
 
 	try {

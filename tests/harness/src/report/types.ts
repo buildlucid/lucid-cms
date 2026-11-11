@@ -65,6 +65,8 @@ export type LaneReport = LaneResult & {
 	durationMs: number;
 	/** Where its output was written, relative to the run's folder, when it was not shown live. */
 	log?: string;
+	/** True when only some of its files or tests ran, so its times and counts cover part of the lane. */
+	filtered?: boolean;
 };
 
 export type RunSummary = Record<TestStatus, number> & {
@@ -99,6 +101,8 @@ export type RunReport = {
 	git: { commit: string | null; branch: string | null };
 	node: string;
 	ci: boolean;
+	/** True when the run was cancelled, so lanes that had not finished are missing or failed. */
+	stopped?: boolean;
 	lanes: LaneReport[];
 	mismatches: DifferentialMismatch[];
 	/** Tests that applied to no setup in the run, which points at a mistyped or unmet `requires()`. */

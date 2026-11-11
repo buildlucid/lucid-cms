@@ -1,15 +1,25 @@
-/** Runs each `*.bench.ts` sequentially and writes measurements as the lane result. */
-import { randomUUID } from "node:crypto";
+/**
+ * Runs each `*.bench.ts` in turn and writes their measurements as the lane result.
+ *
+ * Usage: node run.ts [--file <text>]... [--test <pattern>]... [file text]...
+ */
 import { glob } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { parseArgs } from "node:util";
+import createDatabaseName from "../../databases/create-database-name.ts";
 import createEmptyDatabase from "../../databases/create-empty-database.ts";
 import { resolveDriver } from "../../databases/get-driver.ts";
 import loadContext from "../../environment/load-context.ts";
 import serveBuilt from "../../migrations/serve-built.ts";
 import { getBenchmarks } from "../../performance/benchmark.ts";
 import summarizeSamples from "../../performance/summarize-samples.ts";
-import type { BenchmarkContext, Metric } from "../../performance/types.ts";
+import type {
+	BenchmarkContext,
+	Metric,
+	RegisteredBenchmark,
+} from "../../performance/types.ts";
+import emitProgress from "../../progress/emit-progress.ts";
 import type { Measurement } from "../../report/types.ts";
 import writeLaneResult from "../../report/write-lane-result.ts";
 import getLauncher from "../../servers/get-launcher.ts";
@@ -46,37 +56,75 @@ const benchmarkContext: BenchmarkContext = {
 	database: () =>
 		createEmptyDatabase(resolveDriver(context.setup.database), {
 			directory: context.paths.work,
-			name: `benchmark_${randomUUID().replaceAll("-", "")}`,
+			name: createDatabaseName(context.runId, "benchmark"),
 		}),
 };
 
-//* arguments after the second `--` keep the run to benchmark files whose path holds one of them
-const filters = process.argv.slice(2);
+//* `--file` and bare arguments keep files whose path holds one of them, `--test` keeps benchmarks whose ID matches
+const { values, positionals } = parseArgs({
+	allowPositionals: true,
+	options: {
+		file: { type: "string", multiple: true },
+		test: { type: "string", multiple: true },
+	},
+});
+const files = [...(values.file ?? []), ...positionals];
+const tests = (values.test ?? []).map((pattern) => new RegExp(pattern));
+
 const laneDirectory = path.join(paths.suites, context.lane);
+const selected: Array<{ file: string; benchmark: RegisteredBenchmark }> = [];
 for await (const file of glob("**/*.bench.ts", { cwd: laneDirectory })) {
-	if (filters.length === 0 || filters.some((filter) => file.includes(filter))) {
-		await import(pathToFileURL(path.join(laneDirectory, file)).href);
+	if (files.length > 0 && !files.some((filter) => file.includes(filter))) {
+		continue;
 	}
+
+	const registered = getBenchmarks().length;
+	await import(pathToFileURL(path.join(laneDirectory, file)).href);
+	for (const benchmark of getBenchmarks().slice(registered)) {
+		if (tests.length === 0 || tests.some((test) => test.test(benchmark.id))) {
+			selected.push({ file, benchmark });
+		}
+	}
+}
+
+const byFile = Map.groupBy(selected, (entry) => entry.file);
+emitProgress({ type: "files", total: byFile.size });
+for (const [file, entries] of byFile) {
+	emitProgress({ type: "collected", file, tests: entries.length });
 }
 
 const measurements: Measurement[] = [];
 const errors: string[] = [];
 
-for (const benchmark of getBenchmarks()) {
+for (const { file, benchmark } of selected) {
+	const test = { file, name: benchmark.id };
+	const warmups = benchmark.warmups ?? DEFAULT_WARMUPS;
+	const total = warmups + context.performanceRuns;
+	const startedAt = Date.now();
+	emitProgress({ type: "test-start", ...test });
+
 	try {
 		const opened = await benchmark.open(benchmarkContext);
 		try {
-			for (
-				let warmup = 0;
-				warmup < (benchmark.warmups ?? DEFAULT_WARMUPS);
-				warmup++
-			) {
+			for (let warmup = 0; warmup < warmups; warmup++) {
 				await opened.sample();
+				emitProgress({
+					type: "test-progress",
+					...test,
+					done: warmup + 1,
+					total,
+				});
 			}
 
 			const samples: Array<Record<string, Metric>> = [];
 			for (let run = 0; run < context.performanceRuns; run++) {
 				samples.push(await opened.sample());
+				emitProgress({
+					type: "test-progress",
+					...test,
+					done: warmups + run + 1,
+					total,
+				});
 				console.log(
 					`${benchmark.id}: sample ${run + 1}/${context.performanceRuns}`,
 				);
@@ -85,10 +133,29 @@ for (const benchmark of getBenchmarks()) {
 		} finally {
 			await opened.close();
 		}
+		emitProgress({
+			type: "test-end",
+			...test,
+			status: "passed",
+			durationMs: Date.now() - startedAt,
+		});
 	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
 		errors.push(
-			`Benchmark "${benchmark.id}" failed: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`,
+			`Benchmark "${benchmark.id}" failed: ${error instanceof Error ? (error.stack ?? message) : message}`,
 		);
+		emitProgress({
+			type: "test-end",
+			...test,
+			status: "failed",
+			durationMs: Date.now() - startedAt,
+			error: message.split("\n")[0],
+		});
+	}
+
+	const last = byFile.get(file)?.at(-1);
+	if (last?.benchmark === benchmark) {
+		emitProgress({ type: "file-end", file });
 	}
 }
 

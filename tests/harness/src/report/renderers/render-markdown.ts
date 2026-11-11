@@ -1,5 +1,6 @@
 import formatDuration from "../../utils/format-duration.ts";
 import formatMeasurement from "../../utils/format-measurement.ts";
+import groupMeasurements from "../group-measurements.ts";
 import listFailures from "../list-failures.ts";
 import summarizeBySetup from "../summarize-by-setup.ts";
 import type { RunReport } from "../types.ts";
@@ -23,16 +24,42 @@ const renderMarkdown = (report: RunReport): string => {
 
 	const measured = report.lanes.filter((lane) => lane.measurements.length > 0);
 	if (measured.length > 0) {
+		const groups = new Map(
+			measured.map((lane) => [
+				lane.setup,
+				groupMeasurements(lane.measurements),
+			]),
+		);
+		const rows = new Map(
+			[...groups.values()].flat().map((group) => [group.id, group.label]),
+		);
+		const cell = (setup: string, id: string): string => {
+			const group = groups.get(setup)?.find((candidate) => candidate.id === id);
+			if (!group) {
+				return "–";
+			}
+			const { value, p95, queries } = group;
+			return [
+				`${formatMeasurement(value.value, value.unit)} ±${(value.spread * 100).toFixed(1)}%`,
+				p95 ? `p95 ${formatMeasurement(p95.value, p95.unit)}` : null,
+				queries
+					? `${queries.value} ${queries.value === 1 ? "query" : "queries"}`
+					: null,
+			]
+				.filter((part) => part !== null)
+				.join(" · ");
+		};
+
 		lines.push(
 			"### Measurements",
 			"",
-			"| Setup | Measurement | Median | Spread |",
-			"| --- | --- | ---: | ---: |",
-			...measured.flatMap((lane) =>
-				lane.measurements.map(
-					(measurement) =>
-						`| ${lane.setup} | ${measurement.label} | ${formatMeasurement(measurement.value, measurement.unit)} | ±${(measurement.spread * 100).toFixed(1)}% |`,
-				),
+			"Medians, with how much the samples varied.",
+			"",
+			`| Measurement | ${measured.map((lane) => lane.setup).join(" | ")} |`,
+			`| --- | ${measured.map(() => "---:").join(" | ")} |`,
+			...[...rows].map(
+				([id, label]) =>
+					`| ${label} | ${measured.map((lane) => cell(lane.setup, id)).join(" | ")} |`,
 			),
 			"",
 		);

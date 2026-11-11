@@ -13,6 +13,7 @@ import {
 	ArticleCollection,
 	localization,
 } from "../../shared/fragments/localization.ts";
+import { outbox } from "../../shared/fragments/outbox.ts";
 import LandingPageCollection from "./collections/landing-page.ts";
 
 export const env = harnessEnv;
@@ -24,6 +25,7 @@ export default defineConfig({
 	config: (env) =>
 		withSchemaStep(env, {
 			...sharedConfig({ url: env.HARNESS_URL }),
+			email: outbox(env.HARNESS_OUTBOX),
 			localization,
 			collections: [
 				...sharedCollections,

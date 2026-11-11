@@ -105,24 +105,30 @@ describe("database queries per request", () => {
 		expect(await readContent("large")).toBe(small);
 	});
 
-	test("saving a document runs the same queries however much content it has", async ({
-		lucid,
-	}) => {
-		const admin = await lucid.admin();
-		const story = await storyMaker(admin);
-		const save = async (size: keyof typeof sizes) => {
-			const id = await createDocument(admin, STORY_KEY, story(size));
-			const response = await admin.request({
-				method: "POST",
-				path: `${DOCUMENTS}/${id}`,
-				body: story(size),
-			});
-			expect(response.status).toBe(200);
-			return countQueries(response);
-		};
+	//* a write also dispatches jobs other requests left pending, so on a shared database its count
+	//* depends on what else is running. In host mode the file has its database to itself.
+	describe("writes", () => {
+		requires("mode:host");
 
-		const small = await save("small");
-		expect(small).toBeGreaterThan(0);
-		expect(await save("large")).toBe(small);
+		test("saving a document runs the same queries however much content it has", async ({
+			lucid,
+		}) => {
+			const admin = await lucid.admin();
+			const story = await storyMaker(admin);
+			const save = async (size: keyof typeof sizes) => {
+				const id = await createDocument(admin, STORY_KEY, story(size));
+				const response = await admin.request({
+					method: "POST",
+					path: `${DOCUMENTS}/${id}`,
+					body: story(size),
+				});
+				expect(response.status).toBe(200);
+				return countQueries(response);
+			};
+
+			const small = await save("small");
+			expect(small).toBeGreaterThan(0);
+			expect(await save("large")).toBe(small);
+		});
 	});
 });

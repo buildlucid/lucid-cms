@@ -41,7 +41,11 @@ const mergeCommand = async (
 		complete: options.complete,
 	});
 
-	return finishRun(merged, path.join(paths.output, "runs", runId));
+	return finishRun(merged, {
+		directory: path.join(paths.output, "runs", runId),
+		//* merged runs come from CI, where there are no earlier local runs to compare with
+		previous: [],
+	});
 };
 
 export default mergeCommand;

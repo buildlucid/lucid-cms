@@ -6,9 +6,9 @@ import {
 	test,
 } from "#harness/vitest";
 import { EVERYTHING_KEY } from "#shared/migrations/collections/everything";
-import { createArticle } from "./articles.ts";
+import { createArticle, withFirstArticle } from "./articles.ts";
 
-describe("migrating a database", { timeout: 120_000 }, () => {
+describe("migrating a database", { concurrent: true, timeout: 120_000 }, () => {
 	requires("mode:host");
 
 	test("migrates every field type, then finds nothing left to do", async ({
@@ -52,9 +52,7 @@ describe("migrating a database", { timeout: 120_000 }, () => {
 	test("a fresh migration drops everything and builds the database again", async ({
 		migrations,
 	}) => {
-		const database = await migrations.database();
-		await database.cli("article/base", "migrate", "--yes");
-		await database.cms("article/base", (admin) => createArticle(admin));
+		const database = await migrations.database(withFirstArticle);
 
 		const fresh = await database.cli("article/base", "migrate:fresh", "--yes");
 		expect(fresh.code, fresh.output).toBe(0);

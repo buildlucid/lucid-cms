@@ -47,8 +47,15 @@ export type MigrationDatabase = {
 	query<Result>(use: (kysely: KyselyDB) => Promise<Result>): Promise<Result>;
 };
 
+/** Brings a new database to the state tests start from, such as migrated with content in it. */
+export type PrepareDatabase = (database: MigrationDatabase) => Promise<void>;
+
 /** What the `migrations` fixture gives a test. */
 export type Migrations = {
-	/** Creates an empty database, which is removed when the test ends. */
-	database(): Promise<MigrationDatabase>;
+	/**
+	 * Creates a database, which is removed when the test ends. It starts empty, or as `prepare`
+	 * left it. `prepare` runs at most once per test file and every call gets its own copy, so tests
+	 * that start from the same state skip repeating it. See `migratedTo`.
+	 */
+	database(prepare?: PrepareDatabase): Promise<MigrationDatabase>;
 };

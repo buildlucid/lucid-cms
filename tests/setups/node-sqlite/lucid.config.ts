@@ -7,6 +7,7 @@ import {
 	sharedConfig,
 	withSchemaStep,
 } from "../../shared/config.ts";
+import { outbox } from "../../shared/fragments/outbox.ts";
 
 export const env = harnessEnv;
 
@@ -14,5 +15,9 @@ export default defineConfig({
 	env,
 	runtime: node,
 	db: sqlite((env) => ({ database: getDatabaseUrl(env) })),
-	config: (env) => withSchemaStep(env, sharedConfig({ url: env.HARNESS_URL })),
+	config: (env) =>
+		withSchemaStep(env, {
+			...sharedConfig({ url: env.HARNESS_URL }),
+			email: outbox(env.HARNESS_OUTBOX),
+		}),
 });

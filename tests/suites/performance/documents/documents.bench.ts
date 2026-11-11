@@ -4,6 +4,7 @@ import {
 	countQueries,
 	type Metric,
 	runMeasured,
+	runPool,
 	type ServedCms,
 } from "#harness/performance";
 import { STORY_KEY } from "#shared/collections/story";
@@ -22,6 +23,10 @@ const STORIES = 300;
 const PUBLISHED = 50;
 /** How many requests each sample times for every metric. */
 const REQUESTS = 40;
+/** How many stories are created at once while the CMS is filled. */
+const SEED_CONCURRENCY = 4;
+/** Untimed reads of each kind before the first sample, so the server's code is warm. */
+const WARMUP_REQUESTS = 10;
 
 const DOCUMENTS = `/api/v1/documents/${STORY_KEY}`;
 //* reads past the response cache, so every setup is timed doing the work
@@ -100,6 +105,8 @@ const measure = async (options: {
  */
 benchmark<Prepared>({
 	id: "documents",
+	//* filling the CMS warms its writes, and `prepare` warms its reads, so no sample is thrown away
+	warmups: 0,
 	prepare: async (context) => {
 		const database = await context.database();
 		try {
@@ -118,19 +125,19 @@ benchmark<Prepared>({
 				const story = (title: string) =>
 					fullStory({ title, ...targets, items: 10, heroes: 4 });
 
-				const ids: number[] = [];
-				for (let index = 0; index < STORIES; index++) {
-					ids.push(
-						await createDocument(
+				const ids = await runPool(
+					Array.from({ length: STORIES }, (_, index) => index),
+					SEED_CONCURRENCY,
+					(index) =>
+						createDocument(
 							admin,
 							STORY_KEY,
 							story(`Story ${String(index).padStart(4, "0")}`),
 						),
-					);
-				}
-				for (const id of ids.slice(0, PUBLISHED)) {
-					await publishDocument(admin, STORY_KEY, id, "staging");
-				}
+				);
+				await runPool(ids.slice(0, PUBLISHED), SEED_CONCURRENCY, (id) =>
+					publishDocument(admin, STORY_KEY, id, "staging"),
+				);
 
 				const read = await createContentReader(admin, server.session, [
 					STORY_KEY,
@@ -139,6 +146,21 @@ benchmark<Prepared>({
 				const cached = () =>
 					read(`documents/${STORY_KEY}`, { version: "staging", perPage: 1 });
 				await cached();
+				for (const id of ids.slice(0, WARMUP_REQUESTS)) {
+					await admin.request({
+						path: `${DOCUMENTS}/${id}/latest`,
+						query: { include: "bricks" },
+					});
+					await admin.request({
+						path: `${DOCUMENTS}/latest`,
+						query: { perPage: 50 },
+					});
+					await read(
+						`document/${STORY_KEY}`,
+						{ version: "staging", "filter[id]": id, include: "bricks" },
+						UNCACHED,
+					);
+				}
 
 				return {
 					server,

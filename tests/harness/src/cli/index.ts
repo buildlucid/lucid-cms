@@ -4,7 +4,13 @@ import compareCommand from "./commands/compare.ts";
 import listCommand from "./commands/list.ts";
 import mergeCommand from "./commands/merge.ts";
 import runCommand from "./commands/run.ts";
-import { isProfile } from "./profiles.ts";
+import statusCommand from "./commands/status.ts";
+import findRetryJobs from "./find-retry-jobs.ts";
+import profiles, { isProfile } from "./profiles.ts";
+
+const PROFILES = Object.entries(profiles)
+	.map(([key, profile]) => `${key} (${profile.description})`)
+	.join(", ");
 
 const HELP = `Lucid test harness
 
@@ -13,34 +19,44 @@ Usage
 
 Commands
   run      Run lanes against setups (the default)
+  status   Show whether the latest run is still going, and how far it has got
   list     Show the setups, lanes and what a run would do
   merge    Join report.json files from several runs into one report
   compare  Show what changed between an older report.json and a newer one
 
 Options
-  --profile <name>       What to cover: full (default) or pr, which skips integration
-                         tests against the built server
+  --profile <name>       What to cover. Defaults to local. One of:
+                         ${PROFILES}
   --setup <names>        Setups to use, separated by commas. Defaults to all
   --lane <names>         Lanes to run, separated by commas. Defaults to all
   --mode <names>         Modes to run: host, served, project. Defaults to all
-  --concurrency <n>      Setups to run at once. Defaults to half the CPU cores
+  --file <text>          Only test files whose path holds this. Repeat for more
+  --test <pattern>       Only tests whose describe blocks and name match this. Repeat for more
+  --failed               Run what failed in the latest run again
+  --concurrency <n>      Lanes to run at once across every setup. Defaults to half the CPU cores
+  --workers <n>          Test workers each lane gets. Defaults to the cores shared between the lanes
+  --job-timeout <min>    Minutes a lane may run before it is stopped. Defaults to 15
   --seed <n>             Replays a run's random choices. Defaults to a new seed
   --simulation-runs <n>  Random sequences each simulation tries. Defaults to 10
   --performance-runs <n> Samples each benchmark takes. Defaults to 5
   --no-services          Do not start Docker services. Postgres then runs in memory
-  --json                 With list, print setup names as JSON
+  --plain                Print a line per change instead of the live dashboard
+  --json                 With list, print setup names as JSON. With status, print the run's state
   --complete             With merge, the reports cover every setup, so flag tests that ran nowhere
   --report-only          With compare, never fail on a regression
 
 Examples
   npm run harness
   npm run harness -- --setup node-sqlite --lane integration --mode host
-  npm run harness -- --setup node-sqlite --lane integration --mode host -- -t "logs in"
+  npm run harness -- --lane integration --file documents/listing --test "lists stories"
+  npm run harness -- --failed
+  npm run harness -- --lane performance
+  npm run harness -- status
   npm run harness -- merge a/report.json b/report.json
   npm run harness -- compare base/report.json .harness/latest/report.json
 `;
 
-const COMMANDS = ["run", "list", "merge", "compare"] as const;
+const COMMANDS = ["run", "status", "list", "merge", "compare"] as const;
 type Command = (typeof COMMANDS)[number];
 
 const isCommand = (value: string | undefined): value is Command =>
@@ -79,18 +95,24 @@ const main = async (): Promise<number> => {
 		args: own,
 		allowPositionals: true,
 		options: {
-			profile: { type: "string", default: "full" },
+			profile: { type: "string", default: "local" },
 			setup: { type: "string" },
-			complete: { type: "boolean", default: false },
-			"report-only": { type: "boolean", default: false },
 			lane: { type: "string" },
 			mode: { type: "string" },
+			file: { type: "string", multiple: true },
+			test: { type: "string", multiple: true },
+			failed: { type: "boolean", default: false },
 			concurrency: { type: "string" },
+			workers: { type: "string" },
+			"job-timeout": { type: "string" },
 			seed: { type: "string" },
 			"simulation-runs": { type: "string" },
 			"performance-runs": { type: "string" },
 			"no-services": { type: "boolean", default: false },
+			plain: { type: "boolean", default: false },
 			json: { type: "boolean", default: false },
+			complete: { type: "boolean", default: false },
+			"report-only": { type: "boolean", default: false },
 			help: { type: "boolean", short: "h", default: false },
 		},
 	});
@@ -104,7 +126,7 @@ const main = async (): Promise<number> => {
 	const command = isCommand(first) ? first : "run";
 	if (!isProfile(values.profile)) {
 		throw new Error(
-			`Unknown profile: ${values.profile}. Choose from full, pr.`,
+			`Unknown profile: ${values.profile}. Choose from ${Object.keys(profiles).join(", ")}.`,
 		);
 	}
 	const filters = {
@@ -112,9 +134,19 @@ const main = async (): Promise<number> => {
 		setups: toList(values.setup),
 		lanes: toList(values.lane),
 		modes: toList(values.mode),
+		files: values.file ?? [],
+		tests: values.test ?? [],
+		retry: values.failed ? await findRetryJobs() : undefined,
 	};
+	if (filters.retry?.length === 0) {
+		console.log("Nothing failed in the latest run.");
+		return 0;
+	}
 
 	switch (command) {
+		case "status": {
+			return statusCommand({ json: values.json });
+		}
 		case "list": {
 			return listCommand({ ...filters, json: values.json });
 		}
@@ -129,13 +161,22 @@ const main = async (): Promise<number> => {
 			});
 		}
 		case "run": {
+			const cores = availableParallelism();
+			const concurrency = toNumber(
+				"concurrency",
+				values.concurrency,
+				Math.max(1, Math.round(cores / 2)),
+			);
 			return runCommand({
 				...filters,
-				concurrency: toNumber(
-					"concurrency",
-					values.concurrency,
-					Math.max(1, Math.floor(availableParallelism() / 2)),
+				concurrency,
+				workers: toNumber(
+					"workers",
+					values.workers,
+					Math.max(2, Math.ceil(cores / concurrency)),
 				),
+				jobTimeoutMs:
+					toNumber("job-timeout", values["job-timeout"], 15) * 60_000,
 				seed: toNumber(
 					"seed",
 					values.seed,
@@ -152,6 +193,7 @@ const main = async (): Promise<number> => {
 					5,
 				),
 				services: !values["no-services"],
+				plain: values.plain,
 				passthrough,
 			});
 		}

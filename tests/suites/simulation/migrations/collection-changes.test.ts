@@ -4,6 +4,8 @@ import {
 	fc,
 	getRunOptions,
 	type MigrationDatabase,
+	migratedTo,
+	type PrepareDatabase,
 	recordDigest,
 	requires,
 	sql,
@@ -29,6 +31,23 @@ const START: GeneratedField[] = [
 	{ key: "alpha", type: "text" },
 	{ key: "beta", type: "number" },
 ];
+
+/** Every sequence starts from the collection at `START`, with two documents stored. */
+const started: PrepareDatabase = async (database) => {
+	await migratedTo(generatedStep(START))(database);
+	await database.cms(generatedStep(START), async (admin) => {
+		for (const title of ["one", "two"]) {
+			const created = await admin.request({
+				method: "POST",
+				path: `/api/v1/documents/${GENERATED_KEY}`,
+				body: {
+					fields: [{ key: "alpha", type: "text", value: title }],
+				},
+			});
+			expect(created.status).toBe(201);
+		}
+	});
+};
 
 /** Applies a change to the collection's fields, or returns null when it does not fit them. */
 const applyChange = (
@@ -113,21 +132,8 @@ describe("collection changes", { timeout: 900_000 }, () => {
 					{ maxLength: 6 },
 				),
 				async (changes) => {
-					const database = await migrations.database();
+					const database = await migrations.database(started);
 					let fields = START;
-					await database.cli(generatedStep(fields), "migrate", "--yes");
-					await database.cms(generatedStep(fields), async (admin) => {
-						for (const title of ["one", "two"]) {
-							const created = await admin.request({
-								method: "POST",
-								path: `/api/v1/documents/${GENERATED_KEY}`,
-								body: {
-									fields: [{ key: "alpha", type: "text", value: title }],
-								},
-							});
-							expect(created.status).toBe(201);
-						}
-					});
 
 					for (const change of changes) {
 						const next = applyChange(fields, change);

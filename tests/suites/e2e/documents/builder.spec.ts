@@ -43,7 +43,8 @@ test.describe("editing a document in the builder", () => {
 
 		const saved = answered("");
 		await save.click();
-		expect((await saved).status()).toBe(200);
+		const savedResponse = await saved;
+		expect(savedResponse.status(), await savedResponse.text()).toBe(200);
 
 		const published = answered("/publish");
 		await page.getByRole("button", { name: "Publish Options" }).click();
@@ -52,7 +53,10 @@ test.describe("editing a document in the builder", () => {
 			.getByRole("dialog", { name: "Publish to Staging" })
 			.getByRole("button", { name: "Publish Now" })
 			.click();
-		expect((await published).status()).toBe(204);
+		const publishedResponse = await published;
+		expect(publishedResponse.status(), await publishedResponse.text()).toBe(
+			204,
+		);
 
 		for (const version of ["latest", "staging"]) {
 			expect(await readDocument(admin, STORY_KEY, id, version)).toMatchObject({

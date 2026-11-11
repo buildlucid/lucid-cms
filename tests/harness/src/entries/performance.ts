@@ -9,3 +9,4 @@ export type {
 	ServedCms,
 } from "../performance/types.ts";
 export { default as getLauncher } from "../servers/get-launcher.ts";
+export { default as runPool } from "../utils/run-pool.ts";
