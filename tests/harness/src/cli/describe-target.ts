@@ -22,7 +22,7 @@ const describeTarget = async (
 		case "served": {
 			const { capabilities } = await environment.database();
 			return {
-				target: { mode, url: await environment.serve() },
+				target: { mode, ...(await environment.serve()) },
 				capabilities,
 			};
 		}

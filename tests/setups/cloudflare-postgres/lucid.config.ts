@@ -1,14 +1,22 @@
 import { cloudflare } from "@lucidcms/cloudflare";
 import { defineConfig, z } from "@lucidcms/core";
 import { postgres } from "@lucidcms/postgres";
-import { sharedConfig } from "../../shared/config.ts";
+import { harnessEnv, sharedConfig } from "../../shared/config.ts";
+import { authentication } from "../../shared/fragments/auth.ts";
+import { outbox } from "../../shared/fragments/outbox.ts";
 
 /** A Worker reads its database from a Hyperdrive binding, which `cloudflare.config.ts` points at the harness's database. */
-export const env = z.object({
-	LUCID_DB: z.object({ connectionString: z.string() }),
-	HARNESS_URL: z.url().default("http://localhost:6543"),
-	HARNESS_PORT: z.coerce.number().default(6543),
-});
+export const env = harnessEnv
+	.pick({
+		HARNESS_URL: true,
+		HARNESS_OUTBOX: true,
+		HARNESS_IDP_URL: true,
+		LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE: true,
+	})
+	.extend({
+		LUCID_DB: z.object({ connectionString: z.string() }),
+		HARNESS_PORT: z.coerce.number().default(6543),
+	});
 
 export default defineConfig({
 	env,
@@ -20,5 +28,7 @@ export default defineConfig({
 	})),
 	config: (env) => ({
 		...sharedConfig({ url: env.HARNESS_URL }),
+		...authentication(env),
+		email: outbox(env.HARNESS_OUTBOX),
 	}),
 });

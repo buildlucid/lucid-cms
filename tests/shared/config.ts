@@ -13,6 +13,7 @@ import steps, {
 	type SchemaStep,
 	type SchemaStepKey,
 } from "./migrations/steps.ts";
+import { VARIANTS } from "./variants.ts";
 
 /** A fixed secret for test servers only. */
 const TEST_SECRET =
@@ -29,8 +30,14 @@ export const harnessEnv = z.object({
 	HARNESS_URL: z.url().default("http://localhost:6543"),
 	/** The schema step migration tests load the config with. See `shared/migrations/steps.ts`. */
 	HARNESS_SCHEMA_STEP: z.string().optional(),
-	/** The folder the `outbox` fragment writes sent emails to. See `shared/fragments/outbox.ts`. */
-	HARNESS_OUTBOX: z.string().optional(),
+	/** Where the `outbox` fragment posts sent emails. See `shared/fragments/outbox.ts`. */
+	HARNESS_OUTBOX: z.url().optional(),
+	/** The harness's identity provider, which the `authentication` fragment's providers use. */
+	HARNESS_IDP_URL: z.url().optional(),
+	/** Lucid's own API, which the harness fakes so tests never reach Lucid's servers. Read by core. */
+	LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE: z.url().optional(),
+	/** The variant of the config one test file runs with. See `shared/variants.ts`. */
+	HARNESS_VARIANT: z.enum(VARIANTS).optional(),
 	/** The folder the `media` fragment stores uploads in. See `shared/fragments/media.ts`. */
 	HARNESS_UPLOADS: z.string().optional(),
 });

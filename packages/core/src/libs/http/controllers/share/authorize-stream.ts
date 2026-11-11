@@ -12,6 +12,7 @@ import validate from "../../middleware/validate.js";
 import verifyCaptcha from "../../middleware/verify-captcha.js";
 import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
+import getClientAddress from "../../utils/get-client-address.js";
 
 const factory = createFactory();
 
@@ -47,7 +48,11 @@ const authorizeStreamController = factory.createHandlers(
 		const authorizeRes = await serviceWrapper(
 			mediaShareLinkServices.authorizeShare,
 			{ transaction: false },
-		)(context, { token, providedPassword: password });
+		)(context, {
+			token,
+			providedPassword: password,
+			address: getClientAddress(c),
+		});
 		if (authorizeRes.error) throw new LucidError(authorizeRes.error);
 
 		//* links without a password, or with a session already, have nothing to store

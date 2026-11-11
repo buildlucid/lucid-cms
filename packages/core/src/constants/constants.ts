@@ -46,6 +46,8 @@ export default Object.freeze({
 		temporaryBytes: 12,
 		/** Wrong passwords allowed per account in each window, across logins and confirmations. */
 		attemptLimit: 10,
+		/** Wrong passwords allowed per address in each window, whichever accounts or share links they're for. */
+		addressAttemptLimit: 30,
 		attemptWindowMs: 15 * 60_000,
 	},
 	scrypt: {
@@ -53,6 +55,11 @@ export default Object.freeze({
 		r: 8,
 		p: 1,
 		dkLen: 32,
+		/**
+		 * Hashes run at once per process. Node shares four threads between hashing, session token
+		 * checks and file reads, so a flood of logins can't hold them all.
+		 */
+		concurrency: 2,
 	},
 	fieldBuiler: {
 		maxRepeaterDepth: 3,
@@ -167,6 +174,11 @@ export default Object.freeze({
 			stream: { limit: 500, scopeKey: "stream" },
 			/** Account changes that check a two-factor code, over a 15 minute window. */
 			twoFactor: { limit: 10, scopeKey: "two-factor" },
+			/**
+			 * Session refreshes, apart from sign-ins. Each open admin refreshes every few minutes, so a
+			 * team behind one address would otherwise use up the sign-in limit.
+			 */
+			refresh: { limit: 60, scopeKey: "refresh" },
 		},
 	},
 	directories: {
@@ -542,6 +554,8 @@ export default Object.freeze({
 		twoFactorReset: "two_factor_reset",
 		passkeysReset: "passkeys_reset",
 		twoFactorRequired: "two_factor_required",
+		userLocked: "user_locked",
+		userDeleted: "user_deleted",
 	} as const,
 	userTokenRevokeReasons: {
 		passwordResetUsed: "password_reset_used",

@@ -32,11 +32,15 @@ export type MigrationDatabase = {
 	cli(step: Step, ...args: string[]): Promise<CliRun>;
 	/**
 	 * Starts the CMS on the database in a process of its own for as long as `use` takes, signed in
-	 * as the admin. Each call is a newly started server.
+	 * as the admin. Each call is a newly started server. `server` makes visitors to it, and its
+	 * `url` is the address the CMS believes it is served from, which passkeys are made for.
 	 */
 	cms<Result>(
 		step: Step,
-		use: (admin: Session) => Promise<Result>,
+		use: (
+			admin: Session,
+			server: { url: string; session(): Session },
+		) => Promise<Result>,
 	): Promise<Result>;
 	/**
 	 * Reads the tables, columns and indexes the database has now, as the setup's adapter reports

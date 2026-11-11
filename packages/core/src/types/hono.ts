@@ -48,7 +48,10 @@ export type LucidAuth = LucidUser & {
 export type LucidAccessToken = Pick<
 	LucidAuth,
 	"id" | "exp" | "iat" | "nonce" | "authTime"
->;
+> & {
+	/** The user's session version when it was issued. Ending every session moves it on, which stops this token. */
+	sessionVersion: number;
+};
 
 type LucidExternalAuthBase = {
 	scopes: ExternalScope[];

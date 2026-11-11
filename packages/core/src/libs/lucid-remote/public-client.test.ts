@@ -25,7 +25,7 @@ describe("Lucid Remote public client", () => {
 		expect(headers.get("Content-Type")).toBe("application/json");
 		expect(headers.has("Origin")).toBe(false);
 		expect(headers.has("Authorization")).toBe(false);
-		expect(init?.redirect).toBe("error");
+		expect(init?.redirect).toBe("manual");
 		expect(init?.body).toBe('{"schema_version":1}');
 	});
 
@@ -63,6 +63,6 @@ describe("Lucid Remote public client", () => {
 		const headers = new Headers(init?.headers);
 		expect(headers.has("Origin")).toBe(false);
 		expect(headers.has("Authorization")).toBe(false);
-		expect(init?.redirect).toBe("error");
+		expect(init?.redirect).toBe("manual");
 	});
 });

@@ -304,7 +304,8 @@ const createLucidRemoteClient = (props: {
 						method: requestProps.method ?? "GET",
 						headers,
 						body,
-						redirect: "error",
+						//* a redirect answers as not ok, so it fails like any error. Workers don't support "error"
+						redirect: "manual",
 						signal: requestProps.signal,
 					});
 
@@ -388,7 +389,8 @@ const createLucidRemoteClient = (props: {
 			try {
 				const response = await fetch(new URL(path, props.apiDomain), {
 					headers,
-					redirect: "error",
+					//* a redirect answers as not ok, so it fails like any error. Workers don't support "error"
+					redirect: "manual",
 					signal: requestProps.signal,
 				});
 				if (response.ok) return { error: undefined, data: response };

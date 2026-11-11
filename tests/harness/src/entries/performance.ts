@@ -1,7 +1,9 @@
 /** What benchmarks import. */
+export { ADMIN } from "../client/admin.ts";
 export { default as countQueries } from "../client/count-queries.ts";
 export { default as benchmark } from "../performance/benchmark.ts";
 export { default as measureDirectory } from "../performance/measure-directory.ts";
+export { default as measureRequests } from "../performance/measure-requests.ts";
 export { default as runMeasured } from "../performance/run-measured.ts";
 export type {
 	BenchmarkContext,

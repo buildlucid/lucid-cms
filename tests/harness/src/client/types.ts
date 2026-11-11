@@ -11,8 +11,13 @@ export type ApiRequest = {
 	query?: Record<string, QueryValue | QueryValue[]>;
 	/** Sent as JSON. */
 	body?: unknown;
-	/** Sends the CSRF token on a GET too, for routes that check it there. Other methods always send it. */
+	/**
+	 * Sends the CSRF token on a GET too, for routes that check it there. Other methods send it unless
+	 * this is `false`.
+	 */
 	csrf?: boolean;
+	/** Extra headers, such as a captcha token. */
+	headers?: Record<string, string>;
 };
 
 export type ApiResponse<Body> = {
@@ -32,6 +37,8 @@ export type Session = {
 	/** Sends a JSON request, adding the CSRF token when it changes something. */
 	request<Body = unknown>(request: ApiRequest): Promise<ApiResponse<Body>>;
 	cookies(): Cookie[];
+	/** Stores a cookie as if the CMS had set it, such as one copied from another session. */
+	setCookie(cookie: Cookie): void;
 };
 
 export type Credentials = {

@@ -83,7 +83,8 @@ const streamModelTurn: ServiceFn<
 			),
 			{
 				method: "POST",
-				redirect: "error",
+				//* a redirect answers as not ok, so it fails like any error. Workers don't support "error"
+				redirect: "manual",
 				signal: input.signal,
 				headers: {
 					Authorization: `Bearer ${token.data.accessToken}`,

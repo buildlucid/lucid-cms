@@ -45,6 +45,9 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 					"two_factor_attempts_reset_at",
 					adapter.getDataType("timestamp"),
 				)
+				.addColumn("session_version", adapter.getDataType("integer"), (col) =>
+					col.notNull().defaultTo(0),
+				)
 				.addColumn("passkey_user_id", adapter.getDataType("text"), (col) =>
 					col.unique(),
 				)

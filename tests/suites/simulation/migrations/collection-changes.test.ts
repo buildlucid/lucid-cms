@@ -113,7 +113,7 @@ const fillEmptyFields = (
 const without = (rows: Row[], key: string): Row[] =>
 	rows.map(({ [`_${key}`]: _changed, ...rest }) => rest);
 
-describe("collection changes", { timeout: 900_000 }, () => {
+describe("collection changes", () => {
 	requires("mode:host");
 
 	test("a migration that needs no approval never changes stored content", async ({

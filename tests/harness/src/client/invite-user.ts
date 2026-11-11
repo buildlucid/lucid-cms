@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { Variant } from "../../../shared/variants.ts";
 import { expectOk, login } from "./admin.ts";
 import type { Credentials, Session } from "./types.ts";
 import waitForEmail from "./wait-for-email.ts";
@@ -37,17 +38,21 @@ export const createRole = async (
 	return created.body.data.id;
 };
 
-/**
- * Invites a new user as the admin, accepts the invitation from the email it sent, and signs
- * the user in, as a person would. Needs a setup with `harness:outbox`.
- */
-const inviteUser = async (options: {
+/** A user the admin invited who has not accepted yet, with the token from their email. */
+export type Invitation = {
+	credentials: Credentials;
+	/** The invitation token from the email's link. */
+	token: string;
+	/** The user's own role, when the invitation gave `permissions`. */
+	roleId: number | null;
+};
+
+/** Invites a new user as the admin and reads the token from the email it sent. */
+export const sendInvitation = async (options: {
 	admin: Session;
-	/** A new visitor, who becomes the user. */
-	visitor: Session;
 	outbox: string;
 	invite: InviteOptions;
-}): Promise<InvitedUser> => {
+}): Promise<Invitation> => {
 	const name = `user${randomUUID().replaceAll("-", "").slice(0, 12)}`;
 	const credentials: Credentials = {
 		email: `${name}@harness.test`,
@@ -89,16 +94,40 @@ const inviteUser = async (options: {
 		);
 	}
 
+	return { credentials, token, roleId };
+};
+
+/**
+ * Invites a user through the outbox and signs them in. Requires `harness:outbox`; accepting the
+ * invitation signs in directly when password login is disabled.
+ */
+const inviteUser = async (options: {
+	admin: Session;
+	/** A new visitor, who becomes the user. */
+	visitor: Session;
+	outbox: string;
+	invite: InviteOptions;
+	variant: Variant | undefined;
+}): Promise<InvitedUser> => {
+	const { credentials, token, roleId } = await sendInvitation(options);
+	const passwordless = options.variant === "passwordless";
+
 	const accepted = await options.visitor.request({
 		method: "POST",
 		path: `/api/v1/auth/invitation/accept/${token}`,
-		body: {
-			password: credentials.password,
-			passwordConfirmation: credentials.password,
-		},
+		body: passwordless
+			? {}
+			: {
+					password: credentials.password,
+					passwordConfirmation: credentials.password,
+				},
 	});
 	expectOk("Accepting the invitation", accepted);
-	await login(options.visitor, credentials);
+	if (!passwordless) {
+		await login(options.visitor, credentials, {
+			captcha: options.variant === "captcha",
+		});
+	}
 
 	const account = await options.visitor.request<{ data: { id: number } }>({
 		path: "/api/v1/account",

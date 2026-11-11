@@ -76,13 +76,15 @@ const createMigrationDatabase = (options: {
 				schemaStep: step ?? undefined,
 			});
 			try {
-				const admin = createSession({
-					url: host.url,
-					transport: (request) => fetch(request),
-				});
+				const session = () =>
+					createSession({
+						url: host.url,
+						transport: (request) => fetch(request),
+					});
+				const admin = session();
 				await ensureAdmin(admin);
 				await login(admin, ADMIN);
-				return await use(admin);
+				return await use(admin, { url: HOST_URL, session });
 			} finally {
 				await host.stop();
 			}

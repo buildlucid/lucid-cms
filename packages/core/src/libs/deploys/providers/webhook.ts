@@ -80,7 +80,8 @@ const deployWebhook = (
 			method: "POST",
 			headers,
 			body,
-			redirect: "error",
+			//* a redirect answers as not ok, so it fails like any error. Workers don't support "error"
+			redirect: "manual",
 			signal: AbortSignal.timeout(constants.deploys.requestTimeoutMs),
 		});
 		if (!response.ok) {

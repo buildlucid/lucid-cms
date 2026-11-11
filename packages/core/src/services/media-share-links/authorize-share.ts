@@ -1,13 +1,13 @@
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
-import verifySecret from "../../utils/helpers/verify-secret.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import verifyPassword from "../auth/verify-password.js";
 import { createShareSession, verifyShareSession } from "./helpers/session.js";
 
 /**
  * Checks share availability and password or session proof. Returns a session cookie after a
- * correct password.
+ * correct password. Run outside a transaction so wrong passwords stay counted.
  */
 const authorizeShare: ServiceFn<
 	[
@@ -16,6 +16,8 @@ const authorizeShare: ServiceFn<
 			sessionCookie?: string;
 			providedPassword?: string;
 			enforcePasswordSession?: boolean;
+			/** Where a password attempt came from, which limits wrong passwords per address. */
+			address?: string | null;
 		},
 	],
 	{
@@ -103,12 +105,13 @@ const authorizeShare: ServiceFn<
 			};
 		}
 
-		const valid = await verifySecret(
-			data.providedPassword,
-			context.config.secrets.encryption,
-			password,
-		);
-		if (!valid) {
+		const validRes = await verifyPassword(context, {
+			address: data.address,
+			password: data.providedPassword,
+			stored: { hash: password, salt: context.config.secrets.encryption },
+		});
+		if (validRes.error) return validRes;
+		if (!validRes.data) {
 			return {
 				error: {
 					type: "authorisation",

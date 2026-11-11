@@ -3,20 +3,26 @@ import type { ApiRequest, ApiResponse, Session, Transport } from "./types.ts";
 
 const CSRF_HEADER = "x-csrf-token";
 const CSRF_PATH = "/api/v1/auth/csrf";
+const REFRESH_PATH = "/api/v1/auth/token";
+const REFRESH_COOKIE = "_refresh";
 
 let sessionCount = 0;
 
-/** Gives each session in this process its own address, so their rate limits never mix. */
-const nextAddress = (): string => {
+/** Gives each session or browser in this process its own address, so their rate limits never mix. */
+export const nextAddress = (): string => {
 	sessionCount++;
 	const worker = process.pid % 250;
 	return `10.${worker}.${Math.floor(sessionCount / 250) % 250}.${(sessionCount % 250) + 1}`;
 };
 
-/** Creates a visitor that keeps cookies between requests, as a browser would. */
+/**
+ * Creates a visitor that keeps cookies between requests, as a browser would. `renews` refreshes
+ * an expired access token and sends the request again, as the admin app does.
+ */
 const createSession = (options: {
 	url: string;
 	transport: Transport;
+	renews?: boolean;
 }): Session => {
 	const jar = new Map<string, string>();
 	const address = nextAddress();
@@ -66,9 +72,7 @@ const createSession = (options: {
 		return csrf;
 	};
 
-	const request = async <Body>(
-		input: ApiRequest,
-	): Promise<ApiResponse<Body>> => {
+	const send = async <Body>(input: ApiRequest): Promise<ApiResponse<Body>> => {
 		const method = input.method ?? "GET";
 		const url = new URL(input.path, options.url);
 		for (const [key, value] of Object.entries(input.query ?? {})) {
@@ -77,8 +81,11 @@ const createSession = (options: {
 			}
 		}
 
-		const headers = new Headers({ accept: "application/json" });
-		if (method !== "GET" || input.csrf) {
+		const headers = new Headers({
+			accept: "application/json",
+			...input.headers,
+		});
+		if (input.csrf ?? method !== "GET") {
 			headers.set(CSRF_HEADER, await getCsrf());
 		}
 		if (input.body !== undefined) {
@@ -100,10 +107,27 @@ const createSession = (options: {
 		};
 	};
 
+	const request = async <Body>(
+		input: ApiRequest,
+	): Promise<ApiResponse<Body>> => {
+		const response = await send<Body>(input);
+		const expired =
+			response.status === 401 &&
+			(response.body as { code?: string } | null)?.code === "authorisation";
+		if (!options.renews || !expired || !jar.has(REFRESH_COOKIE)) {
+			return response;
+		}
+		const renewed = await send({ method: "POST", path: REFRESH_PATH });
+		return renewed.ok ? send<Body>(input) : response;
+	};
+
 	return {
 		fetch,
 		request,
 		cookies: () => [...jar].map(([name, value]) => ({ name, value })),
+		setCookie: ({ name, value }) => {
+			jar.set(name, value);
+		},
 	};
 };
 

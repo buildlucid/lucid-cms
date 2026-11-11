@@ -74,6 +74,11 @@ export const usersTable = defineTable("lucid_users", (adapter) => ({
 			schema: z.union([z.string(), z.date()]).nullable(),
 			type: "timestamp",
 		},
+		/** Goes up whenever all of the user's sessions end, which stops access tokens issued before. */
+		session_version: {
+			schema: z.number(),
+			type: "integer",
+		},
 		/** The random user handle stored with the user's passkeys, made when they add their first one. */
 		passkey_user_id: {
 			schema: z.string().nullable(),
@@ -330,6 +335,7 @@ export interface LucidUsers {
 	two_factor_last_step: number | null;
 	two_factor_failed_attempts: Generated<number>;
 	two_factor_attempts_reset_at: TimestampMutable;
+	session_version: Generated<number>;
 	/** Base64url user handle, shared by all of the user's passkeys. Never their email or ID. */
 	passkey_user_id: string | null;
 	triggered_password_reset: ColumnType<

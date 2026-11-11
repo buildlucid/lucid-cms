@@ -1,8 +1,8 @@
 import path from "node:path";
 import {
 	benchmark,
-	countQueries,
 	type Metric,
+	measureRequests,
 	runMeasured,
 	runPool,
 	type ServedCms,
@@ -45,59 +45,10 @@ type Prepared = {
 	destroy(): Promise<void>;
 };
 
-type Response = { status: number; body: unknown; headers: Headers };
-
-const median = (values: number[]) =>
-	values.toSorted((x, y) => x - y)[Math.floor((values.length - 1) / 2)] ?? 0;
-
-/**
- * Measures sequential requests under `key`, recording median and p95 latency and query counts.
- * `send` receives the request index. Unexpected statuses fail the benchmark.
- */
-const measure = async (options: {
-	key: string;
-	label: string;
-	status: number;
-	send: (request: number) => Promise<Response>;
-}): Promise<Record<string, Metric>> => {
-	const durations: number[] = [];
-	const queries: number[] = [];
-	for (let request = 0; request < REQUESTS; request++) {
-		const startedAt = performance.now();
-		const response = await options.send(request);
-		durations.push(performance.now() - startedAt);
-
-		if (response.status !== options.status) {
-			throw new Error(
-				`${options.label} gave ${response.status}: ${JSON.stringify(response.body)}`,
-			);
-		}
-		queries.push(countQueries(response));
-	}
-
-	const at = (share: number) =>
-		Number(
-			(
-				durations.toSorted((x, y) => x - y)[
-					Math.floor((durations.length - 1) * share)
-				] ?? 0
-			).toFixed(2),
-		);
-	return {
-		[options.key]: { label: options.label, unit: "ms", value: at(0.5) },
-		[`${options.key}.p95`]: {
-			label: `${options.label} (95th percentile)`,
-			unit: "ms",
-			value: at(0.95),
-		},
-		//* exact, unlike timings, so a change in it fails a comparison
-		[`${options.key}.queries`]: {
-			label: `${options.label} (database queries)`,
-			unit: "count",
-			value: median(queries),
-		},
-	};
-};
+/** Times `REQUESTS` requests, as every metric here does. */
+const measure = (
+	options: Omit<Parameters<typeof measureRequests>[0], "requests">,
+) => measureRequests({ ...options, requests: REQUESTS });
 
 /**
  * Times the requests an editor and a website make most: reading, listing, saving, creating and

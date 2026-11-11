@@ -169,7 +169,8 @@ export const revokeConnectionGrant = async (
 		const response = await fetch(urls.revocationUrl, {
 			method: "POST",
 			cache: "no-store",
-			redirect: "error",
+			//* a redirect answers as not ok, so it fails like any error. Workers don't support "error"
+			redirect: "manual",
 			signal: AbortSignal.timeout(constants.connection.remoteRequestTimeoutMs),
 			headers: {
 				Accept: "application/json",

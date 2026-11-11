@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { ResponseBody } from "@types";
 import { createMemo } from "solid-js";
 import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
@@ -26,15 +25,14 @@ const useVerifyResetToken = (params: QueryHook<QueryParams>) => {
 			queryKey(),
 			params.key?.(),
 		],
-		queryFn: () =>
-			request<
-				ResponseBody<{
-					message: string;
-				}>
-			>({
+		//* a valid token answers with no body, and a query can't resolve to undefined
+		queryFn: async () => {
+			await request({
 				url: `/api/v1/account/reset-password/${queryParams().location?.token}`,
 				method: "GET",
-			}),
+			});
+			return null;
+		},
 		retry: 0,
 		get enabled() {
 			return params.enabled ? params.enabled() : true;

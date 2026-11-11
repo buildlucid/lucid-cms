@@ -5,6 +5,7 @@ import {
 	expect,
 	login,
 	type Lucid,
+	notApplicable,
 	requires,
 	type Session,
 	test,
@@ -186,7 +187,10 @@ describe("route access", () => {
 		"routes needing $requirement refuse users without it",
 		async ({ requirement, routes: group }, { lucid, skip }) => {
 			const served = servedBy(lucid, group);
-			skip(served.length === 0, "The setup has none of these routes.");
+			skip(
+				served.length === 0,
+				notApplicable("The setup has none of these routes."),
+			);
 			const admin = await lucid.admin();
 			const member = await useMember(lucid);
 			const { misses } = requirementCases(requirement, member.all);
@@ -207,7 +211,10 @@ describe("route access", () => {
 			const allowed = servedBy(lucid, group).filter(
 				([, entry]) => !entry.skipAllowed,
 			);
-			skip(allowed.length === 0, "The setup has none of these routes to call.");
+			skip(
+				allowed.length === 0,
+				notApplicable("The setup has none of these routes to call."),
+			);
 			const admin = await lucid.admin();
 			const member = await useMember(lucid);
 			const { meets } = requirementCases(requirement, member.all);

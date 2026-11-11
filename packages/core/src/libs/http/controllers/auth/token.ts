@@ -24,8 +24,8 @@ const tokenController = factory.createHandlers(
 	validateCSRF(),
 	rateLimiter({
 		mode: "ip",
-		limit: constants.rateLimit.scopes.sensitive.limit,
-		scope: constants.rateLimit.scopes.sensitive.scopeKey,
+		limit: constants.rateLimit.scopes.refresh.limit,
+		scope: constants.rateLimit.scopes.refresh.scopeKey,
 		windowMs: 60_000,
 	}),
 	async (c) => {

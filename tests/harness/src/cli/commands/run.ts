@@ -1,6 +1,7 @@
 import path from "node:path";
 import { getRunPrefix } from "../../databases/create-database-name.ts";
 import { resolveDriver } from "../../databases/get-driver.ts";
+import startFakes from "../../fakes/start-fakes.ts";
 import lanes from "../../lanes/get-lanes.ts";
 import createDashboardView from "../../monitor/create-dashboard-view.ts";
 import createMonitor from "../../monitor/create-monitor.ts";
@@ -106,6 +107,7 @@ const runCommand = async (options: RunOptions): Promise<number> => {
 		monitor.phase(undefined);
 	}
 
+	const fakes = await startFakes();
 	const run = (plan: SetupPlan, slots: ReturnType<typeof createLimiter>) =>
 		runSetup({
 			plan,
@@ -116,6 +118,7 @@ const runCommand = async (options: RunOptions): Promise<number> => {
 			slots,
 			monitor,
 			signal: controller.signal,
+			fakes,
 		});
 
 	const slots = createLimiter(options.concurrency);
@@ -131,6 +134,8 @@ const runCommand = async (options: RunOptions): Promise<number> => {
 	for (const plan of selectJobs(plans, (job) => job.lane.exclusive === true)) {
 		reports.push(...(await run(plan, alone)));
 	}
+
+	await fakes.stop();
 
 	//* test processes that were stopped could not remove their own databases
 	for (const driver of new Set(

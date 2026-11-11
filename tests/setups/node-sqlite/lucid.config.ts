@@ -7,6 +7,7 @@ import {
 	sharedConfig,
 	withSchemaStep,
 } from "../../shared/config.ts";
+import { authentication } from "../../shared/fragments/auth.ts";
 import { media } from "../../shared/fragments/media.ts";
 import { outbox } from "../../shared/fragments/outbox.ts";
 
@@ -19,6 +20,7 @@ export default defineConfig({
 	config: (env) =>
 		withSchemaStep(env, {
 			...sharedConfig({ url: env.HARNESS_URL }),
+			...authentication(env),
 			email: outbox(env.HARNESS_OUTBOX),
 			plugins: [media(env.HARNESS_UPLOADS)],
 		}),

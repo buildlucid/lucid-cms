@@ -4,11 +4,13 @@ import type { Capability } from "../capabilities/types.ts";
 import { getRunPrefix } from "../databases/create-database-name.ts";
 import { resolveDriver } from "../databases/get-driver.ts";
 import type { DatabaseTemplate } from "../databases/types.ts";
+import type { Fakes } from "../fakes/start-fakes.ts";
 import getLauncher from "../servers/get-launcher.ts";
 import type { Setup } from "../setup/types.ts";
 import { HOST_URL } from "../targets/boot-host.ts";
 import prepareTemplate from "./prepare-template.ts";
 import startServer from "./start-server.ts";
+import type { CmsEnv } from "./types.ts";
 
 /** A setup's migrated and seeded database, and what its config says it can do. */
 export type PreparedDatabase = {
@@ -22,18 +24,21 @@ export type PreparedDatabase = {
 export type SetupEnvironment = {
 	/** A scratch folder for databases and files made during the run. */
 	work: string;
-	/** Where the setup's CMS writes the emails it sends, in every mode. */
+	/** The folder holding the emails the setup's CMSs send, one folder per outbox instance. */
 	outbox: string;
-	/** Where the setup's CMS stores uploaded media, on setups with the `media` fragment. */
-	uploads: string;
+	/** What every CMS of the setup is given besides its database and address. */
+	cmsEnv: CmsEnv;
 	/** What is known without loading the setup's config, for lanes that run no CMS. */
 	baseCapabilities: Capability[];
 	/** Migrates and seeds the template database. */
 	database(): Promise<PreparedDatabase>;
-	/** Builds and starts the setup's real server, and returns its address. */
-	serve(): Promise<string>;
+	/** Builds and starts the setup's real server, and returns its address and outbox folder. */
+	serve(): Promise<{ url: string; outbox: string }>;
 	destroy(): Promise<void>;
 };
+
+/** The outbox instance the served server posts to. */
+const SERVED_OUTBOX = "served";
 
 /** Runs a step once however often it is asked for, and shares the result. */
 const once = <Result>(step: () => Promise<Result>): (() => Promise<Result>) => {
@@ -52,11 +57,17 @@ const createEnvironment = (options: {
 	setup: Setup;
 	runId: string;
 	directory: string;
+	fakes: Fakes;
 }): SetupEnvironment => {
 	const { setup, directory } = options;
 	const work = path.join(directory, "work");
 	const outbox = path.join(work, "outbox");
-	const uploads = path.join(work, "uploads");
+	const cmsEnv: CmsEnv = {
+		HARNESS_OUTBOX: options.fakes.outbox(setup.name, outbox),
+		HARNESS_UPLOADS: path.join(work, "uploads"),
+		HARNESS_IDP_URL: options.fakes.identityProvider,
+		LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE: options.fakes.lucidApi,
+	};
 	//* database names must be unique on a shared server
 	const prefix = `${getRunPrefix(options.runId)}_${setup.name}`
 		.replaceAll(/\W/g, "_")
@@ -96,7 +107,7 @@ const createEnvironment = (options: {
 		}),
 	);
 
-	const serve = once(async (): Promise<string> => {
+	const serve = once(async (): Promise<{ url: string; outbox: string }> => {
 		const [{ template }] = await Promise.all([database(), build()]);
 		const copy = await resolveDriver(setup.database).clone(template.state, {
 			directory: work,
@@ -108,17 +119,19 @@ const createEnvironment = (options: {
 			setup,
 			database: copy,
 			directory,
-			outbox,
-			uploads,
+			env: {
+				...cmsEnv,
+				HARNESS_OUTBOX: `${cmsEnv.HARNESS_OUTBOX}/${SERVED_OUTBOX}`,
+			},
 		});
 		cleanups.push(server.stop);
-		return server.url;
+		return { url: server.url, outbox: path.join(outbox, SERVED_OUTBOX) };
 	});
 
 	return {
 		work,
 		outbox,
-		uploads,
+		cmsEnv,
 		baseCapabilities,
 		database,
 		serve,

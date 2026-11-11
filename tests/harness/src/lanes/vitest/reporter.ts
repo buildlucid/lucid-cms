@@ -5,10 +5,10 @@ import type {
 	TestModule,
 	TestSpecification,
 } from "vitest/node";
-import { isNotApplicable } from "../../capabilities/find-missing.ts";
 import loadContext from "../../environment/load-context.ts";
 import emitProgress from "../../progress/emit-progress.ts";
 import createTestId from "../../report/create-test-id.ts";
+import { readSkipReason } from "../../report/not-applicable.ts";
 import type { TestRecord, TestStatus } from "../../report/types.ts";
 import writeLaneResult from "../../report/write-lane-result.ts";
 import { paths } from "../../utils/paths.ts";
@@ -34,7 +34,9 @@ const toStatus = (
 		return "passed";
 	}
 	if (state === "skipped") {
-		return isNotApplicable(skipReason) ? "notApplicable" : "skipped";
+		return readSkipReason(skipReason).notApplicable
+			? "notApplicable"
+			: "skipped";
 	}
 	return "failed";
 };
@@ -116,7 +118,7 @@ class HarnessReporter implements Reporter {
 				name: test.name,
 				status,
 				durationMs: Math.round(test.diagnostic()?.duration ?? 0),
-				skipReason,
+				skipReason: readSkipReason(skipReason).reason,
 				flaky: test.diagnostic()?.flaky ?? false,
 				errors: (result.errors ?? []).map(formatError),
 				meta: test.meta().harness,

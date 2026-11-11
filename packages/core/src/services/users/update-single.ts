@@ -13,6 +13,7 @@ import { formatEmailSubject } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
+import revokeUserTokens from "../auth/refresh-token/revoke-user-tokens.js";
 import notifyDependants from "../document-references/notify-dependants.js";
 import sendEmail from "../email/send-email.js";
 import checkRolesHeld from "../roles/checks/check-roles-held.js";
@@ -248,6 +249,17 @@ const updateSingle: ServiceFn<
 
 	if (updateRolesRes.error) return updateRolesRes;
 	if (updateUserRes.error) return updateUserRes;
+
+	//* a locked or deleted user's sessions end, so unlocking or restoring them doesn't bring the sessions back
+	if (data.isLocked === true || data.isDeleted === true) {
+		const sessionsRes = await revokeUserTokens(context, {
+			userId: data.userId,
+			revokeReason: data.isDeleted
+				? constants.refreshTokenRevokeReasons.userDeleted
+				: constants.refreshTokenRevokeReasons.userLocked,
+		});
+		if (sessionsRes.error) return sessionsRes;
+	}
 
 	const references = await notifyDependants(context, {
 		resource: "users",

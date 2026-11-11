@@ -1,6 +1,7 @@
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
+import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import { trimStringInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import verifyPassword from "./verify-password.js";
@@ -11,6 +12,8 @@ const login: ServiceFn<
 		{
 			usernameOrEmail: string;
 			password: string;
+			/** Where the login came from, which limits wrong passwords per address. */
+			address?: string | null;
 		},
 	],
 	{
@@ -45,9 +48,13 @@ const login: ServiceFn<
 	const user = userRes.data;
 	const passwordRes = await verifyPassword(context, {
 		account: user ? { userId: user.id } : { identifier: usernameOrEmail },
+		address: data.address,
 		password: data.password,
 		stored: user?.password
-			? { password: user.password, secret: user.secret }
+			? {
+					hash: user.password,
+					salt: decrypt(user.secret, context.config.secrets.encryption),
+				}
 			: null,
 	});
 	if (passwordRes.error) return passwordRes;

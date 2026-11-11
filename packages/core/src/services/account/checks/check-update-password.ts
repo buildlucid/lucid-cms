@@ -1,4 +1,5 @@
 import { copy } from "../../../libs/i18n/index.js";
+import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
 import generateSecret from "../../../utils/helpers/generate-secret.js";
 import hashSecret from "../../../utils/helpers/hash-secret.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -109,7 +110,10 @@ const checkUpdatePassword: ServiceFn<
 		account: { userId: data.userId },
 		password: data.currentPassword as string,
 		stored: data.password
-			? { password: data.password, secret: data.encryptedSecret }
+			? {
+					hash: data.password,
+					salt: decrypt(data.encryptedSecret, data.encryptionKey),
+				}
 			: null,
 	});
 	if (passwordRes.error) return passwordRes;

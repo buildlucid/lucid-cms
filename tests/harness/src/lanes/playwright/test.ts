@@ -1,9 +1,11 @@
 import { type BrowserContext, test as base, type Page } from "@playwright/test";
+import { CLIENT_ADDRESS_HEADER } from "../../../../shared/config.ts";
 import {
 	describeMissing,
 	findMissing,
 } from "../../capabilities/find-missing.ts";
 import type { Capability } from "../../capabilities/types.ts";
+import { nextAddress } from "../../client/create-session.ts";
 import openLucid, { type Lucid } from "../../client/open-lucid.ts";
 import type { Session } from "../../client/types.ts";
 import { resolveDriver } from "../../databases/get-driver.ts";
@@ -41,12 +43,17 @@ export const test = base.extend<
 	},
 	{ lucid: Lucid; migrations: ServedMigrations }
 >({
+	//* each browser has its own address, so tests that log in don't share rate limits
+	extraHTTPHeaders: async ({ extraHTTPHeaders }, use) => {
+		await use({ ...extraHTTPHeaders, [CLIENT_ADDRESS_HEADER]: nextAddress() });
+	},
 	pageAs: async ({ browser, lucid }, use) => {
 		const contexts: BrowserContext[] = [];
 		await use(async (session) => {
 			const context = await browser.newContext({
 				baseURL: lucid.url,
 				storageState: toStorageState(session, lucid.url),
+				extraHTTPHeaders: { [CLIENT_ADDRESS_HEADER]: nextAddress() },
 			});
 			contexts.push(context);
 			return context.newPage();

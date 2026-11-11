@@ -1,6 +1,3 @@
-import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { copy } from "@lucidcms/core";
 import type { EmailAdapterInstance, LucidConfig } from "@lucidcms/core/types";
 
@@ -17,27 +14,38 @@ export type OutboxEmail = {
 };
 
 /**
- * Stores emails as JSON for tests. Node setups register it as `email` using `HARNESS_OUTBOX`;
- * without a directory, emails are discarded.
+ * Posts emails to the harness, which keeps them for tests. Every setup registers it as `email`
+ * using `HARNESS_OUTBOX`, a URL, so it works on every runtime. Without one, emails are discarded.
  */
-export const outbox = (directory: string | undefined) =>
+export const outbox = (url: string | undefined) =>
 	({
 		adapter: {
 			type: "email-adapter",
 			key: OUTBOX_ADAPTER_KEY,
 			send: async (_context, params) => {
-				if (directory) {
+				if (url) {
 					const email: OutboxEmail = {
 						to: params.to,
 						subject: params.subject,
 						template: params.template,
 						data: params.data,
 					};
-					await mkdir(directory, { recursive: true });
-					await writeFile(
-						path.join(directory, `${Date.now()}-${randomUUID()}.json`),
-						JSON.stringify(email),
-					);
+					const response = await fetch(url, {
+						method: "POST",
+						headers: { "content-type": "application/json" },
+						body: JSON.stringify(email),
+					});
+					if (!response.ok) {
+						return {
+							success: false,
+							deliveryStatus: "failed",
+							message: copy.literal(
+								`The harness outbox answered ${response.status}.`,
+							),
+							data: null,
+							externalMessageId: null,
+						};
+					}
 				}
 				return {
 					success: true,

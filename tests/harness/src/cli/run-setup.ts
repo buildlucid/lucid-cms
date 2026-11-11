@@ -1,5 +1,6 @@
 import path from "node:path";
 import createEnvironment from "../environment/create-environment.ts";
+import type { Fakes } from "../fakes/start-fakes.ts";
 import type { Monitor } from "../monitor/create-monitor.ts";
 import type { LaneReport } from "../report/types.ts";
 import createJobKey from "../utils/create-job-key.ts";
@@ -33,6 +34,7 @@ const runSetup = async (options: {
 	slots: Limiter;
 	monitor: Monitor;
 	signal: AbortSignal;
+	fakes: Fakes;
 }): Promise<LaneReport[]> => {
 	const { setup, jobs } = options.plan;
 	const directory = path.join(options.directory, setup.name);
@@ -40,6 +42,7 @@ const runSetup = async (options: {
 		setup,
 		runId: options.runId,
 		directory,
+		fakes: options.fakes,
 	});
 
 	//* waits for its turn on the server before taking a slot, so it holds no slot while it waits

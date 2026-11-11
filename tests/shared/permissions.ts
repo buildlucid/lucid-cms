@@ -97,7 +97,6 @@ const NEEDS_AI = notCovered(
 );
 const NEEDS_DEPLOY = notCovered("Needs a deploy in the setup's config.");
 const NEEDS_TRANSFER = notCovered("Needs a transfer in the setup's config.");
-const REACHES_LUCID = "It reaches Lucid's own servers.";
 const CHANGES_PAGE_PATHS =
 	"It changes every page's paths, which other tests on the server use.";
 
@@ -521,23 +520,13 @@ export const routes = {
 	"GET /api/v1/diagnostics": needs("settings:read"),
 	"GET /api/v1/diagnostics/updates": needs("settings:read"),
 	"POST /api/v1/diagnostics/checks": needs("settings:read"),
-	"POST /api/v1/diagnostics/bug-reports": needs("settings:read", {
-		skipAllowed: REACHES_LUCID,
-	}),
+	"POST /api/v1/diagnostics/bug-reports": needs("settings:read"),
 	"GET /api/v1/connection/status": SIGNED_IN,
 	"GET /api/v1/connection/callback": PUBLIC,
-	"POST /api/v1/connection/connect": needs("connection:update", {
-		skipAllowed: REACHES_LUCID,
-	}),
-	"POST /api/v1/connection/verify": needs("connection:update", {
-		skipAllowed: REACHES_LUCID,
-	}),
-	"POST /api/v1/connection/reset": needs("connection:update", {
-		skipAllowed: REACHES_LUCID,
-	}),
-	"DELETE /api/v1/connection": needs("connection:update", {
-		skipAllowed: REACHES_LUCID,
-	}),
+	"POST /api/v1/connection/connect": needs("connection:update"),
+	"POST /api/v1/connection/verify": needs("connection:update"),
+	"POST /api/v1/connection/reset": needs("connection:update"),
+	"DELETE /api/v1/connection": needs("connection:update"),
 	"GET /api/v1/notifications": SIGNED_IN,
 	"PATCH /api/v1/notifications": SIGNED_IN,
 	"GET /api/v1/notifications/summary": SIGNED_IN,

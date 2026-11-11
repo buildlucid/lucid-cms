@@ -1,4 +1,5 @@
 import type { ResolvedLucidConfig } from "@lucidcms/core/types";
+import { PROVIDERS } from "../../../shared/fragments/auth.ts";
 import { OUTBOX_ADAPTER_KEY } from "../../../shared/fragments/outbox.ts";
 import type { Capability } from "./types.ts";
 
@@ -42,6 +43,11 @@ const deriveCapabilities = (config: ResolvedLucidConfig): Capability[] => [
 			typeof config.email.adapter === "object" &&
 			"key" in config.email.adapter &&
 			config.email.adapter.key === OUTBOX_ADAPTER_KEY,
+		identityProvider: Object.values(PROVIDERS).every((key) =>
+			config.auth.providers.some(
+				(provider) => provider.key === key && provider.enabled,
+			),
+		),
 	}),
 ];
 

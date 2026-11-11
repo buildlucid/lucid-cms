@@ -6,25 +6,42 @@ import { readJson } from "../utils/json.ts";
 const TIMEOUT_MS = 10_000;
 const INTERVAL_MS = 100;
 
+/** Which emails to look for: those sent to `to`, rendered from `template`. */
+export type EmailMatch = { to: string; template: string };
+
+/** Lists the matching emails in an outbox folder, oldest first. */
+export const listEmails = async (
+	outbox: string,
+	match: EmailMatch,
+): Promise<OutboxEmail[]> => {
+	const files = await readdir(outbox).catch((): string[] => []);
+	const emails: OutboxEmail[] = [];
+	//* file names start with when they were written, so they sort oldest first
+	for (const file of files.toSorted()) {
+		const email = await readJson<OutboxEmail>(path.join(outbox, file)).catch(
+			() => undefined,
+		);
+		if (email?.to === match.to && email.template === match.template) {
+			emails.push(email);
+		}
+	}
+	return emails;
+};
+
 /**
- * Waits for an email in a setup's outbox, the newest one sent to `to` with `template`. Emails
- * are sent by jobs, so one may land a moment after the request that caused it.
+ * Returns the newest matching outbox email, waiting for asynchronous jobs. `after` requires more
+ * than that many matching emails.
  */
 const waitForEmail = async (
 	outbox: string,
-	match: { to: string; template: string },
+	match: EmailMatch & { after?: number },
 ): Promise<OutboxEmail> => {
-	const deadline = Date.now() + TIMEOUT_MS;
-	while (Date.now() < deadline) {
-		const files = await readdir(outbox).catch((): string[] => []);
-		//* file names start with when they were written, so the newest sorts last
-		for (const file of files.toSorted().reverse()) {
-			const email = await readJson<OutboxEmail>(path.join(outbox, file)).catch(
-				() => undefined,
-			);
-			if (email?.to === match.to && email.template === match.template) {
-				return email;
-			}
+	const deadline = performance.now() + TIMEOUT_MS;
+	while (performance.now() < deadline) {
+		const emails = await listEmails(outbox, match);
+		const newest = emails.at(-1);
+		if (newest && emails.length > (match.after ?? 0)) {
+			return newest;
 		}
 		await new Promise((resolve) => setTimeout(resolve, INTERVAL_MS));
 	}

@@ -58,6 +58,7 @@ const loginController = factory.createHandlers(
 		})(context, {
 			usernameOrEmail: usernameOrEmail,
 			password: password,
+			address: getClientAddress(c),
 		});
 		if (userRes.error) throw new LucidError(userRes.error);
 

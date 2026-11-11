@@ -2,6 +2,7 @@ import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { TwoFactorProof } from "../../types/response.js";
+import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import passkeyLogin from "../auth/passkeys/login.js";
 import checkProof from "../auth/two-factor/check-proof.js";
@@ -76,7 +77,10 @@ const reauthenticate: ServiceFn<
 	const passwordRes = await verifyPassword(context, {
 		account: { userId: data.userId },
 		password: data.proof.password,
-		stored: { password: userRes.data.password, secret: userRes.data.secret },
+		stored: {
+			hash: userRes.data.password,
+			salt: decrypt(userRes.data.secret, context.config.secrets.encryption),
+		},
 	});
 	if (passwordRes.error) return passwordRes;
 	if (!passwordRes.data) {

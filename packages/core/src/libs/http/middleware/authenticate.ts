@@ -15,7 +15,9 @@ import { isRegisteredPermission } from "../../permission/registry.js";
 import { UsersRepository } from "../../repositories/index.js";
 import createServiceContext from "../utils/create-service-context.js";
 
-type CachedAuthState = Omit<LucidAuth, "exp" | "iat" | "nonce" | "authTime">;
+type CachedAuthState = Omit<LucidAuth, "exp" | "iat" | "nonce" | "authTime"> & {
+	sessionVersion: number;
+};
 
 /**
  * Reads the cached live auth state for a user.
@@ -88,6 +90,7 @@ const fetchAuthState = async (
 		email: userRes.data.email,
 		permissions,
 		superAdmin,
+		sessionVersion: userRes.data.session_version,
 	};
 };
 
@@ -100,14 +103,25 @@ const resolveAuthState = async (
 	token: LucidAccessToken,
 ): Promise<LucidAuth> => {
 	const cached = await getCachedAuthState(c, token);
-	const authState = cached.data ?? (await fetchAuthState(c, token));
+	const { sessionVersion, ...authState } =
+		cached.data ?? (await fetchAuthState(c, token));
 
 	if (cached.data == null) {
 		await cached.context.kv.set(cached.context, {
 			key: cached.cacheKey,
-			value: authState,
+			value: { ...authState, sessionVersion },
 			ttlSeconds: constants.authCacheExpiration,
 			hash: true,
+		});
+	}
+
+	//* every session of the user ended after this token was issued, such as when they signed out everywhere
+	if (token.sessionVersion !== sessionVersion) {
+		throw new LucidError({
+			type: "authorisation",
+			code: "authorisation",
+			message: copy("server:core.permissions.unauthorized"),
+			status: 401,
 		});
 	}
 

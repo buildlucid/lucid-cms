@@ -1,8 +1,10 @@
+import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
+import revokeUserTokens from "../auth/refresh-token/revoke-user-tokens.js";
 import notifyDependants from "../document-references/notify-dependants.js";
 import checkNotLastUser from "./checks/check-not-last-user.js";
 import checkUserAccess from "./checks/check-user-access.js";
@@ -60,6 +62,13 @@ const deleteSingle: ServiceFn<
 		},
 	});
 	if (deleteUserRes.error) return deleteUserRes;
+
+	//* restoring the user later doesn't bring their sessions back
+	const sessionsRes = await revokeUserTokens(context, {
+		userId: data.userId,
+		revokeReason: constants.refreshTokenRevokeReasons.userDeleted,
+	});
+	if (sessionsRes.error) return sessionsRes;
 
 	const references = await notifyDependants(context, {
 		resource: "users",

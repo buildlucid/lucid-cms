@@ -42,6 +42,7 @@ const simulation = <Model>(
 						admin: await lucid.admin(),
 					};
 					const trace: JsonValue[] = [];
+					await definition.setup?.(simulated);
 
 					for (const step of steps) {
 						if (!step.when(simulated.model)) {

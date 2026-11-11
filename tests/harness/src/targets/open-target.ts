@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import path from "node:path";
 import createDatabaseName from "../databases/create-database-name.ts";
 import { getDriver } from "../databases/get-driver.ts";
 import type { HarnessContext } from "../environment/types.ts";
@@ -5,8 +7,8 @@ import bootHost from "./boot-host.ts";
 import type { HostTargetOptions, Target } from "./types.ts";
 
 /**
- * Opens an isolated in-process CMS in host mode, or connects to the runner's server in served
- * mode.
+ * Opens an isolated in-process CMS in host mode, with its own database and outbox, or connects to
+ * the runner's server in served mode.
  */
 const openTarget = async (
 	context: HarnessContext,
@@ -19,12 +21,15 @@ const openTarget = async (
 	}
 
 	if (target.mode === "served") {
-		if (options?.adapterOverrides) {
-			throw new Error("Adapters can only be replaced in host mode.");
+		if (options?.adapterOverrides || options?.variant) {
+			throw new Error(
+				'Adapters and config variants only apply in host mode. Call requires("mode:host").',
+			);
 		}
 		return {
 			url: target.url,
 			transport: (request) => fetch(request),
+			outbox: target.outbox,
 			close: async () => {},
 		};
 	}
@@ -36,19 +41,24 @@ const openTarget = async (
 			name: createDatabaseName(context.runId, "db"),
 		},
 	);
+	const instance = randomUUID();
 
 	try {
 		const host = await bootHost({
 			configPath: context.setup.configPath,
 			databaseUrl: database.url,
-			outbox: context.paths.outbox,
-			uploads: context.paths.uploads,
+			env: {
+				...context.cmsEnv,
+				HARNESS_OUTBOX: `${context.cmsEnv.HARNESS_OUTBOX}/${instance}`,
+				HARNESS_VARIANT: options?.variant,
+			},
 			adapterOverrides: options?.adapterOverrides,
 		});
 
 		return {
 			url: host.url,
 			transport: host.transport,
+			outbox: path.join(context.paths.outbox, instance),
 			close: async () => {
 				await host.close();
 				await database.destroy();

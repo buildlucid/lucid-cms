@@ -69,12 +69,12 @@ const runJob = async (options: {
 				simulationRuns: options.run.simulationRuns,
 				performanceRuns: options.run.performanceRuns,
 				workers: options.run.workers,
+				cmsEnv: environment.cmsEnv,
 				paths: {
 					work: environment.work,
 					report: path.join(directory, `${name}.result.json`),
 					events,
 					outbox: environment.outbox,
-					uploads: environment.uploads,
 				},
 			};
 			await writeJson(contextPath, context);

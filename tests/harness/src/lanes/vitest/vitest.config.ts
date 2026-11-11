@@ -6,6 +6,9 @@ import HarnessReporter from "./reporter.ts";
 
 const context = loadContext();
 
+/** How long a simulation may take for each sequence it tries. */
+const SIMULATION_SEQUENCE_MS = 60_000;
+
 /** The config every Vitest lane runs with. The context decides which suite folder it reads. */
 export default defineConfig({
 	test: {
@@ -13,7 +16,11 @@ export default defineConfig({
 		root: paths.root,
 		include: [`suites/${context.lane}/**/*.test.ts`],
 		reporters: ["default", new HarnessReporter()],
-		testTimeout: 30_000,
+		//* a simulation tries every sequence in one test, so its time grows with `--simulation-runs`
+		testTimeout:
+			context.lane === "simulation"
+				? context.simulationRuns * SIMULATION_SEQUENCE_MS
+				: 30_000,
 		hookTimeout: 60_000,
 		passWithNoTests: true,
 		//* lanes start side by side, and Vitest wipes a shared cache when the lockfile changes while

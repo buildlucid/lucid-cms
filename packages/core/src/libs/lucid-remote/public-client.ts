@@ -40,7 +40,8 @@ const createLucidRemotePublicClient = (
 				body: JSON.stringify(body),
 				cache: "no-store",
 				credentials: "omit",
-				redirect: "error",
+				//* a redirect answers as not ok, so it fails like any error. Workers don't support "error"
+				redirect: "manual",
 				signal: AbortSignal.timeout(options.timeoutMs ?? 750),
 			});
 
@@ -62,7 +63,8 @@ const createLucidRemotePublicClient = (
 				},
 				cache: "no-store",
 				credentials: "omit",
-				redirect: "error",
+				//* a redirect answers as not ok, so it fails like any error. Workers don't support "error"
+				redirect: "manual",
 				signal: AbortSignal.timeout(options.timeoutMs ?? 5000),
 			});
 			if (!response.ok) return null;

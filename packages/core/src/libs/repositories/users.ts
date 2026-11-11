@@ -80,6 +80,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			"username",
 			"email",
 			"super_admin",
+			"session_version",
 			this.database.fn
 				.jsonArrayFrom(
 					eb
@@ -117,7 +118,14 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		return this.validateResponse(exec, {
 			...props.validation,
 			mode: "single",
-			select: ["id", "username", "email", "super_admin", "roles"],
+			select: [
+				"id",
+				"username",
+				"email",
+				"super_admin",
+				"session_version",
+				"roles",
+			],
 		});
 	}
 	async selectAuditActorById<V extends boolean = false>(
@@ -1182,10 +1190,23 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 
 		return { error: undefined, data: exec.response.data !== undefined };
 	}
+	/** Moves the user's session version on, so access tokens issued before it stop working. */
+	async incrementSessionVersion(props: { id: number }) {
+		const query = this.db
+			.updateTable("lucid_users")
+			.set({ session_version: sql<number>`session_version + 1` })
+			.where("id", "=", props.id);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "incrementSessionVersion",
+		});
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: undefined };
+	}
 	/**
-	 * Locks the user's row until the transaction ends, so changes that check a
-	 * user's sign-in methods before removing one run one at a time. Databases
-	 * without row locks, such as SQLite, already run write transactions in turn.
+	 * Locks the user row until commit to serialize sign-in method changes. SQLite serializes write
+	 * transactions without row locks.
 	 */
 	async lockForUpdate(props: { id: number }) {
 		if (!this.dbAdapter.supports("sharedRowLocks")) {

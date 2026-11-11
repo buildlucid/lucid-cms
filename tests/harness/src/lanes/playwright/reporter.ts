@@ -8,10 +8,10 @@ import type {
 	TestError,
 	TestResult,
 } from "@playwright/test/reporter";
-import { isNotApplicable } from "../../capabilities/find-missing.ts";
 import loadContext from "../../environment/load-context.ts";
 import emitProgress from "../../progress/emit-progress.ts";
 import createTestId from "../../report/create-test-id.ts";
+import { readSkipReason } from "../../report/not-applicable.ts";
 import type { TestRecord, TestStatus } from "../../report/types.ts";
 import writeLaneResult from "../../report/write-lane-result.ts";
 import { paths } from "../../utils/paths.ts";
@@ -38,7 +38,9 @@ const toStatus = (test: TestCase, result: TestResult): TestStatus => {
 		const skipReason = test.annotations.find(
 			(annotation) => annotation.type === "skip",
 		)?.description;
-		return isNotApplicable(skipReason) ? "notApplicable" : "skipped";
+		return readSkipReason(skipReason).notApplicable
+			? "notApplicable"
+			: "skipped";
 	}
 	//* a test marked with `test.fail()` is expected to fail, and passes by doing so
 	return result.status === test.expectedStatus ? "passed" : "failed";
@@ -100,9 +102,10 @@ class HarnessReporter implements Reporter {
 				name: test.title,
 				status,
 				durationMs: Math.round(result.duration),
-				skipReason: test.annotations.find(
-					(annotation) => annotation.type === "skip",
-				)?.description,
+				skipReason: readSkipReason(
+					test.annotations.find((annotation) => annotation.type === "skip")
+						?.description,
+				).reason,
 				flaky: test.outcome() === "flaky",
 				errors: status === "passed" ? [] : result.errors.map(formatError),
 			};

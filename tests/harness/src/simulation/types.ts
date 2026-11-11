@@ -39,6 +39,11 @@ export type Step<Model> = {
 export type SimulationDefinition<Model> = {
 	/** Creates the empty model that matches a freshly seeded CMS. */
 	model: () => Model;
+	/**
+	 * Runs at the start of each sequence, once the CMS is open, such as to create the users its
+	 * actions work with. It updates the model to match.
+	 */
+	setup?: (context: SimulationContext<Model>) => Promise<void>;
 	/** The actions a sequence is built from. Make each with `action()`. */
 	actions: fc.Arbitrary<Step<Model>>[];
 	/** Rules that must hold after every action, keyed by a description. Each one throws when broken. */

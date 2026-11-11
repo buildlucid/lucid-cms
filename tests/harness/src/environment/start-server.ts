@@ -6,6 +6,7 @@ import getLauncher from "../servers/get-launcher.ts";
 import waitForServer from "../servers/wait-for-server.ts";
 import type { Setup } from "../setup/types.ts";
 import getFreePort from "../utils/get-free-port.ts";
+import type { CmsEnv } from "./types.ts";
 
 /** Starts a setup's built server on a free port and waits until it is ready for tests. */
 const startServer = async (options: {
@@ -13,22 +14,19 @@ const startServer = async (options: {
 	database: ProvisionedDatabase;
 	/** Where the server log goes. */
 	directory: string;
-	/** Where the server writes the emails it sends. */
-	outbox: string;
-	/** Where the server stores uploaded media. */
-	uploads: string;
+	env: CmsEnv;
 }): Promise<{ url: string; stop(): Promise<void> }> => {
 	const { setup } = options;
 	const launcher = getLauncher(setup.runtime);
 	const port = await getFreePort();
-	const url = `http://127.0.0.1:${port}`;
+	//* browsers only allow passkeys on a domain, and localhost counts as one
+	const url = `http://localhost:${port}`;
 	const server = {
 		setup,
 		env: {
+			...options.env,
 			HARNESS_DATABASE_URL: options.database.url,
 			HARNESS_URL: url,
-			HARNESS_OUTBOX: options.outbox,
-			HARNESS_UPLOADS: options.uploads,
 		},
 		log: path.join(options.directory, "server.log"),
 	};

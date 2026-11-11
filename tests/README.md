@@ -91,13 +91,17 @@ describe("creating documents", () => {
 });
 ```
 
-- `lucid.admin()` is a session signed in as the seeded super admin.
-- `lucid.session()` is a new visitor with their own cookies and rate limits.
+- `lucid.admin()` is a session signed in as the seeded super admin. It renews its access token when it expires, as the admin app does. Other sessions answer exactly as the CMS does.
+- `lucid.session()` is a new visitor with their own cookies, client address and rate limits.
 - `lucid.user({ roleIds, superAdmin })` invites a new user as the admin, accepts the invitation from its email and signs them in, so a test can act as someone else. It needs `harness:outbox`. See `suites/integration/auth/invitations.test.ts`.
 - `lucid.user({ permissions })` also makes a role for that user alone, with exactly those permissions. It returns the user's `id` and the role's `roleId`, so a test can change what the user may do.
+- `lucid.invite()` invites a user without accepting, and returns the token from the email, for tests of how invitations are accepted.
+- `lucid.email({ to, template })` waits for an email the CMS sent and returns the newest, with the data it was rendered from, such as a magic link's `loginLink` and `code`. `after` waits for one more than that many. `lucid.emails()` lists them without waiting. In host mode each CMS has its own outbox, so a test only sees its own emails. Send emails to users the test made, as the served server's outbox is shared.
 - In served mode every test shares one server and database, so create the data you need and do not assume the database is empty.
+- `useVariant(name)` at the top of a file runs its tests on a CMS with a change to the setup's config, such as no password login. See `shared/variants.ts`. Variants only run in host mode.
+- `advanceClock(ms)` moves the clock forward for the rest of the test, such as past a token's expiry. It only works in host mode, where the CMS shares the test's clock.
 - The `migrations` fixture gives empty databases for tests that migrate themselves. See `suites/integration/migrations`.
-- Helpers for documents, media and permissions live in `shared/`. Each route the CMS serves needs a rule in `shared/permissions.ts`, as `suites/integration/permissions/routes.test.ts` fails on a route without one.
+- Helpers for documents, media, permissions and signing in live in `shared/`. Each route the CMS serves needs a rule in `shared/permissions.ts`, as `suites/integration/permissions/routes.test.ts` fails on a route without one.
 
 ### Skip what a setup cannot do
 
@@ -112,20 +116,32 @@ describe("page paths", () => {
 
 Capabilities are read from each setup's config, so most need no upkeep:
 
-| Capability                     | From                        |
-| ------------------------------ | --------------------------- |
-| `mode:host`, `mode:served`     | the current mode            |
-| `runtime:node`                 | the setup's runtime         |
-| `database:postgres`            | the database adapter        |
-| `database.sharedRowLocks`      | the adapter's support flags |
-| `database.concurrentWrites`    | a real Postgres server only |
-| `plugin:pages`                 | registered plugins          |
-| `collection:page`, `locale:fr` | collections and locales     |
-| `auth:password`, `feature:ai`  | enabled options             |
-| `harness:outbox`               | the `outbox` fragment       |
-| `plugin:filesystem`            | the `media` fragment        |
+| Capability                     | From                          |
+| ------------------------------ | ----------------------------- |
+| `mode:host`, `mode:served`     | the current mode              |
+| `runtime:node`                 | the setup's runtime           |
+| `database:postgres`            | the database adapter          |
+| `database.sharedRowLocks`      | the adapter's support flags   |
+| `database.concurrentWrites`    | a real Postgres server only   |
+| `plugin:pages`                 | registered plugins            |
+| `collection:page`, `locale:fr` | collections and locales       |
+| `auth:password`, `feature:ai`  | enabled options               |
+| `harness:outbox`               | the `outbox` fragment         |
+| `harness:identityProvider`     | the `authentication` fragment |
+| `plugin:filesystem`            | the `media` fragment          |
 
 A setup can correct the list in its `setup.ts` with `capabilities: { add, remove }`.
+
+When a test only finds out once it runs that it doesn't apply, such as one case of a `test.for` that has nothing to check on this setup, skip it with `notApplicable(reason)`. It is reported as not applicable, like `requires()`, rather than skipped.
+
+```ts
+test.for(groups)("checks $name", (group, { lucid, skip }) => {
+  skip(
+    group.routes.length === 0,
+    notApplicable("The setup has none of these routes."),
+  );
+});
+```
 
 A full run also lists any test that applied to no setup at all. That usually means a mistyped capability.
 
@@ -135,15 +151,19 @@ Files in `suites/e2e` end in `.spec.ts` and import from `#harness/playwright`. T
 
 `pageAs(session)` opens a new page signed in as someone else, such as a user from `lucid.user()`. See `suites/e2e/permissions/access.spec.ts`. Only one person can have a document open for editing, so give each page its own document.
 
+- Each browser has its own client address, so tests that log in don't share rate limits.
+- The served server is at `localhost`, as browsers only allow passkeys on a domain. `addVirtualAuthenticator(page)` gives a page's browser a passkey authenticator that always passes. The login page offers its passkeys as soon as it opens.
+
 ### Simulation tests
 
 A simulation tries many random sequences of actions against a fresh CMS and checks rules after every action. See `suites/simulation/documents/document-lifecycle.test.ts`.
 
 - A failure is shrunk to the shortest sequence that still fails.
 - Replay it with the seed it prints: `npm run harness -- --lane simulation --seed 42`.
-- `--simulation-runs` sets how many sequences each simulation tries.
+- `--simulation-runs` sets how many sequences each simulation tries. A simulation may take a minute per sequence before it times out, so it needs no timeout of its own.
 - Each simulation records a digest of what its actions returned. The report compares digests between setups for the same seed, so a database that behaves differently is flagged even when no rule breaks.
 - `adapters` swaps in faulty adapters, such as a queue that drops deliveries. `withFaults` builds one.
+- `setup` runs at the start of each sequence, such as to create the users its actions work with. See `suites/simulation/auth/sign-in-model.test.ts`.
 
 ### Benchmarks
 
@@ -160,7 +180,7 @@ Files in `suites/performance` end in `.bench.ts` and import from `#harness/perfo
 
 ## Add a setup
 
-1. Create `setups/<name>/lucid.config.ts`. Spread `sharedConfig()` from `shared/config.ts` and read the database from `getDatabaseUrl(env)`. `sharedConfig()` is the bare minimum. Turn features on by adding fragments from `shared/fragments`, such as `localization`. Node setups also add `email: outbox(env.HARNESS_OUTBOX)`, which keeps sent emails for `lucid.user()`, and the `media(env.HARNESS_UPLOADS)` plugin, which stores uploads. Node setups wrap their config in `withSchemaStep()`, which migration tests use to move between config versions.
+1. Create `setups/<name>/lucid.config.ts`. Spread `sharedConfig()` from `shared/config.ts` and read the database from `getDatabaseUrl(env)`. `sharedConfig()` is the bare minimum. Turn features on by adding fragments from `shared/fragments`, such as `localization`. Every setup spreads in `authentication(env)` and adds `email: outbox(env.HARNESS_OUTBOX)`, which sends emails to the harness for `lucid.user()` and magic links. Node setups also add the `media(env.HARNESS_UPLOADS)` plugin, which stores uploads, and wrap their config in `withSchemaStep()`, which migration tests use to move between config versions.
 2. Create `setups/<name>/setup.ts`:
 
 ```ts
@@ -201,6 +221,14 @@ Postgres and libSQL run in Docker from `docker-compose.yml`. The harness starts 
 - libSQL setups need the server, and fail with a clear message without it.
 
 To support another engine, add a driver in `harness/src/databases/` and register it in `get-driver.ts`.
+
+### Fakes
+
+Each run also starts a small local server for services a CMS reaches over HTTP, so they work from every runtime, Workers included. See `harness/src/fakes/`.
+
+- An outbox. The `outbox` fragment posts each email to `HARNESS_OUTBOX`, and the harness keeps it in the setup's run folder for `lucid.email()`.
+- An OAuth 2.0 and OpenID Connect identity provider at `HARNESS_IDP_URL`, for the `authentication` fragment's providers. It checks clients, redirects and PKCE like a real one.
+- Lucid's own API, at `LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE`, so connecting to Lucid and features that call it never reach Lucid's servers. It answers the discovery and client registration a connection starts with.
 
 ## Reports
 

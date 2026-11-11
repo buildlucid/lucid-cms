@@ -9,6 +9,7 @@ import {
 	sharedConfig,
 	withSchemaStep,
 } from "../../shared/config.ts";
+import { authentication } from "../../shared/fragments/auth.ts";
 import {
 	ArticleCollection,
 	localization,
@@ -26,6 +27,7 @@ export default defineConfig({
 	config: (env) =>
 		withSchemaStep(env, {
 			...sharedConfig({ url: env.HARNESS_URL }),
+			...authentication(env),
 			email: outbox(env.HARNESS_OUTBOX),
 			localization,
 			collections: [

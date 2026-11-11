@@ -4,6 +4,7 @@ import {
 	prepareTranslations,
 } from "@lucidcms/core/runtime";
 import type { ResolvedLucidConfig } from "@lucidcms/core/types";
+import type { HarnessEnv } from "../../../shared/config.ts";
 import loadSetupConfig from "./load-setup-config.ts";
 import type { HostTargetOptions, Target } from "./types.ts";
 
@@ -15,22 +16,16 @@ const bootHost = async (
 	options: {
 		configPath: string;
 		databaseUrl: string;
-		/** The schema step to load the config with, for migration tests. */
-		schemaStep?: string;
-		/** Where the CMS writes the emails it sends, on setups with `harness:outbox`. */
-		outbox?: string;
-		/** Where the CMS stores uploaded media, on setups with the `media` fragment. */
-		uploads?: string;
-	} & HostTargetOptions,
-): Promise<Target & { config: ResolvedLucidConfig }> => {
+		/** The rest of what the setup's config reads, such as where sent emails go or a schema step. */
+		env?: Omit<HarnessEnv, "HARNESS_DATABASE_URL" | "HARNESS_URL">;
+	} & Pick<HostTargetOptions, "adapterOverrides">,
+): Promise<Omit<Target, "outbox"> & { config: ResolvedLucidConfig }> => {
 	const loaded = await loadSetupConfig({
 		configPath: options.configPath,
 		env: {
+			...options.env,
 			HARNESS_DATABASE_URL: options.databaseUrl,
 			HARNESS_URL: HOST_URL,
-			HARNESS_SCHEMA_STEP: options.schemaStep,
-			HARNESS_OUTBOX: options.outbox,
-			HARNESS_UPLOADS: options.uploads,
 		},
 	});
 	const { translationStore } = await prepareTranslations({
