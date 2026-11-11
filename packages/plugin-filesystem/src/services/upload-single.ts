@@ -1,5 +1,5 @@
 import { copy } from "@lucidcms/core";
-import { getFileMetadata } from "@lucidcms/core/extension";
+import { getFileMetadata, readBoundedBody } from "@lucidcms/core/extension";
 import type { ServiceFn } from "@lucidcms/core/types";
 import { FILE_SYSTEM_UPLOAD_PATH } from "../constants.js";
 import {
@@ -7,10 +7,16 @@ import {
 	validatePresignedToken,
 } from "./checks/index.js";
 
+/**
+ * Stores a file sent to a signed upload URL. The token is checked before the body is read, and
+ * the body is never read past the CMS's upload limit.
+ */
 const uploadSingle: ServiceFn<
 	[
 		{
-			buffer: Buffer | undefined | null;
+			body: ReadableStream<Uint8Array> | null;
+			/** Stops reading the body, such as when the request is cancelled. */
+			signal: AbortSignal;
 			key: string;
 			mimeType: string;
 			extension?: string;
@@ -39,7 +45,7 @@ const uploadSingle: ServiceFn<
 		},
 	});
 	if (checkPresignedTokenRes.error) return checkPresignedTokenRes;
-	if (!Buffer.isBuffer(data.buffer)) {
+	if (!data.body) {
 		return {
 			error: {
 				type: "basic",
@@ -49,6 +55,33 @@ const uploadSingle: ServiceFn<
 		};
 	}
 
+	const maxBytes = context.config.media.limits.uploadBytes;
+	const read = await readBoundedBody(data.body, {
+		maxBytes,
+		signal: data.signal,
+	});
+	if (read.type === "too-large") {
+		return {
+			error: {
+				type: "basic",
+				status: 413,
+				message: copy("server:plugin.filesystem.media.files.too.large", {
+					data: { size: maxBytes },
+				}),
+			},
+		};
+	}
+	if (read.type === "aborted") {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:plugin.filesystem.media.files.invalid"),
+			},
+		};
+	}
+	const buffer = read.bytes;
+
 	const fileMetadataRes = await getFileMetadata({
 		mimeType: data.mimeType,
 		fileName: data.extension ? `upload.${data.extension}` : "upload",
@@ -57,10 +90,10 @@ const uploadSingle: ServiceFn<
 
 	const uploadRes = await mediaStorageAdapterRes.data.upload(context, {
 		key: data.key,
-		body: data.buffer,
+		body: buffer,
 		mimeType: fileMetadataRes.data.mimeType,
 		extension: fileMetadataRes.data.extension,
-		size: data.buffer.length,
+		size: buffer.length,
 		type: fileMetadataRes.data.type,
 	});
 	if (uploadRes.error) return uploadRes;

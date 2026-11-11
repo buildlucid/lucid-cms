@@ -37,6 +37,8 @@ export default class LucidDatabase {
 	readonly tables: TableRegistry;
 	/** Work queued with `afterCommit` until this client's transaction commits. */
 	private readonly commitCallbacks: Array<() => Promise<unknown>> = [];
+	/** Work queued with `afterRollback` in case this client's transaction rolls back. */
+	private readonly rollbackCallbacks: Array<() => Promise<unknown>> = [];
 
 	private constructor(
 		options: LucidDatabaseOptions,
@@ -178,7 +180,26 @@ export default class LucidDatabase {
 
 	/** Runs the work queued with `afterCommit`. Whoever commits this client's transaction calls it. */
 	async runCommitCallbacks(): Promise<void> {
+		this.rollbackCallbacks.length = 0;
 		for (const callback of this.commitCallbacks.splice(0)) {
+			await callback();
+		}
+	}
+
+	/**
+	 * Runs `callback` if the current transaction rolls back, such as to move back a file renamed for
+	 * a change that wasn't saved. Outside a transaction there is nothing to roll back, so it never
+	 * runs. A savepoint rolled back on its own doesn't run it, and its callbacks are dropped if the
+	 * outer transaction commits.
+	 */
+	afterRollback(callback: () => Promise<unknown>): void {
+		if (this.isTransaction) this.rollbackCallbacks.push(callback);
+	}
+
+	/** Runs the work queued with `afterRollback`. Whoever rolls back this client's transaction calls it. */
+	async runRollbackCallbacks(): Promise<void> {
+		this.commitCallbacks.length = 0;
+		for (const callback of this.rollbackCallbacks.splice(0)) {
 			await callback();
 		}
 	}

@@ -11,5 +11,3 @@ export const FILE_SYSTEM_UPLOAD_PATH = "fs/upload";
 export const FILE_SYSTEM_DOWNLOAD_PATH = "fs/download";
 export const FILE_SYSTEM_UPLOAD_ROUTE = `/api/v1/${FILE_SYSTEM_UPLOAD_PATH}`;
 export const FILE_SYSTEM_DOWNLOAD_ROUTE = `/api/v1/${FILE_SYSTEM_DOWNLOAD_PATH}`;
-export const FILE_SYSTEM_RATE_LIMIT = 20;
-export const FILE_SYSTEM_RATE_LIMIT_WINDOW_MS = 60 * 1000;

@@ -121,7 +121,7 @@ export const routes = {
 	"GET /api/oauth/authorize": PUBLIC,
 	"POST /api/oauth/token": PUBLIC,
 	"POST /api/oauth/revoke": PUBLIC,
-	"GET /cdn/{key}": PUBLIC,
+	"GET /cdn/{path}": PUBLIC,
 
 	//* signing in
 	"GET /api/v1/auth/csrf": PUBLIC,
@@ -553,6 +553,12 @@ export const routes = {
 	//* plugins: signed upload and download links for filesystem media
 	"PUT /api/v1/fs/upload": { ...PUBLIC, plugin: "filesystem" },
 	"GET /api/v1/fs/download": { ...PUBLIC, plugin: "filesystem" },
+	//* plugins: the same for media in R2, sent through the Worker's bucket binding
+	"PUT /api/v1/media/r2/storage/upload": { ...PUBLIC, plugin: "cloudflare-r2" },
+	"GET /api/v1/media/r2/storage/download": {
+		...PUBLIC,
+		plugin: "cloudflare-r2",
+	},
 	//* plugins: page paths, only for the collections the pages plugin manages
 	"POST /api/v1/pages/rebuild-paths": needs("settings:update", {
 		plugin: "pages",

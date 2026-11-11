@@ -76,6 +76,7 @@
 - Renamed the runtime context's `configEntryPoint` to `buildModule`, the path of an emitted `lucid:build` module. ([3d70045](https://github.com/buildlucid/lucid-cms/commit/3d70045394d133d17481d72ceaab2baf5a8161e5))
 - Email templates now use [Kiln](https://kilnlang.com) `.kiln` files instead of Mustache, with types generated from their `props` for `toolkit.email.send` and notification emails. ([cd96ff7](https://github.com/buildlucid/lucid-cms/commit/cd96ff79eb4c910eb011ce8938f821d4ead238ab))
 - CLI commands that ask for confirmation now take `--yes` in place of `--force` and fail when there's no terminal to ask in, and `jobs:schedule` is now `jobs:run`. ([0475f3c](https://github.com/buildlucid/lucid-cms/commit/0475f3c06e25151d216ab594b864879f682c26af))
+- Media URLs are now `/cdn/<uid>/<file name>` instead of the storage key, so they stay the same when a file is replaced or made private. A replacement that fails to save leaves the old file as it was. Uploads no longer take a `temporary` option.
 
 ### Bug Fixes:
 
@@ -129,6 +130,14 @@
 - Fixed session refreshes counting towards the sign-in limit, which could sign out a team sharing one address.
 - Fixed the password reset and email change pages always saying the link was invalid.
 - Fixed Cloudflare Workers failing every request to Lucid, so connecting to Lucid and its AI features didn't work there.
+- Fixed `/cdn` serving uploaded HTML pages and other files that can run scripts without a sandbox, so anyone who could upload could run code on the CMS's address. Only SVGs were sandboxed before.
+- Fixed reaching `media.limits.storageBytes` resetting the storage count to zero, so the limit never held. Full storage now answers 413 instead of 500.
+- Media in the bin is no longer served from `/cdn` or given a URL by the content API, though people who can browse the library still see its previews.
+- Fixed the media folder list failing on Postgres.
+- Fixed media losing its file on Postgres when two requests made it from the same upload, or deleted it while its file was replaced. Deleted files are now removed once the change is saved.
+- Fixed a visibility change that failed to save leaving its media pointing at a file that had moved.
+- Fixed image presets losing their format when `media.images.allowFormatQuery` is on and the browser asks for none Lucid makes.
+- Fixed media URLs renaming files after their type, so `song.mp3` became `song.mpga`.
 
 ## v0.19.0-alpha.0
 

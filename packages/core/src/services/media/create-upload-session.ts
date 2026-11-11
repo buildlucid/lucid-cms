@@ -19,7 +19,6 @@ const createUploadSession: ServiceFn<
 			mimeType: string;
 			size: number;
 			public: boolean;
-			temporary?: boolean;
 			userId: number;
 		},
 	],
@@ -46,7 +45,6 @@ const createUploadSession: ServiceFn<
 	const keyRes = generateKey({
 		name: data.fileName,
 		public: data.public,
-		temporary: data.temporary,
 	});
 	if (keyRes.error) return keyRes;
 

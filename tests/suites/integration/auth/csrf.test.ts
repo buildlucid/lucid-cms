@@ -11,6 +11,7 @@ const EXEMPT: Partial<Record<RouteKey, string>> = {
 	"POST /api/oauth/token": "OAuth clients send their own credentials.",
 	"POST /api/oauth/revoke": "OAuth clients send their own credentials.",
 	"PUT /api/v1/fs/upload": "Uploads carry a signed link.",
+	"PUT /api/v1/media/r2/storage/upload": "Uploads carry a signed link.",
 	"POST /api/v1/deploys/runs/{id}/callback": "Deploy providers sign callbacks.",
 	"POST /api/v1/deploys/{key}/webhook": "Deploy webhooks carry a secret.",
 	"POST /api/v1/content/preview": "Preview links carry a token.",

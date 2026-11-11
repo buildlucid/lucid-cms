@@ -35,25 +35,22 @@ const getSlugifiedExtension = (extension: string | null | undefined) => {
 };
 
 /**
- * Formats the canonical storage key into the browser-facing path shape that
- * includes a readable filename segment without changing the stored key itself.
+ * Formats the path a media item is served at under `/cdn`: its uid, then a readable file name. The
+ * uid outlasts the file, so replacing it never changes the URL.
  */
-const formatMediaBrowserKey = (props: {
-	key: string;
+const formatMediaPath = (props: {
+	uid: string;
 	fileName?: string | null;
 	extension?: string | null;
 }) => {
 	const slugifiedFileName = getSlugifiedFileName(props.fileName);
-	if (!slugifiedFileName) return props.key;
+	if (!slugifiedFileName) return props.uid;
 	const slugifiedExtension = getSlugifiedExtension(props.extension);
 	const displayFileName = slugifiedExtension
 		? `${slugifiedFileName}.${slugifiedExtension}`
 		: slugifiedFileName;
 
-	const parts = props.key.split("/").filter(Boolean);
-	if (parts.length === 0) return props.key;
-
-	return [...parts, displayFileName].join("/");
+	return `${props.uid}/${displayFileName}`;
 };
 
-export default formatMediaBrowserKey;
+export default formatMediaPath;

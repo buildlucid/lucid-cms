@@ -14,7 +14,8 @@ import {
 	ArticleCollection,
 	localization,
 } from "../../shared/fragments/localization.ts";
-import { media } from "../../shared/fragments/media.ts";
+import { mediaConfig } from "../../shared/fragments/media.ts";
+import { nodeMediaPlugins } from "../../shared/fragments/node-media.ts";
 import { outbox } from "../../shared/fragments/outbox.ts";
 import LandingPageCollection from "./collections/landing-page.ts";
 
@@ -28,6 +29,7 @@ export default defineConfig({
 		withSchemaStep(env, {
 			...sharedConfig({ url: env.HARNESS_URL }),
 			...authentication(env),
+			...mediaConfig(env),
 			email: outbox(env.HARNESS_OUTBOX),
 			localization,
 			collections: [
@@ -36,7 +38,7 @@ export default defineConfig({
 				LandingPageCollection,
 			],
 			plugins: [
-				media(env.HARNESS_UPLOADS),
+				...nodeMediaPlugins(env.HARNESS_UPLOADS),
 				pages({ collections: [{ key: LandingPageCollection.key }] }),
 			],
 		}),

@@ -99,7 +99,9 @@ describe("creating documents", () => {
 - `lucid.email({ to, template })` waits for an email the CMS sent and returns the newest, with the data it was rendered from, such as a magic link's `loginLink` and `code`. `after` waits for one more than that many. `lucid.emails()` lists them without waiting. In host mode each CMS has its own outbox, so a test only sees its own emails. Send emails to users the test made, as the served server's outbox is shared.
 - In served mode every test shares one server and database, so create the data you need and do not assume the database is empty.
 - `useVariant(name)` at the top of a file runs its tests on a CMS with a change to the setup's config, such as no password login. See `shared/variants.ts`. Variants only run in host mode.
-- `advanceClock(ms)` moves the clock forward for the rest of the test, such as past a token's expiry. It only works in host mode, where the CMS shares the test's clock.
+- `advanceClock(ms)` moves the clock forward for the rest of the test, such as past a token's expiry. It only works in host mode, where the CMS shares the test's clock. Sign in again on a new session after a long jump, as the shared admin's tokens would be renewed in the future.
+- `lucid.query(use)` runs queries on the CMS's database, for what the API can't show, such as the storage count media limits are checked against. It only works in host mode.
+- `lucid.uploads` is the folder Node setups store uploads in. In host mode each CMS has its own, so a test can compare the files on disk with what the database holds. See `findStorageDrift` in `shared/media.ts`.
 - The `migrations` fixture gives empty databases for tests that migrate themselves. See `suites/integration/migrations`.
 - Helpers for documents, media, permissions and signing in live in `shared/`. Each route the CMS serves needs a rule in `shared/permissions.ts`, as `suites/integration/permissions/routes.test.ts` fails on a route without one.
 
@@ -128,7 +130,8 @@ Capabilities are read from each setup's config, so most need no upkeep:
 | `auth:password`, `feature:ai`  | enabled options               |
 | `harness:outbox`               | the `outbox` fragment         |
 | `harness:identityProvider`     | the `authentication` fragment |
-| `plugin:filesystem`            | the `media` fragment          |
+| `feature:mediaStorage`         | any media storage adapter     |
+| `plugin:filesystem`            | the `node-media` fragment     |
 
 A setup can correct the list in its `setup.ts` with `capabilities: { add, remove }`.
 
@@ -162,7 +165,8 @@ A simulation tries many random sequences of actions against a fresh CMS and chec
 - Replay it with the seed it prints: `npm run harness -- --lane simulation --seed 42`.
 - `--simulation-runs` sets how many sequences each simulation tries. A simulation may take a minute per sequence before it times out, so it needs no timeout of its own.
 - Each simulation records a digest of what its actions returned. The report compares digests between setups for the same seed, so a database that behaves differently is flagged even when no rule breaks.
-- `adapters` swaps in faulty adapters, such as a queue that drops deliveries. `withFaults` builds one.
+- `adapters` swaps in faulty adapters, such as a queue that drops deliveries. `withFaults` builds one. It is given the folder the CMS stores uploads in, for storage that wraps the real one. See `suites/simulation/media/media-lifecycle.test.ts`.
+- `variant` runs every sequence on a variant of the setup's config, such as `media-limits`.
 - `setup` runs at the start of each sequence, such as to create the users its actions work with. See `suites/simulation/auth/sign-in-model.test.ts`.
 
 ### Benchmarks
@@ -180,7 +184,7 @@ Files in `suites/performance` end in `.bench.ts` and import from `#harness/perfo
 
 ## Add a setup
 
-1. Create `setups/<name>/lucid.config.ts`. Spread `sharedConfig()` from `shared/config.ts` and read the database from `getDatabaseUrl(env)`. `sharedConfig()` is the bare minimum. Turn features on by adding fragments from `shared/fragments`, such as `localization`. Every setup spreads in `authentication(env)` and adds `email: outbox(env.HARNESS_OUTBOX)`, which sends emails to the harness for `lucid.user()` and magic links. Node setups also add the `media(env.HARNESS_UPLOADS)` plugin, which stores uploads, and wrap their config in `withSchemaStep()`, which migration tests use to move between config versions.
+1. Create `setups/<name>/lucid.config.ts`. Spread `sharedConfig()` from `shared/config.ts` and read the database from `getDatabaseUrl(env)`. `sharedConfig()` is the bare minimum. Turn features on by adding fragments from `shared/fragments`, such as `localization`. Every setup spreads in `authentication(env)` and adds `email: outbox(env.HARNESS_OUTBOX)`, which sends emails to the harness for `lucid.user()` and magic links. Every setup spreads in `mediaConfig(env)` from `fragments/media.ts`, and Node setups add `nodeMediaPlugins(env.HARNESS_UPLOADS)`, which stores uploads and processes images. Node setups also wrap their config in `withSchemaStep()`, which migration tests use to move between config versions.
 2. Create `setups/<name>/setup.ts`:
 
 ```ts

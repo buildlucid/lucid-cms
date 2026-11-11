@@ -28,4 +28,17 @@ describe("getFileMetadata", () => {
 			extension: "csv",
 		});
 	});
+
+	it.for([
+		{ fileName: "song.mp3", mimeType: "audio/mpeg", extension: "mp3" },
+		{ fileName: "photo.jpeg", mimeType: "image/jpeg", extension: "jpeg" },
+		{ fileName: "photo.png", mimeType: "image/jpeg", extension: "jpg" },
+	])("names $fileName's extension $extension", async (file) => {
+		const result = await getFileMetadata({
+			mimeType: file.mimeType,
+			fileName: file.fileName,
+		});
+
+		expect(result.data?.extension).toBe(file.extension);
+	});
 });

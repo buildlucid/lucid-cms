@@ -1,4 +1,5 @@
 import type { MediaResolveUrlOptions } from "@lucidcms/types";
+import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import type { MediaDeliveryFile } from "../../libs/media-delivery/types.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
@@ -51,8 +52,10 @@ const resolveUrl: ServiceFn<
 	});
 	if (mediaRes.error) return mediaRes;
 
+	//* media in the bin isn't shown on websites, so it has no URL to give
 	if (
 		!mediaRes.data ||
+		formatter.formatBoolean(mediaRes.data.is_deleted) ||
 		!canAccessMedia({
 			actor: data.actor,
 			ownership: getMediaOwnership(mediaRes.data),
@@ -70,6 +73,7 @@ const resolveUrl: ServiceFn<
 	}
 
 	const file: MediaDeliveryFile = {
+		uid: mediaRes.data.uid,
 		key: mediaRes.data.key,
 		fileName: mediaRes.data.file_name,
 		type: mediaRes.data.type,

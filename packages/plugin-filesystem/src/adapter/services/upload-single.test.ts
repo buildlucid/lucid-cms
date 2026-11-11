@@ -2,7 +2,7 @@ import { access, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getStoredMetadataFilePath } from "../metadata.js";
+import { getStoredMetadataPath } from "../metadata.js";
 import getMetadata from "./get-metadata.js";
 import rename from "./rename.js";
 import stream from "./stream.js";
@@ -47,14 +47,12 @@ describe("file-system upload metadata", () => {
 		expect(metadataRes.status).toBe("ready");
 
 		const metadataFile = await readFile(
-			await getStoredMetadataFilePath(),
+			getStoredMetadataPath("public/uuid"),
 			"utf8",
 		);
 		expect(JSON.parse(metadataFile)).toEqual({
-			"public/uuid": {
-				mimeType: "image/svg+xml",
-				extension: "svg",
-			},
+			mimeType: "image/svg+xml",
+			extension: "svg",
 		});
 		await expect(access(path.join(uploadDir, ".lucid"))).rejects.toThrow();
 
@@ -70,6 +68,34 @@ describe("file-system upload metadata", () => {
 		});
 		expect(conditionalStreamRes.notModified).toBe(true);
 		expect(conditionalStreamRes.body).toEqual(new Uint8Array());
+	});
+
+	it("keeps every file's metadata when uploads happen at the same time", async () => {
+		const options = {
+			uploadDir,
+			secretKey: "secret",
+		};
+		const keys = Array.from({ length: 20 }, (_, index) => `public/${index}`);
+
+		await Promise.all(
+			keys.map((key) =>
+				uploadSingle(options)({} as never, {
+					key,
+					body: Buffer.from("plain text"),
+					mimeType: "text/plain",
+					extension: "txt",
+					size: 10,
+					type: "document",
+				}),
+			),
+		);
+		const metadata = await Promise.all(
+			keys.map((key) => getMetadata(options)({} as never, { key })),
+		);
+
+		expect(metadata.map((meta) => meta.mimeType)).toEqual(
+			keys.map(() => "text/plain"),
+		);
 	});
 
 	it("moves stored mime metadata when a key is renamed", async () => {

@@ -1,7 +1,8 @@
 import type fc from "fast-check";
+import type { Variant } from "../../../shared/variants.ts";
 import type { Lucid } from "../client/open-lucid.ts";
 import type { Session } from "../client/types.ts";
-import type { HostTargetOptions } from "../targets/types.ts";
+import type { AdapterOverrides } from "../targets/types.ts";
 import type { JsonValue } from "../utils/json.ts";
 
 /** What an action or invariant works with: the CMS, and the model of what it should now hold. */
@@ -55,7 +56,13 @@ export type SimulationDefinition<Model> = {
 	maxActions?: number;
 	/**
 	 * Replaces adapters to inject faults, such as a queue that fails. `random` gives numbers from
-	 * 0 to 1 that follow the run's seed, so the same faults happen on a replay.
+	 * 0 to 1 that follow the run's seed, so the same faults happen on a replay. `cms.uploads` is
+	 * where the CMS stores uploads, for storage that wraps the real one.
 	 */
-	adapters?: (random: () => number) => HostTargetOptions["adapterOverrides"];
+	adapters?: (
+		random: () => number,
+		cms: { uploads: string },
+	) => AdapterOverrides | Promise<AdapterOverrides>;
+	/** Runs every sequence on a variant of the setup's config. See `shared/variants.ts`. */
+	variant?: Variant;
 };

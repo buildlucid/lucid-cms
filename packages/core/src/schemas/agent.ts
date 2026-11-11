@@ -604,7 +604,7 @@ export const controllerSchemas = {
 				.object({
 					"filter[title]": queryString.schema.filter(false),
 					"filter[agentKey]": queryString.schema.filter(true, {
-						example: "assistant,seo",
+						example: "assistant",
 					}),
 					"filter[routineId]": queryString.schema.filter(false),
 					"filter[status]": queryString.schema.filter(true, {

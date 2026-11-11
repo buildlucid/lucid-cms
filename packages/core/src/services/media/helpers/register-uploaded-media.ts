@@ -19,7 +19,7 @@ import recordRoutineEvent from "../../agent/helpers/record-routine-event.js";
 import * as localeServices from "../../locales/index.js";
 import type createSingle from "../create-single.js";
 import notifyChange from "../notify-change.js";
-import type syncMedia from "../strategies/sync-media.js";
+import type { SyncedMedia } from "../strategies/sync-media.js";
 import prepareMediaTranslations from "./prepare-media-translations.js";
 import resolveAiGeneration from "./resolve-ai-generation.js";
 import resolvePoster from "./resolve-poster.js";
@@ -29,10 +29,7 @@ import upsertCrop from "./upsert-crop.js";
 
 /** Registers validated file metadata and runs the media creation hooks. */
 const registerUploadedMedia: ServiceFn<
-	[
-		Parameters<typeof createSingle>[1],
-		NonNullable<Awaited<ReturnType<typeof syncMedia>>["data"]>,
-	],
+	[Parameters<typeof createSingle>[1], SyncedMedia],
 	Media
 > = async (context, data, uploaded) => {
 	const Media = new MediaRepository(context.db);

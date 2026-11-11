@@ -15,8 +15,6 @@ const mediaSave: ServiceFn<
 		{
 			requestId: string;
 			public: boolean;
-			/** Stores the file under a temporary key, for replacing an existing media item's file. */
-			temporary?: boolean;
 			userId: number;
 			signal: AbortSignal;
 		},
@@ -70,7 +68,6 @@ const mediaSave: ServiceFn<
 			body: bytes.data,
 		}),
 		public: props.public,
-		temporary: props.temporary,
 	});
 	if (stored.error) return stored;
 

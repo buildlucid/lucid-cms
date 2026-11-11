@@ -21,4 +21,21 @@ describe("resolveProcessingRequest", () => {
 			format: undefined,
 		});
 	});
+
+	it.for([
+		{ accept: "*/*", format: "jpeg" },
+		{ accept: "image/webp,*/*", format: "webp" },
+	])(
+		"with format queries on, gives $format for Accept $accept",
+		({ accept, format }) => {
+			const result = resolveProcessingRequest({
+				presets: { card: { width: 400, format: "jpeg" } },
+				allowFormatQuery: true,
+				query: { preset: "card" },
+				accept,
+			});
+
+			expect(result.format).toBe(format);
+		},
+	);
 });

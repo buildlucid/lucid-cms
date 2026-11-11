@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import { constants } from "node:fs";
 import { access, stat } from "node:fs/promises";
 import { copy, LucidError } from "@lucidcms/core";
@@ -6,6 +5,7 @@ import type {
 	FileSystemStorageAdapterOptions,
 	MediaStorageAdapterServiceGetMeta,
 } from "@lucidcms/core/types";
+import { createFileETag } from "../etag.js";
 import { keyPaths } from "../helpers.js";
 import { readStoredMetadata } from "../metadata.js";
 
@@ -33,14 +33,9 @@ export default (options: FileSystemStorageAdapterOptions) => {
 			if (fileTypeResult) {
 				mimeType = fileTypeResult.mime;
 			} else {
-				mimeType =
-					(await readStoredMetadata(options.uploadDir, props.key))?.mimeType ??
-					null;
+				mimeType = (await readStoredMetadata(props.key))?.mimeType ?? null;
 			}
-			const etag = crypto
-				.createHash("md5")
-				.update(`${stats.mtime.getTime()}-${stats.size}`)
-				.digest("hex");
+			const etag = createFileETag(stats);
 			return {
 				size: stats.size,
 				mimeType: mimeType,

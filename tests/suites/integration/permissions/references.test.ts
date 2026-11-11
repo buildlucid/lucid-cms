@@ -140,7 +140,7 @@ describe("linking to what you can't read", () => {
 });
 
 describe("linking media you can't read", () => {
-	requires("harness:outbox", `collection:${STORY_KEY}`, "plugin:filesystem");
+	requires("harness:outbox", `collection:${STORY_KEY}`, "feature:mediaStorage");
 
 	test("a save can't newly link library media without media:read, but can link your own uploads", async ({
 		lucid,

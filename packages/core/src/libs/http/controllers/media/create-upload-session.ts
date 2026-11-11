@@ -60,7 +60,6 @@ const createUploadSessionController = factory.createHandlers(
 			mimeType: body.mimeType,
 			size: body.size,
 			public: body.public,
-			temporary: body.temporary,
 			userId: c.get("auth").id,
 		});
 		if (uploadSession.error) throw new LucidError(uploadSession.error);

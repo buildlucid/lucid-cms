@@ -27,9 +27,11 @@ const resolveProcessingRequest = (props: {
 	accept?: string;
 }) => {
 	const selectedPreset = props.presets?.[props.query.preset ?? ""];
-	const format = props.allowFormatQuery
-		? chooseAcceptHeaderFormat(props.accept, props.query.format)
-		: selectedPreset?.format;
+	//* a preset keeps its own format when neither the query nor the Accept header chooses one
+	const format =
+		(props.allowFormatQuery
+			? chooseAcceptHeaderFormat(props.accept, props.query.format)
+			: undefined) ?? selectedPreset?.format;
 
 	return {
 		selectedPreset,

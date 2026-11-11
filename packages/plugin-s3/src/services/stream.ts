@@ -47,6 +47,11 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 
 			if (!result.ok) {
 				throw new LucidError({
+					//* a missing object or a range past its end is the caller's to handle, not a failure
+					status:
+						result.status === 404 || result.status === 416
+							? result.status
+							: undefined,
 					message: copy("server:plugin.s3.objects.stream.failed", {
 						data: {
 							status: result.status,

@@ -36,8 +36,8 @@ const withTransaction = async <T>(
 		}
 	}
 
+	let transactionDb: LucidDatabase | undefined;
 	try {
-		let transactionDb: LucidDatabase | undefined;
 		const result = await context.db.kysely.transaction().execute(async (tx) => {
 			transactionDb = context.db.withTransaction(tx);
 			const result = await operation({
@@ -74,6 +74,17 @@ const withTransaction = async <T>(
 
 		return result;
 	} catch (error) {
+		try {
+			await transactionDb?.runRollbackCallbacks();
+		} catch (rollbackError) {
+			logger.error({
+				error: rollbackError,
+				event: "db.after-rollback.failed",
+				message: "Work queued to run after a rollback failed",
+				scope: constants.logScopes.lucid,
+			});
+		}
+
 		if (error instanceof TransactionError) {
 			return { error: error.error, data: undefined };
 		}

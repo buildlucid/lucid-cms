@@ -624,10 +624,6 @@ export const controllerSchemas = {
 					description:
 						"Store the file under a public key. Match the media it will create.",
 				}),
-				temporary: z.boolean().optional().meta({
-					description:
-						"Store the file under a temporary key, for replacing an existing media item's file.",
-				}),
 			})
 			.strict(),
 		query: {

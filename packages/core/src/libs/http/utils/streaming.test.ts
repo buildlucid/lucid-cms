@@ -22,24 +22,37 @@ describe("streaming headers", () => {
 		);
 	});
 
-	it("sandboxes streamed SVG responses", () => {
-		const headers = new Map<string, string>();
-		const context = {
-			header: vi.fn((key: string, value: string) => {
-				headers.set(key, value);
-			}),
-		};
+	it.for([
+		{ contentType: "image/svg+xml; charset=utf-8", sandboxed: true },
+		{ contentType: "text/html", sandboxed: true },
+		{ contentType: "application/xhtml+xml", sandboxed: true },
+		{ contentType: undefined, sandboxed: true },
+		{ contentType: "image/png", sandboxed: false },
+		{ contentType: "video/mp4", sandboxed: false },
+		{ contentType: "application/pdf", sandboxed: false },
+	])(
+		"sandboxes $contentType only if it can run script",
+		({ contentType, sandboxed }) => {
+			const headers = new Map<string, string>();
+			const context = {
+				header: vi.fn((key: string, value: string) => {
+					headers.set(key, value);
+				}),
+			};
 
-		applyStreamingHeaders(context as never, {
-			key: "public/file.svg",
-			contentType: "image/svg+xml; charset=utf-8",
-			contentLength: 42,
-		});
+			applyStreamingHeaders(context as never, {
+				key: "public/file",
+				contentType,
+				contentLength: 42,
+			});
 
-		expect(headers.get("Content-Security-Policy")).toBe(
-			"sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:",
-		);
-	});
+			expect(headers.get("Content-Security-Policy")).toBe(
+				sandboxed
+					? "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:"
+					: undefined,
+			);
+		},
+	);
 
 	it("keeps the cache policy on partial responses", () => {
 		const headers = new Map<string, string>();

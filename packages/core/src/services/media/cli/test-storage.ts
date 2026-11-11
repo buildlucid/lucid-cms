@@ -35,7 +35,6 @@ const testStorage: ServiceFn<
 	const key = generateKey({
 		name: "storage-test",
 		public: false,
-		temporary: true,
 	});
 	if (key.error) return key;
 

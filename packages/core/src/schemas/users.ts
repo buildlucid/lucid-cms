@@ -553,10 +553,10 @@ export const controllerSchemas = {
 						example: "admin",
 					}),
 					"filter[roleIds]": queryString.schema.filter(true, {
-						example: "1,2,3",
+						example: "1",
 					}),
 					"filter[id]": queryString.schema.filter(true, {
-						example: "1,2",
+						example: "1",
 					}),
 					"filter[isDeleted]": queryString.schema.filter(false, {
 						example: "true",

@@ -1,7 +1,11 @@
 import crypto from "node:crypto";
 
-export const createBufferETag = (buffer: Uint8Array | Buffer) =>
+const createBufferETag = (buffer: Uint8Array | Buffer) =>
 	crypto.createHash("md5").update(buffer).digest("hex");
+
+/** A stored file's ETag, from when it was last written and its size. Every service reports this one. */
+export const createFileETag = (stats: { mtime: Date; size: number }) =>
+	createBufferETag(Buffer.from(`${stats.mtime.getTime()}-${stats.size}`));
 
 const formatETag = (etag: string) => {
 	const normalized = etag.replace(/^W\//, "").replace(/^"+|"+$/g, "");

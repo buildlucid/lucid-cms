@@ -1,410 +1,63 @@
-import { copy } from "../../../libs/i18n/index.js";
-import type {
-	MediaAdapterData,
-	MediaStatus,
-	MediaType,
-} from "../../../types/response.js";
-import { formatBytes } from "../../../utils/helpers/index.js";
+import constants from "../../../constants/constants.js";
+import type { MediaType } from "../../../types/response.js";
 import mediaAdapterDataSchema from "../../../utils/media/adapter-data.js";
+import changeKeyVisibility from "../../../utils/media/change-key-visibility.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import adjustStorageUsage from "../adjust-storage-usage.js";
-import checkCanStoreMedia from "../checks/check-can-store-media.js";
 import checkHasMediaStorage from "../checks/check-has-media-storage.js";
-import validateUploadedMedia from "../helpers/validate-uploaded-media.js";
+import rename from "./rename.js";
+import syncMedia, { type SyncedMedia } from "./sync-media.js";
 
+/**
+ * Prepares a replacement under its own key and required visibility, leaving the current file
+ * intact. The caller deletes the old file after commit.
+ */
 const update: ServiceFn<
 	[
 		{
+			key: string;
 			fileName: string;
+			public: boolean;
+			replaces: { size: number; type: MediaType };
 			expectedSize?: number;
 			validation?: { maxBytes?: number; mimeTypes?: readonly string[] };
-			previousEtag?: string | null;
-			previousSize: number;
-			previousKey: string;
-			previousType: MediaType;
-			updatedKey: string;
-			targetKey: string;
 			allowedType?: MediaType;
 		},
 	],
-	{
-		mimeType: string;
-		type: MediaType;
-		extension: string;
-		size: number;
-		key: string;
-		etag: string | null;
-		sourceDeleted: boolean;
-		status: MediaStatus;
-		width: number | null;
-		height: number | null;
-		duration: number | null;
-		storageAdapterKey: string;
-		storageAdapterReference: string | null;
-		storageAdapterData: MediaAdapterData | null;
-	}
+	SyncedMedia
 > = async (context, data) => {
 	const mediaStorageRes = await checkHasMediaStorage(context);
 	if (mediaStorageRes.error) return mediaStorageRes;
 
-	const cleanupUpdatedKey = async () => {
-		await mediaStorageRes.data.delete(context, {
-			key: data.updatedKey,
-		});
-	};
+	const { public: isPublic, ...upload } = data;
+	const syncRes = await syncMedia(context, upload);
+	if (syncRes.error) return syncRes;
 
-	// Fetch meta data from new file
-	const mediaMetaRes = await mediaStorageRes.data.getMeta(context, {
-		key: data.updatedKey,
+	//* an upload's visibility is chosen when it starts, so one made before a visibility change is moved
+	const key = changeKeyVisibility({
+		key: data.key,
+		visibility: isPublic
+			? constants.media.visibilityKeys.public
+			: constants.media.visibilityKeys.private,
 	});
-	if (mediaMetaRes.error) return mediaMetaRes;
+	if (key === data.key) return syncRes;
 
-	if (
-		data.expectedSize !== undefined &&
-		mediaMetaRes.data.size !== data.expectedSize
-	) {
-		return {
-			error: {
-				status: 400,
-				message: copy("server:core.media.upload.size.mismatch"),
-			},
-			data: undefined,
-		};
-	}
+	//* a rollback moves it back to the upload's key, which cleanup removes as an unused upload
+	const renameRes = await rename(context, { from: data.key, to: key });
+	if (renameRes.error) return renameRes;
 
-	// Check the upload size.
-	const proposedSizeRes = await checkCanStoreMedia(context, {
-		size: mediaMetaRes.data.size,
-		maxBytes: data.validation?.maxBytes,
-	});
-	if (proposedSizeRes.error) {
-		await cleanupUpdatedKey();
-		return proposedSizeRes;
-	}
-
-	const fileMetaData = await validateUploadedMedia({
-		context,
-		stream: mediaStorageRes.data.stream,
-		key: data.updatedKey,
-		fileName: data.fileName,
-		mimeType: mediaMetaRes.data.mimeType,
-		allowedType: data.allowedType,
-		mimeTypes: data.validation?.mimeTypes,
-		expectedType: data.previousType,
-	});
-	if (fileMetaData.error) {
-		await cleanupUpdatedKey();
-		return fileMetaData;
-	}
-
-	const storageLimit = context.config.media.limits.storageBytes;
-	const storageRes = await adjustStorageUsage(context, {
-		delta: mediaMetaRes.data.size - data.previousSize,
-		max: storageLimit === false ? undefined : storageLimit,
-		min: 0,
-	});
-	if (storageRes.error) {
-		await cleanupUpdatedKey();
-		return storageRes;
-	}
-	if (!storageRes.data.applied) {
-		await cleanupUpdatedKey();
-
-		if (storageLimit === false) {
-			return {
-				error: {
-					type: "basic",
-					status: 500,
-				},
-				data: undefined,
-			};
-		}
-
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.files.validation.storage.limit.exceeded", {
-					data: {
-						size: formatBytes(storageLimit),
-					},
-				}),
-				status: 500,
-				errors: {
-					file: {
-						code: "storage",
-						message: copy(
-							"server:core.files.validation.storage.limit.exceeded",
-							{
-								data: {
-									size: formatBytes(storageLimit),
-								},
-							},
-						),
-					},
-				},
-			},
-			data: undefined,
-		};
-	}
-
-	const getVerifiedTargetMeta = async (options?: {
-		requireChangedEtag?: boolean;
-	}) => {
-		const targetMetaRes = await mediaStorageRes.data.getMeta(context, {
-			key: data.targetKey,
-		});
-		if (targetMetaRes.error) return null;
-
-		const matchesTarget =
-			targetMetaRes.data.size === mediaMetaRes.data.size &&
-			targetMetaRes.data.mimeType === fileMetaData.data.mimeType;
-		if (!matchesTarget) return null;
-
-		if (
-			options?.requireChangedEtag &&
-			data.previousEtag &&
-			targetMetaRes.data.etag === data.previousEtag &&
-			targetMetaRes.data.etag !== mediaMetaRes.data.etag
-		) {
-			return null;
-		}
-
-		return {
-			...targetMetaRes.data,
-			adapterData: mediaAdapterDataSchema
-				.nullable()
-				.parse(targetMetaRes.data.adapterData ?? null),
-		};
-	};
-
-	if (data.targetKey === data.previousKey) {
-		const updatedStreamRes = await mediaStorageRes.data.stream(context, {
-			key: data.updatedKey,
-		});
-		if (updatedStreamRes.error) {
-			await cleanupUpdatedKey();
-			const message =
-				updatedStreamRes.error.message ?? copy("server:core.errors.unknown");
-			return {
-				error: {
-					type: "basic",
-					message,
-					status: 500,
-					errors: {
-						file: {
-							code: "media_error",
-							message,
-						},
-					},
-				},
-				data: undefined,
-			};
-		}
-
-		const uploadRes = await mediaStorageRes.data.upload(context, {
-			key: data.targetKey,
-			body:
-				updatedStreamRes.data.body instanceof Uint8Array
-					? Buffer.from(updatedStreamRes.data.body)
-					: updatedStreamRes.data.body,
-			mimeType: fileMetaData.data.mimeType,
-			extension: fileMetaData.data.extension,
-			size: mediaMetaRes.data.size,
-			type: fileMetaData.data.type,
-		});
-
-		const targetMeta =
-			uploadRes.error === undefined
-				? await getVerifiedTargetMeta()
-				: await getVerifiedTargetMeta({
-						requireChangedEtag: true,
-					});
-
-		if (!targetMeta) {
-			await cleanupUpdatedKey();
-
-			const message =
-				uploadRes.error?.message ?? copy("server:core.errors.unknown");
-			return {
-				error: {
-					type: "basic",
-					message,
-					status: 500,
-					errors: {
-						file: {
-							code: "media_error",
-							message,
-						},
-					},
-				},
-				data: undefined,
-			};
-		}
-
-		let sourceDeleted = true;
-		const deleteUpdatedRes = await mediaStorageRes.data.delete(context, {
-			key: data.updatedKey,
-		});
-		if (deleteUpdatedRes.error) {
-			sourceDeleted = false;
-		}
-
-		return {
-			error: undefined,
-			data: {
-				mimeType: targetMeta.mimeType ?? fileMetaData.data.mimeType,
-				type: fileMetaData.data.type,
-				extension: fileMetaData.data.extension,
-				size: targetMeta.size,
-				key: data.targetKey,
-				etag: targetMeta.etag,
-				sourceDeleted,
-				status: targetMeta.status,
-				width: targetMeta.width ?? null,
-				height: targetMeta.height ?? null,
-				duration: targetMeta.duration ?? null,
-				storageAdapterKey: mediaStorageRes.data.key,
-				storageAdapterReference: targetMeta.adapterReference ?? null,
-				storageAdapterData: targetMeta.adapterData ?? null,
-			},
-		};
-	}
-
-	const promoteRes = await mediaStorageRes.data.rename(context, {
-		from: data.updatedKey,
-		to: data.targetKey,
-	});
-	if (promoteRes.error) {
-		const targetVerified = await getVerifiedTargetMeta();
-		if (!targetVerified) {
-			const message =
-				promoteRes.error.message ?? copy("server:core.errors.unknown");
-			return {
-				error: {
-					type: "basic",
-					message,
-					status: 500,
-					errors: {
-						file: {
-							code: "media_error",
-							message,
-						},
-					},
-				},
-				data: undefined,
-			};
-		}
-
-		const deleteUpdatedRes = await mediaStorageRes.data.delete(context, {
-			key: data.updatedKey,
-		});
-		const sourceDeleted = deleteUpdatedRes.error === undefined;
-
-		const deleteOldRes = await mediaStorageRes.data.delete(context, {
-			key: data.previousKey,
-		});
-		if (deleteOldRes.error) {
-			await mediaStorageRes.data.delete(context, {
-				key: data.targetKey,
-			});
-
-			return {
-				error: {
-					type: "basic",
-					message: deleteOldRes.error.message,
-					status: 500,
-					errors: {
-						file: {
-							code: "media_error",
-							message: deleteOldRes.error.message,
-						},
-					},
-				},
-				data: undefined,
-			};
-		}
-
-		return {
-			error: undefined,
-			data: {
-				mimeType: targetVerified.mimeType ?? fileMetaData.data.mimeType,
-				type: fileMetaData.data.type,
-				extension: fileMetaData.data.extension,
-				size: targetVerified.size,
-				key: data.targetKey,
-				etag: targetVerified.etag,
-				sourceDeleted,
-				status: targetVerified.status,
-				width: targetVerified.width ?? null,
-				height: targetVerified.height ?? null,
-				duration: targetVerified.duration ?? null,
-				storageAdapterKey: mediaStorageRes.data.key,
-				storageAdapterReference: targetVerified.adapterReference ?? null,
-				storageAdapterData: targetVerified.adapterData ?? null,
-			},
-		};
-	}
-
-	const targetMeta = await getVerifiedTargetMeta();
-	if (!targetMeta) {
-		const message = copy("server:core.errors.unknown");
-		return {
-			error: {
-				type: "basic",
-				message,
-				status: 500,
-				errors: {
-					file: {
-						code: "media_error",
-						message,
-					},
-				},
-			},
-			data: undefined,
-		};
-	}
-
-	const deleteOldRes = await mediaStorageRes.data.delete(context, {
-		key: data.previousKey,
-	});
-	if (deleteOldRes.error) {
-		await mediaStorageRes.data.delete(context, {
-			key: data.targetKey,
-		});
-
-		return {
-			error: {
-				type: "basic",
-				message: deleteOldRes.error.message,
-				status: 500,
-				errors: {
-					file: {
-						code: "media_error",
-						message: deleteOldRes.error.message,
-					},
-				},
-			},
-			data: undefined,
-		};
-	}
+	const metaRes = await mediaStorageRes.data.getMeta(context, { key });
+	if (metaRes.error) return metaRes;
 
 	return {
 		error: undefined,
 		data: {
-			mimeType: targetMeta.mimeType ?? fileMetaData.data.mimeType,
-			type: fileMetaData.data.type,
-			extension: fileMetaData.data.extension,
-			size: targetMeta.size,
-			key: data.targetKey,
-			etag: targetMeta.etag,
-			sourceDeleted: true,
-			status: targetMeta.status,
-			width: targetMeta.width ?? null,
-			height: targetMeta.height ?? null,
-			duration: targetMeta.duration ?? null,
-			storageAdapterKey: mediaStorageRes.data.key,
-			storageAdapterReference: targetMeta.adapterReference ?? null,
-			storageAdapterData: targetMeta.adapterData ?? null,
+			...syncRes.data,
+			key,
+			etag: metaRes.data.etag,
+			storageAdapterReference: metaRes.data.adapterReference ?? null,
+			storageAdapterData: mediaAdapterDataSchema
+				.nullable()
+				.parse(metaRes.data.adapterData ?? null),
 		},
 	};
 };

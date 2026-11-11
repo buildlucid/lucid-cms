@@ -1,8 +1,10 @@
 import { cloudflare } from "@lucidcms/cloudflare";
+import { cloudflareR2 } from "@lucidcms/cloudflare-r2";
 import { defineConfig, z } from "@lucidcms/core";
 import { postgres } from "@lucidcms/postgres";
 import { harnessEnv, sharedConfig } from "../../shared/config.ts";
 import { authentication } from "../../shared/fragments/auth.ts";
+import { mediaConfig } from "../../shared/fragments/media.ts";
 import { outbox } from "../../shared/fragments/outbox.ts";
 
 /** A Worker reads its database from a Hyperdrive binding, which `cloudflare.config.ts` points at the harness's database. */
@@ -29,6 +31,9 @@ export default defineConfig({
 	config: (env) => ({
 		...sharedConfig({ url: env.HARNESS_URL }),
 		...authentication(env),
+		...mediaConfig({}),
 		email: outbox(env.HARNESS_OUTBOX),
+		//* a local bucket in development, so media runs on Workers without credentials
+		plugins: [cloudflareR2()],
 	}),
 });

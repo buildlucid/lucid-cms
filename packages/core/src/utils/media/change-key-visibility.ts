@@ -1,23 +1,25 @@
 import type constants from "../../constants/constants.js";
-import getKeyVisibility from "./get-key-visibility.js";
 import { getMediaKeyParts } from "./media-key-parts.js";
 import normalizeMediaKey from "./normalize-media-key.js";
 
 type MediaVisibility =
 	(typeof constants.media.visibilityKeys)[keyof typeof constants.media.visibilityKeys];
 
+/** Moves a key under the given visibility. Keys without a visibility root are returned as they are. */
 const changeKeyVisibility = (data: {
 	key: string;
 	visibility: MediaVisibility;
 }) => {
 	const normalizedKey = normalizeMediaKey(data.key);
-	const current = getKeyVisibility(normalizedKey);
-	if (current === data.visibility) return normalizedKey;
-
 	const keyParts = getMediaKeyParts(normalizedKey);
-	const parts = [...keyParts.parts];
-	if (keyParts.visibilityIndex === -1) return normalizedKey;
+	if (
+		keyParts.visibilityIndex === -1 ||
+		keyParts.visibility === data.visibility
+	) {
+		return normalizedKey;
+	}
 
+	const parts = [...keyParts.parts];
 	parts[keyParts.visibilityIndex] = data.visibility;
 	return parts.join("/");
 };

@@ -5,7 +5,7 @@ export { default as chooseAcceptHeaderFormat } from "./choose-accept-header-form
 export { default as createMediaUrl } from "./create-media-url.js";
 export { default as createShareLinkUrl } from "./create-share-link-url.js";
 export { default as createShareStreamUrl } from "./create-share-stream-url.js";
-export { default as formatMediaBrowserKey } from "./format-media-browser-key.js";
+export { default as formatMediaPath } from "./format-media-path.js";
 export { default as generateKey } from "./generate-key.js";
 export { default as generateProcessKey } from "./generate-process-key.js";
 export { default as getDownloadFileName } from "./get-download-file-name.js";
@@ -27,8 +27,6 @@ export {
 } from "./media-access.js";
 export {
 	getMediaKeyParts,
-	getMediaKeyRootIndex,
-	getMediaKeyVisibilityIndex,
 	isGeneratedMediaIdSegment,
 } from "./media-key-parts.js";
 export { default as normalizeMediaKey } from "./normalize-media-key.js";

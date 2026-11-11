@@ -34,6 +34,7 @@ export {
 	resolveKey as resolveKVKey,
 } from "../libs/kv/utils.js";
 export { toWebReadable } from "../libs/media-storage/normalize-body.js";
+export { default as readBoundedBody } from "../libs/media-storage/read-bounded-body.js";
 export {
 	createSignedMediaUrl,
 	validateSignedMediaUrl,

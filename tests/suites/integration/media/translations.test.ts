@@ -2,7 +2,7 @@ import { describe, expect, requires, test } from "#harness/vitest";
 import { uploadMedia } from "#shared/media";
 
 describe("media text in locales", () => {
-	requires("plugin:filesystem");
+	requires("feature:mediaStorage");
 
 	test("refuses a title in a locale the CMS doesn't have", async ({
 		lucid,

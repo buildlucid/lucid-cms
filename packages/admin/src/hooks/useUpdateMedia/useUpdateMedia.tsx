@@ -55,7 +55,6 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 							mimeType: file.type,
 							size: file.size,
 							public: getPublic(),
-							temporary: true,
 						},
 					}),
 				onProgress: setUploadProgress,
@@ -85,7 +84,6 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 		const key = await saveGeneratedMedia({
 			requestId,
 			public: getPublic(),
-			temporary: true,
 			onError: (error) => setUploadErrors(error),
 		});
 		setUploadLoading(false);

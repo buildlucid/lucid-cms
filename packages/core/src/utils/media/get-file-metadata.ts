@@ -36,6 +36,10 @@ const getFileMetadata = async (props: {
 	if (mimeType === undefined || mimeType === null) {
 		mimeType = fallbackMimeType;
 	}
+	//* the name's own extension wins when it means the same type, so `song.mp3` keeps `mp3`, not `mpga`
+	if (fileNameExtension && mime.getType(fileNameExtension) === mimeType) {
+		extension = fileNameExtension;
+	}
 	if (!extension) {
 		extension = mime.getExtension(mimeType) || "bin";
 	}

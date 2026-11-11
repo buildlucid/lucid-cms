@@ -330,20 +330,25 @@ export const listDocumentIds = async (
 };
 
 /**
- * Creates an API key that can read the given collections, and returns a way to send content API
- * requests with it. Each request gets a new visitor, as a website's requests carry no cookies.
+ * Creates an API key that can read the given collections, and any other `scopes`, such as
+ * `media:read`, and returns a way to send content API requests with it. Each request gets a new
+ * visitor, as a website's requests carry no cookies.
  */
 export const createContentReader = async (
 	admin: Session,
 	newSession: () => Session,
 	collectionKeys: string[] = [STORY_KEY],
+	scopes: string[] = [],
 ) => {
 	const integration = await admin.request<{ data: { apiKey: string } }>({
 		method: "POST",
 		path: "/api/v1/integrations",
 		body: {
-			name: `Reader of ${collectionKeys.join(", ")}`,
-			scopes: collectionKeys.map((key) => `documents:${key}:read`),
+			name: `Reader of ${[...collectionKeys, ...scopes].join(", ")}`,
+			scopes: [
+				...collectionKeys.map((key) => `documents:${key}:read`),
+				...scopes,
+			],
 		},
 	});
 	expectStatus("Creating an API key", integration, 201);
@@ -351,23 +356,39 @@ export const createContentReader = async (
 
 	return async <Body = unknown>(
 		path: string,
-		query: Record<string, string | number> = {},
+		/** A list sends the key once per value, as filters that take several values expect. */
+		query: Record<string, string | number | Array<string | number>> = {},
 		/** Extra request headers, such as `cache-control: no-cache` to read past the cache. */
 		headers: Record<string, string> = {},
+		/** Sends a POST with this JSON body instead of a GET, such as to resolve a media URL. */
+		body?: unknown,
 	): Promise<ApiResponse<Body>> => {
 		const search = new URLSearchParams(
-			Object.entries(query).map(([key, value]) => [key, String(value)]),
+			Object.entries(query).flatMap(([key, value]) =>
+				(Array.isArray(value) ? value : [value]).map((item) => [
+					key,
+					String(item),
+				]),
+			),
 		);
 		const response = await newSession().fetch(
 			`/api/v1/content/${path}?${search}`,
-			{ headers: { ...headers, authorization: `Bearer ${apiKey}` } },
+			{
+				method: body === undefined ? "GET" : "POST",
+				headers: {
+					...headers,
+					authorization: `Bearer ${apiKey}`,
+					...(body !== undefined && { "content-type": "application/json" }),
+				},
+				body: body === undefined ? undefined : JSON.stringify(body),
+			},
 		);
-		const body = await response.text();
+		const text = await response.text();
 
 		return {
 			status: response.status,
 			ok: response.ok,
-			body: (body === "" ? null : JSON.parse(body)) as Body,
+			body: (text === "" ? null : JSON.parse(text)) as Body,
 			headers: response.headers,
 		};
 	};

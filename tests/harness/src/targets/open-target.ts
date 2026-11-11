@@ -7,7 +7,7 @@ import bootHost from "./boot-host.ts";
 import type { HostTargetOptions, Target } from "./types.ts";
 
 /**
- * Opens an isolated in-process CMS in host mode, with its own database and outbox, or connects to
+ * Opens an isolated in-process CMS in host mode, with its own database, outbox and uploads, or connects to
  * the runner's server in served mode.
  */
 const openTarget = async (
@@ -30,6 +30,7 @@ const openTarget = async (
 			url: target.url,
 			transport: (request) => fetch(request),
 			outbox: target.outbox,
+			uploads: context.cmsEnv.HARNESS_UPLOADS,
 			close: async () => {},
 		};
 	}
@@ -42,6 +43,7 @@ const openTarget = async (
 		},
 	);
 	const instance = randomUUID();
+	const uploads = path.join(context.cmsEnv.HARNESS_UPLOADS, instance);
 
 	try {
 		const host = await bootHost({
@@ -50,15 +52,21 @@ const openTarget = async (
 			env: {
 				...context.cmsEnv,
 				HARNESS_OUTBOX: `${context.cmsEnv.HARNESS_OUTBOX}/${instance}`,
+				HARNESS_UPLOADS: uploads,
 				HARNESS_VARIANT: options?.variant,
 			},
-			adapterOverrides: options?.adapterOverrides,
+			adapterOverrides:
+				typeof options?.adapterOverrides === "function"
+					? await options.adapterOverrides({ uploads })
+					: options?.adapterOverrides,
 		});
 
 		return {
 			url: host.url,
 			transport: host.transport,
 			outbox: path.join(context.paths.outbox, instance),
+			uploads,
+			query: host.query,
 			close: async () => {
 				await host.close();
 				await database.destroy();

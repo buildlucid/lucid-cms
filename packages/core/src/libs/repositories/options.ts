@@ -64,6 +64,26 @@ export default class OptionsRepository extends StaticRepository<"lucid_options">
 		});
 	}
 
+	/** Inserts an integer option at 0 if absent. An existing value is left alone. */
+	async ensureIntValue(props: { name: Select<LucidOptions>["name"] }) {
+		const query = this.db
+			.insertInto("lucid_options")
+			.values({
+				name: props.name,
+				value_int: 0,
+				value_text: null,
+				value_bool: null,
+			})
+			.onConflict((conflict) => conflict.column("name").doNothing());
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "ensureIntValue",
+		});
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: undefined };
+	}
+
 	/**
 	 * Inserts an immutable text option if absent and returns the stored value.
 	 * A concurrent creator wins without allowing this caller to replace it.

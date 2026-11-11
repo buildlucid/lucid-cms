@@ -38,7 +38,7 @@ export const harnessEnv = z.object({
 	LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE: z.url().optional(),
 	/** The variant of the config one test file runs with. See `shared/variants.ts`. */
 	HARNESS_VARIANT: z.enum(VARIANTS).optional(),
-	/** The folder the `media` fragment stores uploads in. See `shared/fragments/media.ts`. */
+	/** The folder Node setups store uploads in. Host mode gives each CMS its own. See `shared/fragments/node-media.ts`. */
 	HARNESS_UPLOADS: z.string().optional(),
 });
 

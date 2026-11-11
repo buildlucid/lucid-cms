@@ -114,7 +114,7 @@ const exportMedia: ServiceFn<[TransferExportProps], MediaEntry[]> = async (
 			},
 			text,
 			url: createMediaUrl({
-				key: media.key,
+				uid: media.uid,
 				host: getBaseUrl(context),
 				fileName: media.file_name,
 				extension: media.file_extension,

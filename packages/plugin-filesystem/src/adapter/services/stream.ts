@@ -5,7 +5,7 @@ import type {
 	FileSystemStorageAdapterOptions,
 	MediaStorageAdapterServiceStream,
 } from "@lucidcms/core/types";
-import { createBufferETag, matchesETag } from "../etag.js";
+import { createFileETag, matchesETag } from "../etag.js";
 import { keyPaths } from "../helpers.js";
 import { readStoredMetadata } from "../metadata.js";
 
@@ -26,17 +26,13 @@ export default (adapterOptions: FileSystemStorageAdapterOptions) => {
 				stat(targetPath),
 				fileType.fileTypeFromFile(targetPath),
 			]);
-			const etag = createBufferETag(
-				Buffer.from(`${stats.mtime.getTime()}-${stats.size}`),
-			);
+			const etag = createFileETag(stats);
 			let mimeType: string | undefined;
 			const totalSize = stats.size;
 			if (fileTypeResult) {
 				mimeType = fileTypeResult.mime;
 			} else {
-				mimeType =
-					(await readStoredMetadata(adapterOptions.uploadDir, props.key))
-						?.mimeType ?? undefined;
+				mimeType = (await readStoredMetadata(props.key))?.mimeType ?? undefined;
 			}
 
 			if (!props.range && matchesETag(props.ifNoneMatch, etag)) {
@@ -52,9 +48,9 @@ export default (adapterOptions: FileSystemStorageAdapterOptions) => {
 			//* handle range requests
 			if (props.range) {
 				const start = props.range.start;
-				const end = props.range.end ?? totalSize - 1;
-				//* validate range
-				if (start >= totalSize || end >= totalSize || start > end) {
+				//* a range may run past the end, which is read as up to the last byte
+				const end = Math.min(props.range.end ?? totalSize - 1, totalSize - 1);
+				if (start >= totalSize || start > end) {
 					throw new LucidError({
 						message: copy(
 							"server:plugin.filesystem.media.stream.range.invalid",

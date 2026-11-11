@@ -1,23 +1,20 @@
 import { randomUUID } from "node:crypto";
 import type { BooleanInt } from "../../../libs/db/types.js";
+import formatter from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
-import {
-	MediaAwaitingSyncRepository,
-	MediaRepository,
-} from "../../../libs/repositories/index.js";
+import { MediaRepository } from "../../../libs/repositories/index.js";
 import type {
-	MediaAdapterData,
 	MediaCropInput,
 	MediaOrigin,
-	MediaStatus,
 	MediaType,
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import clearProcessedImage from "../../processed-images/clear-single.js";
-import checkAwaitingSync from "../checks/check-awaiting-sync.js";
 import checkHasMediaStorage from "../checks/check-has-media-storage.js";
-import syncMedia from "../strategies/sync-media.js";
+import syncMedia, { type SyncedMedia } from "../strategies/sync-media.js";
 import updateMedia from "../strategies/update.js";
+import claimAwaitingSync from "./claim-awaiting-sync.js";
+import deleteFilesAfterCommit from "./delete-files-after-commit.js";
 
 type CropParent = {
 	id: number;
@@ -30,7 +27,10 @@ type CropParent = {
 	relation_type?: "crop" | "poster" | null;
 };
 
-/** Creates, restores, or overwrites the stable crop derivative for a source. */
+/**
+ * Creates, restores or replaces a source's crop. A replaced crop gets the new file's key, and the
+ * old file goes once the change is saved.
+ */
 const upsertCrop: ServiceFn<
 	[
 		{
@@ -53,34 +53,22 @@ const upsertCrop: ServiceFn<
 	}
 
 	const Media = new MediaRepository(context.db);
-	const MediaAwaitingSync = new MediaAwaitingSyncRepository(context.db);
 
-	const [awaitingSyncRes, existingCropRes] = await Promise.all([
-		checkAwaitingSync(context, { key: data.crop.key }),
+	const [claimRes, existingCropRes] = await Promise.all([
+		claimAwaitingSync(context, { key: data.crop.key }),
 		Media.selectSingle({
-			select: ["id", "key", "e_tag", "file_size", "type"],
+			select: ["id", "key", "file_size"],
 			where: [
 				{ key: "parent_media_id", operator: "=", value: data.parent.id },
 				{ key: "relation_type", operator: "=", value: "crop" },
 			],
 		}),
 	]);
-	if (awaitingSyncRes.error) return awaitingSyncRes;
+	if (claimRes.error) return claimRes;
 
 	if (existingCropRes.error) return existingCropRes;
 
-	let file: {
-		key: string;
-		etag: string | null;
-		type: "image";
-		mimeType: string;
-		extension: string;
-		size: number;
-		status: MediaStatus;
-		storageAdapterKey: string;
-		storageAdapterReference: string | null;
-		storageAdapterData: MediaAdapterData | null;
-	};
+	let file: SyncedMedia & { type: "image" };
 
 	if (existingCropRes.data) {
 		const clearProcessedRes = await clearProcessedImage(context, {
@@ -89,14 +77,11 @@ const upsertCrop: ServiceFn<
 		if (clearProcessedRes.error) return clearProcessedRes;
 
 		const updateRes = await updateMedia(context, {
-			previousSize: existingCropRes.data.file_size,
-			previousKey: existingCropRes.data.key,
-			previousType: "image",
-			previousEtag: existingCropRes.data.e_tag,
-			updatedKey: data.crop.key,
-			targetKey: existingCropRes.data.key,
-			allowedType: "image",
+			key: data.crop.key,
 			fileName: data.crop.fileName,
+			public: formatter.formatBoolean(data.parent.public),
+			replaces: { size: existingCropRes.data.file_size, type: "image" },
+			allowedType: "image",
 		});
 		if (updateRes.error) return updateRes;
 
@@ -109,18 +94,7 @@ const upsertCrop: ServiceFn<
 		});
 		if (syncRes.error) return syncRes;
 
-		file = {
-			key: syncRes.data.key,
-			etag: syncRes.data.etag,
-			type: "image",
-			mimeType: syncRes.data.mimeType,
-			extension: syncRes.data.extension,
-			size: syncRes.data.size,
-			status: syncRes.data.status,
-			storageAdapterKey: syncRes.data.storageAdapterKey,
-			storageAdapterReference: syncRes.data.storageAdapterReference,
-			storageAdapterData: syncRes.data.storageAdapterData,
-		};
+		file = { ...syncRes.data, type: "image" };
 	}
 
 	const now = new Date().toISOString();
@@ -200,11 +174,9 @@ const upsertCrop: ServiceFn<
 		return cropRes;
 	}
 
-	const deleteAwaitingRes = await MediaAwaitingSync.deleteSingle({
-		where: [{ key: "key", operator: "=", value: data.crop.key }],
-		returning: ["key"],
-	});
-	if (deleteAwaitingRes.error) return deleteAwaitingRes;
+	if (existingCropRes.data) {
+		await deleteFilesAfterCommit(context, [existingCropRes.data.key]);
+	}
 
 	return { error: undefined, data: cropRes.data };
 };

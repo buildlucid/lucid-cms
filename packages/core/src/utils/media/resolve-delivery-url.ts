@@ -34,7 +34,7 @@ function resolveDeliveryUrl(
 		return props.transformation && !props.delivery.processImage
 			? null
 			: createMediaUrl({
-					key: props.file.key,
+					uid: props.file.uid,
 					host: props.host,
 					fileName: props.file.fileName,
 					extension: props.transformation?.format ?? props.file.extension,
@@ -56,7 +56,7 @@ function resolveDeliveryUrl(
 		return props.transformation
 			? null
 			: createMediaUrl({
-					key: props.file.key,
+					uid: props.file.uid,
 					host: props.host,
 					fileName: props.file.fileName,
 					extension: props.file.extension,
@@ -68,7 +68,7 @@ function resolveDeliveryUrl(
 	if (props.transformation && !props.delivery.processImage) return null;
 
 	return createMediaUrl({
-		key: props.file.key,
+		uid: props.file.uid,
 		host: props.host,
 		fileName: props.file.fileName,
 		extension: props.transformation?.format ?? props.file.extension,

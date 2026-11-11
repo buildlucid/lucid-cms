@@ -34,18 +34,8 @@ const adjustInt: ServiceFn<
 
 	const updatedRows = Number(updateRes.data.count);
 	if (updatedRows === 0 && data.ensure === true) {
-		const ensureRes = await Options.upsertSingle({
-			data: {
-				name: data.name,
-				value_int: 0,
-				value_text: null,
-				value_bool: null,
-			},
-			returning: ["name"],
-			validation: {
-				enabled: true,
-			},
-		});
+		//* no update can also mean the limit stopped it, so an existing value is never reset
+		const ensureRes = await Options.ensureIntValue({ name: data.name });
 		if (ensureRes.error) return ensureRes;
 
 		const retryRes = await Options.adjustInt({

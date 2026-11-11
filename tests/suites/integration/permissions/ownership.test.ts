@@ -35,7 +35,7 @@ const getStatus = async (session: Session, id: number) =>
 	(await session.request({ path: `/api/v1/media/${id}` })).status;
 
 describe("media ownership", () => {
-	requires("harness:outbox", "plugin:filesystem");
+	requires("harness:outbox", "feature:mediaStorage");
 
 	test("library media needs media:read to browse", async ({ lucid }) => {
 		const admin = await lucid.admin();

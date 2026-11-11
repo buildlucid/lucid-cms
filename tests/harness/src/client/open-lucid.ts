@@ -1,3 +1,4 @@
+import type { KyselyDB } from "@lucidcms/core/types";
 import type { OutboxEmail } from "../../../shared/fragments/outbox.ts";
 import type { Variant } from "../../../shared/variants.ts";
 import type { Capability } from "../capabilities/types.ts";
@@ -25,6 +26,16 @@ export type Lucid = {
 	variant: Variant | undefined;
 	/** The address of the CMS. Only reachable from outside the test process in served mode. */
 	url: string;
+	/**
+	 * The folder Node setups store uploads in. In host mode it holds only this CMS's files; the
+	 * served server shares one with every test.
+	 */
+	uploads: string;
+	/**
+	 * Runs queries on the CMS's database, for what the API cannot show, such as a counter it keeps
+	 * to itself. Host mode only, so call `requires("mode:host")`.
+	 */
+	query<Result>(use: (kysely: KyselyDB) => Promise<Result>): Promise<Result>;
 	/** A new visitor who is not signed in. */
 	session(): Session;
 	/**
@@ -83,6 +94,15 @@ const openLucid = async (
 		capabilities: context.capabilities,
 		variant,
 		url: target.url,
+		uploads: target.uploads,
+		query: (use) => {
+			if (!target.query) {
+				throw new Error(
+					'The database can only be queried in host mode. Call requires("mode:host").',
+				);
+			}
+			return target.query(use);
+		},
 		session,
 		admin: signInAdmin,
 		user: async (invite = {}) =>

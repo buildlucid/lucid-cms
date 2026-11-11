@@ -1,138 +1,65 @@
-import { constants } from "node:fs";
-import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { z } from "@lucidcms/core";
 import { pluginDirectory } from "@lucidcms/core/extension";
 import { PLUGIN_KEY } from "../constants.js";
 
-type StoredFileMetadata = {
-	mimeType?: string | null;
-	extension?: string | null;
-};
+/** What a metadata file holds. Values that aren't text read as null. */
+const storedMetadataSchema = z.object({
+	mimeType: z.string().nullable().catch(null),
+	extension: z.string().nullable().catch(null),
+});
 
-type StoredMetadataIndex = Record<string, StoredFileMetadata>;
+type StoredFileMetadata = z.infer<typeof storedMetadataSchema>;
 
-const METADATA_FILE_NAME = "metadata.json";
+/**
+ * Where a file's metadata is kept: one JSON file per key in the plugin's folder, so uploads at the
+ * same time never overwrite each other's, and the upload folder only holds media.
+ */
+export const getStoredMetadataPath = (key: string) =>
+	path.join(pluginDirectory(PLUGIN_KEY), "metadata", `${key}.json`);
 
-const getMetadataFilePath = async () => {
-	const directory = pluginDirectory(PLUGIN_KEY);
-	await mkdir(directory, { recursive: true });
-	return path.join(directory, METADATA_FILE_NAME);
-};
-
-const readStoredMetadataIndex = async (
-	_uploadDir: string,
-): Promise<StoredMetadataIndex> => {
-	const metadataPath = await getMetadataFilePath();
-
-	try {
-		await access(metadataPath, constants.F_OK);
-	} catch {
-		return {};
-	}
-
-	try {
-		const raw = await readFile(metadataPath, "utf8");
-		const parsed = JSON.parse(raw) as StoredMetadataIndex;
-
-		if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-			return {};
-		}
-
-		return parsed;
-	} catch {
-		return {};
-	}
-};
-
-const writeStoredMetadataIndex = async (
-	_uploadDir: string,
-	index: StoredMetadataIndex,
-) => {
-	const metadataPath = await getMetadataFilePath();
-
-	if (Object.keys(index).length === 0) {
-		try {
-			await rm(metadataPath);
-		} catch {}
-		return;
-	}
-
-	await writeFile(metadataPath, JSON.stringify(index, null, 2), "utf8");
-};
-
+/** Reads the MIME type and extension a file was uploaded with, or null when none were kept. */
 export const readStoredMetadata = async (
-	uploadDir: string,
 	key: string,
 ): Promise<StoredFileMetadata | null> => {
-	const index = await readStoredMetadataIndex(uploadDir);
-	const storedMetadata = index[key];
-
-	if (!storedMetadata || typeof storedMetadata !== "object") {
+	let raw: string;
+	try {
+		raw = await readFile(getStoredMetadataPath(key), "utf8");
+	} catch {
 		return null;
 	}
 
-	return {
-		mimeType:
-			typeof storedMetadata.mimeType === "string"
-				? storedMetadata.mimeType
-				: null,
-		extension:
-			typeof storedMetadata.extension === "string"
-				? storedMetadata.extension
-				: null,
-	};
+	try {
+		return storedMetadataSchema.parse(JSON.parse(raw));
+	} catch {
+		return null;
+	}
 };
 
+/** Keeps a file's metadata. Written to a temporary file and moved into place, so readers never see half of it. */
 export const writeStoredMetadata = async (
-	uploadDir: string,
 	key: string,
 	metadata: StoredFileMetadata,
 ) => {
-	const index = await readStoredMetadataIndex(uploadDir);
-
-	index[key] = {
-		mimeType: metadata.mimeType ?? null,
-		extension: metadata.extension ?? null,
-	};
-
-	await writeStoredMetadataIndex(uploadDir, index);
+	const target = getStoredMetadataPath(key);
+	const temporary = `${target}.${randomUUID()}.tmp`;
+	await mkdir(path.dirname(target), { recursive: true });
+	await writeFile(temporary, JSON.stringify(metadata), "utf8");
+	await rename(temporary, target);
 };
 
-export const deleteStoredMetadata = async (uploadDir: string, key: string) => {
-	const index = await readStoredMetadataIndex(uploadDir);
-
-	if (!(key in index)) return;
-
-	delete index[key];
-	await writeStoredMetadataIndex(uploadDir, index);
+export const deleteStoredMetadata = async (key: string) => {
+	await rm(getStoredMetadataPath(key), { force: true });
 };
 
-export const copyStoredMetadata = async (
-	uploadDir: string,
-	fromKey: string,
-	toKey: string,
-) => {
-	const index = await readStoredMetadataIndex(uploadDir);
-	const storedMetadata = index[fromKey];
-
-	if (!storedMetadata) {
-		delete index[toKey];
-		await writeStoredMetadataIndex(uploadDir, index);
+/** Gives `toKey` the metadata `fromKey` has, or none when it has none. */
+export const copyStoredMetadata = async (fromKey: string, toKey: string) => {
+	const metadata = await readStoredMetadata(fromKey);
+	if (!metadata) {
+		await deleteStoredMetadata(toKey);
 		return;
 	}
-
-	index[toKey] = {
-		mimeType:
-			typeof storedMetadata.mimeType === "string"
-				? storedMetadata.mimeType
-				: null,
-		extension:
-			typeof storedMetadata.extension === "string"
-				? storedMetadata.extension
-				: null,
-	};
-
-	await writeStoredMetadataIndex(uploadDir, index);
+	await writeStoredMetadata(toKey, metadata);
 };
-
-export const getStoredMetadataFilePath = getMetadataFilePath;

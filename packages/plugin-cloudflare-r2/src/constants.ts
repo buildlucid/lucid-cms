@@ -17,5 +17,3 @@ export const STORAGE_UPLOAD_PATH = "media/r2/storage/upload";
 export const STORAGE_DOWNLOAD_PATH = "media/r2/storage/download";
 export const STORAGE_UPLOAD_ROUTE = `/api/v1/${STORAGE_UPLOAD_PATH}`;
 export const STORAGE_DOWNLOAD_ROUTE = `/api/v1/${STORAGE_DOWNLOAD_PATH}`;
-export const STORAGE_RATE_LIMIT = 20;
-export const STORAGE_RATE_LIMIT_WINDOW_MS = 60 * 1000;

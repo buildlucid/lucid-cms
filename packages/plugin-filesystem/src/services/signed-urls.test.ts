@@ -47,13 +47,14 @@ describe("filesystem signed URLs", () => {
 				error: undefined,
 				data: { etag: "uploaded" },
 			}));
-			// These services only use config secrets and the media storage adapter.
+			// These services only use config secrets, the upload limit and the media storage adapter.
 			const context = {
 				config: {
 					secrets: {
 						encryption: "final-encryption-secret",
 						cookie: "cookie-secret",
 					},
+					media: { limits: { uploadBytes: 1024 } },
 				},
 				mediaStorage: { ...storage, stream, upload },
 			} as unknown as ServiceContext;
@@ -104,7 +105,8 @@ describe("filesystem signed URLs", () => {
 			).toBe(true);
 			const uploaded = await uploadSingle(context, {
 				...uploadData,
-				buffer: body,
+				body: new Blob([body]).stream(),
+				signal: new AbortController().signal,
 				mimeType: "text/plain",
 				extension: params.extension,
 			});

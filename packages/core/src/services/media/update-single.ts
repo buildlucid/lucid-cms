@@ -7,7 +7,6 @@ import { copy } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import {
-	MediaAwaitingSyncRepository,
 	MediaRepository,
 	MediaTranslationsRepository,
 } from "../../libs/repositories/index.js";
@@ -28,10 +27,11 @@ import recordRoutineEvent from "../agent/helpers/record-routine-event.js";
 import * as localeServices from "../locales/index.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import clearProcessedImage from "../processed-images/clear-single.js";
-import checkAwaitingSync from "./checks/check-awaiting-sync.js";
 import mediaAccessError from "./checks/media-access-error.js";
+import claimAwaitingSync from "./helpers/claim-awaiting-sync.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 import deactivateCrop from "./helpers/deactivate-crop.js";
+import deleteFilesAfterCommit from "./helpers/delete-files-after-commit.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
@@ -83,12 +83,15 @@ const updateSingle: ServiceFn<
 > = async (context, data) => {
 	const Media = new MediaRepository(context.db);
 	const MediaTranslations = new MediaTranslationsRepository(context.db);
-	const MediaAwaitingSync = new MediaAwaitingSyncRepository(context.db);
 
 	const folderAccessRes = await checkFolderAccess(context, {
 		folderId: data.folderId,
 	});
 	if (folderAccessRes.error) return folderAccessRes;
+
+	//* a replacement writes files before it saves, so it waits for any other change, such as a delete
+	const lockRes = await Media.lockForUpdate({ id: data.id });
+	if (lockRes.error) return lockRes;
 
 	const mediaRes = await Media.selectSingleById({
 		id: data.id,
@@ -202,30 +205,17 @@ const updateSingle: ServiceFn<
 	const targetPublic = data.public ?? currentPublic;
 
 	if (data.key !== undefined && data.fileName !== undefined) {
-		const awaitingSync = await checkAwaitingSync(context, {
-			key: data.key,
-		});
-		if (awaitingSync.error) return awaitingSync;
+		const claimRes = await claimAwaitingSync(context, { key: data.key });
+		if (claimRes.error) return claimRes;
 
 		const updateRes = await updateMedia(context, {
-			previousSize: mediaRes.data.file_size,
-			previousKey: mediaRes.data.key,
-			previousType: mediaRes.data.type,
-			previousEtag: mediaRes.data.e_tag,
-			updatedKey: data.key,
+			key: data.key,
+			fileName: data.fileName,
+			public: targetPublic,
+			replaces: { size: mediaRes.data.file_size, type: mediaRes.data.type },
 			allowedType: data.allowedType,
 			expectedSize: data.expectedSize,
 			validation: data.validation,
-			fileName: data.fileName,
-			targetKey:
-				targetPublic === currentPublic
-					? mediaRes.data.key
-					: changeKeyVisibility({
-							key: mediaRes.data.key,
-							visibility: targetPublic
-								? constants.media.visibilityKeys.public
-								: constants.media.visibilityKeys.private,
-						}),
 		});
 		if (updateRes.error) return updateRes;
 
@@ -566,19 +556,9 @@ const updateSingle: ServiceFn<
 	});
 	if (visibilityRes.error) return visibilityRes;
 
-	if (
-		updateObjectRes !== undefined &&
-		updateObjectRes.sourceDeleted !== false &&
-		data.key !== undefined
-	) {
-		const deleteMediaSyncRes = await MediaAwaitingSync.deleteSingle({
-			where: [{ key: "key", operator: "=", value: data.key }],
-			returning: ["key"],
-			validation: {
-				enabled: true,
-			},
-		});
-		if (deleteMediaSyncRes.error) return deleteMediaSyncRes;
+	//* the replaced file has a key of its own, so it goes once the new one is saved
+	if (updateObjectRes !== undefined) {
+		await deleteFilesAfterCommit(context, [mediaRes.data.key]);
 	}
 
 	await Promise.all([

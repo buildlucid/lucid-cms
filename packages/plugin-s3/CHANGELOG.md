@@ -5,3 +5,7 @@
 ### Breaking Changes:
 
 - Renamed from `@lucidcms/plugin-s3` to `@lucidcms/s3`, and versions now match `@lucidcms/core`.
+
+### Bug Fixes:
+
+- Fixed missing files answering 500 instead of 404.

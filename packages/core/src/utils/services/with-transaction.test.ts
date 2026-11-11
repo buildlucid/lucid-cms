@@ -155,3 +155,25 @@ test("work queued after commit waits for the commit, and is dropped on rollback"
 
 	expect(ran).toEqual(["committed", "no transaction"]);
 });
+
+test("work queued for a rollback runs only when the transaction rolls back", async () => {
+	const ran: string[] = [];
+
+	await withTransaction(context, async (transaction) => {
+		transaction.db.afterRollback(async () => {
+			ran.push("committed");
+		});
+		return { error: undefined, data: undefined };
+	});
+	await withTransaction(context, async (transaction) => {
+		transaction.db.afterRollback(async () => {
+			ran.push("rolled back");
+		});
+		return { error: failure, data: undefined };
+	});
+	context.db.afterRollback(async () => {
+		ran.push("no transaction");
+	});
+
+	expect(ran).toEqual(["rolled back"]);
+});

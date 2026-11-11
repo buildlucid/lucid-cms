@@ -5,8 +5,6 @@ interface Params {
 	requestId: string;
 	/** Match the visibility of the media the file will create. */
 	public: boolean;
-	/** Use a temporary key, for replacing an existing media item's file. */
-	temporary?: boolean;
 	signal?: AbortSignal;
 }
 
@@ -16,7 +14,7 @@ export const mediaSaveReq = (params: Params) => {
 		url: `/api/v1/ai/media/generations/${params.requestId}/save`,
 		csrf: true,
 		method: "POST",
-		body: { public: params.public, temporary: params.temporary },
+		body: { public: params.public },
 		signal: params.signal,
 	});
 };

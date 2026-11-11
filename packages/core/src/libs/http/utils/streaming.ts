@@ -1,8 +1,23 @@
 import type { LucidHonoContext } from "../../../types/hono.js";
 import { formatETag } from "../../../utils/http/etag.js";
 
-const SVG_CONTENT_SECURITY_POLICY =
+const SANDBOX_CONTENT_SECURITY_POLICY =
 	"sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:";
+
+/**
+ * Identifies types safe to display without sandboxing. Sandboxes active content such as HTML and
+ * SVG; excludes PDFs because browser viewers isolate scripts and reject sandboxing.
+ */
+const isPassiveType = (contentType: string | undefined) => {
+	const type = contentType?.split(";", 1)[0]?.trim().toLowerCase();
+	if (!type) return false;
+	if (type === "image/svg+xml") return false;
+	return (
+		/^(image|video|audio|font)\//.test(type) ||
+		type === "application/pdf" ||
+		type === "text/plain"
+	);
+};
 
 export const applyStreamingHeaders = (
 	c: LucidHonoContext,
@@ -15,10 +30,8 @@ export const applyStreamingHeaders = (
 ) => {
 	c.header("Accept-Ranges", "bytes");
 	c.header("X-Content-Type-Options", "nosniff");
-	if (
-		opts.contentType?.split(";", 1)[0]?.trim().toLowerCase() === "image/svg+xml"
-	) {
-		c.header("Content-Security-Policy", SVG_CONTENT_SECURITY_POLICY);
+	if (!isPassiveType(opts.contentType)) {
+		c.header("Content-Security-Policy", SANDBOX_CONTENT_SECURITY_POLICY);
 	}
 	if (opts.key)
 		c.header("Content-Disposition", `inline; filename="${opts.key}"`);

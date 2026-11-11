@@ -15,7 +15,7 @@ export default (options: FileSystemStorageAdapterOptions) => {
 		try {
 			const { targetPath } = keyPaths(props.key, options.uploadDir);
 			await rm(targetPath, { force: true });
-			await deleteStoredMetadata(options.uploadDir, props.key);
+			await deleteStoredMetadata(props.key);
 			return;
 		} catch (e) {
 			if (e instanceof LucidError) throw e;

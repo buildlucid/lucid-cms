@@ -4,6 +4,7 @@
 	"plugin.filesystem.media.stream.range.invalid": "Invalid range.",
 	"plugin.filesystem.media.files.not.found": "File not found.",
 	"plugin.filesystem.media.files.invalid": "Invalid file.",
+	"plugin.filesystem.media.files.too.large": "The file is larger than the {{size}} bytes uploads may be.",
 	"plugin.filesystem.media.tokens.invalid.or.expired": "Invalid or expired token.",
 	"plugin.filesystem.media.routes.upload.error.name": "File Upload Error",
 	"plugin.filesystem.media.routes.upload.error.message": "There was an error uploading the file.",

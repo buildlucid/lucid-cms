@@ -46,6 +46,9 @@ export type MediaDeliveryServiceProcessImage = (
 ) => Promise<MediaDeliveryProcessResult>;
 
 export type MediaDeliveryFile = {
+	/** The media's lasting identity, which its Lucid URL is built from. */
+	uid: string;
+	/** Where the current file is stored, which changes when it is replaced. */
 	key: string;
 	fileName: string | null;
 	type: MediaType;

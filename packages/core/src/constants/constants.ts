@@ -333,7 +333,6 @@ export default Object.freeze({
 	media: {
 		imagePresetQuality: 80,
 		processedKey: "processed" as const,
-		awaitingSyncKey: "awaiting-sync" as const,
 		visibilityKeys: {
 			private: "private",
 			public: "public",

@@ -5,15 +5,12 @@ import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/cdn.js";
 import { cdnServices } from "../../../../services/index.js";
 import { LucidError } from "../../../../utils/errors/index.js";
-import {
-	getKeyVisibility,
-	normalizeMediaKey,
-} from "../../../../utils/media/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import authorizePrivateMedia from "../../middleware/authorize-private-media.js";
+import { copy } from "../../../i18n/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import openAPI from "../../openapi/index.js";
+import authorizeMediaStream from "../../utils/authorize-media-stream.js";
 import createServiceContext from "../../utils/create-service-context.js";
 import {
 	applyRangeHeaders,
@@ -27,7 +24,7 @@ const factory = createFactory();
 const streamSingleController = factory.createHandlers(
 	openAPI.describeRoute(() => ({
 		description:
-			"Streams a piece of media based on the given key. If its an image, you can resize and format it on request. These will count towards the processed image usage that is unique to each image. This limit is configurable on a per project bases. Once it has been hit, instead of returning the processed image, it will return the original image. This is to prevent abuse of the endpoint.",
+			"Streams a piece of media based on its uid, which stays the same when its file is replaced. If its an image, you can resize and format it on request. These will count towards the processed image usage that is unique to each image. This limit is configurable on a per project bases. Once it has been hit, instead of returning the processed image, it will return the original image. This is to prevent abuse of the endpoint.",
 		tags: ["cdn"],
 		summary: "Stream Media",
 		parameters: openAPI.parameters({
@@ -135,38 +132,50 @@ const streamSingleController = factory.createHandlers(
 		windowMs: 60_000,
 	}),
 	validate("param", controllerSchemas.streamSingle.params),
-	authorizePrivateMedia,
 	validate("query", controllerSchemas.streamSingle.query.string),
 	async (c) => {
 		const params = c.req.valid("param");
 		const query = c.req.valid("query");
 
-		const normalizedKey = normalizeMediaKey(params.key);
+		//* the path is the media's uid, then a file name that is only there to be read
+		const uid = params.path.split("/")[0] ?? "";
+		const media = await authorizeMediaStream(c, uid);
 
 		const context = createServiceContext(c);
 
 		const range = parseRangeHeader(c.req.header("range"));
 		const ifNoneMatch = c.req.header("if-none-match");
-		//* Private media may be cached only by the browser.
+		//* private media, and the bin, may be cached only by the browser
 		const cacheControl =
-			getKeyVisibility(normalizedKey) === constants.media.visibilityKeys.private
-				? "private, max-age=0, must-revalidate"
-				: "public, max-age=0, must-revalidate";
+			media?.public && !media.inBin
+				? "public, max-age=0, must-revalidate"
+				: "private, max-age=0, must-revalidate";
 
 		//* Vary by Accept when it selects the image format.
 		if (context.config.media.images.allowFormatQuery && !query.format) {
 			c.header("Vary", "Accept", { append: true });
 		}
 
-		const response = await serviceWrapper(cdnServices.streamMedia, {
-			transaction: false,
-		})(context, {
-			key: normalizedKey,
-			query: query,
-			accept: c.req.header("accept"),
-			ifNoneMatch: !range ? ifNoneMatch : undefined,
-			range,
-		});
+		//* nothing to see goes through the same fallback as a missing file
+		const response = media
+			? await serviceWrapper(cdnServices.streamMedia, {
+					transaction: false,
+				})(context, {
+					key: media.key,
+					query: query,
+					accept: c.req.header("accept"),
+					ifNoneMatch: !range ? ifNoneMatch : undefined,
+					range,
+				})
+			: ({
+					error: {
+						type: "basic",
+						status: 404,
+						name: copy("server:core.media.not.found.name"),
+						message: copy("server:core.media.not.found.message"),
+					},
+					data: undefined,
+				} as const);
 
 		if (response.error) {
 			const streamFallbackMedia = await serviceWrapper(

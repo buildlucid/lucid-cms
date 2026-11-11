@@ -7,8 +7,8 @@ import type {
 import type { MediaActor } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
-import checkAwaitingSync from "./checks/check-awaiting-sync.js";
 import checkHasMediaStorage from "./checks/check-has-media-storage.js";
+import claimAwaitingSync from "./helpers/claim-awaiting-sync.js";
 import registerUploadedMedia from "./helpers/register-uploaded-media.js";
 import syncMedia from "./strategies/sync-media.js";
 
@@ -57,10 +57,10 @@ const createSingle: ServiceFn<
 	});
 	if (folderAccessRes.error) return folderAccessRes;
 
-	const awaitingSyncRes = await checkAwaitingSync(context, {
+	const claimRes = await claimAwaitingSync(context, {
 		key: data.key,
 	});
-	if (awaitingSyncRes.error) return awaitingSyncRes;
+	if (claimRes.error) return claimRes;
 
 	const syncMediaRes = await syncMedia(context, {
 		key: data.key,

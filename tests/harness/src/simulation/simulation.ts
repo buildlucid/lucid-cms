@@ -31,8 +31,11 @@ const simulation = <Model>(
 
 		await fc.assert(
 			fc.asyncProperty(sequences, async ({ steps, faultSeed }) => {
+				const { adapters } = definition;
 				const lucid = await openLucid(context, {
-					adapterOverrides: definition.adapters?.(createRandom(faultSeed)),
+					adapterOverrides:
+						adapters && ((cms) => adapters(createRandom(faultSeed), cms)),
+					variant: definition.variant,
 				});
 
 				try {

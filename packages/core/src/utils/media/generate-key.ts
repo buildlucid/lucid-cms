@@ -9,7 +9,6 @@ import type { ServiceResponse } from "../services/types.js";
 const generateKey = (props: {
 	name: string;
 	public: boolean;
-	temporary?: boolean;
 }): Awaited<ServiceResponse<string>> => {
 	const name = props.name.trim();
 
@@ -26,11 +25,9 @@ const generateKey = (props: {
 	}
 
 	const uuid = crypto.randomUUID().replaceAll("-", "");
-	const root = props.temporary
-		? constants.media.awaitingSyncKey
-		: props.public
-			? constants.media.visibilityKeys.public
-			: constants.media.visibilityKeys.private;
+	const root = props.public
+		? constants.media.visibilityKeys.public
+		: constants.media.visibilityKeys.private;
 	return {
 		error: undefined,
 		data: `${root}/${uuid}`,

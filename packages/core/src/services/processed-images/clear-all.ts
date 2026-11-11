@@ -2,6 +2,7 @@ import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import adjustStorageUsage from "../media/adjust-storage-usage.js";
 import checkHasMediaStorage from "../media/checks/check-has-media-storage.js";
+import deleteFilesAfterCommit from "../media/helpers/delete-files-after-commit.js";
 
 // TODO: push this to a queue
 const clearAll: ServiceFn<[], undefined> = async (context) => {
@@ -30,10 +31,12 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 		0,
 	);
 
-	const [_, clearProcessedRes, updateStorageRes] = await Promise.all([
-		mediaStorageRes.data.deleteMultiple(context, {
-			keys: processedImagesRes.data.map((i) => i.key),
-		}),
+	await deleteFilesAfterCommit(
+		context,
+		processedImagesRes.data.map((i) => i.key),
+	);
+
+	const [clearProcessedRes, updateStorageRes] = await Promise.all([
 		ProcessedImages.deleteMultiple({
 			where: [],
 		}),

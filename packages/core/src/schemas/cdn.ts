@@ -37,9 +37,10 @@ export const controllerSchemas = {
 			}),
 		},
 		params: z.object({
-			key: z.string().trim().meta({
-				description: "The media key you wish to stream",
-				example: "public/123e4567e89b12d3a456426614174000/placeholder-image",
+			path: z.string().trim().meta({
+				description:
+					"The media's uid, optionally followed by a readable file name, as its URL gives it",
+				example: "123e4567-e89b-12d3-a456-426614174000/placeholder-image.png",
 			}),
 		}),
 		response: undefined,

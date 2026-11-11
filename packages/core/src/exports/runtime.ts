@@ -20,6 +20,7 @@ import createServiceContext from "../utils/services/create-service-context.js";
 
 export { startRunStream as startAgentRunStream } from "../libs/agent/run-stream.js";
 export { initializeLogger } from "../libs/logger/index.js";
+export { resolveMediaStorageAdapter } from "../libs/media-storage/get-adapter.js";
 export {
 	createAdminShellResponse,
 	isAdminPath,

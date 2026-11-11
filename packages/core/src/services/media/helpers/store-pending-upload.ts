@@ -12,8 +12,6 @@ const storePendingUpload: ServiceFn<
 		{
 			file: ReturnType<typeof normalizeUploadFile>;
 			public: boolean;
-			/** Stores the file under a temporary key, for replacing an existing media item's file. */
-			temporary?: boolean;
 			maxBytes?: number;
 		},
 	],
@@ -37,7 +35,6 @@ const storePendingUpload: ServiceFn<
 	const key = generateKey({
 		name: input.file.fileName,
 		public: input.public,
-		temporary: input.temporary,
 	});
 	if (key.error) return key;
 

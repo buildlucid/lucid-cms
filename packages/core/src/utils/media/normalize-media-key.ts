@@ -8,7 +8,7 @@ const normalizeMediaKey = (key: string) => {
 	const keyParts = getMediaKeyParts(key);
 	if (keyParts.parts.length === 0) return key;
 
-	if (keyParts.rootIndex === -1) return keyParts.parts.join("/");
+	if (keyParts.visibilityIndex === -1) return keyParts.parts.join("/");
 
 	if (keyParts.identity) {
 		return keyParts.parts.slice(0, keyParts.identityIndex + 1).join("/");

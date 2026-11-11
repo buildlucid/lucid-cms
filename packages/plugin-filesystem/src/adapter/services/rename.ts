@@ -19,9 +19,9 @@ export default (options: FileSystemStorageAdapterOptions) => {
 
 			await mkdir(path.dirname(to.targetPath), { recursive: true });
 			await copyFile(from.targetPath, to.targetPath);
-			await copyStoredMetadata(options.uploadDir, props.from, props.to);
+			await copyStoredMetadata(props.from, props.to);
 			await rm(from.targetPath);
-			await deleteStoredMetadata(options.uploadDir, props.from);
+			await deleteStoredMetadata(props.from);
 
 			return;
 		} catch (e) {

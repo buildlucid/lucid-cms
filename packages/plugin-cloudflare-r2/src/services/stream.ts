@@ -20,6 +20,7 @@ const stream = (
 					if (!object) {
 						throw new LucidError({
 							type: "plugin",
+							status: 404,
 							message: copy("server:plugin.cloudflare.r2.objects.not.found"),
 						});
 					}
@@ -47,6 +48,7 @@ const stream = (
 				if (!object) {
 					throw new LucidError({
 						type: "plugin",
+						status: 404,
 						message: copy("server:plugin.cloudflare.r2.objects.not.found"),
 					});
 				}
@@ -63,12 +65,21 @@ const stream = (
 			if (!meta) {
 				throw new LucidError({
 					type: "plugin",
+					status: 404,
 					message: copy("server:plugin.cloudflare.r2.objects.not.found"),
 				});
 			}
 
 			const start = range.start;
-			const end = range.end ?? meta.size - 1;
+			//* a range may run past the end, which is read as up to the last byte
+			const end = Math.min(range.end ?? meta.size - 1, meta.size - 1);
+			if (start >= meta.size || start > end) {
+				throw new LucidError({
+					type: "plugin",
+					status: 416,
+					message: copy("server:plugin.cloudflare.r2.stream.range.invalid"),
+				});
+			}
 
 			const object = await binding.get(key, {
 				range: {
@@ -80,6 +91,7 @@ const stream = (
 			if (!object) {
 				throw new LucidError({
 					type: "plugin",
+					status: 404,
 					message: copy("server:plugin.cloudflare.r2.objects.not.found"),
 				});
 			}

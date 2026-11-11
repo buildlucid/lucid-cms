@@ -141,7 +141,7 @@ export const controllerSchemas = {
 						example: "Editor",
 					}),
 					"filter[roleIds]": queryString.schema.filter(true, {
-						example: "1,2",
+						example: "1",
 					}),
 					"filter[description]": queryString.schema.filter(false, {
 						example: "Can manage content",

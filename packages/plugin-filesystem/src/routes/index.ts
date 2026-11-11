@@ -1,17 +1,9 @@
 import { Readable } from "node:stream";
-import {
-	copy,
-	defineRoute,
-	LucidError,
-	middleware,
-	serviceWrapper,
-} from "@lucidcms/core";
+import { copy, defineRoute, LucidError, serviceWrapper } from "@lucidcms/core";
 import { buildDownloadContentDisposition } from "@lucidcms/core/extension";
 import { stream } from "hono/streaming";
 import {
 	FILE_SYSTEM_DOWNLOAD_ROUTE,
-	FILE_SYSTEM_RATE_LIMIT,
-	FILE_SYSTEM_RATE_LIMIT_WINDOW_MS,
 	FILE_SYSTEM_UPLOAD_ROUTE,
 } from "../constants.js";
 import { controllerSchemas } from "../schema/fs.js";
@@ -22,14 +14,6 @@ const routes = () => [
 		method: "get",
 		path: FILE_SYSTEM_DOWNLOAD_ROUTE,
 		schema: controllerSchemas.download,
-		middleware: [
-			middleware.rateLimiter({
-				mode: "ip",
-				scope: "filesystem-download",
-				limit: FILE_SYSTEM_RATE_LIMIT,
-				windowMs: FILE_SYSTEM_RATE_LIMIT_WINDOW_MS,
-			}),
-		],
 		openAPI: {
 			description: "Download a single media file from local storage.",
 			tags: ["filesystem-plugin"],
@@ -93,14 +77,6 @@ const routes = () => [
 		method: "put",
 		path: FILE_SYSTEM_UPLOAD_ROUTE,
 		schema: controllerSchemas.upload,
-		middleware: [
-			middleware.rateLimiter({
-				mode: "ip",
-				scope: "filesystem-upload",
-				limit: FILE_SYSTEM_RATE_LIMIT,
-				windowMs: FILE_SYSTEM_RATE_LIMIT_WINDOW_MS,
-			}),
-		],
 		openAPI: {
 			description: "Upload a single media file.",
 			tags: ["filesystem-plugin"],
@@ -108,7 +84,6 @@ const routes = () => [
 		},
 		handler: async ({ hono, context, input }) => {
 			const query = input.query;
-			const buffer = await hono.req.arrayBuffer();
 
 			const uploadMedia = await serviceWrapper(uploadSingle, {
 				transaction: false,
@@ -120,7 +95,8 @@ const routes = () => [
 					),
 				},
 			})(context, {
-				buffer: buffer ? Buffer.from(buffer) : undefined,
+				body: hono.req.raw.body,
+				signal: hono.req.raw.signal,
 				key: query.key,
 				mimeType: query.mimeType,
 				extension: query.extension,

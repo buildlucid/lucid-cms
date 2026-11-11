@@ -1,18 +1,7 @@
 import { Readable } from "node:stream";
-import {
-	copy,
-	defineRoute,
-	LucidError,
-	middleware,
-	serviceWrapper,
-} from "@lucidcms/core";
+import { copy, defineRoute, LucidError, serviceWrapper } from "@lucidcms/core";
 import { stream } from "hono/streaming";
-import {
-	STORAGE_DOWNLOAD_ROUTE,
-	STORAGE_RATE_LIMIT,
-	STORAGE_RATE_LIMIT_WINDOW_MS,
-	STORAGE_UPLOAD_ROUTE,
-} from "../constants.js";
+import { STORAGE_DOWNLOAD_ROUTE, STORAGE_UPLOAD_ROUTE } from "../constants.js";
 import { controllerSchemas } from "../schema/storage.js";
 import storageDownload from "../services/storage-download.js";
 import storageUpload from "../services/storage-upload.js";
@@ -28,14 +17,6 @@ const routes = (pluginOptions: PluginOptions) => [
 		method: "get",
 		path: STORAGE_DOWNLOAD_ROUTE,
 		schema: controllerSchemas.storageDownload,
-		middleware: [
-			middleware.rateLimiter({
-				mode: "ip",
-				scope: "cloudflare-r2-storage-download",
-				limit: STORAGE_RATE_LIMIT,
-				windowMs: STORAGE_RATE_LIMIT_WINDOW_MS,
-			}),
-		],
 		openAPI: {
 			description:
 				"Download a single media file from the Cloudflare R2 binding using a signed URL.",
@@ -111,14 +92,6 @@ const routes = (pluginOptions: PluginOptions) => [
 		method: "put",
 		path: STORAGE_UPLOAD_ROUTE,
 		schema: controllerSchemas.storageUpload,
-		middleware: [
-			middleware.rateLimiter({
-				mode: "ip",
-				scope: "cloudflare-r2-storage-upload",
-				limit: STORAGE_RATE_LIMIT,
-				windowMs: STORAGE_RATE_LIMIT_WINDOW_MS,
-			}),
-		],
 		openAPI: {
 			description:
 				"Upload a single media file through the Cloudflare R2 binding.",

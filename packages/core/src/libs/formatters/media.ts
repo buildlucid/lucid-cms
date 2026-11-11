@@ -48,6 +48,7 @@ export type MediaFormatterOptions = {
 
 export interface MediaPosterPropsT {
 	id: number;
+	uid: string;
 	key: string;
 	status: MediaStatus;
 	storage_adapter_key: string;
@@ -111,6 +112,7 @@ export const formatFocalPoint = (
 };
 
 const toDeliveryFile = (media: MediaPosterPropsT): MediaDeliveryFile => ({
+	uid: media.uid,
 	key: media.key,
 	fileName: media.file_name,
 	type: media.type,

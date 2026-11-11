@@ -14,6 +14,7 @@ const getMetadata = (
 			if (!object) {
 				throw new LucidError({
 					type: "plugin",
+					status: 404,
 					message: copy("server:plugin.cloudflare.r2.objects.not.found"),
 				});
 			}

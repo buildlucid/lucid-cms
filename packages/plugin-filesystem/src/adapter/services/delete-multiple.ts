@@ -16,7 +16,7 @@ export default (options: FileSystemStorageAdapterOptions) => {
 			for (const key of props.keys) {
 				const { targetPath } = keyPaths(key, options.uploadDir);
 				await rm(targetPath, { force: true });
-				await deleteStoredMetadata(options.uploadDir, key);
+				await deleteStoredMetadata(key);
 			}
 			return;
 		} catch (e) {

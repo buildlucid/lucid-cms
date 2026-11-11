@@ -941,7 +941,7 @@ export const controllerSchemas = {
 						example: "done",
 					}),
 					"filter[workflowAssignee]": queryString.schema.filter(true, {
-						example: "1,2",
+						example: "1",
 					}),
 					"filter[envStatus.key]": queryString.schema.filter(false, {
 						description:

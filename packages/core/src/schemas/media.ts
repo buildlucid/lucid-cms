@@ -496,7 +496,7 @@ export const mediaListItemResponseSchema = z.union([
 
 const mediaGetMultipleQueryStringSchema = z
 	.object({
-		"filter[id]": queryString.schema.filter(true, { example: "1,2" }),
+		"filter[id]": queryString.schema.filter(true, { example: "1" }),
 		"filter[title]": queryString.schema.filter(false, {
 			example: "Thumbnail",
 		}),
@@ -504,10 +504,10 @@ const mediaGetMultipleQueryStringSchema = z
 			example: "thumbnail-2022",
 		}),
 		"filter[status]": queryString.schema.filter(true, {
-			example: "ready,processing",
+			example: "ready",
 		}),
 		"filter[mimeType]": queryString.schema.filter(true, {
-			example: "image/png,image/jpg",
+			example: "image/png",
 		}),
 		"filter[folderId]": queryString.schema.filter(false, {
 			example: "1",
@@ -517,7 +517,7 @@ const mediaGetMultipleQueryStringSchema = z
 			example: "document",
 		}),
 		"filter[extension]": queryString.schema.filter(true, {
-			example: "jpg,png",
+			example: "jpg",
 		}),
 		"filter[isDeleted]": queryString.schema.filter(false, {
 			example: "true",
@@ -529,7 +529,7 @@ const mediaGetMultipleQueryStringSchema = z
 			example: "true",
 		}),
 		"filter[origin]": queryString.schema.filter(true, {
-			example: "human,ai_generated",
+			example: "human",
 		}),
 		"filter[fileSize]": queryString.schema.filter(false, {
 			example: "1048576",
@@ -559,7 +559,7 @@ const mediaGetMultipleQueryStringSchema = z
 const mediaAdminGetMultipleQueryStringSchema = mediaGetMultipleQueryStringSchema
 	.extend({
 		"filter[ownership]": queryString.schema.filter(true, {
-			example: "library,user,system",
+			example: "library",
 		}),
 		"filter[ownerId]": queryString.schema.filter(true, {
 			example: "1",
@@ -1229,10 +1229,6 @@ export const controllerSchemas = {
 				description: "Whether the media is public",
 				example: true,
 			}),
-			temporary: z.boolean().optional().meta({
-				description: "Whether the upload target should be temporary.",
-				example: false,
-			}),
 		}),
 		query: {
 			string: undefined,
@@ -1323,7 +1319,7 @@ export const controllerSchemas = {
 				url: z.string().meta({
 					description: "The URL of the media",
 					example:
-						"https://example.com/cdn/public/123e4567e89b12d3a456426614174000/placeholder-image?preset=thumbnail-small&format=webp",
+						"https://example.com/cdn/123e4567-e89b-12d3-a456-426614174000/placeholder-image.png?preset=thumbnail-small&format=webp",
 				}),
 			}),
 		},

@@ -93,8 +93,11 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 						"lucid_media_folders.updated_at",
 						eb
 							.selectFrom("lucid_media_folders as children")
-							.select(({ fn }) =>
-								fn.count<number>("children.id").as("folder_count"),
+							//* Postgres counts as bigint, which arrives as a string unless cast
+							.select((eb) =>
+								eb
+									.cast<number>(eb.fn.count("children.id"), "integer")
+									.as("folder_count"),
 							)
 							.whereRef(
 								"children.parent_folder_id",
@@ -104,8 +107,11 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 							.as("folder_count"),
 						eb
 							.selectFrom("lucid_media")
-							.select(({ fn }) =>
-								fn.count<number>("lucid_media.id").as("media_count"),
+							//* Postgres counts as bigint, which arrives as a string unless cast
+							.select((eb) =>
+								eb
+									.cast<number>(eb.fn.count("lucid_media.id"), "integer")
+									.as("media_count"),
 							)
 							.whereRef("lucid_media.folder_id", "=", "lucid_media_folders.id")
 							.as("media_count"),

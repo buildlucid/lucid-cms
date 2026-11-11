@@ -12,6 +12,28 @@ import checkCanStoreMedia from "../checks/check-can-store-media.js";
 import checkHasMediaStorage from "../checks/check-has-media-storage.js";
 import validateUploadedMedia from "../helpers/validate-uploaded-media.js";
 
+/** A checked upload, ready to be saved as media. */
+export type SyncedMedia = {
+	mimeType: string;
+	name: string;
+	type: MediaType;
+	extension: string;
+	size: number;
+	key: string;
+	etag: string | null;
+	status: MediaStatus;
+	width: number | null;
+	height: number | null;
+	duration: number | null;
+	storageAdapterKey: string;
+	storageAdapterReference: string | null;
+	storageAdapterData: MediaAdapterData | null;
+};
+
+/**
+ * Checks an upload's size, type and the storage it needs, and counts it as stored. A refused
+ * upload is deleted.
+ */
 const syncMedia: ServiceFn<
 	[
 		{
@@ -20,24 +42,11 @@ const syncMedia: ServiceFn<
 			expectedSize?: number;
 			validation?: { maxBytes?: number; mimeTypes?: readonly string[] };
 			allowedType?: MediaType;
+			/** The file this one replaces, whose type it must keep and whose size it takes over. */
+			replaces?: { size: number; type: MediaType };
 		},
 	],
-	{
-		mimeType: string;
-		name: string;
-		type: MediaType;
-		extension: string;
-		size: number;
-		key: string;
-		etag: string | null;
-		status: MediaStatus;
-		width: number | null;
-		height: number | null;
-		duration: number | null;
-		storageAdapterKey: string;
-		storageAdapterReference: string | null;
-		storageAdapterData: MediaAdapterData | null;
-	}
+	SyncedMedia
 > = async (context, data) => {
 	const mediaStorageRes = await checkHasMediaStorage(context);
 	if (mediaStorageRes.error) return mediaStorageRes;
@@ -83,6 +92,7 @@ const syncMedia: ServiceFn<
 		fileName: data.fileName,
 		allowedType: data.allowedType,
 		mimeTypes: data.validation?.mimeTypes,
+		expectedType: data.replaces?.type,
 	});
 	if (fileMetaData.error) {
 		await mediaStorageRes.data.delete(context, {
@@ -93,7 +103,7 @@ const syncMedia: ServiceFn<
 
 	const storageLimit = context.config.media.limits.storageBytes;
 	const adjustStorageRes = await adjustStorageUsage(context, {
-		delta: mediaMetaRes.data.size,
+		delta: mediaMetaRes.data.size - (data.replaces?.size ?? 0),
 		max: storageLimit === false ? undefined : storageLimit,
 		min: 0,
 	});
@@ -122,7 +132,7 @@ const syncMedia: ServiceFn<
 						size: formatBytes(storageLimit),
 					},
 				}),
-				status: 500,
+				status: 413,
 				errors: {
 					file: {
 						code: "storage",

@@ -3,6 +3,7 @@ import type { MediaDeliveryFile } from "../../libs/media-delivery/types.js";
 import resolveDeliveryUrl from "./resolve-delivery-url.js";
 
 const file: MediaDeliveryFile = {
+	uid: "123e4567-e89b-12d3-a456-426614174000",
 	key: "public/video",
 	fileName: "video.mp4",
 	type: "video",
@@ -76,7 +77,9 @@ describe("resolve delivery URL", () => {
 			public: true,
 		});
 
-		expect(result).toBe("https://cms.example.com/cdn/public/video/video.mp4");
+		expect(result).toBe(
+			"https://cms.example.com/cdn/123e4567-e89b-12d3-a456-426614174000/video.mp4",
+		);
 	});
 
 	it("keeps private media on Lucid and rejects unavailable transforms", () => {
@@ -97,7 +100,9 @@ describe("resolve delivery URL", () => {
 				host: "https://cms.example.com",
 				public: false,
 			}),
-		).toBe("https://cms.example.com/cdn/public/video/video.mp4");
+		).toBe(
+			"https://cms.example.com/cdn/123e4567-e89b-12d3-a456-426614174000/video.mp4",
+		);
 		expect(
 			resolveDeliveryUrl({
 				delivery,

@@ -37,6 +37,7 @@ const deriveCapabilities = (config: ResolvedLucidConfig): Capability[] => [
 		mcp: config.ai.mcp.enabled,
 		openAPI: config.http.openAPI.enabled,
 		localization: config.localization.locales.length > 0,
+		mediaStorage: config.media.storageAdapter !== undefined,
 	}),
 	...enabled("harness:", {
 		outbox:

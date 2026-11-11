@@ -55,7 +55,6 @@ const mediaSaveController = factory.createHandlers(
 		})(context, {
 			requestId: params.id,
 			public: body.public,
-			temporary: body.temporary,
 			userId: c.get("auth").id,
 			signal: c.req.raw.signal,
 		});

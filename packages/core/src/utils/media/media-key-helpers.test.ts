@@ -1,8 +1,9 @@
 import crypto from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import buildDownloadContentDisposition from "./build-download-content-disposition.js";
+import changeKeyVisibility from "./change-key-visibility.js";
 import createMediaUrl from "./create-media-url.js";
-import formatMediaBrowserKey from "./format-media-browser-key.js";
+import formatMediaPath from "./format-media-path.js";
 import generateKey from "./generate-key.js";
 import generateProcessKey from "./generate-process-key.js";
 import getDownloadFileName from "./get-download-file-name.js";
@@ -12,6 +13,13 @@ import normalizeMediaKey from "./normalize-media-key.js";
 describe("media key helpers", () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
+	});
+
+	it.for([
+		{ key: "public/abc", visibility: "private", moved: "private/abc" },
+		{ key: "private/abc", visibility: "private", moved: "private/abc" },
+	] as const)("moves $key to $moved", ({ key, visibility, moved }) => {
+		expect(changeKeyVisibility({ key, visibility })).toBe(moved);
 	});
 
 	it("generates canonical UUID-based public keys", () => {
@@ -28,54 +36,25 @@ describe("media key helpers", () => {
 		expect(result.data).toBe("public/123e4567e89b12d3a456426614174000");
 	});
 
-	it("generates temporary awaiting-sync keys for replacement uploads", () => {
-		vi.spyOn(crypto, "randomUUID").mockReturnValue(
-			"123e4567-e89b-12d3-a456-426614174000",
-		);
-
-		const result = generateKey({
-			name: "replacement.png",
-			public: true,
-			temporary: true,
-		});
-
-		expect(result.error).toBeUndefined();
-		expect(result.data).toBe("awaiting-sync/123e4567e89b12d3a456426614174000");
-	});
-
-	it("formats originals with a visual filename segment", () => {
+	it("serves media at its uid with a readable file name", () => {
 		expect(
-			formatMediaBrowserKey({
-				key: "public/123e4567e89b12d3a456426614174000",
+			formatMediaPath({
+				uid: "123e4567-e89b-12d3-a456-426614174000",
 				fileName: "Screenshot 2026-02-13 at 10.png",
 				extension: "png",
 			}),
 		).toBe(
-			"public/123e4567e89b12d3a456426614174000/screenshot-2026-02-13-at-10.png",
+			"123e4567-e89b-12d3-a456-426614174000/screenshot-2026-02-13-at-10.png",
 		);
 	});
 
-	it("formats processed keys with a visual filename segment", () => {
+	it("serves media at its uid alone when it has no file name", () => {
 		expect(
-			formatMediaBrowserKey({
-				key: "public/processed/123e4567e89b12d3a456426614174000-w400-fwebp",
-				fileName: "Screenshot 2026-02-13 at 10.png",
-				extension: "webp",
+			formatMediaPath({
+				uid: "123e4567-e89b-12d3-a456-426614174000",
+				fileName: null,
 			}),
-		).toBe(
-			"public/processed/123e4567e89b12d3a456426614174000-w400-fwebp/screenshot-2026-02-13-at-10.webp",
-		);
-	});
-
-	it("omits the visual extension when it is not available", () => {
-		expect(
-			formatMediaBrowserKey({
-				key: "public/123e4567e89b12d3a456426614174000",
-				fileName: "Screenshot 2026-02-13 at 10.png",
-			}),
-		).toBe(
-			"public/123e4567e89b12d3a456426614174000/screenshot-2026-02-13-at-10",
-		);
+		).toBe("123e4567-e89b-12d3-a456-426614174000");
 	});
 
 	it("normalizes original display keys back to their canonical storage key", () => {
@@ -100,7 +79,6 @@ describe("media key helpers", () => {
 				"public/123e4567e89b12d3a456426614174000/screenshot-2026-02-13-at-10",
 			),
 		).toMatchObject({
-			root: "public",
 			visibility: "public",
 			identity: "123e4567e89b12d3a456426614174000",
 			isProcessed: false,
@@ -110,7 +88,6 @@ describe("media key helpers", () => {
 				"public/processed/123e4567e89b12d3a456426614174000-w400-fwebp",
 			),
 		).toMatchObject({
-			root: "public",
 			visibility: "public",
 			identity: "123e4567e89b12d3a456426614174000-w400-fwebp",
 			isProcessed: true,
@@ -154,11 +131,11 @@ describe("media key helpers", () => {
 		).toBe("public/processed/123e4567e89b12d3a456426614174000-fwebp");
 	});
 
-	it("creates browser-facing URLs for processed media without version params", () => {
+	it("creates media URLs from the uid, with the query that picks a variant", () => {
 		expect(
 			createMediaUrl({
 				host: "https://example.com",
-				key: "public/processed/123e4567e89b12d3a456426614174000-w400-fwebp",
+				uid: "123e4567-e89b-12d3-a456-426614174000",
 				fileName: "Screenshot 2026-02-13 at 10.png",
 				extension: "webp",
 				query: {
@@ -167,7 +144,7 @@ describe("media key helpers", () => {
 				},
 			}),
 		).toBe(
-			"https://example.com/cdn/public/processed/123e4567e89b12d3a456426614174000-w400-fwebp/screenshot-2026-02-13-at-10.webp?preset=thumbnail-small&format=webp",
+			"https://example.com/cdn/123e4567-e89b-12d3-a456-426614174000/screenshot-2026-02-13-at-10.webp?preset=thumbnail-small&format=webp",
 		);
 	});
 

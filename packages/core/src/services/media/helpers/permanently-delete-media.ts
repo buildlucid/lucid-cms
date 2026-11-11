@@ -14,7 +14,10 @@ import notifyChange from "../notify-change.js";
 import deleteMediaObject from "../strategies/delete.js";
 import clearContentMediaSingleCache from "./clear-content-media-cache.js";
 
-/** Permanently deletes owned descendants before their parent and stored objects. */
+/**
+ * Permanently deletes owned descendants before their parent. Stored files go once the transaction
+ * commits. See `strategies/delete.ts`.
+ */
 const permanentlyDeleteMedia: ServiceFn<
 	[
 		{
@@ -29,6 +32,9 @@ const permanentlyDeleteMedia: ServiceFn<
 
 	const Media = new MediaRepository(context.db);
 	const ProcessedImages = new ProcessedImagesRepository(context.db);
+
+	const lockRes = await Media.lockForUpdate({ id: data.id });
+	if (lockRes.error) return lockRes;
 
 	const getMediaRes = await Media.selectSingleById({
 		id: data.id,
@@ -70,14 +76,10 @@ const permanentlyDeleteMedia: ServiceFn<
 	});
 	if (processedImagesRes.error) return processedImagesRes;
 
-	const processedDelete = await mediaStorageRes.data.deleteMultiple(context, {
-		keys: processedImagesRes.data.map((image) => image.key),
-	});
-	if (processedDelete.error) return processedDelete;
-
 	const deletedObject = await deleteMediaObject(context, {
 		key: getMediaRes.data.key,
 		size: getMediaRes.data.file_size,
+		processedKeys: processedImagesRes.data.map((image) => image.key),
 		processedSize: processedImagesRes.data.reduce(
 			(sum, image) => sum + image.file_size,
 			0,

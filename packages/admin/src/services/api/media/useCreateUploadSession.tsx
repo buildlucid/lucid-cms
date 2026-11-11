@@ -8,7 +8,6 @@ interface Params {
 		mimeType: string;
 		size: number;
 		public: boolean;
-		temporary?: boolean;
 	};
 }
 
