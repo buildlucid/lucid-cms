@@ -230,6 +230,11 @@ export type HttpConfig = {
 		enabled?: boolean;
 	};
 	/**
+	 * Adds a `Server-Timing` header to every response, with how many database queries the request
+	 * ran and how long they took. Browser dev tools show it with the request's timing. Defaults to false.
+	 */
+	serverTiming?: boolean;
+	/**
 	 * Custom HTTP routes to register after Lucid's core routes.
 	 */
 	routes?: LucidCustomRouteDefinition[];
@@ -814,6 +819,7 @@ export interface ResolvedLucidConfig {
 		openAPI: {
 			enabled: boolean;
 		};
+		serverTiming: boolean;
 		routes: LucidCustomRouteDefinition[];
 		extensions: HttpExtension[];
 	};

@@ -1,5 +1,6 @@
 import type { ProvisionedDatabase } from "../databases/types.ts";
 import type { HarnessContext } from "../environment/types.ts";
+import type serveBuilt from "../migrations/serve-built.ts";
 import type { MeasurementUnit } from "../report/types.ts";
 
 /** One number from one sample, such as how long this build took. */
@@ -31,17 +32,51 @@ export type BenchmarkContext = {
 	 * `HARNESS_DATABASE_URL`, and destroy it when the sample is done.
 	 */
 	database(): Promise<ProvisionedDatabase>;
+	/**
+	 * Builds the setup once, then starts its real server on a database that is already migrated,
+	 * to time requests as a deployment would answer them. Stop it when the benchmark is done.
+	 */
+	serve(database: ProvisionedDatabase): Promise<ServedCms>;
 };
 
-/** Something to measure for every setup, such as a build. */
-export type Benchmark = {
+/** A running server a benchmark sends requests to. */
+export type ServedCms = Awaited<ReturnType<typeof serveBuilt>>;
+
+/**
+ * Something to measure for every setup, such as a build. A benchmark that needs something made
+ * once for all its samples, such as a server full of content, makes it in `prepare`.
+ */
+export type Benchmark<Prepared = undefined> = {
 	/** Starts every measurement's ID, such as `build` in `build.duration`. Keep it stable, as runs are compared by it. */
 	id: string;
 	/** Samples to take first and throw away, so caches are warm. Defaults to 1. */
 	warmups?: number;
-	/**
-	 * Does the work once and returns what it measured, keyed by a short name such as `duration`.
-	 * It runs once per sample, and the report keeps each metric's median.
-	 */
-	sample: (context: BenchmarkContext) => Promise<Record<string, Metric>>;
+} & (
+	| {
+			prepare?: undefined;
+			cleanup?: undefined;
+			/**
+			 * Does the work once and returns what it measured, keyed by a short name such as `duration`.
+			 * It runs once per sample, and the report keeps each metric's median.
+			 */
+			sample: (context: BenchmarkContext) => Promise<Record<string, Metric>>;
+	  }
+	| {
+			/** Runs once before the first sample. What it returns is given to every sample. */
+			prepare: (context: BenchmarkContext) => Promise<Prepared>;
+			/** Runs once after the last sample, and when a sample fails. */
+			cleanup?: (prepared: Prepared) => Promise<void>;
+			sample: (
+				context: BenchmarkContext,
+				prepared: Prepared,
+			) => Promise<Record<string, Metric>>;
+	  }
+);
+
+/** A benchmark as the lane's runner sees it, with what it prepared kept inside. */
+export type RegisteredBenchmark = Pick<Benchmark, "id" | "warmups"> & {
+	open(context: BenchmarkContext): Promise<{
+		sample(): Promise<Record<string, Metric>>;
+		close(): Promise<void>;
+	}>;
 };

@@ -28,6 +28,7 @@
 	"common.duplicate": "Duplicate",
 	"actions.with.collection": "{{action}} {{collectionSingle}}",
 	"documents.publish.to": "Publish to",
+	"documents.publish.options": "Publish Options",
 	"documents.request.action": "Request",
 	"documents.filter.requests": "Create Requests",
 	"documents.filter.unpublished": "Unpublished {{environment}}",

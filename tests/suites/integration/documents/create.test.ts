@@ -21,10 +21,3 @@ describe("creating documents", () => {
 		expect(read.status).toBe(200);
 	});
 });
-
-describe("row locking", () => {
-	//* a placeholder that shows a skipped test and its reason in the report
-	requires("database.sharedRowLocks");
-
-	test("holds a referenced row until the transaction commits", () => {});
-});

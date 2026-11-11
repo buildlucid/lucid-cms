@@ -66,9 +66,7 @@ const HomePage: Component = () => {
 									<HomeViewSwitch />
 								</Show>
 								<ActionMenu
-									size="md"
-									//* matches the view switch beside it
-									class="size-8! min-w-8!"
+									size="sm"
 									placement="bottom-end"
 									actions={[
 										{

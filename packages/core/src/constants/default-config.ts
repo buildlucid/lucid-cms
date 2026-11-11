@@ -28,6 +28,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 		openAPI: {
 			enabled: false,
 		},
+		serverTiming: false,
 		routes: [],
 		extensions: [],
 	},

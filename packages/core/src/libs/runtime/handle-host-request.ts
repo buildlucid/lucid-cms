@@ -1,4 +1,5 @@
 import type { LucidHost, LucidInvocation } from "./create-lucid-host.js";
+import parseExecutionContext from "./parse-execution-context.js";
 import withResponseCleanup from "./with-response-cleanup.js";
 
 /** Handles a runtime HTTP request in its own host invocation until the response body finishes, ending it immediately if handling throws. */
@@ -13,7 +14,11 @@ const handleHostRequest = async (
 
 	try {
 		const response = await invocation.handle(request);
-		return withResponseCleanup(response, () => invocation.destroy());
+		return withResponseCleanup(
+			response,
+			() => invocation.destroy(),
+			parseExecutionContext(request.executionContext)?.waitUntil,
+		);
 	} catch (error) {
 		await invocation.destroy();
 		throw error;

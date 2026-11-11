@@ -347,3 +347,15 @@ test("datetime schema preserves an explicitly configured default", () => {
 	expect(res.error).toBeUndefined();
 	expect(res.data?.columns[0]?.default).toBe("2024-06-15T14:14:21.704Z");
 });
+
+test("datetime values read the same whichever format the database returns", () => {
+	const field = new DatetimeCustomField("field");
+
+	expect(field.formatResponseValue("2026-01-02T03:04:05+00:00")).toBe(
+		"2026-01-02T03:04:05.000Z",
+	);
+	expect(field.formatResponseValue("2026-01-02T03:04:05.000Z")).toBe(
+		"2026-01-02T03:04:05.000Z",
+	);
+	expect(field.formatResponseValue(null)).toBe("");
+});

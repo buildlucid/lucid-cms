@@ -1,10 +1,14 @@
 import type { LucidDocumentTableName } from "../../../libs/db/tables/index.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { DocumentsRepository } from "../../../libs/repositories/index.js";
+import {
+	CollectionsRepository,
+	DocumentsRepository,
+} from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
- * Checks if the given single collection has more than one document
+ * Checks if the given single collection has more than one document. Call inside a transaction:
+ * a create holds the collection until it commits, so two at once cannot both find it empty.
  */
 const checkSingleCollectionDocumentCount: ServiceFn<
 	[
@@ -26,6 +30,14 @@ const checkSingleCollectionDocumentCount: ServiceFn<
 	}
 
 	const Document = new DocumentsRepository(context.db);
+
+	if (data.documentId === undefined) {
+		const Collections = new CollectionsRepository(context.db);
+		const lockRes = await Collections.lockForUpdate({
+			key: data.collectionKey,
+		});
+		if (lockRes.error) return lockRes;
+	}
 
 	const existingDocumentRes =
 		await Document.selectMultipleCollectionDocumentIds(

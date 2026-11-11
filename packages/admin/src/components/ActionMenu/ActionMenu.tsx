@@ -62,13 +62,14 @@ export interface ActionMenuItem {
 	sortOrder?: number;
 }
 
-export type ActionMenuSize = "sm" | "md";
+/** Matches the Button sizes: `xs` 28px, `sm` 32px, `md` 36px. */
+export type ActionMenuSize = "xs" | "sm" | "md";
 
 export type ActionMenuVariant = "outline" | "ghost" | "toolbar";
 
 export interface ActionMenuProps {
 	actions: ActionMenuItem[];
-	/** @default "sm" */
+	/** @default "xs" */
 	size?: ActionMenuSize;
 	/** `ghost` drops the trigger's background and border, like the ghost button; `toolbar` matches the toolbar button, for headers. @default "outline" */
 	variant?: ActionMenuVariant;
@@ -116,6 +117,7 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 	// ----------------------------------------
 	// Memos
 	const visibleActions = createMemo(() => getVisibleActions(props.actions));
+	const size = createMemo(() => props.size ?? "xs");
 
 	// ----------------------------------------
 	// Functions
@@ -151,7 +153,7 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 						props.variant === "toolbar"
 							? getButtonClasses({
 									variant: "toolbar",
-									size: props.size === "md" ? "sm" : "xs",
+									size: size(),
 									shape: "square",
 								})
 							: {
@@ -160,8 +162,9 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 										props.variant !== "ghost",
 									"text-muted hover:text-subtitle hover:bg-background/50":
 										props.variant === "ghost",
-									"min-w-7 w-7 h-7": props.size !== "md",
-									"min-w-9 w-9 h-9": props.size === "md",
+									"min-w-7 w-7 h-7": size() === "xs",
+									"min-w-8 w-8 h-8": size() === "sm",
+									"min-w-9 w-9 h-9": size() === "md",
 								},
 						props.class,
 					)}

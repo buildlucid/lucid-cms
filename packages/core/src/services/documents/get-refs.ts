@@ -1,5 +1,3 @@
-import collections from "../../libs/collection/collections.js";
-import buildTableName from "../../libs/collection/helpers/build-table-name.js";
 import extractCollectionKey from "../../libs/collection/helpers/extract-collection-key.js";
 import primeRuntimeSchemas from "../../libs/collection/schema/runtime/prime-runtime-schemas.js";
 import {
@@ -13,8 +11,6 @@ import type {
 	LucidBrickTableName,
 	LucidDocumentTableName,
 } from "../../libs/db/tables/index.js";
-import { copy } from "../../libs/i18n/index.js";
-import { ExternalScopes } from "../../libs/permission/external-scopes.js";
 import type {
 	DocumentRefData,
 	DocumentRefVersionTypeResolver,
@@ -30,67 +26,10 @@ type DocumentRefFetchTarget = {
 	versionType: Exclude<DocumentVersionType, "revision">;
 };
 
-const checkCollectionAccess: ServiceFn<
-	[
-		{
-			targets: RefResourceTargets;
-			allowedCollectionKeys?: string[];
-		},
-	],
-	undefined
-> = async (context, data) => {
-	if (data.allowedCollectionKeys === undefined) {
-		return { data: undefined, error: undefined };
-	}
-
-	const collectionsRes = await collections.getAll(context, {});
-	if (collectionsRes.error) return collectionsRes;
-
-	const tableToCollection = new Map<string, string>();
-	for (const collection of collectionsRes.data) {
-		const tableNameRes = buildTableName(
-			"document",
-			{ collection: collection.key },
-			context.config.db.config.tableNameByteLimit,
-		);
-		if (tableNameRes.error) return tableNameRes;
-		tableToCollection.set(tableNameRes.data.name, collection.key);
-	}
-
-	const allowedCollectionKeys = new Set(data.allowedCollectionKeys);
-	const missingCollectionKeys = Array.from(
-		new Set(
-			Array.from(data.targets.keys()).flatMap((table) => {
-				const collectionKey = tableToCollection.get(table);
-				return collectionKey && !allowedCollectionKeys.has(collectionKey)
-					? [collectionKey]
-					: [];
-			}),
-		),
-	);
-	if (missingCollectionKeys.length === 0) {
-		return { data: undefined, error: undefined };
-	}
-
-	const missingScopes = missingCollectionKeys.map((collectionKey) =>
-		ExternalScopes.DocumentRead(collectionKey),
-	);
-	return {
-		data: undefined,
-		error: {
-			type: "authorisation",
-			name: copy("server:core.integrations.scopes.error.name"),
-			message: copy("server:core.integrations.scopes.missing.message", {
-				data: {
-					requiredScopes: missingScopes.join(", "),
-					missingScopes: missingScopes.join(", "),
-				},
-			}),
-			status: 403,
-		},
-	};
-};
-
+/**
+ * Reads referenced documents, leaving collections outside `allowedCollectionKeys` unresolved so
+ * content reads can omit them.
+ */
 const getDocumentRefs: ServiceFn<
 	[
 		{
@@ -102,9 +41,10 @@ const getDocumentRefs: ServiceFn<
 	],
 	DocumentRefData
 > = async (context, data) => {
-	const accessRes = await checkCollectionAccess(context, data);
-	if (accessRes.error) return accessRes;
-
+	const allowedCollectionKeys =
+		data.allowedCollectionKeys === undefined
+			? undefined
+			: new Set(data.allowedCollectionKeys);
 	const targetsByVersion = new Map<string, DocumentRefFetchTarget>();
 	for (const [targetTable, targetValues] of data.targets) {
 		if (!isDocumentTableName(targetTable)) continue;
@@ -112,6 +52,9 @@ const getDocumentRefs: ServiceFn<
 		const table = targetTable;
 		const collectionKey = extractCollectionKey(table);
 		if (!collectionKey) continue;
+		if (allowedCollectionKeys && !allowedCollectionKeys.has(collectionKey)) {
+			continue;
+		}
 
 		const ids = Array.from(targetValues).filter(
 			(value): value is number => typeof value === "number",

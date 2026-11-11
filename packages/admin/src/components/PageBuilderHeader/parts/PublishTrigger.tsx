@@ -151,6 +151,7 @@ export const PublishTrigger: Component<{
 						)}
 						disabled={isDisabled()}
 						onClick={handleTriggerClick}
+						aria-label={T()("documents.publish.options")}
 					>
 						<TbOutlineChevronDown size={12} />
 					</Menu.Trigger>

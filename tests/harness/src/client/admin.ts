@@ -44,18 +44,35 @@ export const ensureAdmin = async (session: Session): Promise<void> => {
 	expectOk("Creating the admin", setup);
 };
 
-/** Logs a session in with a password, leaving its cookies ready for signed-in requests. */
+const LOGIN_ATTEMPTS = 40;
+const LOGIN_RETRY_MS = 250;
+
+/**
+ * Signs in and stores session cookies. Retries refused password attempts because concurrent test
+ * logins can temporarily exhaust the account's attempt limit.
+ */
 export const login = async (
 	session: Session,
 	credentials: Pick<Credentials, "username" | "password">,
 ): Promise<void> => {
-	const response = await session.request({
-		method: "POST",
-		path: "/api/v1/auth/login",
-		body: {
-			usernameOrEmail: credentials.username,
-			password: credentials.password,
-		},
-	});
+	const send = () =>
+		session.request({
+			method: "POST",
+			path: "/api/v1/auth/login",
+			body: {
+				usernameOrEmail: credentials.username,
+				password: credentials.password,
+			},
+		});
+
+	let response = await send();
+	for (
+		let attempt = 1;
+		response.status === 429 && attempt < LOGIN_ATTEMPTS;
+		attempt++
+	) {
+		await new Promise((resolve) => setTimeout(resolve, LOGIN_RETRY_MS));
+		response = await send();
+	}
 	expectOk(`Logging in as ${credentials.username}`, response);
 };

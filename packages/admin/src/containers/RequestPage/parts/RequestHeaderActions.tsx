@@ -126,7 +126,7 @@ export const RequestHeaderActions: Component<{
 							<Menu.Root placement="bottom-end">
 								<Menu.Trigger
 									class={classNames(
-										"flex h-9 w-9 items-center justify-center bg-secondary text-secondary-foreground focus-ring transition-colors hover:bg-secondary-hover",
+										"flex size-8 items-center justify-center bg-secondary text-secondary-foreground focus-ring transition-colors hover:bg-secondary-hover",
 										{
 											"rounded-r-md border-l border-black/10":
 												interfaceDirection.isLTR(),
@@ -156,7 +156,8 @@ export const RequestHeaderActions: Component<{
 				)}
 			</Show>
 			<ActionMenu
-				size="md"
+				size="sm"
+				placement="bottom-end"
 				actions={[
 					...(primary()
 						? []

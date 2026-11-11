@@ -140,9 +140,22 @@ describe("adding a field", () => {
 
 Schema steps reach a config through `HARNESS_SCHEMA_STEP`, which Node setups read with `withSchemaStep()` from `shared/config.ts`. A new Node setup should wrap its config in it.
 
+### Document tests
+
+Tests about documents use two collections every setup registers, and the helpers in `shared/documents.ts`.
+
+- `story` has every field type, nested repeaters, builder and fixed bricks, revisions, and `staging` and `production` environments. `reviewed-story` needs an approved request to create, publish to production, unpublish from it or bin a document. The admin may approve their own requests there, as tests have one user.
+- `fullStory()` builds a story that uses all of it. `valuesOf()` reduces what was sent, or what was read back, to plain values, so a test can compare the two.
+- `createDocument`, `saveDocument`, `readDocument` and `publishDocument` throw when the CMS refuses them. Send the request yourself when the refusal is what the test is about.
+- `createContentReader()` makes an API key and returns a way to call the content API with it.
+- `query` takes a list to send a key more than once, as `filter[fields.title:in]` needs for several values.
+- Responses are only cached on setups with a KV store. Tests of the cache require `plugin:sqlite-kv`, which `node-libsql` has.
+- Every setup turns on `http.serverTiming`, so `countQueries(response)` reads how many database queries a request ran. See `suites/integration/documents/queries.test.ts`, which checks reads and saves don't run more queries as content grows.
+- A served database is shared, so put a marker in a field and filter by it when a test counts or lists documents. See `suites/integration/documents/listing.test.ts`.
+
 ### Simulation tests
 
-A simulation tries many random sequences of actions against a fresh CMS and checks rules after every action. See `suites/simulation/documents/page-lifecycle.test.ts`.
+A simulation tries many random sequences of actions against a fresh CMS and checks rules after every action. See `suites/simulation/documents/document-lifecycle.test.ts`.
 
 - A failure is shrunk to the shortest sequence that still fails.
 - Replay it with the seed it prints: `npm run harness -- --lane simulation --seed 42`.
@@ -156,7 +169,10 @@ Files in `suites/performance` end in `.bench.ts` and import from `#harness/perfo
 
 - The report keeps each metric's median, and how much the samples varied.
 - `--performance-runs` sets how many samples to take. One warm-up sample is thrown away first.
+- Arguments after the second `--` keep a run to the benchmark files whose path holds one of them: `npm run harness -- --lane performance -- documents`.
 - `database()` gives a benchmark an empty database for the setup, such as to time its migrations. See `suites/performance/migrations/migrate.bench.ts`.
+- `prepare` runs once before the samples, for what would take too long to make each time. What it returns is given to every sample, and to `cleanup` at the end.
+- `serve(database)` builds the setup and starts its real server on a migrated database, to time requests. See `suites/performance/documents/documents.bench.ts`, which fills a CMS with stories and times reading, listing, saving, creating and publishing them. It also reports each one's database queries, which are exact, so a change in them fails a comparison.
 - Each metric has a `tolerance`, the share it may grow before that counts as a regression, and says whether a regression is `blocking`. Timings default to 15% and not blocking. Everything else defaults to 1% and blocking.
 
 ## Add a setup

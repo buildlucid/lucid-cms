@@ -1,11 +1,14 @@
 /** Sends a request to the CMS, in-process or over the network. */
 export type Transport = (request: Request) => Promise<Response>;
 
+type QueryValue = string | number | boolean;
+
 export type ApiRequest = {
 	method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 	/** A path on the CMS, such as `/api/v1/account`. */
 	path: string;
-	query?: Record<string, string | number | boolean>;
+	/** A list sends the key once per value, as filters that take several values expect. */
+	query?: Record<string, QueryValue | QueryValue[]>;
 	/** Sent as JSON. */
 	body?: unknown;
 };

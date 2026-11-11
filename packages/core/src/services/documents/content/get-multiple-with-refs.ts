@@ -30,6 +30,7 @@ import readPreviewDraft from "../../preview-sessions/helpers/read-draft.js";
 import type { PreviewSessionCollectionTarget } from "../../preview-sessions/types.js";
 import checkFilterAccess from "../checks/check-filter-access.js";
 import checkFilterKeys from "../checks/check-filter-keys.js";
+import checkSortKeys from "../checks/check-sort-keys.js";
 import collectDocumentRefTargets from "../helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
 import resolveDocumentRefs from "../helpers/resolve-document-refs.js";
@@ -147,6 +148,11 @@ const getMultipleWithRefs: ContentDocumentsGetMultipleWithRefsService = async <
 		data.collectionKey,
 	);
 	if (documentFieldsTableSchemaRes.error) return documentFieldsTableSchemaRes;
+	const sortKeysRes = checkSortKeys(
+		documentFieldsTableSchemaRes.data,
+		data.query.sort,
+	);
+	if (sortKeysRes.error) return sortKeysRes;
 
 	const filterAccessRes = checkFilterAccess({
 		collection: collectionRes.data,

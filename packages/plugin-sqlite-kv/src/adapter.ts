@@ -201,7 +201,7 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 						}
 					},
 				);
-				incrementTransaction = nextDatabase.transaction(
+				const increment = nextDatabase.transaction(
 					(
 						key: string,
 						incrementOptions?: Omit<KVIncrementParams, "key">,
@@ -225,6 +225,10 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 						};
 					},
 				);
+				//* it reads the count before writing it, so it takes the write lock first: a read upgraded to a
+				//* write fails at once, without waiting, when another process sharing the file wrote meanwhile
+				incrementTransaction = (key, incrementOptions) =>
+					increment.immediate(key, incrementOptions);
 				cleanupInterval = setInterval(() => {
 					nextStatements.cleanExpired.run(Date.now());
 				}, CLEANUP_INTERVAL_MS);

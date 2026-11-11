@@ -1,7 +1,9 @@
 import { z } from "@lucidcms/core";
 import type { EnvironmentVariables, LucidConfig } from "@lucidcms/core/types";
 import PageCollection from "./collections/page.ts";
+import ReviewedStoryCollection from "./collections/reviewed-story.ts";
 import SettingsCollection from "./collections/settings.ts";
+import StoryCollection from "./collections/story.ts";
 import {
 	generatedCollection,
 	isGeneratedStep,
@@ -35,7 +37,12 @@ export const getDatabaseUrl = (env: EnvironmentVariables): string =>
 	harnessEnv.parse(env).HARNESS_DATABASE_URL;
 
 /** The collections every setup registers. Setups may add their own on top. */
-export const sharedCollections = [PageCollection, SettingsCollection];
+export const sharedCollections = [
+	PageCollection,
+	SettingsCollection,
+	StoryCollection,
+	ReviewedStoryCollection,
+];
 
 /**
  * Minimal shared config with optional features disabled. Setups add fragments and plugins to
@@ -58,6 +65,8 @@ export const sharedConfig = (options: { url: string }) =>
 			security: {
 				proxy: { header: CLIENT_ADDRESS_HEADER },
 			},
+			//* every response reports its database queries, which tests and benchmarks read with `countQueries`
+			serverTiming: true,
 		},
 		collections: sharedCollections,
 	}) satisfies LucidConfig;

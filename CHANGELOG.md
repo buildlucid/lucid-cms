@@ -33,6 +33,7 @@
 - Plugins can now add their own hook events with `defineHookEvents`, for project hooks and deploy triggers to subscribe to. ([8996a28](https://github.com/buildlucid/lucid-cms/commit/8996a28fe2007c08a906357e96bcce6754af926a))
 - Plugins can now add their own `lucidcms` commands, which `lucidcms --help` lists when run inside a project. ([bf8f9bd](https://github.com/buildlucid/lucid-cms/commit/bf8f9bd4a85d5279e3baf2794a521e88d248a5ae))
 - Admin slots shown to signed-in users can now take a `permission`, and `adminHref` links to admin routes, which take their page title from their navigation label. ([74a262a](https://github.com/buildlucid/lucid-cms/commit/74a262a342ae1cbd278b438e0eee39091250ec74))
+- Added `http.serverTiming`, which reports how many database queries each request ran, and how long they took, in a `Server-Timing` header.
 
 ### Breaking Changes:
 
@@ -117,6 +118,12 @@
 - Fixed new fields being saved empty when a migration ran while the CMS was already running. They now save without a restart.
 - Fixed Diagnostics showing no pending migrations when project or plugin migrations had not run.
 - Fixed a failed project or plugin migration leaving its changes behind on SQLite and libSQL. Failed migrations are now rolled back on every database.
+- Fixed single-document collections ending up with several documents on Postgres when they were created at the same moment.
+- Fixed datetime fields reading back in a different format on Postgres. They are now UTC ISO strings on every database.
+- Fixed Cloudflare Workers keeping about 1 MB per request in memory, which crashed the local server after about 1,200 requests.
+- Fixed content API reads failing when a document relates to a collection the API key can't read. Those related documents are now left out.
+- Fixed errors that asked for a 400 or 403 status being sent as 401, such as missing integration scopes and invalid OAuth token requests.
+- Fixed document lists ignoring sorts by fields that don't exist or can't be sorted. They are now refused, as unknown filters are.
 
 ## v0.19.0-alpha.0
 

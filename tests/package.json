@@ -18,7 +18,8 @@
 		"@lucidcms/node": "*",
 		"@lucidcms/pages": "*",
 		"@lucidcms/postgres": "*",
-		"@lucidcms/sqlite": "*"
+		"@lucidcms/sqlite": "*",
+		"@lucidcms/sqlite-kv": "*"
 	},
 	"devDependencies": {
 		"@electric-sql/pglite": "^0.5.16",

@@ -24,6 +24,7 @@ import createLucidAdapters, {
 	type LucidAdapterOverrides,
 } from "./create-lucid-adapters.js";
 import parseEnv from "./parse-env.js";
+import parseExecutionContext from "./parse-execution-context.js";
 import type {
 	AdapterKeys,
 	AdapterRuntimeContext,
@@ -32,40 +33,6 @@ import type {
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
 } from "./types.js";
-
-/** Reads platform methods at the host boundary and preserves their receivers. */
-const parseExecutionContext = (input: unknown) => {
-	if (
-		typeof input !== "object" ||
-		input === null ||
-		!("waitUntil" in input) ||
-		typeof input.waitUntil !== "function"
-	) {
-		return null;
-	}
-
-	const waitUntil = input.waitUntil;
-	const passThroughOnException =
-		"passThroughOnException" in input &&
-		typeof input.passThroughOnException === "function"
-			? input.passThroughOnException
-			: undefined;
-
-	return {
-		waitUntil: (promise: Promise<unknown>) => {
-			waitUntil.call(input, promise);
-		},
-		...(passThroughOnException
-			? {
-					passThroughOnException: () => {
-						passThroughOnException.call(input);
-					},
-				}
-			: {}),
-		props: "props" in input ? input.props : undefined,
-		exports: "exports" in input ? input.exports : undefined,
-	};
-};
 
 type CreateLucidHostSharedOptions = {
 	runtimeContext: AdapterRuntimeContext;

@@ -28,6 +28,7 @@ import {
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFilterAccess from "./checks/check-filter-access.js";
 import checkFilterKeys from "./checks/check-filter-keys.js";
+import checkSortKeys from "./checks/check-sort-keys.js";
 import collectDocumentRefTargets from "./helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
 import resolveDocumentRefs from "./helpers/resolve-document-refs.js";
@@ -123,6 +124,11 @@ const getMultiple: ServiceFn<
 		data.collectionKey,
 	);
 	if (documentFieldsTableSchemaRes.error) return documentFieldsTableSchemaRes;
+	const sortKeysRes = checkSortKeys(
+		documentFieldsTableSchemaRes.data,
+		data.query.sort,
+	);
+	if (sortKeysRes.error) return sortKeysRes;
 	const includeWorkflow = Boolean(
 		collectionRes.data.getData.publishing.workflow,
 	);

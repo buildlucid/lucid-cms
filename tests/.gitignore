@@ -7,3 +7,6 @@ setups/*/.cloudflare
 setups/*/.wrangler
 setups/*/dist
 setups/*/node_modules
+
+# KV files the SQLite KV plugin writes when a test process hosts a CMS
+.lucid

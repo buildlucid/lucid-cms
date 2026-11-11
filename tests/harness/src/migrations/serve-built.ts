@@ -10,8 +10,8 @@ import getFreePort from "../utils/get-free-port.ts";
 import type { Step } from "./types.ts";
 
 /**
- * Starts the lane's built server against a migration test database and schema step, allowing
- * browser tests to inspect pending migrations.
+ * Starts the setup's built server on a database a test or benchmark owns. A schema step lets
+ * browser tests open the admin on a database its config has moved ahead of.
  */
 const serveBuilt = async (options: {
 	context: HarnessContext;
@@ -21,6 +21,8 @@ const serveBuilt = async (options: {
 	url: string;
 	/** A session signed in as the admin on this server. */
 	admin: Session;
+	/** A new visitor to this server who is not signed in. */
+	session(): Session;
 	stop(): Promise<void>;
 }> => {
 	const { context } = options;
@@ -41,13 +43,12 @@ const serveBuilt = async (options: {
 
 	try {
 		await waitForServer({ url, server, log });
-		const admin = createSession({
-			url,
-			transport: (request) => fetch(request),
-		});
+		const session = () =>
+			createSession({ url, transport: (request) => fetch(request) });
+		const admin = session();
 		await ensureAdmin(admin);
 		await login(admin, ADMIN);
-		return { url, admin, stop: server.stop };
+		return { url, admin, session, stop: server.stop };
 	} catch (error) {
 		await server.stop();
 		throw error;

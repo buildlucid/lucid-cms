@@ -1,5 +1,6 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../exports/types.js";
+import formatter from "../../../../formatters/helpers.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
@@ -67,8 +68,9 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 			error: undefined,
 		};
 	}
-	formatResponseValue(value?: string | null) {
-		return (value ??
+	/** Databases return timestamps in their own formats, so a stored value is read as a UTC ISO string on all of them. */
+	formatResponseValue(value?: string | Date | null) {
+		return (formatter.formatDate(value) ??
 			this.config.default ??
 			null) satisfies FieldResponse<"datetime">["value"];
 	}

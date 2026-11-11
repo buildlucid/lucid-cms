@@ -42,7 +42,7 @@ export const queryString = {
 				.meta({
 					description: multiple
 						? options?.description ||
-							"Accepts multiple values separated by commas."
+							"Matches several values with the in or not-in operator: repeat the parameter once per value, eg. filter[id:in]=1&filter[id:in]=2. Commas are part of the value."
 						: (options?.description || "Accepts a single value only.") +
 							(options?.nullable ? " Leave empty for null comparison" : ""),
 					example: options?.example,

@@ -2,7 +2,6 @@ import type { PublicErrorData } from "@lucidcms/types";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { openAPIRouteHandler } from "hono-openapi";
-import { contextStorage } from "hono/context-storage";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import type { StatusCode } from "hono/utils/http-status";
@@ -21,11 +20,13 @@ import type LucidDatabase from "../db/client/lucid-database.js";
 import { createTranslator, resolveInterfaceLocale } from "../i18n/index.js";
 import type { TranslationStore } from "../i18n/types.js";
 import logger, { destroyLogger } from "../logger/index.js";
+import requestIdStorage from "../logger/request-id-storage.js";
 import type { LucidAdapterInstances } from "../runtime/create-lucid-adapters.js";
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 import createCorsMiddleware from "./middleware/cors.js";
 import logRoute from "./middleware/log-route.js";
 import noIndex from "./middleware/no-index.js";
+import serverTiming from "./middleware/server-timing.js";
 import contentRoleRoutes from "./routes/content-role.js";
 import routes from "./routes/index.js";
 import type { HttpExtension } from "./types.js";
@@ -88,7 +89,7 @@ const createApp = async (props: {
 				headerName: constants.headers.requestId,
 			}),
 		)
-		.use(contextStorage());
+		.use((c, next) => requestIdStorage.run(c.get("requestId"), next));
 
 	await runHttpExtensions({
 		app,
@@ -142,6 +143,7 @@ const createApp = async (props: {
 			});
 			await next();
 		})
+		.use(serverTiming)
 		.route("/", props.config.role === "content" ? contentRoleRoutes : routes)
 		.onError(async (err, c) => {
 			const locale = resolveInterfaceLocale({

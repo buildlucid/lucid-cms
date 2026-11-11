@@ -257,7 +257,11 @@ const STATUS_INDICATOR_SIZES = valuesOf<StatusIndicatorSize>({
 	sm: true,
 	md: true,
 });
-const ACTION_MENU_SIZES = valuesOf<ActionMenuSize>({ sm: true, md: true });
+const ACTION_MENU_SIZES = valuesOf<ActionMenuSize>({
+	xs: true,
+	sm: true,
+	md: true,
+});
 const ASPECT_RATIOS = valuesOf<AspectRatioValue>({
 	"1:1": true,
 	"4:3": true,

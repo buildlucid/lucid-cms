@@ -13,7 +13,7 @@ The plugin achieves this by registering hooks that fire at different points in t
 The intended use case for this plugin is to enable easy document fetching for front-end applications, whereby you can use the URL location to filter a document via the `path`. Using the content endpoints that might look something like this:
 
 ```text
-/api/v1/content/document/COLLECTION_KEY/published?filter[fields.path]=/about
+/api/v1/content/document/COLLECTION_KEY?version=production&filter[fields.path]=/about
 ```
 
 ## Installation

@@ -1,10 +1,12 @@
 /**
- * Keeps invocation-owned resources alive until a streamed response finishes,
- * then releases them when the body completes, fails or is cancelled.
+ * Releases invocation resources when the response body completes, fails or is cancelled. Pass
+ * `waitUntil` on Cloudflare so connection cleanup survives the response and does not retain
+ * requests.
  */
 const withResponseCleanup = async (
 	response: Response,
 	cleanup: () => void | Promise<void>,
+	waitUntil?: (promise: Promise<unknown>) => void,
 ): Promise<Response> => {
 	if (!response.body) {
 		await cleanup();
@@ -12,11 +14,13 @@ const withResponseCleanup = async (
 	}
 
 	const reader = response.body.getReader();
-	let cleaned = false;
-	const runCleanup = async () => {
-		if (cleaned) return;
-		cleaned = true;
-		await cleanup();
+	let cleaning: Promise<void> | undefined;
+	const runCleanup = () => {
+		if (!cleaning) {
+			cleaning = (async () => cleanup())();
+			waitUntil?.(cleaning);
+		}
+		return cleaning;
 	};
 	const body = new ReadableStream<Uint8Array>({
 		async pull(controller) {

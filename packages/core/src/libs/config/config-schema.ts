@@ -365,6 +365,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		openAPI: z.strictObject({
 			enabled: z.boolean(),
 		}),
+		serverTiming: z.boolean(),
 		routes: z.array(LucidRouteDefinitionSchema),
 		extensions: z.array(HttpExtensionSchema),
 	}),

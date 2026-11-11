@@ -178,6 +178,7 @@ export default defineConfig({
 		notifications: [deployFinishedNotification],
 		deploys: [deploys.productionDeploy, deploys.stagingDeploy],
 		http: {
+			serverTiming: true,
 			routes: [
 				fakeCiRoute,
 				searchMediaRoute,

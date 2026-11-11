@@ -1,3 +1,4 @@
+import type { KyselyPlugin } from "kysely";
 import type DatabaseAdapter from "../adapter-base.js";
 import type { KyselyDB } from "../types.js";
 import { codecs } from "./codecs/index.js";
@@ -99,6 +100,17 @@ export default class LucidDatabase {
 			{
 				registry: this.tables,
 				pluginsApplied: false,
+			},
+		);
+	}
+
+	/** Adds a Kysely plugin to a copy of this client, such as one that counts the queries a request runs. */
+	withPlugin(plugin: KyselyPlugin): LucidDatabase {
+		return new LucidDatabase(
+			{ client: this.kysely.withPlugin(plugin), adapter: this.adapter },
+			{
+				registry: this.tables,
+				pluginsApplied: true,
 			},
 		);
 	}

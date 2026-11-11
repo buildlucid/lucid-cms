@@ -1,6 +1,6 @@
-import type { Benchmark } from "./types.ts";
+import type { Benchmark, RegisteredBenchmark } from "./types.ts";
 
-const benchmarks: Benchmark[] = [];
+const benchmarks: RegisteredBenchmark[] = [];
 
 /**
  * Registers a benchmark. Call it at the top of a `*.bench.ts` file in `suites/performance`.
@@ -16,11 +16,32 @@ const benchmarks: Benchmark[] = [];
  * });
  * ```
  */
-const benchmark = (definition: Benchmark): void => {
-	benchmarks.push(definition);
+const benchmark = <Prepared = undefined>(
+	definition: Benchmark<Prepared>,
+): void => {
+	benchmarks.push({
+		id: definition.id,
+		warmups: definition.warmups,
+		open: async (context) => {
+			if (!definition.prepare) {
+				return {
+					sample: () => definition.sample(context),
+					close: async () => {},
+				};
+			}
+
+			const prepared = await definition.prepare(context);
+			return {
+				sample: () => definition.sample(context, prepared),
+				close: async () => {
+					await definition.cleanup?.(prepared);
+				},
+			};
+		},
+	});
 };
 
 /** The benchmarks registered so far, for the lane's runner. */
-export const getBenchmarks = (): readonly Benchmark[] => benchmarks;
+export const getBenchmarks = (): readonly RegisteredBenchmark[] => benchmarks;
 
 export default benchmark;

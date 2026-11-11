@@ -319,7 +319,7 @@ const resolveRelationDocumentFilters: ServiceFn<
 		if (missingScopes.length > 0) {
 			return {
 				error: {
-					type: "authorisation",
+					type: "forbidden",
 					name: copy("server:core.integrations.scopes.error.name"),
 					message: copy("server:core.integrations.scopes.missing.message", {
 						data: {

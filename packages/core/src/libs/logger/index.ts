@@ -1,6 +1,5 @@
-import { tryGetContext } from "hono/context-storage";
-import type { LucidHonoGeneric } from "../../types/hono.js";
 import createConsoleTransport from "./console-transport/index.js";
+import requestIdStorage from "./request-id-storage.js";
 import type {
 	LogEntry,
 	LogEntryLevel,
@@ -52,12 +51,8 @@ const shouldLog = (
 	return LOG_LEVELS[messageLevel] <= LOG_LEVELS[currentLevel];
 };
 
-/**
- * Reads the request ID from Hono's concurrency-safe async context when available.
- */
-const getActiveRequestId = () => {
-	return tryGetContext<LucidHonoGeneric>()?.get("requestId");
-};
+/** Reads the ID of the request being handled, when there is one. */
+const getActiveRequestId = () => requestIdStorage.getStore();
 
 /**
  * Writes an entry while containing synchronous and asynchronous transport failures.

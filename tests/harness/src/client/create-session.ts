@@ -72,7 +72,9 @@ const createSession = (options: {
 		const method = input.method ?? "GET";
 		const url = new URL(input.path, options.url);
 		for (const [key, value] of Object.entries(input.query ?? {})) {
-			url.searchParams.set(key, String(value));
+			for (const item of Array.isArray(value) ? value : [value]) {
+				url.searchParams.append(key, String(item));
+			}
 		}
 
 		const headers = new Headers({ accept: "application/json" });
