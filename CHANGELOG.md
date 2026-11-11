@@ -114,6 +114,9 @@
 - Fixed job schedules that are empty or can never run, such as 31 February, passing config checks. ([e031c52](https://github.com/buildlucid/lucid-cms/commit/e031c52bca645661f71988cd89bad8540cd2348d))
 - Fixed failed jobs on the built-in inline queue retrying straight away instead of waiting for their backoff. ([2edd5ec](https://github.com/buildlucid/lucid-cms/commit/2edd5ec3485a67e172ceaf859d20fbcf16475269))
 - Fixed admin route navigation rejecting the `notifications` and `translations` icons. ([eaf605d](https://github.com/buildlucid/lucid-cms/commit/eaf605db85f9b80bc3bbc31f2a2c8f9d962ad46f))
+- Fixed new fields being saved empty when a migration ran while the CMS was already running. They now save without a restart.
+- Fixed Diagnostics showing no pending migrations when project or plugin migrations had not run.
+- Fixed a failed project or plugin migration leaving its changes behind on SQLite and libSQL. Failed migrations are now rolled back on every database.
 
 ## v0.19.0-alpha.0
 

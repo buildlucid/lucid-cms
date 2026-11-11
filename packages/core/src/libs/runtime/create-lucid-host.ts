@@ -157,6 +157,12 @@ const createLucidHost = async (
 					},
 				});
 
+	//* a server only reports on external migrations, so it needs their names and not their code
+	resolved.config.db.registerKnownExternalMigrations([
+		...resolved.config.migrations.map((migration) => migration.name),
+		...("meta" in options ? (options.meta?.migrationFiles ?? []) : []),
+	]);
+
 	const invocationEnvs = new WeakMap<
 		Record<string, unknown>,
 		EnvironmentVariables

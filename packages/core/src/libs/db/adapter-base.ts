@@ -46,17 +46,11 @@ export default abstract class DatabaseAdapter {
 	/** Published package metadata for update checks. */
 	readonly package?: PackageInfo;
 	private externalMigrations: Record<string, ExternalMigration> = {};
+	private knownExternalMigrations: string[] = [];
 	constructor(adapter: string) {
 		this.adapter = adapter;
 	}
-	/**
-	 * Returns the list of migration names that cannot be rolled back.
-	 * If migrate:rollback attempts to rollback a core migration, it will exit the process.
-	 *
-	 * For the initial release, all of these migrations are required to be run. There is no
-	 * valid version prior to this release, and as such you should never be able to rollback
-	 * the database to a previous version.
-	 */
+	/** Lists core migrations that cannot be rolled back because no supported schema predates them. */
 	readonly protectedMigrations = [
 		"00000001-locales",
 		"00000002-options",
@@ -192,6 +186,13 @@ export default abstract class DatabaseAdapter {
 		this.externalMigrations = migrations;
 	}
 	/**
+	 * Registers external migration names without loading handlers, so servers report pending and
+	 * applied migrations correctly.
+	 */
+	registerKnownExternalMigrations(names: string[]) {
+		this.knownExternalMigrations = names;
+	}
+	/**
 	 * Runs pending Lucid-owned migrations without crossing into the external
 	 * phase. Keeping the full provider registered preserves valid Kysely history
 	 * when a newer core migration is added after external migrations have run.
@@ -227,9 +228,8 @@ export default abstract class DatabaseAdapter {
 
 	/**
 	 * Creates the shared Kysely migrator used by forward migrations and rollback.
-	 * External definitions are bound to Kysely's migration-scoped client (a
-	 * transaction where the dialect supports transactional DDL), while retaining
-	 * all other service context state.
+	 * External definitions are bound to a transaction on Kysely's migration-scoped
+	 * client, while retaining all other service context state.
 	 */
 	async createMigrator(
 		connection: DatabaseConnection,
@@ -313,7 +313,12 @@ export default abstract class DatabaseAdapter {
 	 */
 	async getMigrationStatus(db: KyselyDB): Promise<DatabaseMigrationStatus> {
 		const core = Object.keys(this.coreMigrations).sort();
-		const external = Object.keys(this.externalMigrations).sort();
+		const external = [
+			...new Set([
+				...Object.keys(this.externalMigrations),
+				...this.knownExternalMigrations,
+			]),
+		].sort();
 		const registered = [...core, ...external].sort();
 		let executed: string[] = [];
 
@@ -367,14 +372,17 @@ export default abstract class DatabaseAdapter {
 							message: `A service context is required to execute external migration "${name}".`,
 						});
 					}
-					const migrationContext: ServiceContext = {
-						...context,
-						db: context.db.withKysely(db as KyselyDB),
-					};
+					const migrationContext = context;
 
-					return migration.up({
-						context: migrationContext,
-						toolkit: createToolkit(migrationContext),
+					return this.runExternalMigration(db as KyselyDB, (database) => {
+						const scoped: ServiceContext = {
+							...migrationContext,
+							db: migrationContext.db.withKysely(database),
+						};
+						return migration.up({
+							context: scoped,
+							toolkit: createToolkit(scoped),
+						});
 					});
 				},
 				down: down
@@ -384,14 +392,17 @@ export default abstract class DatabaseAdapter {
 									message: `A service context is required to execute external migration "${name}".`,
 								});
 							}
-							const migrationContext: ServiceContext = {
-								...context,
-								db: context.db.withKysely(db as KyselyDB),
-							};
+							const migrationContext = context;
 
-							return down({
-								context: migrationContext,
-								toolkit: createToolkit(migrationContext),
+							return this.runExternalMigration(db as KyselyDB, (database) => {
+								const scoped: ServiceContext = {
+									...migrationContext,
+									db: migrationContext.db.withKysely(database),
+								};
+								return down({
+									context: scoped,
+									toolkit: createToolkit(scoped),
+								});
 							});
 						}
 					: undefined,
@@ -399,6 +410,17 @@ export default abstract class DatabaseAdapter {
 		}
 
 		return migrations;
+	}
+
+	/**
+	 * Ensures external migrations are transactional, including SQLite and libSQL where Kysely does
+	 * not open a transaction.
+	 */
+	private runExternalMigration(
+		db: KyselyDB,
+		run: (database: KyselyDB) => Promise<void>,
+	): Promise<void> {
+		return db.isTransaction ? run(db) : db.transaction().execute(run);
 	}
 
 	/** Core migration definitions keyed in their fixed execution order. */

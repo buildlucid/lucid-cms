@@ -42,10 +42,11 @@ class HarnessReporter implements Reporter {
 				(annotation) => annotation.type === "skip",
 			)?.description;
 			let status: TestStatus = "failed";
-			if (result.status === "passed") {
-				status = "passed";
-			} else if (result.status === "skipped") {
+			if (result.status === "skipped") {
 				status = isNotApplicable(skipReason) ? "notApplicable" : "skipped";
+			} else if (result.status === test.expectedStatus) {
+				//* a test marked with `test.fail()` is expected to fail, and passes by doing so
+				status = "passed";
 			}
 
 			return {
@@ -57,7 +58,7 @@ class HarnessReporter implements Reporter {
 				durationMs: Math.round(result.duration),
 				skipReason,
 				flaky: test.outcome() === "flaky",
-				errors: result.errors.map(formatError),
+				errors: status === "passed" ? [] : result.errors.map(formatError),
 			};
 		};
 

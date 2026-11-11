@@ -84,10 +84,14 @@ export const setRuntimeSchema = async (
 	});
 };
 
+/**
+ * Resolves and caches runtime schemas, except pending ones. Another process may migrate missing
+ * additions without clearing this process's cache.
+ */
 export const resolveRuntimeSchema = async (
 	context: ServiceContext,
 	collectionKey: string,
-	resolver: () => Promise<CachedSchemaResponse>,
+	resolver: () => Promise<CachedSchemaResponse & { pending?: boolean }>,
 ): Promise<CachedSchemaResponse> => {
 	const signature = await getCollectionSignatureByKey(context, collectionKey);
 	if (!signature) {
@@ -109,7 +113,7 @@ export const resolveRuntimeSchema = async (
 	const pending = (async (): Promise<CachedSchemaResponse> => {
 		try {
 			const result = await resolver();
-			if (!result.error) {
+			if (!result.error && !result.pending) {
 				await setRuntimeSchema(context, collectionKey, result.data);
 			}
 			return result;

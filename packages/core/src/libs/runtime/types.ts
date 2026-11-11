@@ -30,7 +30,10 @@ export type LucidBuild = {
 	host: {
 		definition: LucidConfigDefinition;
 		translationBundles: TranslationBundles;
-		meta: Pick<LucidConfigDefinitionMeta, "emailTemplates" | "admin" | "host">;
+		meta: Pick<
+			LucidConfigDefinitionMeta,
+			"emailTemplates" | "admin" | "host" | "migrationFiles"
+		>;
 		/** During development, sends runtime logs to Lucid's Vite plugin to print. */
 		logger?: LoggerOverride;
 		/** In commands' task servers, an inline queue and no agent runner, so pending jobs and agent runs finish inside the command. */
@@ -177,6 +180,8 @@ export type LucidConfigDefinitionMeta = {
 	emailTemplates?: RenderedTemplates;
 	/** The key of the framework serving Lucid, when it isn't Lucid's own server. */
 	host?: string;
+	/** The names of the project's migration files. Builds leave the files out, as only commands run them. */
+	migrationFiles?: string[];
 };
 
 export type RuntimeAdapterValue =

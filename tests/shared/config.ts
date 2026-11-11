@@ -2,6 +2,14 @@ import { z } from "@lucidcms/core";
 import type { EnvironmentVariables, LucidConfig } from "@lucidcms/core/types";
 import PageCollection from "./collections/page.ts";
 import SettingsCollection from "./collections/settings.ts";
+import {
+	generatedCollection,
+	isGeneratedStep,
+} from "./migrations/collections/generated.ts";
+import steps, {
+	type SchemaStep,
+	type SchemaStepKey,
+} from "./migrations/steps.ts";
 
 /** A fixed secret for test servers only. */
 const TEST_SECRET =
@@ -16,6 +24,8 @@ export const harnessEnv = z.object({
 	HARNESS_DATABASE_URL: z.string(),
 	/** The address the CMS is reached on. */
 	HARNESS_URL: z.url().default("http://localhost:6543"),
+	/** The schema step migration tests load the config with. See `shared/migrations/steps.ts`. */
+	HARNESS_SCHEMA_STEP: z.string().optional(),
 });
 
 export type HarnessEnv = z.infer<typeof harnessEnv>;
@@ -51,3 +61,37 @@ export const sharedConfig = (options: { url: string }) =>
 		},
 		collections: sharedCollections,
 	}) satisfies LucidConfig;
+
+/**
+ * Adds the schema step named in `HARNESS_SCHEMA_STEP` to a setup's config, for migration tests.
+ * Without one the config is returned as it is, which is how every other test runs.
+ */
+export const withSchemaStep = <Config extends LucidConfig>(
+	env: Pick<HarnessEnv, "HARNESS_SCHEMA_STEP">,
+	config: Config,
+): Config => {
+	const key = env.HARNESS_SCHEMA_STEP;
+	if (!key) {
+		return config;
+	}
+	if (!isGeneratedStep(key) && !Object.hasOwn(steps, key)) {
+		throw new Error(`No schema step is registered as "${key}".`);
+	}
+
+	const step: SchemaStep = isGeneratedStep(key)
+		? { collections: [generatedCollection(key)] }
+		: steps[key as SchemaStepKey];
+	return {
+		...config,
+		collections: [...(config.collections ?? []), ...(step.collections ?? [])],
+		migrations: [...(config.migrations ?? []), ...(step.migrations ?? [])],
+		plugins: [...(config.plugins ?? []), ...(step.plugins ?? [])],
+		sources: {
+			...config.sources,
+			migrations: [
+				...(config.sources?.migrations ?? []),
+				...(step.sources?.migrations ?? []),
+			],
+		},
+	};
+};

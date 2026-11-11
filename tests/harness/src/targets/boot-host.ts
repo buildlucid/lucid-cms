@@ -15,11 +15,17 @@ const bootHost = async (
 	options: {
 		configPath: string;
 		databaseUrl: string;
+		/** The schema step to load the config with, for migration tests. */
+		schemaStep?: string;
 	} & HostTargetOptions,
 ): Promise<Target & { config: ResolvedLucidConfig }> => {
 	const loaded = await loadSetupConfig({
 		configPath: options.configPath,
-		env: { HARNESS_DATABASE_URL: options.databaseUrl, HARNESS_URL: HOST_URL },
+		env: {
+			HARNESS_DATABASE_URL: options.databaseUrl,
+			HARNESS_URL: HOST_URL,
+			HARNESS_SCHEMA_STEP: options.schemaStep,
+		},
 	});
 	const { translationStore } = await prepareTranslations({
 		config: loaded.config,

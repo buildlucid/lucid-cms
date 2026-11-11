@@ -1,3 +1,4 @@
+import path from "node:path";
 import { normalizePath } from "vite";
 import type { LogLevel } from "../logger/types.js";
 import type { ResourceFile } from "../resources/types.js";
@@ -21,6 +22,7 @@ const renderBuildModule = (props: {
 
 	const meta = [
 		`emailTemplates: ${json(project.emailTemplates)}`,
+		`migrationFiles: ${json(project.resources.files.migrations.map((file) => path.parse(file.path).name))}`,
 		...(dev ? ['admin: "development"'] : []),
 		...(props.host ? [`host: ${json(props.host)}`] : []),
 	];

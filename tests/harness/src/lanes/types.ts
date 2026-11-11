@@ -15,6 +15,11 @@ export type Lane = {
 	 * For lanes that measure, where anything else running would skew the numbers.
 	 */
 	exclusive?: boolean;
+	/**
+	 * Uses the setup's database even in project mode, so the service behind it is started.
+	 * For lanes that create their own databases, such as to time migrations.
+	 */
+	database?: boolean;
 	/** The command that runs it from the `tests` folder. `passthrough` holds extra arguments from the terminal. */
 	command(passthrough: string[]): { command: string; args: string[] };
 };

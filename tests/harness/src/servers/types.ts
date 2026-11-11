@@ -5,7 +5,7 @@ import type { RunningCommand } from "../utils/run-command.ts";
 export type RuntimeKey = "node" | "cloudflare";
 
 export type ServerOptions = {
-	setup: Setup;
+	setup: Pick<Setup, "name" | "directory">;
 	/** The environment the setup's config reads, including its database. */
 	env: Record<string, string>;
 	/** The file that collects build and server output. */

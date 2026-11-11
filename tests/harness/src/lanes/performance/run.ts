@@ -1,10 +1,10 @@
-/**
- * The performance lane's command. It loads every `*.bench.ts` in the lane's folder, takes each
- * benchmark's samples one after another, and writes the measurements as the lane's result.
- */
+/** Runs each `*.bench.ts` sequentially and writes measurements as the lane result. */
+import { randomUUID } from "node:crypto";
 import { glob } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import createEmptyDatabase from "../../databases/create-empty-database.ts";
+import { resolveDriver } from "../../databases/get-driver.ts";
 import loadContext from "../../environment/load-context.ts";
 import { getBenchmarks } from "../../performance/benchmark.ts";
 import summarizeSamples from "../../performance/summarize-samples.ts";
@@ -24,6 +24,11 @@ const benchmarkContext: BenchmarkContext = {
 		HARNESS_DATABASE_URL: "unused-by-benchmarks",
 		HARNESS_URL: "http://localhost:6543",
 	},
+	database: () =>
+		createEmptyDatabase(resolveDriver(context.setup.database), {
+			directory: context.paths.work,
+			name: `benchmark_${randomUUID().replaceAll("-", "")}`,
+		}),
 };
 
 const laneDirectory = path.join(paths.suites, context.lane);

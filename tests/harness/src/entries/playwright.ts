@@ -3,4 +3,9 @@ export { expect } from "@playwright/test";
 export type { Capability } from "../capabilities/types.ts";
 export { ADMIN } from "../client/admin.ts";
 export type { Lucid } from "../client/open-lucid.ts";
-export { requires, test } from "../lanes/playwright/test.ts";
+export type { Session } from "../client/types.ts";
+export {
+	requires,
+	type ServedMigrations,
+	test,
+} from "../lanes/playwright/test.ts";

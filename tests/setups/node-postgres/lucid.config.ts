@@ -7,6 +7,7 @@ import {
 	harnessEnv,
 	sharedCollections,
 	sharedConfig,
+	withSchemaStep,
 } from "../../shared/config.ts";
 import {
 	ArticleCollection,
@@ -20,14 +21,15 @@ export default defineConfig({
 	env,
 	runtime: node,
 	db: postgres((env) => ({ url: getDatabaseUrl(env) })),
-	config: (env) => ({
-		...sharedConfig({ url: env.HARNESS_URL }),
-		localization,
-		collections: [
-			...sharedCollections,
-			ArticleCollection,
-			LandingPageCollection,
-		],
-		plugins: [pages({ collections: [{ key: LandingPageCollection.key }] })],
-	}),
+	config: (env) =>
+		withSchemaStep(env, {
+			...sharedConfig({ url: env.HARNESS_URL }),
+			localization,
+			collections: [
+				...sharedCollections,
+				ArticleCollection,
+				LandingPageCollection,
+			],
+			plugins: [pages({ collections: [{ key: LandingPageCollection.key }] })],
+		}),
 });

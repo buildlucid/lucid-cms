@@ -1,3 +1,4 @@
+import type { ProvisionedDatabase } from "../databases/types.ts";
 import type { HarnessContext } from "../environment/types.ts";
 import type { MeasurementUnit } from "../report/types.ts";
 
@@ -25,6 +26,11 @@ export type BenchmarkContext = {
 	env: Record<string, string>;
 	/** A folder in the run's output for logs and scratch files. */
 	work: string;
+	/**
+	 * Creates an empty database for the setup, such as to time its migrations. Pass its `url` as
+	 * `HARNESS_DATABASE_URL`, and destroy it when the sample is done.
+	 */
+	database(): Promise<ProvisionedDatabase>;
 };
 
 /** Something to measure for every setup, such as a build. */

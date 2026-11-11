@@ -6,6 +6,7 @@ import inferSchema from "../infer-schema.js";
 import type { CollectionSchema } from "../types.js";
 import buildRuntimeSchema from "./build-runtime-schema.js";
 import diffSnapshotVsConfig from "./diff-snapshot-vs-config.js";
+import hasPendingAdditions from "./has-pending-additions.js";
 import { resolveRuntimeSchema } from "./runtime-schema-cache.js";
 
 /**
@@ -58,6 +59,7 @@ const getRuntimeSchema: ServiceFn<
 		return {
 			data: filteredSchema,
 			error: undefined,
+			pending: hasPendingAdditions(diff),
 		};
 	});
 };

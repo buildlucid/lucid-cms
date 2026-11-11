@@ -26,6 +26,7 @@ Browser tests need Playwright's browser once: `npx playwright install chromium`.
 tests/
   setups/<name>/        a lucid.config.ts and a setup.ts that describes it
   shared/               the config and collections every setup starts from
+  shared/migrations/    the config versions that migration tests move between
   suites/<lane>/<area>/ the tests, grouped by lane and then by area
   harness/src/          the harness itself
   .harness/             run output (ignored by git)
@@ -106,6 +107,39 @@ A full run also lists any test that applied to no setup at all. That usually mea
 
 Files in `suites/e2e` end in `.spec.ts` and import from `#harness/playwright`. The browser starts signed in as the admin. The `lucid` fixture is there for preparing data over the API.
 
+### Migration tests
+
+The `lucid` fixture gives a database that is already migrated. A test that is about migrations asks the `migrations` fixture for an empty database, and migrates it itself.
+
+```ts
+import { describe, expect, requires, test } from "#harness/vitest";
+
+describe("adding a field", () => {
+  requires("mode:host");
+
+  test("keeps content", async ({ migrations }) => {
+    const database = await migrations.database();
+    await database.cli("article/base", "migrate", "--yes");
+    await database.cms("article/base", async (admin) => {
+      // create content over the API
+    });
+
+    const migrated = await database.cli("article/added", "migrate");
+    expect(migrated.code).toBe(0);
+  });
+});
+```
+
+- A **schema step** is a named version of a project's config, such as `article/base` and `article/added`. Steps live in `shared/migrations/steps.ts`. Each one adds its own collections, migrations or plugins to the setup's config, so the shared content model stays as it is.
+- `cli(step, ...args)` runs a real `lucidcms` command with the config at that step. It has no terminal, so a migration that needs approval fails unless the test passes `--yes` or `--allow-destructive`.
+- `cms(step, use)` starts the CMS in its own process for as long as `use` runs. Each call is a newly started server. Call `cli` inside `use` to migrate beside a running server.
+- `schema()` reads the tables the database has. `query()` runs SQL on it, with `sql` from `#harness/vitest`.
+- `generatedStep(fields)` from `#shared/migrations/collections/generated` names a step for any list of fields. The simulation in `suites/simulation/migrations` uses it to try random changes.
+- `recordDigest(task, value)` attaches a digest to a test. The report flags setups whose digests differ.
+- Browser tests get the same fixture, plus `migrations.serve(database, step)`. It starts the setup's built server on that database, so the admin can be opened on a database its config has moved ahead of. See `suites/e2e/migrations/pending.spec.ts`.
+
+Schema steps reach a config through `HARNESS_SCHEMA_STEP`, which Node setups read with `withSchemaStep()` from `shared/config.ts`. A new Node setup should wrap its config in it.
+
 ### Simulation tests
 
 A simulation tries many random sequences of actions against a fresh CMS and checks rules after every action. See `suites/simulation/documents/page-lifecycle.test.ts`.
@@ -122,6 +156,7 @@ Files in `suites/performance` end in `.bench.ts` and import from `#harness/perfo
 
 - The report keeps each metric's median, and how much the samples varied.
 - `--performance-runs` sets how many samples to take. One warm-up sample is thrown away first.
+- `database()` gives a benchmark an empty database for the setup, such as to time its migrations. See `suites/performance/migrations/migrate.bench.ts`.
 - Each metric has a `tolerance`, the share it may grow before that counts as a regression, and says whether a regression is `blocking`. Timings default to 15% and not blocking. Everything else defaults to 1% and blocking.
 
 ## Add a setup

@@ -5,6 +5,7 @@ import collections from "../../collections.js";
 import inferSchema from "../infer-schema.js";
 import buildRuntimeSchema from "./build-runtime-schema.js";
 import diffSnapshotVsConfig from "./diff-snapshot-vs-config.js";
+import hasPendingAdditions from "./has-pending-additions.js";
 import { hasRuntimeSchema, setRuntimeSchema } from "./runtime-schema-cache.js";
 
 /**
@@ -85,6 +86,9 @@ const primeRuntimeSchemas: ServiceFn<
 			latestMigration.collection_schema,
 			localSchemaRes.data,
 		);
+
+		//* a schema that waits on a migration isn't cached, as only another process's migration completes it
+		if (hasPendingAdditions(diff)) continue;
 
 		const finalSchema = buildRuntimeSchema(localSchemaRes.data, diff);
 

@@ -14,7 +14,10 @@ export type TargetDescription =
  */
 export type HarnessContext = {
 	runId: string;
-	setup: Pick<Setup, "name" | "directory" | "configPath" | "runtime">;
+	setup: Pick<
+		Setup,
+		"name" | "directory" | "configPath" | "runtime" | "database"
+	>;
 	lane: string;
 	mode: Mode;
 	capabilities: Capability[];

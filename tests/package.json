@@ -26,6 +26,7 @@
 		"@playwright/test": "^1.65.0",
 		"@types/node": "^24.19.2",
 		"fast-check": "^4.10.2",
+		"kysely": "0.29.7",
 		"picocolors": "^1.1.1",
 		"postgres": "^4.0.0",
 		"typescript": "^6.0.3",

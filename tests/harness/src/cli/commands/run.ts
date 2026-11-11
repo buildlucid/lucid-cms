@@ -45,10 +45,11 @@ const runCommand = async (options: RunOptions): Promise<number> => {
 
 	if (options.services) {
 		await ensureServices(
-			//* lanes that run no CMS need no database
-			selectJobs(plans, (job) => job.mode !== "project").map(
-				(plan) => plan.setup.database,
-			),
+			//* lanes that run no CMS need no database, unless they create their own
+			selectJobs(
+				plans,
+				(job) => job.mode !== "project" || job.lane.database === true,
+			).map((plan) => plan.setup.database),
 			{ directory },
 		);
 	}

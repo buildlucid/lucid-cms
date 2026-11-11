@@ -117,6 +117,10 @@ export class PostgresAdapter extends DatabaseAdapter {
 			caseInsensitiveLikeOperator: "ilike",
 		};
 	}
+	/**
+	 * Reads Lucid's tables from the system catalogs. The `information_schema` views hold the same
+	 * details, but joining them takes seconds once a project has a few hundred tables.
+	 */
 	async inferSchema(client: KyselyDB): Promise<InferredTable[]> {
 		const [res, indexRes] = await Promise.all([
 			sql<{
@@ -135,65 +139,71 @@ export class PostgresAdapter extends DatabaseAdapter {
 				fk_on_delete?: OnDelete;
 				is_unique: boolean;
 			}>`
-	            WITH table_columns AS (
-	                SELECT
-	                    c.table_name,
-	                    c.column_name AS name,
-	                    c.data_type AS type,
-	                    c.is_nullable = 'NO' AS notnull,
-	                    c.column_default AS dflt_value,
-	                    CASE WHEN pk.constraint_name IS NOT NULL THEN true ELSE false END AS pk,
-	                    CASE WHEN uc.constraint_name IS NOT NULL THEN true ELSE false END AS is_unique
-	                FROM information_schema.columns c
-	                LEFT JOIN (
-	                    SELECT
-	                        kcu.table_name,
-	                        kcu.column_name,
-	                        tc.constraint_name
-	                    FROM information_schema.table_constraints tc
-	                    JOIN information_schema.key_column_usage kcu
-	                        ON tc.constraint_name = kcu.constraint_name
-	                    WHERE tc.constraint_type = 'PRIMARY KEY'
-	                ) pk ON
-	                    c.table_name = pk.table_name AND
-	                    c.column_name = pk.column_name
-	                LEFT JOIN (
-	                    SELECT
-	                        kcu.table_name,
-	                        kcu.column_name,
-	                        tc.constraint_name
-	                    FROM information_schema.table_constraints tc
-	                    JOIN information_schema.key_column_usage kcu
-	                        ON tc.constraint_name = kcu.constraint_name
-	                    WHERE tc.constraint_type = 'UNIQUE'
-	                ) uc ON
-	                    c.table_name = uc.table_name AND
-	                    c.column_name = uc.column_name
-	                WHERE c.table_name LIKE 'lucid_%'
+	            WITH tables AS (
+	                SELECT table_class.oid, table_class.relname
+	                FROM pg_class table_class
+	                JOIN pg_namespace namespace
+	                    ON namespace.oid = table_class.relnamespace
+	                WHERE namespace.nspname = 'public'
+	                    AND table_class.relname LIKE 'lucid_%'
+	                    AND table_class.relkind IN ('r', 'p')
 	            ),
 	            foreign_keys AS (
 	                SELECT
-	                    kcu.table_name,
-	                    kcu.column_name,
-	                    kcu.constraint_name AS constraint_id,
-	                    kcu.ordinal_position - 1 AS seq,
-	                    count(*) OVER (PARTITION BY kcu.constraint_schema, kcu.table_name, kcu.constraint_name) AS column_count,
-	                    ccu.table_name AS referenced_table,
-	                    ccu.column_name AS referenced_column,
-	                    rc.update_rule AS on_update,
-	                    rc.delete_rule AS on_delete
-	                FROM information_schema.key_column_usage kcu
-	                JOIN information_schema.referential_constraints rc
-	                    ON kcu.constraint_name = rc.constraint_name
-	                        AND kcu.constraint_schema = rc.constraint_schema
-	                JOIN information_schema.key_column_usage ccu
-	                    ON rc.unique_constraint_name = ccu.constraint_name
-	                        AND rc.unique_constraint_schema = ccu.constraint_schema
-	                        AND kcu.position_in_unique_constraint = ccu.ordinal_position
-	                WHERE kcu.table_name LIKE 'lucid_%'
+	                    constraint_row.conrelid,
+	                    key.attnum,
+	                    constraint_row.conname AS constraint_id,
+	                    (key.ordinality - 1)::int AS seq,
+	                    cardinality(constraint_row.conkey) AS column_count,
+	                    referenced_class.relname AS referenced_table,
+	                    referenced_attribute.attname AS referenced_column,
+	                    CASE constraint_row.confupdtype
+	                        WHEN 'c' THEN 'CASCADE'
+	                        WHEN 'n' THEN 'SET NULL'
+	                        WHEN 'd' THEN 'SET DEFAULT'
+	                        WHEN 'r' THEN 'RESTRICT'
+	                        ELSE 'NO ACTION'
+	                    END AS on_update,
+	                    CASE constraint_row.confdeltype
+	                        WHEN 'c' THEN 'CASCADE'
+	                        WHEN 'n' THEN 'SET NULL'
+	                        WHEN 'd' THEN 'SET DEFAULT'
+	                        WHEN 'r' THEN 'RESTRICT'
+	                        ELSE 'NO ACTION'
+	                    END AS on_delete
+	                FROM pg_constraint constraint_row
+	                JOIN tables
+	                    ON tables.oid = constraint_row.conrelid
+	                JOIN LATERAL unnest(constraint_row.conkey, constraint_row.confkey)
+	                    WITH ORDINALITY AS key(attnum, referenced_attnum, ordinality)
+	                    ON true
+	                JOIN pg_class referenced_class
+	                    ON referenced_class.oid = constraint_row.confrelid
+	                JOIN pg_attribute referenced_attribute
+	                    ON referenced_attribute.attrelid = constraint_row.confrelid
+	                    AND referenced_attribute.attnum = key.referenced_attnum
+	                WHERE constraint_row.contype = 'f'
 	            )
 	            SELECT
-	                tc.*,
+	                tables.relname AS table_name,
+	                attribute.attname AS name,
+	                format_type(attribute.atttypid, NULL) AS type,
+	                attribute.attnotnull AS notnull,
+	                CASE WHEN attribute.attgenerated = ''
+	                    THEN pg_get_expr(column_default.adbin, column_default.adrelid)
+	                END AS dflt_value,
+	                EXISTS (
+	                    SELECT 1 FROM pg_constraint primary_key
+	                    WHERE primary_key.conrelid = tables.oid
+	                        AND primary_key.contype = 'p'
+	                        AND attribute.attnum = ANY (primary_key.conkey)
+	                ) AS pk,
+	                EXISTS (
+	                    SELECT 1 FROM pg_constraint unique_key
+	                    WHERE unique_key.conrelid = tables.oid
+	                        AND unique_key.contype = 'u'
+	                        AND attribute.attnum = ANY (unique_key.conkey)
+	                ) AS is_unique,
 	                fk.referenced_table AS fk_table,
 	                fk.constraint_id AS fk_id,
 	                fk.seq AS fk_seq,
@@ -201,10 +211,18 @@ export class PostgresAdapter extends DatabaseAdapter {
 	                fk.referenced_column AS fk_column,
 	                fk.on_update AS fk_on_update,
 	                fk.on_delete AS fk_on_delete
-	            FROM table_columns tc
-	            LEFT JOIN foreign_keys fk ON
-	                tc.table_name = fk.table_name AND
-	                tc.name = fk.column_name
+	            FROM tables
+	            JOIN pg_attribute attribute
+	                ON attribute.attrelid = tables.oid
+	                AND attribute.attnum > 0
+	                AND NOT attribute.attisdropped
+	            LEFT JOIN pg_attrdef column_default
+	                ON column_default.adrelid = attribute.attrelid
+	                AND column_default.adnum = attribute.attnum
+	            LEFT JOIN foreign_keys fk
+	                ON fk.conrelid = tables.oid
+	                AND fk.attnum = attribute.attnum
+	            ORDER BY tables.relname, attribute.attnum
 	        `.execute(client),
 			sql<{
 				table_name: string;

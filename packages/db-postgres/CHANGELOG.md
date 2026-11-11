@@ -12,3 +12,4 @@
 - Database schema checks now correctly recognise foreign keys that use multiple columns.
 - Fixed `NOW()` defaults on collection `timestamptz` columns being stored as a fixed date, which made every migration report changed defaults.
 - Fixed JSON values being encoded twice, so `jsonb` columns held strings instead of objects and arrays.
+- Fixed migrations and `lucidcms dev` start-up getting slow on projects with many collections. Reading the database schema took seconds and now takes milliseconds.
