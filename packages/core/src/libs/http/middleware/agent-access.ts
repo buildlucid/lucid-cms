@@ -10,7 +10,7 @@ const agentAccess = (requireConnection = false) =>
 		const context = createServiceContext(c);
 
 		const result = await resolveAgentAccess(context, {
-			userId: c.get("auth").id,
+			auth: c.get("auth"),
 			requireConnection,
 		});
 		if (result.error) throw new LucidError(result.error);

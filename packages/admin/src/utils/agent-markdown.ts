@@ -1,5 +1,6 @@
 import DOMPurify from "dompurify";
 import { Marked } from "marked";
+import { adminLinkPath } from "@/utils/navigation";
 
 const markdown = new Marked({ gfm: true, breaks: true });
 const allowedTags = [
@@ -36,11 +37,13 @@ const purify = DOMPurify();
 
 purify.addHook("afterSanitizeAttributes", (node) => {
 	if (node.tagName !== "A") return;
+	//* links to this admin open in place, so a chat page can keep the chat open beside them
+	if (adminLinkPath(node.getAttribute("href") ?? "") !== undefined) return;
 	node.setAttribute("target", "_blank");
 	node.setAttribute("rel", "noopener noreferrer");
 });
 
-/** Renders sanitised agent markdown with links that open in a new tab. */
+/** Renders sanitised agent markdown, with links that leave the admin opening in a new tab. */
 export const renderAgentMarkdown = (text: string) =>
 	purify.sanitize(markdown.parse(text, { async: false }), {
 		ALLOWED_TAGS: allowedTags,

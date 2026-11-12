@@ -24,6 +24,7 @@ const DeleteAgentMemoryModal: Component<{
 			onOpenChange={props.state.setOpen}
 			title={T()("modals.agent.memory.delete.title")}
 			description={T()("modals.agent.memory.delete.description")}
+			confirmLabel={T()("common.delete")}
 			loading={deleteMemories.action.isPending}
 			error={deleteMemories.errors()?.message}
 			onConfirm={() => {

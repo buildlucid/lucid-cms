@@ -1,19 +1,23 @@
 import { A } from "@solidjs/router";
-import type { AgentConversation } from "@types";
+import type { AgentSubagent } from "@types";
 import classnames from "classnames";
-import { TbOutlineMessage } from "solid-icons/tb";
-import { type Component, createMemo, For, Show } from "solid-js";
-import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
+import { TbOutlineSubtask } from "solid-icons/tb";
+import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
 import { getAgentRunDisplay, isRunBusy } from "@/utils/agent-chat";
 
-/** The chat that started the sub-agents, with each sub-agent branching off beneath it, for moving between them. Shows nothing for chats without any. */
+const shownSubagents = 3;
+
+/** The sub-agents a chat started, working ones first and then newest first. Shows nothing for chats without any. */
 const AgentChatSubagents: Component<{
-	/** The chat open on the page. */
 	conversationId: string;
 }> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const [showAll, setShowAll] = createSignal(false);
+
 	// ----------------------------------------
 	// Queries & Mutations
 	//* shares the chat's query, which keeps it up to date while sub-agents work
@@ -23,70 +27,68 @@ const AgentChatSubagents: Component<{
 
 	// ----------------------------------------
 	// Memos
-	const family = createMemo(() => {
-		const data = subagents.data?.data;
-		return data?.subagents.length ? data : undefined;
-	});
+	const sorted = createMemo(() =>
+		(subagents.data?.data.subagents ?? []).toSorted(
+			(a, b) =>
+				Number(isRunBusy(b.latestRun)) - Number(isRunBusy(a.latestRun)) ||
+				(b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
+		),
+	);
+	const visible = createMemo(() =>
+		showAll() ? sorted() : sorted().slice(0, shownSubagents),
+	);
 
 	// ----------------------------------------
 	// Render
 	return (
-		<Show when={family()}>
-			{(family) => (
-				<section
-					aria-labelledby="agent-chat-subagents-title"
-					class="flex flex-col gap-2 border-t border-border pt-4"
+		<Show when={sorted().length}>
+			<section
+				aria-labelledby="agent-chat-subagents-title"
+				class="flex flex-col gap-2 border-t border-border pt-4"
+			>
+				<h4
+					id="agent-chat-subagents-title"
+					class="flex items-baseline justify-between text-xs text-muted"
 				>
-					<h4
-						id="agent-chat-subagents-title"
-						class="flex items-baseline justify-between text-xs text-muted"
+					{T()("agent.subagent.title")}
+					<span class="tabular-nums">{sorted().length}</span>
+				</h4>
+				<ul class="flex flex-col gap-0.5">
+					<For each={visible()}>
+						{(subagent) => (
+							<li>
+								<SubagentRow subagent={subagent} />
+							</li>
+						)}
+					</For>
+				</ul>
+				<Show when={sorted().length > shownSubagents}>
+					<button
+						type="button"
+						class="self-start rounded-sm text-2xs text-muted transition-colors hover:text-body focus-ring"
+						aria-expanded={showAll()}
+						onClick={() => setShowAll((value) => !value)}
 					>
-						{T()("agent.subagent.title")}
-						<span class="tabular-nums">{family().subagents.length}</span>
-					</h4>
-					{/* the rows' padding spaces them from each other, so the last one's doesn't widen the gap before the next section */}
-					<ul class="-mb-1">
-						<li>
-							<SubagentLink
-								conversation={family().parent}
-								current={family().parent.id === props.conversationId}
-								parent={true}
-							/>
-							{/* a line runs down from the parent's icon and branches off to each sub-agent's status dot */}
-							<ul class="relative ms-1.5 before:absolute before:-top-4.5 before:h-4.5 before:border-s before:border-body/25 before:start-0">
-								<For each={family().subagents}>
-									{(subagent) => (
-										<li class="relative ps-3.5 before:absolute before:top-0 before:h-3 before:w-2.5 before:rounded-es-md before:border-s before:border-b before:border-body/25 before:start-0 not-last:after:absolute not-last:after:top-1.5 not-last:after:bottom-0 not-last:after:border-s not-last:after:border-body/25 not-last:after:start-0">
-											<SubagentLink
-												conversation={subagent}
-												current={subagent.id === props.conversationId}
-												pending={subagent.pending !== null}
-											/>
-										</li>
-									)}
-								</For>
-							</ul>
-						</li>
-					</ul>
-				</section>
-			)}
+						{showAll()
+							? T()("common.show_less")
+							: T()("agent.tool.group.show", {
+									count: sorted().length - shownSubagents,
+								})}
+					</button>
+				</Show>
+			</section>
 		</Show>
 	);
 };
 
-/** One chat in the tree, marked by its status dot, with its agent and status beneath its title. */
-const SubagentLink: Component<{
-	conversation: AgentConversation;
-	current: boolean;
-	/** Whether it's the chat that started the sub-agents, which gets a chat icon in place of the dot. */
-	parent?: boolean;
-	/** Whether it waits on the person's confirmation. */
-	pending?: boolean;
+/** A sub-agent's chat, with its agent and how its latest run is going beneath its title. */
+const SubagentRow: Component<{
+	subagent: AgentSubagent;
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
 	const status = createMemo(() => {
-		const run = props.conversation.latestRun;
+		const run = props.subagent.latestRun;
 		return run
 			? getAgentRunDisplay(run.status, run.outcome, run.waitingFor)
 			: undefined;
@@ -96,48 +98,34 @@ const SubagentLink: Component<{
 	// Render
 	return (
 		<A
-			href={`/admin/agent/chats/${props.conversation.id}`}
-			aria-current={props.current ? "page" : undefined}
-			class="group -mx-1 flex gap-2 rounded-md px-1 py-1 text-start focus-ring"
+			href={`/admin/agent/chats/${props.subagent.id}`}
+			class="-mx-1.5 flex min-w-0 items-center gap-2.5 rounded-md p-1.5 transition-colors hover:bg-card-hover focus-ring"
 		>
 			<span
-				class="flex h-4 w-3.25 shrink-0 items-center text-muted"
 				aria-hidden="true"
+				class="flex h-9 w-7 shrink-0 items-center justify-center rounded-sm border border-border bg-input text-muted"
 			>
-				<Show
-					when={props.parent}
-					fallback={
-						<StatusIndicator
-							size="xs"
-							variant={status()?.variant}
-							class={classnames({
-								"animate-pulse": isRunBusy(props.conversation.latestRun),
-							})}
-						/>
-					}
-				>
-					<TbOutlineMessage size={14} />
-				</Show>
+				<TbOutlineSubtask
+					size={10}
+					class={classnames({
+						"animate-pulse": isRunBusy(props.subagent.latestRun),
+					})}
+				/>
 			</span>
-			<span class="min-w-0 grow">
-				<span
-					class={classnames(
-						"block truncate text-xs transition-colors",
-						props.current
-							? "font-medium text-title"
-							: "text-body group-hover:text-title",
-					)}
-				>
-					{props.conversation.title}
-				</span>
-				<span class="block truncate text-2xs leading-4 text-muted">
-					{getAgentName(props.conversation.agentKey)}
+			<span class="flex min-w-0 grow flex-col">
+				<span class="truncate text-xs text-title">{props.subagent.title}</span>
+				<span class="truncate text-2xs leading-4 text-muted">
+					{getAgentName(props.subagent.agentKey)}
 					<Show when={status()}>
 						{(status) => (
 							<>
 								{" · "}
-								<span class={classnames({ "text-warning": props.pending })}>
-									{props.pending
+								<span
+									class={classnames({
+										"text-warning": props.subagent.pending !== null,
+									})}
+								>
+									{props.subagent.pending !== null
 										? T()("agent.subagent.confirmation")
 										: status().label}
 								</span>

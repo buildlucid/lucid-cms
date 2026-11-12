@@ -5,9 +5,11 @@ import { sqliteKV } from "@lucidcms/sqlite-kv";
 import {
 	getDatabaseUrl,
 	harnessEnv,
+	sharedCollections,
 	sharedConfig,
 	withSchemaStep,
 } from "../../shared/config.ts";
+import { aiCollections, aiConfig } from "../../shared/fragments/ai.ts";
 import { authentication } from "../../shared/fragments/auth.ts";
 import { harnessJobs } from "../../shared/fragments/jobs.ts";
 import { mediaConfig } from "../../shared/fragments/media.ts";
@@ -25,7 +27,9 @@ export default defineConfig({
 			...sharedConfig({ url: env.HARNESS_URL }),
 			...authentication(env),
 			...mediaConfig(env),
+			...aiConfig(env),
 			email: outbox(env.HARNESS_OUTBOX),
+			collections: [...sharedCollections, ...aiCollections],
 			plugins: [
 				...nodeMediaPlugins(env.HARNESS_UPLOADS),
 				//* every test database keeps its own keys in the one KV file, so no cached response is shared

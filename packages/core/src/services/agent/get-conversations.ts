@@ -3,6 +3,7 @@ import { AgentConversationsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleConversationsQueryParams } from "../../schemas/agent.js";
 import type { AgentConversation } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import resolveUserAccess from "../users/resolve-access.js";
 import resolveAgentAccess from "./helpers/resolve-agent-access.js";
 
 /** Lists the chats the person can open. */
@@ -10,7 +11,10 @@ const getConversations: ServiceFn<
 	[{ userId: number; query: GetMultipleConversationsQueryParams }],
 	{ data: AgentConversation[]; count: number }
 > = async (context, input) => {
-	const access = await resolveAgentAccess(context, { userId: input.userId });
+	const user = await resolveUserAccess(context, { userId: input.userId });
+	if (user.error) return user;
+
+	const access = await resolveAgentAccess(context, { auth: user.data });
 	if (access.error) return access;
 
 	const AgentConversations = new AgentConversationsRepository(context.db);

@@ -25,3 +25,17 @@ export const ArticleCollection = defineCollection({
 		}),
 	],
 });
+
+/**
+ * A localized collection whose fields are optional, so a guide can start in one locale. AI
+ * translation tests fill in the rest. Add it to a setup's collections with the config above.
+ */
+export const GuideCollection = defineCollection({
+	key: "guide",
+	mode: "multiple",
+	details: {
+		labels: { singular: "Guide", plural: "Guides" },
+	},
+	localized: true,
+	fields: [field.text("title", { useAsLabel: true }), field.richText("body")],
+});

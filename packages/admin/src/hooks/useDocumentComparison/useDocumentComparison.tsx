@@ -217,14 +217,15 @@ export const useDocumentComparison = (props: {
 		});
 		setSearch({ compare: key }, { replace: true });
 	};
-	/** Opens with the first other version that has content. */
+	/** Opens with the first other version that has content, leaving the source text until last unless it's preferred. */
 	const openFirst = () => {
-		const first = options().find(
+		const others = options().filter(
 			(option) =>
-				option.versionId !== null &&
-				option.key !== props.currentKey() &&
-				(option.key !== "source" || props.preferSource?.() === true),
+				option.versionId !== null && option.key !== props.currentKey(),
 		);
+		const first = props.preferSource?.()
+			? others[0]
+			: (others.find((option) => option.key !== "source") ?? others[0]);
 		if (first) select(first.key);
 	};
 	/** Closes the comparison, returning to a view picked while comparing. */

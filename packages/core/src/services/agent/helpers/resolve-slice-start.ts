@@ -21,14 +21,23 @@ type SliceRun = NonNullable<
 	>["data"]
 >;
 
+/** A run ready for its next slice, with any answer applied to its checkpoint. */
+export type SliceStart =
+	| { run: SliceRun; finished: true }
+	| {
+			run: SliceRun;
+			finished: false;
+			checkpoint: Checkpoint;
+			applied: boolean;
+	  };
+
 /**
  * Prepares the next slice: validates answers and retries, resumes sub-agent waits and applies
  * steering before host handoff.
  */
 const resolveSliceStart: ServiceFn<
 	[{ runId: string; answer?: AgentRunAnswer }],
-	| { run: SliceRun; finished: true }
-	| { run: SliceRun; finished: false; checkpoint: Checkpoint; applied: boolean }
+	SliceStart
 > = async (context, input) => {
 	const AgentRuns = new AgentRunsRepository(context.db);
 
@@ -67,15 +76,17 @@ const resolveSliceStart: ServiceFn<
 
 	const checkpoint = parsed.data;
 
+	const { pending, answered } = checkpoint;
+
 	//* a steer replaces the answer a waiting run needs, and dismisses its question
 	const Inputs = new AgentInputsRepository(context.db);
-	const pendingInputs = await Inputs.selectDeliverable(run.conversation_id);
-	if (pendingInputs.error) return pendingInputs;
+	const pendingInputs = pending
+		? await Inputs.selectDeliverable(run.conversation_id)
+		: undefined;
+	if (pendingInputs?.error) return pendingInputs;
 
-	const steering = pendingInputs.data.some(
-		(item) => item.target_run_id === run.id,
-	);
-	const { pending, answered } = checkpoint;
+	const steering =
+		pendingInputs?.data.some((item) => item.target_run_id === run.id) ?? false;
 	//* a retry can resubmit the answer the run already saved, even once its tool has run, so it carries on without it
 	const submitted =
 		input.answer &&

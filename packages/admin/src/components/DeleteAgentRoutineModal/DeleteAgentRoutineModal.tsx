@@ -24,6 +24,7 @@ const DeleteAgentRoutineModal: Component<{
 			onOpenChange={props.state.setOpen}
 			title={T()("modals.agent.routine.delete.title")}
 			description={T()("modals.agent.routine.delete.description")}
+			confirmLabel={T()("common.delete")}
 			loading={deleteRoutine.action.isPending}
 			error={deleteRoutine.errors()?.message}
 			onConfirm={() => {

@@ -34,10 +34,11 @@ export const getFetchURL = (url: string, query?: QueryBuilderProps): string => {
 	const [pathname, hash] = url.split("#", 2);
 	const [base, search] = pathname.split("?", 2);
 	const params = new URLSearchParams(search);
+	const added = new URLSearchParams(serialized);
 
-	for (const [key, value] of new URLSearchParams(serialized)) {
-		params.set(key, value);
-	}
+	//* the query replaces what the URL has under the same name, keeping every value of a list filter
+	for (const key of new Set(added.keys())) params.delete(key);
+	for (const [key, value] of added) params.append(key, value);
 
 	return `${base}?${params}${hash ? `#${hash}` : ""}`;
 };

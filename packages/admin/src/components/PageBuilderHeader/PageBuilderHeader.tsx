@@ -98,6 +98,8 @@ export const PageBuilderHeader: Component<{
 		value: Accessor<BuilderView>;
 		/** The views offered besides the fields alone. */
 		options: Accessor<Exclude<BuilderView, "fields">[]>;
+		/** Offered views with nothing to show yet, eg. a comparison before there's another version, kept in place so the switch doesn't move. */
+		disabled?: Accessor<Exclude<BuilderView, "fields">[]>;
 		onChange: (view: BuilderView) => void;
 	};
 	/** While previewing, the header is the top row of the preview's card, split where its columns split. */
@@ -666,8 +668,11 @@ export const PageBuilderHeader: Component<{
 					? [
 							{
 								value: "compare" as const,
-								label: T()("documents.compare.action"),
+								label: props.view?.disabled?.().includes("compare")
+									? T()("documents.compare.none")
+									: T()("documents.compare.action"),
 								icon: <TbOutlineLayoutColumns size={12} />,
+								disabled: props.view?.disabled?.().includes("compare"),
 							},
 						]
 					: []),

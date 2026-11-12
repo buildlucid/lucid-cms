@@ -27,6 +27,11 @@ export interface ModalRootProps {
 	role?: ModalRole;
 	/** Set automatically when opened from a drawer or another modal. */
 	zIndex?: number;
+	/**
+	 * Opens together with a drawer or modal it isn't rendered inside, such as media generation over the
+	 * upload drawer. Layers that open at once otherwise hide each other from assistive technology.
+	 */
+	stacked?: boolean;
 	/** Shown above the dialog, such as tabs that switch what it shows. */
 	above?: JSXElement;
 	/** Applied to the dialog. */
@@ -73,6 +78,7 @@ export const ModalRoot: Component<ModalRootProps> = (props) => {
 				<div class="fixed inset-0" style={{ "z-index": layer() }}>
 					<Dialog.Content
 						role={props.role}
+						data-kb-top-layer={props.stacked ? "" : undefined}
 						class="overflow-y-auto h-full p-4 pointer-events-none! flex items-center justify-center outline-hidden animate-modal-hide data-expanded:animate-modal-show"
 						onEscapeKeyDown={(event) => {
 							if (!dismissible()) event.preventDefault();

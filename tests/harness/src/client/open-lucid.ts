@@ -36,6 +36,8 @@ export type Lucid = {
 	 * served server shares one with every test. Read it with the helpers in `shared/jobs.ts`.
 	 */
 	ledger: string;
+	/** The harness's fake of Lucid's API, which the CMS connects to. See `shared/ai.ts`. */
+	lucidApi: string;
 	/**
 	 * Runs queries on the CMS's database, for what the API cannot show, such as a counter it keeps
 	 * to itself. Host mode only, so call `requires("mode:host")`.
@@ -101,6 +103,7 @@ const openLucid = async (
 		url: target.url,
 		uploads: target.uploads,
 		ledger: target.ledger,
+		lucidApi: context.cmsEnv.LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE,
 		query: (use) => {
 			if (!target.query) {
 				throw new Error(

@@ -30,18 +30,18 @@ import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesSt
 import T from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
 import { getNewChatHref } from "@/utils/home-view";
-import { isModifiedClick, isNavigationLinkActive } from "@/utils/navigation";
+import {
+	adminLinkPath,
+	isModifiedClick,
+	isNavigationLinkActive,
+} from "@/utils/navigation";
 import AgentChatActions from "./parts/AgentChatActions";
 import AgentChatSidebar from "./parts/AgentChatSidebar";
 
 /**
- * A single chat with the agent: a header, then messages that scroll on their
- * own with the chat box, or a question box while the agent waits on an answer,
- * fixed below them. A tool call opens in a floating panel beside the chat,
- * which closes with its close button, Escape, or by selecting the call again.
- * The chat's details card sits above it, toggled from the header and
- * remembered between chats. The chat is the one open across the admin, so
- * leaving for something it links to keeps it open in the agent panel.
+ * Chat page with scrolling messages and a fixed input or question box. Tool panels toggle on
+ * selection, close or Escape. Details visibility persists across chats; navigation keeps the
+ * conversation open in the admin agent panel.
  */
 const AgentConversationPage: Component = () => {
 	// ----------------------------------------
@@ -104,10 +104,10 @@ const AgentConversationPage: Component = () => {
 		if (isModifiedClick(event) || !xl()) return;
 		const link =
 			event.target instanceof Element ? event.target.closest("a") : null;
-		const href = link?.getAttribute("href");
+		const path = link ? adminLinkPath(link.href) : undefined;
 		if (
-			!href?.startsWith("/admin/") ||
-			isNavigationLinkActive(href, "/admin/agent") ||
+			!path ||
+			isNavigationLinkActive(path, "/admin/agent") ||
 			link?.target === "_blank"
 		) {
 			return;

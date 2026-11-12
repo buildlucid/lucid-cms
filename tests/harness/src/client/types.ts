@@ -36,6 +36,8 @@ export type Session = {
 	fetch(path: string, init?: RequestInit): Promise<Response>;
 	/** Sends a JSON request, adding the CSRF token when it changes something. */
 	request<Body = unknown>(request: ApiRequest): Promise<ApiResponse<Body>>;
+	/** The CSRF token this visitor sends, for a raw `fetch` that changes something. */
+	csrf(): Promise<string>;
 	cookies(): Cookie[];
 	/** Stores a cookie as if the CMS had set it, such as one copied from another session. */
 	setCookie(cookie: Cookie): void;

@@ -9,6 +9,8 @@ export type FieldInput = {
 	key: string;
 	type: string;
 	value?: unknown;
+	/** A localized field's value in each locale, in place of `value`. */
+	translations?: Record<string, unknown>;
 	groups?: Array<{ ref: string; order: number; fields: FieldInput[] }>;
 };
 

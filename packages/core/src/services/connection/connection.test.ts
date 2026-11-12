@@ -278,6 +278,7 @@ describe("Lucid remote connection", () => {
 			data: {
 				accessToken: "access-token",
 				lucidRemoteConnectionId: row.data.id,
+				refreshed: false,
 			},
 		});
 
@@ -303,6 +304,7 @@ describe("Lucid remote connection", () => {
 		expect(refreshed.data).toEqual({
 			accessToken: "refreshed-access-token",
 			lucidRemoteConnectionId: row.data.id,
+			refreshed: true,
 		});
 		const stored = await resolveEffectiveConnection(context);
 		expect(stored.data).toBeDefined();

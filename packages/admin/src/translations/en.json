@@ -2869,6 +2869,7 @@
 	"toasts.documents.align.disabled.title": "Align unavailable",
 	"toasts.documents.align.disabled.message": "Wait for the document to finish saving, then try again.",
 	"documents.compare.action": "Compare Versions",
+	"documents.compare.none": "Nothing to compare with yet",
 	"documents.compare.select": "Select a Version",
 	"documents.compare.close": "Close Comparison",
 	"documents.compare.left": "Left Column Version",

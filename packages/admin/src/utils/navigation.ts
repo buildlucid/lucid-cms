@@ -39,6 +39,22 @@ export const setNavigationLinkActiveState = (
 	}
 };
 
+/** The in-app path a link points at when it stays in this admin, or undefined when it leaves it. */
+export const adminLinkPath = (
+	href: string,
+	origin = window.location.origin,
+) => {
+	if (!URL.canParse(href, origin)) return undefined;
+
+	const url = new URL(href, origin);
+	if (url.origin !== origin) return undefined;
+	if (url.pathname !== "/admin" && !url.pathname.startsWith("/admin/")) {
+		return undefined;
+	}
+
+	return `${url.pathname}${url.search}${url.hash}`;
+};
+
 /** Whether a click asks for a link somewhere other than in place, eg. in a new tab. */
 export const isModifiedClick = (event: MouseEvent) =>
 	event.button !== 0 ||

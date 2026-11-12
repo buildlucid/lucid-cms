@@ -124,6 +124,7 @@ const createSession = (options: {
 	return {
 		fetch,
 		request,
+		csrf: getCsrf,
 		cookies: () => [...jar].map(([name, value]) => ({ name, value })),
 		setCookie: ({ name, value }) => {
 			jar.set(name, value);

@@ -458,6 +458,30 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 
 		return { error: undefined, data: result.response.data !== undefined };
 	}
+	/** Whether a conversation's queue is paused and holds undelivered input, in one read. */
+	async selectQueueState(conversationId: string) {
+		const query = this.db
+			.selectFrom("lucid_agent_conversations")
+			.select((eb) => [
+				"queue_paused",
+				eb
+					.exists(
+						eb
+							.selectFrom("lucid_agent_inputs")
+							.select("id")
+							.where("conversation_id", "=", conversationId)
+							.where("status", "in", constants.agent.deliverableInputStatuses),
+					)
+					.as("has_input"),
+			])
+			.where("id", "=", conversationId);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectQueueState",
+		});
+
+		return exec.response;
+	}
 	/** Lets queued input start again after a pause. */
 	async resumeQueue(props: { conversationId: string }) {
 		const query = this.db

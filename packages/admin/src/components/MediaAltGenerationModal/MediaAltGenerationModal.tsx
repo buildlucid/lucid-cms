@@ -184,6 +184,9 @@ const MediaAltGenerationModalContent: Component<{
 	// Render
 	return (
 		<Modal.Root open={props.state.open} onOpenChange={setOpen} size="lg">
+			<Modal.Title class="sr-only">
+				{T()("ai.media.alt.generate.modal.title")}
+			</Modal.Title>
 			<div class="grid min-w-0 w-full items-stretch gap-0 md:grid-cols-[minmax(24rem,0.5fr)_minmax(0,1fr)]">
 				<form
 					class="flex min-h-130 min-w-0 flex-col gap-4 border-b border-border bg-card p-4 md:border-r md:border-b-0 md:p-6"

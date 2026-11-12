@@ -18,11 +18,11 @@ const getRoutines: ServiceFn<
 	[{ userId: number; query: GetMultipleRoutinesQueryParams }],
 	{ data: AgentRoutine[]; count: number }
 > = async (context, input) => {
-	const access = await resolveAgentAccess(context, { userId: input.userId });
-	if (access.error) return access;
-
 	const user = await resolveUserAccess(context, { userId: input.userId });
 	if (user.error) return user;
+
+	const access = await resolveAgentAccess(context, { auth: user.data });
+	if (access.error) return access;
 
 	const AgentRoutines = new AgentRoutinesRepository(context.db);
 

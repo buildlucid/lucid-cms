@@ -99,16 +99,19 @@ describe("public request", () => {
 		).rejects.toThrow("current origin");
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
-	it("merges query parameters without losing includes or existing search", () => {
-		const url = getFetchURL("/api/plugin?active=1", {
+	it("merges query parameters without losing includes, list filters or existing search", () => {
+		const url = getFetchURL("/api/plugin?active=1&page=1", {
 			queryString: "include=fields",
 			include: { bricks: true },
+			filters: { agentKey: ["lucid", "helper"] },
 			page: 2,
 			sort: { title: "desc" },
 		});
 		const params = new URL(url, "https://example.com").searchParams;
 		expect(params.get("include")).toBe("fields,bricks");
+		expect(params.getAll("filter[agentKey:in]")).toEqual(["lucid", "helper"]);
 		expect(params.get("active")).toBe("1");
+		expect(params.getAll("page")).toEqual(["2"]);
 		expect(params.get("sort")).toBe("-title");
 	});
 });

@@ -56,6 +56,7 @@ const sendMessageController = factory.createHandlers(
 		})(context, {
 			conversationId: param.id,
 			userId: c.get("auth").id,
+			auth: c.get("auth"),
 			dispatch: !streaming,
 			text: body.text,
 			references: body.references,

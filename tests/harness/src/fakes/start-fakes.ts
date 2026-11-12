@@ -3,7 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import serveFetch from "../utils/serve-fetch.ts";
 import createIdentityProvider from "./create-identity-provider.ts";
-import createLucidApi from "./create-lucid-api.ts";
+import createLucidApi from "./lucid-api/create-lucid-api.ts";
 
 /** An outbox or ledger instance's name, which becomes a folder. */
 const INSTANCE = /^[a-z0-9-]{1,64}$/;

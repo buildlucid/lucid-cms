@@ -91,7 +91,8 @@ describe("scheduled requests", () => {
 		{ timeout: 120_000 },
 		async ({ lucid }) => {
 			const admin = await lucid.admin();
-			const at = new Date(Date.now() + 5_000);
+			//* far enough ahead that a slow server still schedules all four before it passes
+			const at = new Date(Date.now() + 15_000);
 
 			const created = await openCreateRequest(admin, REVIEWED_STORY_KEY, {
 				title: "Create on time",

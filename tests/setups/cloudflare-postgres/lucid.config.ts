@@ -3,7 +3,12 @@ import { cloudflareQueues } from "@lucidcms/cloudflare-queues";
 import { cloudflareR2 } from "@lucidcms/cloudflare-r2";
 import { defineConfig, z } from "@lucidcms/core";
 import { postgres } from "@lucidcms/postgres";
-import { harnessEnv, sharedConfig } from "../../shared/config.ts";
+import {
+	harnessEnv,
+	sharedCollections,
+	sharedConfig,
+} from "../../shared/config.ts";
+import { aiCollections, aiConfig } from "../../shared/fragments/ai.ts";
 import { authentication } from "../../shared/fragments/auth.ts";
 import { harnessJobs } from "../../shared/fragments/jobs.ts";
 import { mediaConfig } from "../../shared/fragments/media.ts";
@@ -35,7 +40,9 @@ export default defineConfig({
 		...sharedConfig({ url: env.HARNESS_URL }),
 		...authentication(env),
 		...mediaConfig({}),
+		...aiConfig(env),
 		email: outbox(env.HARNESS_OUTBOX),
+		collections: [...sharedCollections, ...aiCollections],
 		plugins: [
 			//* a local bucket in development, so media runs on Workers without credentials
 			cloudflareR2(),

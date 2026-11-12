@@ -16,7 +16,7 @@ import { agentFormatter } from "../../../libs/formatters/index.js";
 import { getConversationPermission } from "../../../libs/permission/agent-permissions.js";
 import type { AgentRunStatus } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import getAiAccess from "../../connection/get-ai-access.js";
+import checkConnectedFeature from "../../ai/checks/check-connected-feature.js";
 import checkAgentAccess from "./check-agent-access.js";
 import compactContext from "./compact-context.js";
 import consumeSteering from "./consume-steering.js";
@@ -71,7 +71,6 @@ const driveRun: ServiceFn<
 		userId: run.user_id,
 		agentKey: run.agent_key,
 		action: getConversationPermission(run.conversation_kind),
-		requireConnection: true,
 	});
 	if (access.error) {
 		return session.finish(
@@ -80,15 +79,23 @@ const driveRun: ServiceFn<
 				context.translate("server:agent.access.unavailable"),
 		);
 	}
-	const aiAccess = await getAiAccess(context, {});
-	if (aiAccess.error) return aiAccess;
-	//* Reload before each model turn so requests use current memories.
+	const aiAccess = await checkConnectedFeature(context, { feature: "agents" });
+	if (aiAccess.error) {
+		return session.finish(
+			"failed",
+			context.translate(aiAccess.error.message) ??
+				context.translate("server:agent.access.unavailable"),
+		);
+	}
+	//* Reload before each later model turn so requests use current memories.
 	const loadMemories = () =>
 		access.data.agent.features.memory.read
 			? getRunMemories(context, { userId: run.user_id })
 			: Promise.resolve({ error: undefined, data: undefined });
 	let memories = await loadMemories();
 	if (memories.error) return memories;
+	//* the first model turn uses what was just read
+	let memoriesFresh = true;
 
 	if (!checkpoint.selection || !checkpoint.model) {
 		const model = await resolveModel(context, {
@@ -103,6 +110,7 @@ const driveRun: ServiceFn<
 			);
 		}
 
+		//* the choice is saved with the model turn's first save, or whatever ends the slice first
 		checkpoint.selection = model.data.selection;
 		checkpoint.model = {
 			id: model.data.model.id,
@@ -111,9 +119,6 @@ const driveRun: ServiceFn<
 			instructionTokens: model.data.model.instructionTokens,
 		};
 		checkpoint.measured = undefined;
-
-		const saved = await session.save();
-		if (saved.error) return saved;
 	}
 
 	//* resolved before each model turn, since trimmed context adds the history tool and steering can move the person to another screen
@@ -143,8 +148,11 @@ const driveRun: ServiceFn<
 		}
 
 		if (checkpoint.phase === "model") {
-			memories = await loadMemories();
-			if (memories.error) return memories;
+			if (!memoriesFresh) {
+				memories = await loadMemories();
+				if (memories.error) return memories;
+			}
+			memoriesFresh = false;
 			setup = resolve();
 
 			const history = checkpoint.compaction
@@ -255,6 +263,8 @@ const driveRun: ServiceFn<
 			}
 		}
 
+		//* tools can save memories, so the next model turn reads them again
+		memoriesFresh = false;
 		while (checkpoint.cursor < checkpoint.calls.length) {
 			if (checkpoint.finish) return completeRoutineRun();
 			if (session.signal.aborted || Date.now() > deadline) {

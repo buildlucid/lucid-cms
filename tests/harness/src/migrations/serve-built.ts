@@ -19,6 +19,8 @@ const serveBuilt = async (options: {
 	step: Step;
 }): Promise<{
 	url: string;
+	/** The harness's fake of Lucid's API, which the server connects to. See `shared/ai.ts`. */
+	lucidApi: string;
 	/** A session signed in as the admin on this server. */
 	admin: Session;
 	/** A new visitor to this server who is not signed in. */
@@ -33,6 +35,10 @@ const serveBuilt = async (options: {
 	const server = await getLauncher(context.setup.runtime).start({
 		setup: context.setup,
 		env: {
+			//* the run's fakes, so a server a test starts never reaches Lucid's or a provider's servers
+			LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE:
+				context.cmsEnv.LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE,
+			HARNESS_IDP_URL: context.cmsEnv.HARNESS_IDP_URL,
 			HARNESS_DATABASE_URL: options.databaseUrl,
 			HARNESS_URL: url,
 			...(options.step ? { HARNESS_SCHEMA_STEP: options.step } : {}),
@@ -48,7 +54,13 @@ const serveBuilt = async (options: {
 		const admin = session();
 		await ensureAdmin(admin);
 		await login(admin, ADMIN);
-		return { url, admin, session, stop: server.stop };
+		return {
+			url,
+			lucidApi: context.cmsEnv.LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE,
+			admin,
+			session,
+			stop: server.stop,
+		};
 	} catch (error) {
 		await server.stop();
 		throw error;

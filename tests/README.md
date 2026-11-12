@@ -107,6 +107,11 @@ describe("creating documents", () => {
 - Every setup registers probe jobs from `shared/fragments/jobs.ts`, whose `steps` say what each attempt does: succeed, fail, throw or hang. Each attempt posts what it did to a ledger, which `executions()` in `shared/jobs.ts` reads from `lucid.ledger`. `enqueueProbe()` enqueues one through a harness-only route, and `waitForJob()` waits for its status. See `suites/integration/jobs`.
 - `tick(lucid)` runs one job scheduler tick, as a runtime's timer does each minute. `tick(lucid, at)` picks its time, which moves the scheduler's cursor for everyone on the CMS, so it is host mode only. `resetScheduler()` puts the cursor back after a test that ticked ahead. On a queue without delayed delivery, `waitForJob()` ticks every second while it waits, as retries there only run on a tick.
 - In host mode a setup with the worker queue runs a stand-in with the same key, as there is no build to start the worker thread from. It runs jobs in the test process through the same job pool as the worker, so jobs on those setups run in the background in both modes.
+- AI features talk to the fake of Lucid's API (see Fakes). `connectLucid(lucid)` from `shared/ai.ts` connects the CMS to it. In served mode every test shares the server's one connection, so only host mode tests change it, such as with `changeConnection()` to turn off features, run out of credits or revoke it.
+- The fake's model answers from a script a test puts in the message it sends: `script(callTool("harness_echo", { message: "hi" }), reply("Done."))` from `shared/agent-script.ts` plays one turn per model request. A script also works in a routine's instructions or a sub-agent's task. `failTurn()` fails a turn, `times` only that many attempts. A turn's `gate` holds its stream open until `openGate()`, and `waitAtGate()` waits until it is held, so a test can steer, queue or stop a run mid-turn. `failGenerate()` and `gateGenerate()` do the same for other AI requests, such as alt text or a translation. A message without a script is answered `You said: …`.
+- `modelRequests()`, `generateRequests()` and `readLedger()` read what the CMS sent Lucid's API, and `chargedFor()` what it charged. `transcriptViolations()` lists transcripts a real model API would refuse, such as a tool call with no result.
+- Every setup spreads in `aiConfig(env)` from `shared/fragments/ai.ts`: the `harness` agent with every built-in tool, direct document writes and tools that do as a test says (`harness_echo`, `harness_wait` on a gate, `harness_fail`, `harness_write`, which needs confirmation and records each write for `readEffects()`, and `harness_choose`, a question with its own widget), the read-only `harness-helper` for sub-agents, two routines defined in code and MCP. The `brief` collection is only for event routines, so they never run for other tests' content.
+- Chat, routine and stream helpers live in `shared/agent.ts`. `sendMessage()` reads a run's stream to its end. `runAgentTick(lucid)` runs the agent tick, which recovers runs and starts routines, as a user of its own, as starting a schedule early is rate limited per user. It needs `harness:outbox`.
 - Helpers for documents, media, permissions and signing in live in `shared/`. Each route the CMS serves needs a rule in `shared/permissions.ts`, as `suites/integration/permissions/routes.test.ts` fails on a route without one.
 
 ### Skip what a setup cannot do
@@ -131,6 +136,7 @@ Capabilities are read from each setup's config, so most need no upkeep:
 | `database.concurrentWrites`    | a real Postgres server only   |
 | `plugin:pages`                 | registered plugins            |
 | `collection:page`, `locale:fr` | collections and locales       |
+| `agent:harness`                | enabled agents                |
 | `auth:password`, `feature:ai`  | enabled options               |
 | `harness:outbox`               | the `outbox` fragment         |
 | `harness:identityProvider`     | the `authentication` fragment |
@@ -195,7 +201,7 @@ Files in `suites/performance` end in `.bench.ts` and import from `#harness/perfo
 
 ## Add a setup
 
-1. Create `setups/<name>/lucid.config.ts`. Spread `sharedConfig()` from `shared/config.ts` and read the database from `getDatabaseUrl(env)`. `sharedConfig()` is the bare minimum. Turn features on by adding fragments from `shared/fragments`, such as `localization`. Every setup spreads in `authentication(env)` and adds `email: outbox(env.HARNESS_OUTBOX)`, which sends emails to the harness for `lucid.user()` and magic links. Every setup spreads in `mediaConfig(env)` from `fragments/media.ts`, and Node setups add `nodeMediaPlugins(env.HARNESS_UPLOADS)`, which stores uploads and processes images. Node setups also wrap their config in `withSchemaStep()`, which migration tests use to move between config versions.
+1. Create `setups/<name>/lucid.config.ts`. Spread `sharedConfig()` from `shared/config.ts` and read the database from `getDatabaseUrl(env)`. `sharedConfig()` is the bare minimum. Turn features on by adding fragments from `shared/fragments`, such as `localization`. Every setup spreads in `authentication(env)` and adds `email: outbox(env.HARNESS_OUTBOX)`, which sends emails to the harness for `lucid.user()` and magic links. Every setup spreads in `mediaConfig(env)` from `fragments/media.ts`, and Node setups add `nodeMediaPlugins(env.HARNESS_UPLOADS)`, which stores uploads and processes images. Every setup spreads in `aiConfig(env)` and adds `aiCollections` to its collections, for AI tests. Node setups also wrap their config in `withSchemaStep()`, which migration tests use to move between config versions.
 2. Create `setups/<name>/setup.ts`:
 
 ```ts
@@ -244,7 +250,7 @@ Each run also starts a small local server for services a CMS reaches over HTTP, 
 - An outbox. The `outbox` fragment posts each email to `HARNESS_OUTBOX`, and the harness keeps it in the setup's run folder for `lucid.email()`.
 - A ledger. Probe jobs post what each attempt did to `HARNESS_LEDGER`, which is kept like the outbox, and the probe `checked` schedule posts each time the scheduler asks its `when` check. Host mode gives each CMS its own.
 - An OAuth 2.0 and OpenID Connect identity provider at `HARNESS_IDP_URL`, for the `authentication` fragment's providers. It checks clients, redirects and PKCE like a real one.
-- Lucid's own API, at `LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE`, so connecting to Lucid and features that call it never reach Lucid's servers. It answers the discovery and client registration a connection starts with.
+- Lucid's own API, at `LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE`, so connecting to Lucid and features that call it never reach Lucid's servers. It approves sign-ins at once and gives each client registration a connection of its own. Its model answers from scripts, and its other AI features, model catalogues, generated files and credits answer with plain, predictable output. It keeps a ledger of what each connection asked for, and checks every transcript as a real model API would. Routes under `/harness` let tests read that ledger, open gates, read what `harness_write` recorded and change a connection. Servers a test or benchmark starts itself get it too.
 
 ## Reports
 

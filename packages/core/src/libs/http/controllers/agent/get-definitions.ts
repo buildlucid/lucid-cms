@@ -14,7 +14,8 @@ const factory = createFactory();
 
 const getDefinitionsController = factory.createHandlers(
 	openAPI.describeRoute(() => ({
-		description: "Returns enabled agents and their available chat details.",
+		description:
+			"Returns the agents the person may use and their available chat details.",
 		tags: ["agent"],
 		summary: "Get Agent Definitions",
 		responses: openAPI.responses({

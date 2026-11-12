@@ -23,7 +23,7 @@ const authUser = (permissions: string[]): LucidAuth => ({
 	authTime: 0,
 });
 
-test("agent details expose suggestions to users and tools to managers", async () => {
+test("agent details expose suggestions to users, tools to managers and nothing to others", async () => {
 	const base = await testConfig.getConfig();
 	const agent = defineAgent({
 		key: "reviewer",
@@ -71,8 +71,7 @@ test("agent details expose suggestions to users and tools to managers", async ()
 		expect(manager.agents[0]?.tools.length).toBeGreaterThan(0);
 	}
 
-	const noAccess = format([]);
-	expect(noAccess.agents[0]).toMatchObject({ suggestions: [], tools: [] });
+	expect(format([]).agents).toEqual([]);
 	expect(
 		agentFormatter.formatDefinitions({
 			config: {

@@ -23,6 +23,7 @@ const DisconnectConnectionModal: Component<{
 			onOpenChange={props.state.setOpen}
 			title={T()("connection.disconnect.title")}
 			description={T()("connection.disconnect.description")}
+			confirmLabel={T()("connection.disconnect.action")}
 			loading={disconnect.action.isPending}
 			error={disconnect.errors()?.message}
 			onConfirm={() => disconnect.action.mutate({})}

@@ -1,4 +1,6 @@
 import constants from "../../constants/constants.js";
+import type { LucidRemoteConnections } from "../../libs/db/tables/index.js";
+import type { Select } from "../../libs/db/types.js";
 import { lucidRemoteConnectionsFormatter } from "../../libs/formatters/index.js";
 import { aiAccessFeatureSchema } from "../../libs/lucid-remote/schema/connection.js";
 import type { AiAccessFeature } from "../../types/response.js";
@@ -12,16 +14,20 @@ import verify from "./verify.js";
  * @remarks Missing access allows all known features; Lucid enforces remote access.
  * Refreshes require an encrypted grant and no transaction, using the later attempt or verification time.
  * Intervals are `statusRecheckIntervalSeconds`, or `aiAccessRefreshCooldownSeconds` for `refresh`.
+ * Pass a `connection` row the caller has just read to save reading it again.
  */
 const getAiAccess: ServiceFn<
 	[
 		{
 			refresh?: boolean;
+			connection?: Select<LucidRemoteConnections>;
 		},
 	],
 	readonly AiAccessFeature[]
 > = async (context, data) => {
-	const connection = await resolveEffectiveConnection(context);
+	const connection = data.connection
+		? { error: undefined, data: data.connection }
+		: await resolveEffectiveConnection(context);
 	if (connection.error) return connection;
 
 	const row = connection.data;

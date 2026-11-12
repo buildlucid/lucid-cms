@@ -17,7 +17,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 		super(db, agentInputsTable);
 	}
 
-	/** A retried submission with the same id is ignored, so callers compare the stored input. */
+	/** Returns the input when this call stored it. A retried submission with the same id is ignored, so callers compare the stored input. */
 	async submit(input: {
 		id: string;
 		conversationId: string;
@@ -45,10 +45,40 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 				status: "pending",
 				created_at: new Date().toISOString(),
 			})
-			.onConflict((conflict) => conflict.column("id").doNothing());
+			.onConflict((conflict) => conflict.column("id").doNothing())
+			.returning("id");
 
-		const result = await this.executeQuery(() => query.execute(), {
+		const result = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "submit",
+		});
+
+		return result.response;
+	}
+	/** Where an ID is already in use, as an input's ID becomes its run's and its message's. */
+	async selectIdUse(id: string) {
+		const query = this.db.selectNoFrom((eb) => [
+			eb
+				.exists(
+					eb.selectFrom("lucid_agent_inputs").select("id").where("id", "=", id),
+				)
+				.as("input"),
+			eb
+				.exists(
+					eb.selectFrom("lucid_agent_runs").select("id").where("id", "=", id),
+				)
+				.as("run"),
+			eb
+				.exists(
+					eb
+						.selectFrom("lucid_agent_messages")
+						.select("id")
+						.where("id", "=", id),
+				)
+				.as("message"),
+		]);
+
+		const result = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectIdUse",
 		});
 
 		return result.response;

@@ -37,6 +37,9 @@ const deriveCapabilities = (config: ResolvedLucidConfig): Capability[] => [
 	...config.collections.map(
 		(collection) => `collection:${collection.key}` as const,
 	),
+	...config.ai.agents
+		.filter((agent) => agent.enabled)
+		.map((agent) => `agent:${agent.key}` as const),
 	...config.localization.locales.map(
 		(locale) => `locale:${locale.code}` as const,
 	),

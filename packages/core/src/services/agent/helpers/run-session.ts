@@ -20,6 +20,7 @@ import type { LucidAgentInputs } from "../../../libs/db/tables/agent-inputs.js";
 import type { Select } from "../../../libs/db/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
+import logger from "../../../libs/logger/index.js";
 import {
 	AgentCompactionsRepository,
 	AgentConversationsRepository,
@@ -45,6 +46,7 @@ import messageContext from "./message-context.js";
 import notifyRoutineRun from "./notify-routine-run.js";
 import registerUrlKeys from "./register-url-keys.js";
 import getParentPart from "./subagents/get-parent-part.js";
+import isSubagentWaitOver from "./subagents/is-subagent-wait-over.js";
 import stopSubagents from "./subagents/stop-subagents.js";
 import wakeParent from "./subagents/wake-parent.js";
 
@@ -450,6 +452,31 @@ const openRunSession = async (
 				//* the status, release and hooks commit together, so a run can't end without its hooks
 				const finished = await withTransaction(context, finishRun);
 				if (finished.error) return finished;
+
+				//* a sub-agent that finished as this run settled into its wait saw it still working, so the run checks once its wait is saved
+				if (
+					status === "waiting" &&
+					checkpoint.pending?.widget.key ===
+						constants.agent.widgets.subagentWait
+				) {
+					const over = await isSubagentWaitOver(context, {
+						conversationId: run.conversation_id,
+						checkpoint,
+					});
+					const queued = over.data
+						? await enqueueRun(context, { runId: run.id, userId: run.user_id })
+						: undefined;
+					const failed = over.error ?? queued?.error;
+					//* the wait is saved, so the agent tick resumes it if this check can't
+					if (failed) {
+						logger.error({
+							error: failed,
+							message: "Agent run's sub-agent wait could not be checked",
+							scope: constants.logScopes.ai,
+							data: { runId: run.id },
+						});
+					}
+				}
 
 				for (const part of abandoned) {
 					await emit({

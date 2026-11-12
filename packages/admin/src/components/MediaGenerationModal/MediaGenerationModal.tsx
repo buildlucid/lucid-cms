@@ -278,7 +278,10 @@ const MediaGenerationModal: Component = () => {
 	// -----------------------------
 	// Render
 	return (
-		<Modal.Root open={isOpen()} onOpenChange={close} size="lg">
+		<Modal.Root open={isOpen()} onOpenChange={close} size="lg" stacked>
+			<Modal.Title class="sr-only">
+				{T()("ai.media.generate.modal.title")}
+			</Modal.Title>
 			<div class="grid min-w-0 w-full items-stretch gap-0 lg:grid-cols-[minmax(27rem,0.72fr)_minmax(0,1fr)]">
 				<div class="flex min-h-130 min-w-0 w-full flex-col border-b border-border bg-card lg:border-r lg:border-b-0">
 					<div class="border-b border-border p-4 md:px-6">

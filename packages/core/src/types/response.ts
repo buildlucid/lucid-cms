@@ -47,6 +47,7 @@ export type {
 	AgentRunStatus,
 	AgentRunWaitingFor,
 	AgentScreen,
+	AgentStreamEvent,
 	AgentSubagent,
 	AgentSubagents,
 	AgentSummary,

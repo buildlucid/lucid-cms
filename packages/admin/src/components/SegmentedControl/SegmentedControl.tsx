@@ -7,6 +7,8 @@ export type SegmentedControlOption<T extends string> = {
 	/** Names the segment for screen readers and its tooltip, as segments only show their icon. */
 	label: string;
 	icon: JSXElement;
+	/** Keeps the segment in place but unselectable, with its label saying why. */
+	disabled?: boolean;
 };
 
 /**
@@ -48,10 +50,11 @@ const SegmentedControl = <T extends string>(props: {
 					<KobSegmentedControl.Item
 						value={option.value}
 						title={option.label}
-						class="relative z-10 h-full w-7 rounded-sm text-icon transition-colors hover:text-icon-hover has-[input:focus-visible]:ring-1 has-[input:focus-visible]:ring-primary data-checked:text-title"
+						disabled={option.disabled}
+						class="relative z-10 h-full w-7 rounded-sm text-icon transition-colors hover:text-icon-hover has-[input:focus-visible]:ring-1 has-[input:focus-visible]:ring-primary data-checked:text-title data-disabled:opacity-40 data-disabled:hover:text-icon"
 					>
 						<KobSegmentedControl.ItemInput />
-						<KobSegmentedControl.ItemLabel class="flex size-full cursor-pointer items-center justify-center">
+						<KobSegmentedControl.ItemLabel class="flex size-full cursor-pointer items-center justify-center data-disabled:cursor-not-allowed">
 							<span aria-hidden="true" class="flex">
 								{option.icon}
 							</span>

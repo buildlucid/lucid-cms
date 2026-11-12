@@ -5,6 +5,7 @@ import type {
 	Session,
 } from "../harness/src/client/types.ts";
 import { STORY_KEY } from "./collections/story.ts";
+import { HARNESS_AGENT, HELPER_AGENT } from "./fragments/ai.ts";
 
 /** One permission, every permission in a list, or at least one of several. */
 export type Requirement =
@@ -92,11 +93,42 @@ const notCovered = (reason: string): RouteEntry => ({
 	reason,
 });
 
-const NEEDS_AI = notCovered(
-	"Needs AI switched on, which no setup has. Agent permissions come with it.",
-);
+/** A UUID no record has, for routes whose IDs are UUIDs. */
+const MISSING_UUID = "00000000-0000-4000-8000-000000000000";
+
+/** Every agent the `ai` fragment registers, including Lucid's own. */
+const AGENT_KEYS = ["lucid-agent", HARNESS_AGENT, HELPER_AGENT];
+
+/**
+ * Agent routes let anyone through who can use some agent: chat with it or manage its routines, or
+ * oversee every routine. The service then checks the agent the request is for.
+ */
+const AGENT_ACCESS = {
+	some: [
+		...AGENT_KEYS.flatMap((key) =>
+			["chat", "manage-own-routines", "manage-code-routines"].map(
+				(action) => `agents:${key}:${action}`,
+			),
+		),
+		"ai:routines-manage-all",
+	],
+};
+const agentRoute = (request: RouteRequest = {}) =>
+	needs(AGENT_ACCESS, {
+		...request,
+		params: { id: MISSING_UUID, ...request.params },
+	});
+
+/** Memories are for chats, so they need chat access to some agent. */
+const CHAT_ACCESS = {
+	some: AGENT_KEYS.map((key) => `agents:${key}:chat`),
+};
+
+const MEDIA_GENERATION = { some: ["ai:image-generate", "ai:audio-generate"] };
 const NEEDS_DEPLOY = notCovered("Needs a deploy in the setup's config.");
 const NEEDS_TRANSFER = notCovered("Needs a transfer in the setup's config.");
+const CHANGES_CONNECTION =
+	"It changes the connection to Lucid, which AI tests on the server use.";
 const CHANGES_PAGE_PATHS =
 	"It changes every page's paths, which other tests on the server use.";
 
@@ -192,57 +224,85 @@ export const routes = {
 	"DELETE /api/v1/account/auth-providers/{providerId}": SIGNED_IN,
 
 	//* AI and agents
-	"GET /api/v1/ai/credits": NEEDS_AI,
-	"GET /api/v1/ai/usage/chart": NEEDS_AI,
-	"GET /api/v1/ai/usage/sessions": NEEDS_AI,
-	"GET /api/v1/ai/usage/sessions/{type}/{id}": NEEDS_AI,
-	"GET /api/v1/ai/usage/sessions/{type}/{id}/records": NEEDS_AI,
-	"GET /api/v1/ai/media/models/{type}": NEEDS_AI,
-	"POST /api/v1/ai/media/image": NEEDS_AI,
-	"POST /api/v1/ai/media/audio": NEEDS_AI,
-	"POST /api/v1/ai/media/alt": NEEDS_AI,
-	"GET /api/v1/ai/media/files/{key}": NEEDS_AI,
-	"GET /api/v1/ai/media/generations/{id}": NEEDS_AI,
-	"POST /api/v1/ai/media/generations/{id}/save": NEEDS_AI,
-	"GET /api/v1/agent/definitions": NEEDS_AI,
-	"GET /api/v1/agent/models/{agentKey}": NEEDS_AI,
-	"POST /api/v1/agent/uploads/session": NEEDS_AI,
-	"POST /api/v1/agent/uploads": NEEDS_AI,
-	"GET /api/v1/agent/conversations": NEEDS_AI,
-	"POST /api/v1/agent/conversations": NEEDS_AI,
-	"GET /api/v1/agent/conversations/{id}": NEEDS_AI,
-	"PATCH /api/v1/agent/conversations/{id}": NEEDS_AI,
-	"DELETE /api/v1/agent/conversations/{id}": NEEDS_AI,
-	"POST /api/v1/agent/conversations/{id}/title/generate": NEEDS_AI,
-	"GET /api/v1/agent/conversations/{id}/details": NEEDS_AI,
-	"GET /api/v1/agent/conversations/{id}/subagents": NEEDS_AI,
-	"GET /api/v1/agent/conversations/{id}/media-previews": NEEDS_AI,
-	"GET /api/v1/agent/conversations/{id}/references": NEEDS_AI,
-	"DELETE /api/v1/agent/conversations/{id}/references/{referenceId}": NEEDS_AI,
-	"GET /api/v1/agent/conversations/{id}/messages": NEEDS_AI,
-	"POST /api/v1/agent/conversations/{id}/messages": NEEDS_AI,
+	"GET /api/v1/ai/credits": needs("settings:read"),
+	"GET /api/v1/ai/usage/chart": needs("settings:read"),
+	"GET /api/v1/ai/usage/sessions": needs("settings:read"),
+	"GET /api/v1/ai/usage/sessions/{type}/{id}": needs("settings:read", {
+		params: { type: "agent", id: MISSING_UUID },
+	}),
+	"GET /api/v1/ai/usage/sessions/{type}/{id}/records": needs("settings:read", {
+		params: { type: "agent", id: MISSING_UUID },
+	}),
+	"GET /api/v1/ai/media/models/{type}": needs(MEDIA_GENERATION, {
+		params: { type: "image" },
+	}),
+	"POST /api/v1/ai/media/image": needs("ai:image-generate"),
+	"POST /api/v1/ai/media/audio": needs("ai:audio-generate"),
+	"POST /api/v1/ai/media/alt": needs("ai:alt-generate"),
+	"GET /api/v1/ai/media/files/{key}": needs(MEDIA_GENERATION),
+	"GET /api/v1/ai/media/generations/{id}": needs(MEDIA_GENERATION, {
+		params: { id: MISSING_UUID },
+	}),
+	//* it needs a generation permission and one to make or change media, which a rule can't say
+	"POST /api/v1/ai/media/generations/{id}/save": checkedIn(
+		"../ai/media-generation.test.ts",
+	),
+	"GET /api/v1/agent/definitions": SIGNED_IN,
+	//* also needs access to the agent it names
+	"GET /api/v1/agent/models/{agentKey}": checkedIn("../agent/access.test.ts"),
+	"POST /api/v1/agent/uploads/session": agentRoute(),
+	"POST /api/v1/agent/uploads": agentRoute(),
+	"GET /api/v1/agent/conversations": agentRoute(),
+	"POST /api/v1/agent/conversations": agentRoute(),
+	"GET /api/v1/agent/conversations/{id}": agentRoute(),
+	"PATCH /api/v1/agent/conversations/{id}": agentRoute(),
+	"DELETE /api/v1/agent/conversations/{id}": agentRoute(),
+	"POST /api/v1/agent/conversations/{id}/title/generate": agentRoute(),
+	"GET /api/v1/agent/conversations/{id}/details": agentRoute(),
+	"GET /api/v1/agent/conversations/{id}/subagents": agentRoute(),
+	"GET /api/v1/agent/conversations/{id}/media-previews": agentRoute(),
+	"GET /api/v1/agent/conversations/{id}/references": agentRoute(),
+	"DELETE /api/v1/agent/conversations/{id}/references/{referenceId}":
+		agentRoute({ params: { referenceId: MISSING_UUID } }),
+	"GET /api/v1/agent/conversations/{id}/messages": agentRoute(),
+	"POST /api/v1/agent/conversations/{id}/messages": agentRoute(),
 	"GET /api/v1/agent/conversations/{id}/messages/{messageId}/tools/{toolCallId}":
-		NEEDS_AI,
-	"PATCH /api/v1/agent/conversations/{id}/inputs": NEEDS_AI,
-	"POST /api/v1/agent/conversations/{id}/compact": NEEDS_AI,
-	"POST /api/v1/agent/conversations/{id}/retry": NEEDS_AI,
-	"POST /api/v1/agent/conversations/{id}/branch": NEEDS_AI,
-	"POST /api/v1/agent/runs/{id}/respond": NEEDS_AI,
-	"POST /api/v1/agent/runs/{id}/cancel": NEEDS_AI,
-	"GET /api/v1/agent/runs/{id}/events": NEEDS_AI,
-	"GET /api/v1/agent/routines": NEEDS_AI,
-	"POST /api/v1/agent/routines": NEEDS_AI,
-	"GET /api/v1/agent/routines/{id}": NEEDS_AI,
-	"PATCH /api/v1/agent/routines/{id}": NEEDS_AI,
-	"DELETE /api/v1/agent/routines/{id}": NEEDS_AI,
-	"POST /api/v1/agent/routines/{id}/run": NEEDS_AI,
-	"GET /api/v1/agent/routines/{id}/runs": NEEDS_AI,
-	"GET /api/v1/agent/memories": NEEDS_AI,
-	"POST /api/v1/agent/memories": NEEDS_AI,
-	"PATCH /api/v1/agent/memories/{id}": NEEDS_AI,
-	"DELETE /api/v1/agent/memories": NEEDS_AI,
-	"POST /api/v1/documents/{collectionKey}/translate": NEEDS_AI,
-	"POST /api/v1/documents/{collectionKey}/translate/status": NEEDS_AI,
+		agentRoute({
+			params: { messageId: MISSING_UUID, toolCallId: "missing-call" },
+		}),
+	"PATCH /api/v1/agent/conversations/{id}/inputs": agentRoute(),
+	"POST /api/v1/agent/conversations/{id}/compact": agentRoute(),
+	"POST /api/v1/agent/conversations/{id}/retry": agentRoute(),
+	"POST /api/v1/agent/conversations/{id}/branch": agentRoute(),
+	"POST /api/v1/agent/runs/{id}/respond": agentRoute(),
+	//* checks the run's chat in the service, so a missing run is not found for anyone
+	"POST /api/v1/agent/runs/{id}/cancel": {
+		...SIGNED_IN,
+		params: { id: MISSING_UUID },
+	},
+	"GET /api/v1/agent/runs/{id}/events": agentRoute(),
+	"GET /api/v1/agent/routines": agentRoute(),
+	"POST /api/v1/agent/routines": agentRoute(),
+	"GET /api/v1/agent/routines/{id}": agentRoute(),
+	"PATCH /api/v1/agent/routines/{id}": agentRoute(),
+	"DELETE /api/v1/agent/routines/{id}": agentRoute(),
+	"POST /api/v1/agent/routines/{id}/run": agentRoute(),
+	"GET /api/v1/agent/routines/{id}/runs": agentRoute(),
+	"GET /api/v1/agent/memories": needs(CHAT_ACCESS),
+	"POST /api/v1/agent/memories": needs(CHAT_ACCESS, {
+		body: { scope: "personal", content: "Route check" },
+		skipAllowed: "It saves a memory.",
+	}),
+	"PATCH /api/v1/agent/memories/{id}": needs(CHAT_ACCESS, {
+		params: { id: MISSING_UUID },
+		body: { scope: "personal", content: "Route check" },
+	}),
+	"DELETE /api/v1/agent/memories": needs(CHAT_ACCESS, {
+		body: { ids: [MISSING_UUID] },
+	}),
+	"POST /api/v1/documents/{collectionKey}/translate": needs("ai:translate"),
+	"POST /api/v1/documents/{collectionKey}/translate/status":
+		needs("ai:translate"),
 
 	//* integrations
 	"GET /api/v1/integrations/scopes": needs("integrations:read"),
@@ -523,10 +583,16 @@ export const routes = {
 	"POST /api/v1/diagnostics/bug-reports": needs("settings:read"),
 	"GET /api/v1/connection/status": SIGNED_IN,
 	"GET /api/v1/connection/callback": PUBLIC,
-	"POST /api/v1/connection/connect": needs("connection:update"),
+	"POST /api/v1/connection/connect": needs("connection:update", {
+		skipAllowed: CHANGES_CONNECTION,
+	}),
 	"POST /api/v1/connection/verify": needs("connection:update"),
-	"POST /api/v1/connection/reset": needs("connection:update"),
-	"DELETE /api/v1/connection": needs("connection:update"),
+	"POST /api/v1/connection/reset": needs("connection:update", {
+		skipAllowed: CHANGES_CONNECTION,
+	}),
+	"DELETE /api/v1/connection": needs("connection:update", {
+		skipAllowed: CHANGES_CONNECTION,
+	}),
 	"GET /api/v1/notifications": SIGNED_IN,
 	"PATCH /api/v1/notifications": SIGNED_IN,
 	"GET /api/v1/notifications/summary": SIGNED_IN,

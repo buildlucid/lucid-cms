@@ -3,6 +3,7 @@ import type { Select } from "../../../libs/db/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getConversationPermission } from "../../../libs/permission/agent-permissions.js";
 import { AgentConversationsRepository } from "../../../libs/repositories/index.js";
+import type { LucidAuth } from "../../../types/hono.js";
 import type {
 	AgentRunOutcome,
 	AgentRunStatus,
@@ -13,7 +14,14 @@ import checkAgentAccess from "./check-agent-access.js";
 
 /** Chats are private to their user. Chats started by code routines are shared with the agent's managers, and sub-agent chats with whoever can open their parent. */
 const getAccessibleConversation: ServiceFn<
-	[{ id: string; userId: number }],
+	[
+		{
+			id: string;
+			userId: number;
+			/** The signed-in user, whose permissions aren't read again when the chat is theirs. */
+			auth?: LucidAuth;
+		},
+	],
 	Select<LucidAgentConversations> & {
 		latest_run_id: string | null;
 		latest_run_status: AgentRunStatus | null;
@@ -42,6 +50,7 @@ const getAccessibleConversation: ServiceFn<
 		const parent = await getAccessibleConversation(context, {
 			id: result.data.parent_conversation_id,
 			userId: input.userId,
+			auth: input.auth,
 		});
 		if (parent.error) return parent;
 
@@ -61,6 +70,7 @@ const getAccessibleConversation: ServiceFn<
 
 	const access = await checkAgentAccess(context, {
 		userId: input.userId,
+		auth: input.auth,
 		agentKey: result.data.agent_key,
 		action: getConversationPermission(result.data.kind),
 	});

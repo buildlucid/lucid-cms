@@ -24,7 +24,12 @@ const getAccessToken: ServiceFn<
 			connection?: Select<LucidRemoteConnections>;
 		},
 	],
-	{ accessToken: string; lucidRemoteConnectionId: number }
+	{
+		accessToken: string;
+		lucidRemoteConnectionId: number;
+		/** Whether the grant was refreshed, which rewrote the connection row. */
+		refreshed: boolean;
+	}
 > = async (context, data) => {
 	const resolved = data.connection
 		? { error: undefined, data: data.connection }
@@ -116,6 +121,7 @@ const getAccessToken: ServiceFn<
 			data: {
 				accessToken: grant.accessToken,
 				lucidRemoteConnectionId: row.id,
+				refreshed: false,
 			},
 		};
 	}
@@ -171,6 +177,7 @@ const getAccessToken: ServiceFn<
 		data: {
 			accessToken: refresh.data.accessToken,
 			lucidRemoteConnectionId: row.id,
+			refreshed: true,
 		},
 	};
 };

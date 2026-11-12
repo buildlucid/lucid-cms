@@ -594,9 +594,13 @@ const DocumentEditorPage: Component<{
 	const viewOptions = createMemo(() => {
 		const options: Exclude<BuilderView, "fields">[] = [];
 		if (uiState.showPreview() && sideBySide()) options.push("preview");
-		if (showComparisonToggle()) options.push("compare");
+		//* offered wherever this version can open side by side, so the switch stays put as the language changes
+		if (comparison.available()) options.push("compare");
 		return options;
 	});
+	const disabledViews = createMemo((): Exclude<BuilderView, "fields">[] =>
+		showComparisonToggle() ? [] : ["compare"],
+	);
 
 	// ----------------------------------
 	// Functions
@@ -712,7 +716,12 @@ const DocumentEditorPage: Component<{
 							currentViewLabel={currentViewLabel}
 							view={
 								viewOptions().length > 0
-									? { value: view, options: viewOptions, onChange: changeView }
+									? {
+											value: view,
+											options: viewOptions,
+											disabled: disabledViews,
+											onChange: changeView,
+										}
 									: undefined
 							}
 							previewBar={

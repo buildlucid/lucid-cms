@@ -119,13 +119,6 @@ const startRun: ServiceFn<
 		parent_conversation_id: parentConversationId,
 	} = conversation.data;
 
-	const repaired = await AgentConversations.releaseFinishedClaims({
-		conversationId: input.conversationId,
-		now: new Date().toISOString(),
-		staleBefore: new Date(Date.now() - constants.agent.leaseMs).toISOString(),
-	});
-	if (repaired.error) return repaired;
-
 	return withTransaction(context, async (context) => {
 		const now = new Date().toISOString();
 		const conversations = new AgentConversationsRepository(context.db);
@@ -189,7 +182,8 @@ const startRun: ServiceFn<
 			};
 		};
 
-		const appendMessage = async () => {
+		/** Saves the input message, returning its position when this call saved it. */
+		const appendMessage = async (): ServiceResponse<number | undefined> => {
 			const parts = await messageParts();
 			if (parts.error) return parts;
 
@@ -205,10 +199,13 @@ const startRun: ServiceFn<
 			//* a retry keeps the first message, so its changed text cannot add URLs
 			if (!appended.data) return { error: undefined, data: undefined };
 
-			return registerUrlKeys(context, {
+			const registered = await registerUrlKeys(context, {
 				conversationId: input.conversationId,
 				messages: [{ role: "user", parts: parts.data }],
 			});
+			if (registered.error) return registered;
+
+			return { error: undefined, data: appended.data.position };
 		};
 
 		const existing = await runs.selectSingle({
@@ -254,14 +251,30 @@ const startRun: ServiceFn<
 			}
 		}
 
-		const claim = await conversations.claimRun({
-			conversationId: input.conversationId,
-			runId: input.runId,
-			updatedAt: now,
-			//* paused user-input queues still allow retries, compaction and routine runs
-			allowPaused: input.purpose !== undefined || input.routine !== undefined,
-		});
+		const claimRun = () =>
+			conversations.claimRun({
+				conversationId: input.conversationId,
+				runId: input.runId,
+				updatedAt: now,
+				//* paused user-input queues still allow retries, compaction and routine runs
+				allowPaused: input.purpose !== undefined || input.routine !== undefined,
+			});
+		let claim = await claimRun();
 		if (claim.error) return claim;
+		//* a run that ended without letting go of the chat is released, then the claim tried again
+		if (!claim.data) {
+			const repaired = await conversations.releaseFinishedClaims({
+				conversationId: input.conversationId,
+				now,
+				staleBefore: new Date(
+					Date.now() - constants.agent.leaseMs,
+				).toISOString(),
+			});
+			if (repaired.error) return repaired;
+
+			claim = await claimRun();
+			if (claim.error) return claim;
+		}
 		if (!claim.data) {
 			return {
 				data: undefined,
@@ -275,18 +288,6 @@ const startRun: ServiceFn<
 					),
 				},
 			};
-		}
-
-		let firstMessage = false;
-		if (!input.routine && !input.purpose) {
-			const previous = await messages.selectLatest({
-				conversationId: input.conversationId,
-				limit: 1,
-			});
-			if (previous.error) return previous;
-			if (!previous.data.length) {
-				firstMessage = true;
-			}
 		}
 
 		//* Routine chat replies also inherit the routine's tool settings.
@@ -350,11 +351,14 @@ const startRun: ServiceFn<
 			};
 		}
 
+		let position: number | undefined;
 		if (!input.purpose) {
 			const appended = await appendMessage();
 			if (appended.error) return appended;
+			position = appended.data;
 		}
-		if (firstMessage) {
+		//* a chat's first message names it until its title is generated
+		if (!input.routine && position === 1) {
 			const titled = await conversations.updateProvisionalTitle({
 				conversationId: input.conversationId,
 				title: titleFromMessage(input.text ?? ""),

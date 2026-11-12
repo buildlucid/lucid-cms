@@ -88,7 +88,7 @@ export default class AgentMessagesRepository extends StaticRepository<"lucid_age
 
 		return { error: undefined, data: exec.response.data.length > 0 };
 	}
-	/** Retried requests may write the same message id; only the first insert wins. Returns whether this call inserted it. */
+	/** Retried requests may write the same message id; only the first insert wins, and only it returns the message. */
 	async appendOnce(data: {
 		id: string;
 		conversationId: string;
@@ -109,14 +109,13 @@ export default class AgentMessagesRepository extends StaticRepository<"lucid_age
 				position: this.nextPosition(data.conversationId),
 			})
 			.onConflict((conflict) => conflict.column("id").doNothing())
-			.returning("id");
+			.returning("position");
 
-		const exec = await this.executeQuery(() => query.execute(), {
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "appendOnce",
 		});
-		if (exec.response.error) return exec.response;
 
-		return { error: undefined, data: exec.response.data.length > 0 };
+		return exec.response;
 	}
 	/** Returns the latest messages, optionally before a position, newest first. */
 	async selectLatest(props: {

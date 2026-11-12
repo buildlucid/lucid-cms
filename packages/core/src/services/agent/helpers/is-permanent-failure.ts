@@ -1,6 +1,6 @@
-import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
+import wasUncharged from "./was-uncharged.js";
 
 /**
  * Whether a failed model request fails its run rather than interrupting it for
@@ -11,13 +11,12 @@ const isPermanentFailure = async (
 	context: ServiceContext,
 	props: { error: LucidErrorData; requestId?: string },
 ) => {
-	if (props.error.key === "agent_model_failed" && props.requestId) {
-		const AiGenerations = new AiGenerationsRepository(context.db);
-		const usage = await AiGenerations.selectSingleByRequestId({
-			requestId: props.requestId,
-			select: ["status"],
-		});
-		if (usage.data?.status === "failed") return true;
+	if (
+		props.error.key === "agent_model_failed" &&
+		props.requestId &&
+		(await wasUncharged(context, props.requestId))
+	) {
+		return true;
 	}
 
 	const { status } = props.error;

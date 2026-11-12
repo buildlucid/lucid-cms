@@ -69,14 +69,14 @@ export const streamRun = async (
 	context: ServiceContext,
 	input: AgentRunStart,
 ) => {
+	//* an answer is checked before the run starts, so a refused one is an HTTP error wherever the run executes
+	const checked = input.answer
+		? await resolveSliceStart(context, input)
+		: undefined;
+	if (checked?.error) throw new LucidError(checked.error);
+
 	const runner = context.agentRunner;
 	if (runner) {
-		//* the runner holds an answer until its slice runs, so it's checked first, as running in place would
-		if (input.answer) {
-			const checked = await resolveSliceStart(context, input);
-			if (checked.error) throw new LucidError(checked.error);
-		}
-
 		const started = await runner.start(context, input);
 		if (started.error) throw new LucidError(started.error);
 		c.header("X-Lucid-Agent-Run-ID", input.runId);
@@ -97,7 +97,7 @@ export const streamRun = async (
 	const execution = serviceWrapper(agentServices.executeRun, {
 		transaction: false,
 		logError: true,
-	})(context, { ...input, stream });
+	})(context, { ...input, start: checked?.data, stream });
 
 	c.get("ctx")?.waitUntil(execution);
 	c.header("X-Lucid-Agent-Run-ID", input.runId);

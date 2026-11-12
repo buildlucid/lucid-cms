@@ -24,6 +24,7 @@ import type { RunSession, SessionRun } from "./run-session.js";
 import runnerRequestRecord from "./runner-request-record.js";
 import streamModelTurn from "./stream-model-turn.js";
 import trackPaidRequest from "./track-paid-request.js";
+import wasUncharged from "./was-uncharged.js";
 
 type CompactionProps = {
 	run: SessionRun;
@@ -115,7 +116,16 @@ const summariseContext: ServiceFn<[CompactionProps], boolean> = async (
 				},
 			}),
 	});
-	if (result.error) return result;
+	if (result.error) {
+		//* Lucid settled it without charging, so the next attempt is a compaction of its own
+		if (
+			!session.signal.aborted &&
+			(await wasUncharged(context, pending.requestId))
+		) {
+			checkpoint.compaction = undefined;
+		}
+		return result;
+	}
 	if (!summary.trim()) {
 		return {
 			data: undefined,
@@ -171,11 +181,9 @@ const summariseContext: ServiceFn<[CompactionProps], boolean> = async (
 };
 
 /**
- * Compacts context before a model request when a person asked, when saved
- * history cannot load or the API rejected the request as too large, or when
- * context nears the model's limit. Automatic compaction is best effort while
- * the request still fits. `historyFull` means saved history stopped loading
- * for lack of room.
+ * Compacts on request, incomplete history, oversized requests or approaching the model limit.
+ * Automatic compaction is best effort while the request fits. `historyFull` indicates history
+ * exceeded available space.
  */
 const compactContext = async (
 	context: ServiceContext,

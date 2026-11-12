@@ -10,17 +10,19 @@ import enqueueRun from "../enqueue-run.js";
 import isSubagentWaitOver from "./is-subagent-wait-over.js";
 
 /**
- * Wakes the parent when a sub-agent finishes. Call in the finishing transaction.
- * @remarks Notification failures roll back separately and are logged; the agent tick recovers
- * missed wakeups.
+ * Wakes the parent when a sub-agent finishes, once the finishing transaction commits.
+ * @remarks Checking after the commit means a parent settling into its wait at the same moment
+ * can't miss the result, as it checks again once its wait is saved. Failures are logged; the
+ * agent tick recovers missed wakeups.
  */
 const wakeParent: ServiceFn<[{ conversationId: string }], undefined> = async (
 	context,
 	input,
 ) => {
-	const woken = await withTransaction(
-		context,
-		async (context) => {
+	const committed = { ...context, db: context.db.outsideTransaction };
+
+	await context.db.afterCommit(async () => {
+		const woken = await withTransaction(committed, async (context) => {
 			const Conversations = new AgentConversationsRepository(context.db);
 			const Runs = new AgentRunsRepository(context.db);
 
@@ -67,15 +69,14 @@ const wakeParent: ServiceFn<[{ conversationId: string }], undefined> = async (
 				runId: run.data.id,
 				userId: run.data.user_id,
 			});
-		},
-		{ isolate: true },
-	);
-	if (woken.error) {
-		logger.error({
-			message: `Agent sub-agent ${input.conversationId} could not wake its parent: ${context.translate(woken.error.message)}`,
-			scope: constants.logScopes.ai,
 		});
-	}
+		if (woken.error) {
+			logger.error({
+				message: `Agent sub-agent ${input.conversationId} could not wake its parent: ${context.translate(woken.error.message)}`,
+				scope: constants.logScopes.ai,
+			});
+		}
+	});
 
 	return { error: undefined, data: undefined };
 };

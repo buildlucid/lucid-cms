@@ -116,7 +116,10 @@ const AgentChatDetailsCard: Component<{
 					</AgentCardDetail>
 				</Show>
 			</dl>
-			<AgentChatSubagents conversationId={props.conversation.id} />
+			{/* a sub-agent opens from the chat that started it, so it lists none of its own */}
+			<Show when={!props.conversation.parentConversationId}>
+				<AgentChatSubagents conversationId={props.conversation.id} />
+			</Show>
 			<AgentChatReferences
 				conversationId={props.conversation.id}
 				agentKey={props.conversation.agentKey}

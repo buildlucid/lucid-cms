@@ -13,6 +13,7 @@ import runnerRequestRecord from "./runner-request-record.js";
 import streamModelTurn from "./stream-model-turn.js";
 import toolCallPart from "./tool-call-part.js";
 import trackPaidRequest from "./track-paid-request.js";
+import wasUncharged from "./was-uncharged.js";
 
 type TurnResult =
 	| { kind: "continue" }
@@ -157,6 +158,10 @@ const runModelTurn: ServiceFn<
 			error: response.error,
 			requestId: checkpoint.requestId,
 		});
+		//* Lucid settled it without charging, so the next attempt is a request of its own
+		if (!permanent && (await wasUncharged(context, checkpoint.requestId))) {
+			checkpoint.requestId = randomUUID();
+		}
 
 		return {
 			error: undefined,

@@ -1,12 +1,12 @@
 import { isDeepStrictEqual } from "node:util";
 import type { AgentDelivery } from "@lucidcms/types";
+import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	AgentConversationsRepository,
 	AgentInputsRepository,
-	AgentMessagesRepository,
-	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { AgentReferenceInput, AgentScreen } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import resolveNotification from "../notifications/resolve.js";
@@ -28,6 +28,8 @@ const submitInput: ServiceFn<
 		{
 			conversationId: string;
 			userId: number;
+			/** The signed-in sender, whose permissions aren't read again. */
+			auth?: LucidAuth;
 			/** A new ID for the input, which becomes its run and message IDs. */
 			inputId: string;
 			text: string;
@@ -45,6 +47,7 @@ const submitInput: ServiceFn<
 	const owned = await getAccessibleConversation(context, {
 		id: input.conversationId,
 		userId: input.userId,
+		auth: input.auth,
 	});
 	if (owned.error) return owned;
 
@@ -60,28 +63,17 @@ const submitInput: ServiceFn<
 
 	const Inputs = new AgentInputsRepository(context.db);
 	const Conversations = new AgentConversationsRepository(context.db);
-	const Runs = new AgentRunsRepository(context.db);
-	const Messages = new AgentMessagesRepository(context.db);
 
 	//* input IDs become run and message IDs, so reject unrelated collisions
-	const [existingInput, existingRun, existingMessage] = await Promise.all([
-		Inputs.selectSingle({
-			select: ["id"],
-			where: [{ key: "id", operator: "=", value: input.inputId }],
-		}),
-		Runs.selectSingle({
-			select: ["id"],
-			where: [{ key: "id", operator: "=", value: input.inputId }],
-		}),
-		Messages.selectSingle({
-			select: ["id"],
-			where: [{ key: "id", operator: "=", value: input.inputId }],
-		}),
-	]);
-	if (existingInput.error) return existingInput;
-	if (existingRun.error) return existingRun;
-	if (existingMessage.error) return existingMessage;
-	if (!existingInput.data && (existingRun.data || existingMessage.data)) {
+	const used = await Inputs.selectIdUse(input.inputId);
+	if (used.error) return used;
+	//* the same input sent again, which must match what was stored
+	const resent = formatter.formatBoolean(used.data?.input);
+	if (
+		!resent &&
+		(formatter.formatBoolean(used.data?.run) ||
+			formatter.formatBoolean(used.data?.message))
+	) {
 		return {
 			data: undefined,
 			error: {
@@ -117,40 +109,44 @@ const submitInput: ServiceFn<
 		};
 	}
 
-	const submitted = await Inputs.submit({
-		id: input.inputId,
-		conversationId: input.conversationId,
-		userId: input.userId,
-		text: input.text,
-		references,
-		screen: input.screen,
-		timezone: input.timezone,
-		targetRunId,
-	});
-	if (submitted.error) return submitted;
+	const submitted = resent
+		? undefined
+		: await Inputs.submit({
+				id: input.inputId,
+				conversationId: input.conversationId,
+				userId: input.userId,
+				text: input.text,
+				references,
+				screen: input.screen,
+				timezone: input.timezone,
+				targetRunId,
+			});
+	if (submitted?.error) return submitted;
 
-	//* a retry must repeat the original submission
-	const receipt = await Inputs.selectSingle({
-		select: ["conversation_id", "user_id", "text", "references", "screen"],
-		where: [{ key: "id", operator: "=", value: input.inputId }],
-	});
-	if (receipt.error) return receipt;
+	//* a retry, or a copy that saved first, must repeat the original submission
+	if (!submitted?.data) {
+		const receipt = await Inputs.selectSingle({
+			select: ["conversation_id", "user_id", "text", "references", "screen"],
+			where: [{ key: "id", operator: "=", value: input.inputId }],
+		});
+		if (receipt.error) return receipt;
 
-	if (
-		receipt.data?.conversation_id !== input.conversationId ||
-		receipt.data.user_id !== input.userId ||
-		receipt.data.text !== input.text ||
-		!isDeepStrictEqual(receipt.data.references, references) ||
-		!isDeepStrictEqual(receipt.data.screen, input.screen ?? null)
-	) {
-		return {
-			data: undefined,
-			error: {
-				type: "basic",
-				status: 409,
-				message: copy("server:agent.input.changed"),
-			},
-		};
+		if (
+			receipt.data?.conversation_id !== input.conversationId ||
+			receipt.data.user_id !== input.userId ||
+			receipt.data.text !== input.text ||
+			!isDeepStrictEqual(receipt.data.references, references) ||
+			!isDeepStrictEqual(receipt.data.screen, input.screen ?? null)
+		) {
+			return {
+				data: undefined,
+				error: {
+					type: "basic",
+					status: 409,
+					message: copy("server:agent.input.changed"),
+				},
+			};
+		}
 	}
 
 	const reviewed = await resolveNotification(context, {

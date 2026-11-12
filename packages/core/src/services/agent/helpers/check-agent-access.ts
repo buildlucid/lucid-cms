@@ -4,9 +4,8 @@ import { copy } from "../../../libs/i18n/index.js";
 import { hasAgentPermission } from "../../../libs/permission/agent-permissions.js";
 import type { AgentPermissionAction } from "../../../libs/permission/types.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
+import type { LucidAuth } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import checkFeatureEnabled from "../../ai/checks/check-feature-enabled.js";
-import getAccessToken from "../../connection/token-manager.js";
 import resolveUserAccess from "../../users/resolve-access.js";
 
 //* the agent's tools are its ceiling, so the system may use all of them
@@ -19,15 +18,15 @@ const systemAuthority: AgentToolAuthority = {
 /**
  * Resolves an agent run's principal and checks its agent permission.
  * @remarks Null users act as the system; omitted actions accept any agent permission.
- * `requireConnection` also checks the AI connection and organisation agent access.
  */
 const checkAgentAccess: ServiceFn<
 	[
 		{
 			userId: number | null;
+			/** The signed-in user. When the check is for them, their permissions aren't read again. */
+			auth?: LucidAuth;
 			agentKey: string;
 			action?: AgentPermissionAction;
-			requireConnection?: boolean;
 		},
 	],
 	{ agent: AgentDefinition; authority: AgentToolAuthority }
@@ -47,7 +46,16 @@ const checkAgentAccess: ServiceFn<
 	let authority = systemAuthority;
 
 	if (input.userId !== null) {
-		const user = await resolveUserAccess(context, { userId: input.userId });
+		const user =
+			input.auth?.id === input.userId
+				? {
+						error: undefined,
+						data: {
+							superAdmin: input.auth.superAdmin,
+							permissions: input.auth.permissions ?? [],
+						},
+					}
+				: await resolveUserAccess(context, { userId: input.userId });
 		if (user.error) return user;
 		if (!hasAgentPermission(user.data, agent.key, input.action)) {
 			return {
@@ -65,13 +73,6 @@ const checkAgentAccess: ServiceFn<
 			permissions: user.data.permissions,
 			superAdmin: user.data.superAdmin,
 		};
-	}
-
-	if (input.requireConnection) {
-		const connection = await getAccessToken(context, {});
-		if (connection.error) return connection;
-		const enabled = await checkFeatureEnabled(context, { feature: "agents" });
-		if (enabled.error) return enabled;
 	}
 
 	return { error: undefined, data: { agent, authority } };

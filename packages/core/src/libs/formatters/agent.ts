@@ -68,48 +68,49 @@ const formatDefinitions = (props: {
 
 	return {
 		enabled: isAiFeatureEnabled(props.config, "agents"),
-		agents: getAgents(props.config).map((agent) => {
-			const canChat = hasAgentPermission(grant, agent.key, "chat");
+		//* only the agents the person may use in some way, so others' descriptions and tools stay private
+		agents: getAgents(props.config)
+			.filter((agent) => hasAgentPermission(grant, agent.key))
+			.map((agent) => {
+				const canChat = hasAgentPermission(grant, agent.key, "chat");
 
-			return {
-				key: agent.key,
-				name: withDefaultMessage(agent.name),
-				description: withDefaultMessage(agent.description),
-				features: {
-					media: {
-						upload: agent.features.media.upload,
-						attach: agent.features.media.attach,
-						generate: agent.features.media.generate,
+				return {
+					key: agent.key,
+					name: withDefaultMessage(agent.name),
+					description: withDefaultMessage(agent.description),
+					features: {
+						media: {
+							upload: agent.features.media.upload,
+							attach: agent.features.media.attach,
+							generate: agent.features.media.generate,
+						},
+						documents: { attach: agent.features.documents.attach },
+						requests: { attach: agent.features.requests.attach },
+						builder: agent.features.builder,
 					},
-					documents: { attach: agent.features.documents.attach },
-					requests: { attach: agent.features.requests.attach },
-					builder: agent.features.builder,
-				},
-				capabilities: summariseCapabilities(
-					getCapabilityProviders({
-						tools: getAvailableTools(agent, grant, availability),
-					}),
-				),
-				suggestions: canChat
-					? agent.suggestions.map((suggestion) => ({
-							title: withDefaultMessage(suggestion.title),
-							description: withDefaultMessage(suggestion.description),
-							message: withDefaultMessage(suggestion.message),
-						}))
-					: [],
-				tools: hasAgentPermission(grant, agent.key)
-					? agent.tools
-							.filter((tool) => tool.available?.(availability) ?? true)
-							.map((tool) => ({
-								name: tool.name,
-								title: withDefaultMessage(tool.title),
-								requiresConfirmation: tool.requiresConfirmation,
-								interactive: Boolean(tool.interaction),
-								permissions: [...tool.permissions],
+					capabilities: summariseCapabilities(
+						getCapabilityProviders({
+							tools: getAvailableTools(agent, grant, availability),
+						}),
+					),
+					suggestions: canChat
+						? agent.suggestions.map((suggestion) => ({
+								title: withDefaultMessage(suggestion.title),
+								description: withDefaultMessage(suggestion.description),
+								message: withDefaultMessage(suggestion.message),
 							}))
-					: [],
-			};
-		}),
+						: [],
+					tools: agent.tools
+						.filter((tool) => tool.available?.(availability) ?? true)
+						.map((tool) => ({
+							name: tool.name,
+							title: withDefaultMessage(tool.title),
+							requiresConfirmation: tool.requiresConfirmation,
+							interactive: Boolean(tool.interaction),
+							permissions: [...tool.permissions],
+						})),
+				};
+			}),
 	};
 };
 

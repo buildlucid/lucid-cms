@@ -28,6 +28,7 @@ const DeleteAgentConversationModal: Component<{
 			onOpenChange={props.state.setOpen}
 			title={T()("modals.agent.conversation.delete.title")}
 			description={T()("modals.agent.conversation.delete.description")}
+			confirmLabel={T()("common.delete")}
 			loading={deleteConversation.action.isPending}
 			error={deleteConversation.errors()?.message}
 			onConfirm={() => {

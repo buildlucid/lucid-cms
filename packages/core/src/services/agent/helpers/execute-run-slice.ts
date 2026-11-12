@@ -9,7 +9,7 @@ import { inputNeededNotification } from "../notifications/input-needed.js";
 import { agentNotificationKeys } from "../notifications/keys.js";
 import continueQueue from "./continue-queue.js";
 import driveRun from "./drive-run.js";
-import resolveSliceStart from "./resolve-slice-start.js";
+import resolveSliceStart, { type SliceStart } from "./resolve-slice-start.js";
 import openRunSession from "./run-session.js";
 
 /**
@@ -24,13 +24,17 @@ const executeRunSlice: ServiceFn<
 			signal?: AbortSignal;
 			emit?: (event: AgentStreamEvent) => Promise<void>;
 			answer?: AgentRunAnswer;
+			/** The start the caller has just resolved with the answer, so it isn't checked twice. */
+			start?: SliceStart;
 		},
 	],
 	{ status: AgentRunStatus }
 > = async (context, input) => {
 	const emit = input.emit ?? (async () => {});
 
-	const start = await resolveSliceStart(context, input);
+	const start = input.start
+		? { error: undefined, data: input.start }
+		: await resolveSliceStart(context, input);
 	if (start.error) return start;
 
 	if (start.data.finished) {

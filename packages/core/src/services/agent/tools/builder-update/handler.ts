@@ -27,6 +27,7 @@ import type {
 	ScreenResponse,
 } from "../../helpers/builder/screen-call.js";
 import screenCall from "../../helpers/builder/screen-call.js";
+import screenContentLocale from "../../helpers/builder/screen-content-locale.js";
 import screenUnavailableMessage from "../../helpers/builder/screen-unavailable-message.js";
 import { builderUpdateTitle } from "./constants.js";
 import type { inputSchema, outputSchema } from "./schema.js";
@@ -128,7 +129,8 @@ const handler: ServiceFn<
 	const locale = resolveContentLocale(
 		context,
 		collection,
-		input.contentLocale ?? response.document.contentLocale ?? undefined,
+		input.contentLocale ??
+			screenContentLocale(context, collection, response.document.contentLocale),
 	);
 	if (locale.error) {
 		return {

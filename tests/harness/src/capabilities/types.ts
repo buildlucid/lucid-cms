@@ -18,6 +18,8 @@ export type Capability =
 	| `queue.${string}`
 	| `collection:${string}`
 	| `locale:${string}`
+	/** An agent the config defines and enables, such as `agent:harness`. */
+	| `agent:${string}`
 	| `auth:${string}`
 	| `feature:${string}`
 	/** Something the harness adds to a setup for tests, such as `harness:outbox` for sent emails. */
