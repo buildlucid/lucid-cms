@@ -35,6 +35,7 @@
 - Admin slots shown to signed-in users can now take a `permission`, and `adminHref` links to admin routes, which take their page title from their navigation label. ([74a262a](https://github.com/buildlucid/lucid-cms/commit/74a262a342ae1cbd278b438e0eee39091250ec74))
 - Added `http.serverTiming`, which reports how many database queries each request ran, and how long they took, in a `Server-Timing` header. ([9a13932](https://github.com/buildlucid/lucid-cms/commit/9a13932b428edc9160987cd6de8c58efbbee9826))
 - Job schedules can take a `when` check that skips a run with nothing to do, so quiet minutes store no jobs. ([aa2114d](https://github.com/buildlucid/lucid-cms/commit/aa2114d59ea05f7707a8ec1812c37ef763212133))
+- Seeds can now upload media and import content with media, and a seed that fails deletes the files it stored.
 
 ### Breaking Changes:
 
@@ -145,6 +146,7 @@
 - Fixed a reused OAuth authorization code leaving the tokens from its first use working. The connection is now revoked, as the code may have been stolen.
 - Fixed `/api/oauth/revoke` leaving the connection and its access tokens active, and refusing access tokens. Revoking either token now ends the connection.
 - Fixed every API key and OAuth request writing when it was last used. It is now recorded at most once a minute.
+- Fixed `lucidcms seed` and `jobs:run` waiting forever to be picked from a list when there's no terminal. They now ask for a name.
 
 ## v0.19.0-alpha.0
 

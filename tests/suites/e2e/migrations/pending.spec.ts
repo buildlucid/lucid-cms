@@ -1,20 +1,13 @@
-import type { BrowserContext } from "@playwright/test";
-import { expect, requires, type Session, test } from "#harness/playwright";
+import {
+	expect,
+	requires,
+	type Session,
+	signInTo,
+	test,
+} from "#harness/playwright";
 import { ARTICLE_KEY } from "#shared/migrations/collections/article";
 
 type Server = { url: string; admin: Session };
-
-/** Signs the browser in to a server other than the one the lane started. */
-const signIn = async (context: BrowserContext, server: Server) => {
-	await context.clearCookies();
-	await context.addCookies(
-		server.admin.cookies().map((cookie) => ({
-			...cookie,
-			domain: new URL(server.url).hostname,
-			path: "/",
-		})),
-	);
-};
 
 test.describe("a collection waiting for its migration", () => {
 	//* a schema step reaches the built server through its environment, which only Node setups read
@@ -50,7 +43,7 @@ test.describe("a collection waiting for its migration", () => {
 		server = await migrations.serve(database, "article/added");
 	});
 
-	test.beforeEach(({ context }) => signIn(context, server));
+	test.beforeEach(({ context }) => signInTo(context, server));
 
 	test("the editor warns, and marks the fields with no column", async ({
 		page,
@@ -87,7 +80,7 @@ test.describe("database migrations that have not run", () => {
 		server = await migrations.serve(database, "external");
 	});
 
-	test.beforeEach(({ context }) => signIn(context, server));
+	test.beforeEach(({ context }) => signInTo(context, server));
 
 	test("are counted on the diagnostics page", async ({ page }) => {
 		await page.goto(`${server.url}/admin/system/diagnostics`);

@@ -44,6 +44,8 @@ export const harnessEnv = z.object({
 	HARNESS_VARIANT: z.enum(VARIANTS).optional(),
 	/** The folder Node setups store uploads in. Host mode gives each CMS its own. See `shared/fragments/node-media.ts`. */
 	HARNESS_UPLOADS: z.string().optional(),
+	/** The folder `seed:new` writes to and seed commands read project seeds from. Each migration database has its own. */
+	HARNESS_SEEDS: z.string().optional(),
 });
 
 export type HarnessEnv = z.infer<typeof harnessEnv>;
@@ -93,16 +95,22 @@ export const sharedConfig = (options: { url: string }) =>
 	}) satisfies LucidConfig;
 
 /**
- * Adds the schema step named in `HARNESS_SCHEMA_STEP` to a setup's config, for migration tests.
- * Without one the config is returned as it is, which is how every other test runs.
+ * Applies `HARNESS_SCHEMA_STEP` and `HARNESS_SEEDS` for migration and seed tests. Leaves config
+ * unchanged when neither is set.
  */
 export const withSchemaStep = <Config extends LucidConfig>(
-	env: Pick<HarnessEnv, "HARNESS_SCHEMA_STEP">,
+	env: Pick<HarnessEnv, "HARNESS_SCHEMA_STEP" | "HARNESS_SEEDS">,
 	config: Config,
 ): Config => {
+	const seeded: Config = env.HARNESS_SEEDS
+		? {
+				...config,
+				directories: { ...config.directories, seeds: env.HARNESS_SEEDS },
+			}
+		: config;
 	const key = env.HARNESS_SCHEMA_STEP;
 	if (!key) {
-		return config;
+		return seeded;
 	}
 	if (!isGeneratedStep(key) && !Object.hasOwn(steps, key)) {
 		throw new Error(`No schema step is registered as "${key}".`);
@@ -112,16 +120,18 @@ export const withSchemaStep = <Config extends LucidConfig>(
 		? { collections: [generatedCollection(key)] }
 		: steps[key as SchemaStepKey];
 	return {
-		...config,
+		...seeded,
 		collections: [...(config.collections ?? []), ...(step.collections ?? [])],
 		migrations: [...(config.migrations ?? []), ...(step.migrations ?? [])],
 		plugins: [...(config.plugins ?? []), ...(step.plugins ?? [])],
+		seeds: [...(config.seeds ?? []), ...(step.seeds ?? [])],
 		sources: {
 			...config.sources,
 			migrations: [
 				...(config.sources?.migrations ?? []),
 				...(step.sources?.migrations ?? []),
 			],
+			seeds: [...(config.sources?.seeds ?? []), ...(step.sources?.seeds ?? [])],
 		},
 	};
 };

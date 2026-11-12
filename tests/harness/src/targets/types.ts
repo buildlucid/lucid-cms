@@ -2,6 +2,7 @@ import type { createLucidHost } from "@lucidcms/core/runtime";
 import type { KyselyDB } from "@lucidcms/core/types";
 import type { Variant } from "../../../shared/variants.ts";
 import type { Transport } from "../client/types.ts";
+import type { CliRun } from "../migrations/types.ts";
 
 /** A CMS that tests can send requests to. */
 export type Target = {
@@ -14,6 +15,8 @@ export type Target = {
 	ledger: string;
 	/** The folder Node setups store this CMS's uploads in. Host mode gives each CMS its own. */
 	uploads: string;
+	/** Runs a CLI command against the live CMS database, e.g. `lucid.cli("seed", "starter")`. */
+	cli(...args: string[]): Promise<CliRun>;
 	/** Runs queries on the CMS's database. Only an in-process CMS has one to hand. */
 	query?: <Result>(
 		use: (kysely: KyselyDB) => Promise<Result>,

@@ -17,10 +17,7 @@ import downloadTransferFile from "./helpers/download-transfer-file.js";
 import resolveTransferFolder from "./helpers/resolve-transfer-folder.js";
 import type { MediaEntry } from "./schema.js";
 
-/**
- * Reuses matching library media or uploads a bundled or downloaded file.
- * @remarks Run outside a transaction; uploads store files before registration.
- */
+/** Reuses matching library media or uploads a bundled or downloaded file. */
 const importMedia: ServiceFn<
 	[TransferImportProps<MediaEntry>],
 	TransferImportOutcome

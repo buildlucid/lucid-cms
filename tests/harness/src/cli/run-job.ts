@@ -98,6 +98,8 @@ const runJob = async (options: {
 				void running.stop();
 			}, options.run.jobTimeoutMs);
 			const exitCode = await running.exit.finally(() => clearTimeout(timer));
+			//* stops what the lane left in its process group, such as a CMS a timed-out test started
+			await running.stop();
 
 			const result = await readJson<LaneResult>(context.paths.report).catch(
 				(): LaneResult => ({

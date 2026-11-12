@@ -38,7 +38,7 @@ const importEntryController = factory.createHandlers(
 		const context = createServiceContext(c);
 		const upload = body.upload;
 
-		//* entries save in their own transactions, and media uploads can't run in one
+		//* entries save in their own transactions, so a file downloaded from the source site holds none open
 		const resultRes = await serviceWrapper(transferServices.importEntry, {
 			transaction: false,
 			defaultError: {

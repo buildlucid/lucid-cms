@@ -88,6 +88,7 @@ export const test = base.extend<
 						context,
 						databaseUrl: database.url,
 						step,
+						uploads: database.uploads,
 					});
 					servers.push(server.stop);
 					return server;

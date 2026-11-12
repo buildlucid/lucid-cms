@@ -8,7 +8,7 @@ import type { ApiResponse, Session } from "../harness/src/client/types.ts";
 export type MediaFile = {
 	name: string;
 	mimeType: string;
-	bytes: Uint8Array;
+	bytes: Uint8Array<ArrayBuffer>;
 };
 
 type UploadOptions = { public?: boolean };
@@ -417,9 +417,11 @@ export const countVariants = (lucid: Lucid, key: string) =>
 
 /**
  * Returns missing and orphaned files by comparing disk with database records, including pending
- * uploads. Requires host mode and filesystem storage.
+ * uploads, for a host mode CMS or a migration database. Requires filesystem storage.
  */
-export const findStorageDrift = async (lucid: Lucid) => {
+export const findStorageDrift = async (
+	lucid: Pick<Lucid, "query" | "uploads">,
+) => {
 	const [rows, onDisk] = await Promise.all([
 		lucid.query(async (kysely) => {
 			const [media, processed, pending] = await Promise.all([

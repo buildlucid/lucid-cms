@@ -24,6 +24,7 @@ import type { Measurement } from "../../report/types.ts";
 import writeLaneResult from "../../report/write-lane-result.ts";
 import getLauncher from "../../servers/get-launcher.ts";
 import { paths } from "../../utils/paths.ts";
+import { stopAllCommands } from "../../utils/run-command.ts";
 
 const DEFAULT_WARMUPS = 1;
 
@@ -151,6 +152,10 @@ for (const { file, benchmark } of selected) {
 			durationMs: Date.now() - startedAt,
 			error: message.split("\n")[0],
 		});
+	} finally {
+		//* a benchmark that fails before its cleanup leaves its servers running in process groups of
+		//* their own, which would outlive the lane
+		await stopAllCommands();
 	}
 
 	const last = byFile.get(file)?.at(-1);

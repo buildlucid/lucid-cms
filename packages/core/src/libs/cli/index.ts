@@ -140,7 +140,7 @@ program
 program
 	.command("jobs:run [job-or-schedule]")
 	.description(
-		"Run a registered job schedule now, picked from a list when omitted",
+		"Run a registered job schedule now, picked from a list in a terminal when omitted",
 	)
 	.option("--remote", remoteOptionDescription)
 	.action(jobSchedulerCommand);

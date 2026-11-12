@@ -18,6 +18,10 @@ export type CmsEnv = Required<
 	>
 >;
 
+/** What a CMS is started with: its database and address, and the shared resources it uses. */
+export type ServerEnv = CmsEnv &
+	Required<Pick<HarnessEnv, "HARNESS_DATABASE_URL" | "HARNESS_URL">>;
+
 /** Where tests find the CMS: a template to boot their own copy from, a running server, or nowhere. */
 export type TargetDescription =
 	| { mode: "host"; template: DatabaseTemplate }
@@ -28,6 +32,8 @@ export type TargetDescription =
 			outbox: string;
 			/** The folder holding what the server's probe jobs did. */
 			ledger: string;
+			/** What the server was started with, which commands run against it are given too. */
+			env: ServerEnv;
 	  }
 	| { mode: "project" };
 

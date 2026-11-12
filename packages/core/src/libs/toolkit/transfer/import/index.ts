@@ -14,7 +14,6 @@ export type * from "./types.js";
 /**
  * Imports an export file, entry by entry. Entries that succeed are kept when others fail,
  * so check `items` for each outcome.
- * @remarks Media uploads can't run in a transaction, so import files with media outside one.
  */
 const importFile = (
 	context: ServiceContext,

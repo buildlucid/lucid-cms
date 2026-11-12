@@ -1,4 +1,11 @@
 import type { LucidConfig } from "@lucidcms/core/types";
+import seedsPlugin from "../seeds/plugin.ts";
+import {
+	badlyNamedSeed,
+	duplicateSeed,
+	failingSeeds,
+	workingSeeds,
+} from "../seeds/seeds.ts";
 import {
 	ARTICLE_KEY,
 	addedArticle,
@@ -15,7 +22,7 @@ import notesPlugin from "./external/plugin.ts";
 /** What a step adds to a setup's config. Steps only add, so the shared content model stays as it is. */
 export type SchemaStep = Pick<
 	LucidConfig,
-	"collections" | "migrations" | "plugins" | "sources"
+	"collections" | "migrations" | "plugins" | "seeds" | "sources"
 >;
 
 export const INLINE_MIGRATION = "1790000000001-harness-inline-notes";
@@ -23,8 +30,15 @@ export const FAILING_MIGRATION = "1790000000004-harness-failing-notes";
 
 const articleTable = `lucid_document__${ARTICLE_KEY}`;
 
+/** Seeds from each place a project can register them: the config, a plugin and a folder. */
+const seedsStep = {
+	plugins: [seedsPlugin(undefined)],
+	seeds: workingSeeds,
+	sources: { seeds: ["../../shared/seeds/files"] },
+} satisfies SchemaStep;
+
 /**
- * Named config versions for migration tests. `HARNESS_SCHEMA_STEP` selects the same version for
+ * Named config versions for migration and seed tests. `HARNESS_SCHEMA_STEP` selects the same version for
  * the CLI, in-process CMS and built server.
  */
 const steps = {
@@ -84,6 +98,22 @@ const steps = {
 	},
 	large: { collections: largeModel() },
 	"large/changed": { collections: largeModel({ extraField: true }) },
+	seeds: seedsStep,
+	"seeds/failing": {
+		...seedsStep,
+		seeds: [...workingSeeds, ...failingSeeds],
+	},
+	/** The seeds with a collection the database has not been migrated for. */
+	"seeds/article": { ...seedsStep, collections: [baseArticle] },
+	"seeds/duplicate": { ...seedsStep, seeds: [...workingSeeds, duplicateSeed] },
+	"seeds/invalid-name": {
+		...seedsStep,
+		seeds: [...workingSeeds, badlyNamedSeed],
+	},
+	"seeds/invalid-file": {
+		...seedsStep,
+		sources: { seeds: ["../../shared/seeds/invalid"] },
+	},
 } satisfies Record<string, SchemaStep>;
 
 export type SchemaStepKey = keyof typeof steps;

@@ -177,3 +177,18 @@ test("work queued for a rollback runs only when the transaction rolls back", asy
 
 	expect(ran).toEqual(["rolled back"]);
 });
+
+test("work queued for a rollback runs newest first, undoing in reverse", async () => {
+	const ran: string[] = [];
+
+	await withTransaction(context, async (transaction) => {
+		for (const step of ["stored", "moved"]) {
+			transaction.db.afterRollback(async () => {
+				ran.push(`undo ${step}`);
+			});
+		}
+		return { error: failure, data: undefined };
+	});
+
+	expect(ran).toEqual(["undo moved", "undo stored"]);
+});

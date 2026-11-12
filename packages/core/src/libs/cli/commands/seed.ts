@@ -28,7 +28,7 @@ export const seedListCommand = (options?: TaskServerOptions) =>
 		options,
 	);
 
-/** Runs the named seed, every seed with `--all`, or one picked from a list, in the runtime. */
+/** Runs the named seed, every seed with `--all`, or one picked from a list in a terminal, in the runtime. */
 const seedCommand = (
 	seedName?: string,
 	options?: { all?: boolean } & TaskServerOptions,
@@ -39,6 +39,12 @@ const seedCommand = (
 			if (seedName && options?.all) {
 				throw new LucidError({
 					message: "Specify either a seed name or --all, not both.",
+				});
+			}
+			if (!seedName && !options?.all && !process.stdin.isTTY) {
+				throw new LucidError({
+					message:
+						"There's no terminal to pick a seed in. Name the seed to run, or re-run with --all to run every seed.",
 				});
 			}
 

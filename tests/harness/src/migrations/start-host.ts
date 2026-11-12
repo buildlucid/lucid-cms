@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import path from "node:path";
 import { createInterface } from "node:readline";
+import type { HostEnv } from "../targets/boot-host.ts";
 import { paths } from "../utils/paths.ts";
 
 /**
@@ -11,7 +12,7 @@ import { paths } from "../utils/paths.ts";
 const startHost = async (options: {
 	configPath: string;
 	databaseUrl: string;
-	schemaStep?: string;
+	env: HostEnv;
 }): Promise<{ url: string; stop(): Promise<void> }> => {
 	const child = spawn(
 		process.execPath,
@@ -19,7 +20,7 @@ const startHost = async (options: {
 			path.join(paths.harness, "migrations/serve-host.ts"),
 			options.configPath,
 			options.databaseUrl,
-			...(options.schemaStep ? [options.schemaStep] : []),
+			JSON.stringify(options.env),
 		],
 		{ cwd: paths.root, stdio: ["ignore", "pipe", "pipe"] },
 	);

@@ -15,15 +15,17 @@ import type { AdapterOverrides, Target } from "./types.ts";
 /** The address an in-process CMS believes it is served from. Nothing listens on it. */
 export const HOST_URL = "http://localhost:6543";
 
+/** What a setup's config reads besides its database and address, such as where sent emails go or a schema step. */
+export type HostEnv = Omit<HarnessEnv, "HARNESS_DATABASE_URL" | "HARNESS_URL">;
+
 /** Loads a setup's config and runs the CMS inside this process, against the given database. */
 const bootHost = async (options: {
 	configPath: string;
 	databaseUrl: string;
-	/** The rest of what the setup's config reads, such as where sent emails go or a schema step. */
-	env?: Omit<HarnessEnv, "HARNESS_DATABASE_URL" | "HARNESS_URL">;
+	env?: HostEnv;
 	adapterOverrides?: AdapterOverrides;
 }): Promise<
-	Omit<Target, "outbox" | "ledger" | "uploads"> & {
+	Omit<Target, "outbox" | "ledger" | "uploads" | "cli"> & {
 		config: ResolvedLucidConfig;
 	}
 > => {

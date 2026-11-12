@@ -5,7 +5,7 @@ import runPrompt from "../services/run-prompt.js";
 import runTaskCommand from "../services/run-task-command.js";
 import type { TaskServerOptions } from "../services/start-task-server.js";
 
-/** Runs one registered job schedule in the runtime, found by its key or job name, or picked from a list. */
+/** Runs one registered job schedule in the runtime, found by its key or job name, or picked from a list in a terminal. */
 const jobSchedulerCommand = (
 	jobOrSchedule?: string,
 	options?: TaskServerOptions,
@@ -16,6 +16,11 @@ const jobSchedulerCommand = (
 			const schedules = await run("jobs:list", {});
 			if (schedules.length === 0) {
 				throw new LucidError({ message: "No job schedules are registered." });
+			}
+			if (!jobOrSchedule && !process.stdin.isTTY) {
+				throw new LucidError({
+					message: `There's no terminal to pick a job schedule in. Name the job or schedule to run. Available schedules: ${schedules.map((schedule) => schedule.key).join(", ")}.`,
+				});
 			}
 
 			const reference =

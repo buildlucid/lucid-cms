@@ -1,20 +1,13 @@
-import type { BrowserContext } from "@playwright/test";
-import { expect, requires, type Session, test } from "#harness/playwright";
+import {
+	expect,
+	requires,
+	type Session,
+	signInTo,
+	test,
+} from "#harness/playwright";
 import { composerIn } from "#shared/agent-pages";
 
 type Server = { url: string; admin: Session; stop(): Promise<void> };
-
-/** Signs the browser in to a server other than the one the lane started. */
-const signIn = async (context: BrowserContext, server: Server) => {
-	await context.clearCookies();
-	await context.addCookies(
-		server.admin.cookies().map((cookie) => ({
-			...cookie,
-			domain: new URL(server.url).hostname,
-			path: "/",
-		})),
-	);
-};
 
 test.describe("connecting to Lucid in the admin", () => {
 	//* each test needs a CMS of its own that starts disconnected, which only Node setups can start
@@ -29,7 +22,7 @@ test.describe("connecting to Lucid in the admin", () => {
 		server = await migrations.serve(database, null);
 	});
 
-	test.beforeEach(({ context }) => signIn(context, server));
+	test.beforeEach(({ context }) => signInTo(context, server));
 
 	test("asks to connect before the agent can be used", async ({ page }) => {
 		await page.goto(`${server.url}/admin/agent`);

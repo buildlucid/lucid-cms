@@ -20,6 +20,8 @@ export type CliRun = {
 export type MigrationDatabase = {
 	/** What the setup's config receives as `HARNESS_DATABASE_URL`. */
 	url: string;
+	/** The folder Node setups store this database's uploads in, for comparing files with their rows. */
+	uploads: string;
 	/**
 	 * Runs a `lucidcms` command as a project would, with no terminal to answer prompts.
 	 *
@@ -59,7 +61,8 @@ export type Migrations = {
 	/**
 	 * Creates a database, which is removed when the test ends. It starts empty, or as `prepare`
 	 * left it. `prepare` runs at most once per test file and every call gets its own copy, so tests
-	 * that start from the same state skip repeating it. See `migratedTo`.
+	 * that start from the same state skip repeating it. Copies have uploads folders of their own,
+	 * so files `prepare` stores are not in them. See `migratedTo`.
 	 */
 	database(prepare?: PrepareDatabase): Promise<MigrationDatabase>;
 };

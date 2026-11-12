@@ -4,6 +4,8 @@ import type { Seed } from "./types.js";
  * Defines a repeatable data seed. Use the supplied service context for database
  * queries or the supplied toolkit for content helpers. Seeds may run more than
  * once, so check for existing data or use upserts. Throw a LucidError to report failure.
+ * Each seed runs in its own transaction, so a failure undoes its writes and deletes the
+ * media files it uploaded.
  *
  * @example
  * export default defineSeed({

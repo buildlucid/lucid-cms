@@ -44,7 +44,8 @@ Browser tests need Playwright's browser once: `npx playwright install chromium`.
 tests/
   setups/<name>/        a lucid.config.ts and a setup.ts that describes it
   shared/               the config and collections every setup starts from
-  shared/migrations/    the config versions that migration tests move between
+  shared/migrations/    the config versions that migration and seed tests move between
+  shared/seeds/         the seeds those config versions register, and what tests read back
   suites/<lane>/<area>/ the tests, grouped by lane and then by area
   harness/src/          the harness itself
   .harness/             run output (ignored by git)
@@ -103,7 +104,8 @@ describe("creating documents", () => {
 - `advanceClock(ms)` moves the clock forward for the rest of the test, such as past a token's expiry. It only works in host mode, where the CMS shares the test's clock. Sign in again on a new session after a long jump, as the shared admin's tokens would be renewed in the future.
 - `lucid.query(use)` runs queries on the CMS's database, for what the API can't show, such as the storage count media limits are checked against. It only works in host mode.
 - `lucid.uploads` is the folder Node setups store uploads in. In host mode each CMS has its own, so a test can compare the files on disk with what the database holds. See `findStorageDrift` in `shared/media.ts`.
-- The `migrations` fixture gives empty databases for tests that migrate themselves. See `suites/integration/migrations`.
+- `lucid.cli(...args)` runs a `lucidcms` command on the CMS's database while the CMS runs, as a project runs one beside its server. See `suites/integration/seeds/served.test.ts`.
+- The `migrations` fixture gives empty databases for tests that migrate themselves. See `suites/integration/migrations`. Each database has its own uploads folder, `database.uploads`, and its own folder for project seeds, so `findStorageDrift(database)` checks what a seed stored. Seed tests use the `seeds` config versions in `shared/migrations/steps.ts`. See `suites/integration/seeds`.
 - Every setup registers probe jobs from `shared/fragments/jobs.ts`, whose `steps` say what each attempt does: succeed, fail, throw or hang. Each attempt posts what it did to a ledger, which `executions()` in `shared/jobs.ts` reads from `lucid.ledger`. `enqueueProbe()` enqueues one through a harness-only route, and `waitForJob()` waits for its status. See `suites/integration/jobs`.
 - `tick(lucid)` runs one job scheduler tick, as a runtime's timer does each minute. `tick(lucid, at)` picks its time, which moves the scheduler's cursor for everyone on the CMS, so it is host mode only. `resetScheduler()` puts the cursor back after a test that ticked ahead. On a queue without delayed delivery, `waitForJob()` ticks every second while it waits, as retries there only run on a tick.
 - In host mode a setup with the worker queue runs a stand-in with the same key, as there is no build to start the worker thread from. It runs jobs in the test process through the same job pool as the worker, so jobs on those setups run in the background in both modes.
@@ -166,6 +168,8 @@ A full run also lists any test that applied to no setup at all. That usually mea
 Files in `suites/e2e` end in `.spec.ts` and import from `#harness/playwright`. The browser starts signed in as the admin. The `lucid` fixture is there for preparing data over the API.
 
 `pageAs(session)` opens a new page signed in as someone else, such as a user from `lucid.user()`. See `suites/e2e/permissions/access.spec.ts`. Only one person can have a document open for editing, so give each page its own document.
+
+`signInTo(context, server)` signs the browser in to a server from `migrations.serve()`. See `suites/e2e/seeds/seeded-content.spec.ts`.
 
 - Each browser has its own client address, so tests that log in don't share rate limits.
 - The served server is at `localhost`, as browsers only allow passkeys on a domain. `addVirtualAuthenticator(page)` gives a page's browser a passkey authenticator that always passes. The login page offers its passkeys as soon as it opens.

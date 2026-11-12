@@ -1,3 +1,5 @@
+import { mkdir } from "node:fs/promises";
+import path from "node:path";
 import createDatabaseName from "../databases/create-database-name.ts";
 import type { DatabaseDriver } from "../databases/types.ts";
 import type { HarnessContext } from "../environment/types.ts";
@@ -23,8 +25,16 @@ const createMigrationTemplates = (options: {
 			name,
 		});
 		try {
+			const seeds = path.join(context.paths.work, `${name}-seeds`);
+			await mkdir(seeds, { recursive: true });
 			await prepare(
-				createMigrationDatabase({ context, name, url: pending.url }),
+				createMigrationDatabase({
+					context,
+					name,
+					url: pending.url,
+					uploads: path.join(context.paths.work, `${name}-uploads`),
+					seeds,
+				}),
 			);
 			return await pending.seal();
 		} catch (error) {

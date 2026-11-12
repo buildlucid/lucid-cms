@@ -1,5 +1,6 @@
+import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/helpers.js";
-import { copy } from "../../libs/i18n/index.js";
+import logger from "../../libs/logger/index.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { MediaOrigin } from "../../types/response.js";
 import type { MediaActor } from "../../utils/media/index.js";
@@ -14,7 +15,10 @@ import {
 } from "./helpers/upload-file.js";
 import updateSingle from "./update-single.js";
 
-/** Stores a file, then registers it through the same service used by the admin API. */
+/**
+ * Stores and registers a file through the admin media service. Rolls back the stored file if the
+ * caller's transaction fails.
+ */
 const uploadSingle: ServiceFn<
 	[
 		{
@@ -56,17 +60,6 @@ const uploadSingle: ServiceFn<
 > = async (context, input) => {
 	const file = normalizeUploadFile(input.file);
 
-	if (context.db.isTransaction) {
-		return {
-			error: {
-				status: 400,
-				code: "invalid_request",
-				message: copy("server:core.media.upload.transaction"),
-			},
-			data: undefined,
-		};
-	}
-
 	const Media = new MediaRepository(context.db);
 	const existing =
 		input.id === undefined
@@ -93,6 +86,18 @@ const uploadSingle: ServiceFn<
 	});
 	if (stored.error) return stored;
 	const key = stored.data.key;
+
+	//* the pending upload's row rolls back with the caller's transaction, which leaves nothing to clean the file up later
+	context.db.afterRollback(async () => {
+		const deleted = await context.mediaStorage?.delete(context, { key });
+		if (deleted?.error) {
+			logger.warn({
+				message: "A media file couldn't be removed after a rollback",
+				scope: constants.logScopes.lucid,
+				data: { key, reason: deleted.error.message },
+			});
+		}
+	});
 
 	let registered = false;
 	try {

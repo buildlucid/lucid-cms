@@ -13,7 +13,7 @@ import type { Setup } from "../setup/types.ts";
 import { HOST_URL } from "../targets/boot-host.ts";
 import prepareTemplate from "./prepare-template.ts";
 import startServer from "./start-server.ts";
-import type { CmsEnv } from "./types.ts";
+import type { CmsEnv, TargetDescription } from "./types.ts";
 
 /** A setup's migrated and seeded database, and what its config says it can do. */
 export type PreparedDatabase = {
@@ -41,7 +41,9 @@ export type SetupEnvironment = {
 	 * Builds and starts the setup's real server, connected to the fake Lucid API, and returns its
 	 * address, outbox and ledger folders.
 	 */
-	serve(): Promise<{ url: string; outbox: string; ledger: string }>;
+	serve(): Promise<
+		Omit<Extract<TargetDescription, { mode: "served" }>, "mode">
+	>;
 	destroy(): Promise<void>;
 };
 
@@ -125,15 +127,16 @@ const createEnvironment = (options: {
 		});
 		cleanups.push(copy.destroy);
 
+		const servedEnv = {
+			...cmsEnv,
+			HARNESS_OUTBOX: `${cmsEnv.HARNESS_OUTBOX}/${SERVED_INSTANCE}`,
+			HARNESS_LEDGER: `${cmsEnv.HARNESS_LEDGER}/${SERVED_INSTANCE}`,
+		};
 		const server = await startServer({
 			setup,
 			database: copy,
 			directory,
-			env: {
-				...cmsEnv,
-				HARNESS_OUTBOX: `${cmsEnv.HARNESS_OUTBOX}/${SERVED_INSTANCE}`,
-				HARNESS_LEDGER: `${cmsEnv.HARNESS_LEDGER}/${SERVED_INSTANCE}`,
-			},
+			env: servedEnv,
 		});
 		cleanups.push(server.stop);
 
@@ -150,6 +153,11 @@ const createEnvironment = (options: {
 			url: server.url,
 			outbox: path.join(outbox, SERVED_INSTANCE),
 			ledger: path.join(ledger, SERVED_INSTANCE),
+			env: {
+				...servedEnv,
+				HARNESS_DATABASE_URL: copy.url,
+				HARNESS_URL: server.url,
+			},
 		};
 	});
 

@@ -1,30 +1,33 @@
-import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { stripVTControlCharacters } from "node:util";
 import type { KyselyDB, ResolvedLucidConfig } from "@lucidcms/core/types";
 import { ADMIN, ensureAdmin, login } from "../client/admin.ts";
 import createSession from "../client/create-session.ts";
 import type { HarnessContext } from "../environment/types.ts";
+import captureLucidCli from "../servers/capture-lucid-cli.ts";
 import { HOST_URL } from "../targets/boot-host.ts";
 import loadSetupConfig from "../targets/load-setup-config.ts";
-import { paths } from "../utils/paths.ts";
-import { runCommand } from "../utils/run-command.ts";
+import type { RunningCommand } from "../utils/run-command.ts";
 import startHost from "./start-host.ts";
 import type { MigrationDatabase, Step } from "./types.ts";
 
 /**
- * Gives a database the commands and readers a migration test needs. `name` must be unique in
- * the run, as it names the database's command logs.
+ * Provides migration commands and readers. `name` must be unique for command logs. Uploads and
+ * seeds use separate folders; the `seeds` folder must exist.
  */
 const createMigrationDatabase = (options: {
 	context: HarnessContext;
 	name: string;
 	url: string;
+	uploads: string;
+	seeds: string;
+	/** Holds its commands while they run, so whoever owns the database can stop one a test left hanging. */
+	running?: Set<RunningCommand>;
 }): MigrationDatabase => {
-	const { context, name, url } = options;
+	const { context, name, url, uploads } = options;
 	const env = (step: Step) => ({
 		HARNESS_DATABASE_URL: url,
 		HARNESS_URL: HOST_URL,
+		HARNESS_UPLOADS: uploads,
 		...(step ? { HARNESS_SCHEMA_STEP: step } : {}),
 	});
 	let commands = 0;
@@ -53,27 +56,23 @@ const createMigrationDatabase = (options: {
 
 	return {
 		url,
-		cli: async (step, ...args) => {
-			const log = path.join(context.paths.work, `${name}-${++commands}.log`);
-			const code = await runCommand({
-				command: path.join(paths.bin, "lucidcms"),
+		uploads,
+		cli: (step, ...args) =>
+			captureLucidCli({
+				setup: context.setup,
 				args,
-				cwd: context.setup.directory,
-				//* CI stops the CLI drawing spinners into the log
-				env: { ...env(step), CI: "true" },
-				output: log,
-			});
-
-			return {
-				code,
-				output: stripVTControlCharacters(await readFile(log, "utf8")),
-			};
-		},
+				env: { ...env(step), HARNESS_SEEDS: options.seeds },
+				log: path.join(context.paths.work, `${name}-${++commands}.log`),
+				running: options.running,
+			}),
 		cms: async (step, use) => {
 			const host = await startHost({
 				configPath: context.setup.configPath,
 				databaseUrl: url,
-				schemaStep: step ?? undefined,
+				env: {
+					HARNESS_UPLOADS: uploads,
+					...(step ? { HARNESS_SCHEMA_STEP: step } : {}),
+				},
 			});
 			try {
 				const session = () =>

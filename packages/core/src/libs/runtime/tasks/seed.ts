@@ -1,9 +1,9 @@
 import z from "zod";
 import { LucidError } from "../../../utils/errors/index.js";
+import withTransaction from "../../../utils/services/with-transaction.js";
 import cliLogger from "../../cli/logger.js";
 import assessMigrationPlans from "../../collection/migration/assess-migration-plan.js";
 import planCollectionMigrations from "../../collection/plan-collection-migrations.js";
-import type { LucidDatabase } from "../../db/client/index.js";
 import collectSeeds from "../../seed/collect-seeds.js";
 import createToolkit from "../../toolkit/create-toolkit.js";
 import createTaskServiceContext from "./create-task-service-context.js";
@@ -11,7 +11,10 @@ import defineRuntimeTask from "./define-runtime-task.js";
 import loadDevModules from "./load-dev-modules.js";
 import runSyncTasks from "./run-sync-tasks.js";
 
-/** Runs seeds on a migrated, synced CMS instance, isolating each seed in its own transaction so failures roll back partial writes. */
+/**
+ * Runs seeds in separate transactions on a migrated, synced CMS. Failed seeds roll back writes and
+ * run cleanup callbacks, including stored-file deletion.
+ */
 const seedTask = defineRuntimeTask({
 	input: z.object({ names: z.array(z.string()).min(1) }),
 	run: async (context, input) => {
@@ -82,22 +85,13 @@ const seedTask = defineRuntimeTask({
 		try {
 			for (const { name, seed } of selected) {
 				cliLogger.info(`Running seed "${name}"...`);
-				let transactionDb: LucidDatabase | undefined;
-				await serviceContext.db.kysely
-					.transaction()
-					.execute(async (transaction) => {
-						transactionDb = serviceContext.db.withTransaction(transaction);
-						const transactionContext = {
-							...serviceContext,
-							db: transactionDb,
-						};
-
-						await seed.run({
-							context: transactionContext,
-							toolkit: createToolkit(transactionContext),
-						});
+				await withTransaction(serviceContext, async (transactionContext) => {
+					await seed.run({
+						context: transactionContext,
+						toolkit: createToolkit(transactionContext),
 					});
-				await transactionDb?.runCommitCallbacks();
+					return { error: undefined, data: undefined };
+				});
 
 				cliLogger.success(
 					`Seed "${name}" completed`,

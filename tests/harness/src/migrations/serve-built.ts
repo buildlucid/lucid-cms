@@ -17,6 +17,8 @@ const serveBuilt = async (options: {
 	context: HarnessContext;
 	databaseUrl: string;
 	step: Step;
+	/** Where Node setups store uploads, such as a migration database's own folder. */
+	uploads?: string;
 }): Promise<{
 	url: string;
 	/** The harness's fake of Lucid's API, which the server connects to. See `shared/ai.ts`. */
@@ -42,6 +44,7 @@ const serveBuilt = async (options: {
 			HARNESS_DATABASE_URL: options.databaseUrl,
 			HARNESS_URL: url,
 			...(options.step ? { HARNESS_SCHEMA_STEP: options.step } : {}),
+			...(options.uploads ? { HARNESS_UPLOADS: options.uploads } : {}),
 		},
 		log,
 		port,

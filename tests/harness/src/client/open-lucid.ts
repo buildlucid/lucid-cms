@@ -3,6 +3,7 @@ import type { OutboxEmail } from "../../../shared/fragments/outbox.ts";
 import type { Variant } from "../../../shared/variants.ts";
 import type { Capability } from "../capabilities/types.ts";
 import type { HarnessContext } from "../environment/types.ts";
+import type { CliRun } from "../migrations/types.ts";
 import type { Mode } from "../setup/types.ts";
 import openTarget from "../targets/open-target.ts";
 import type { HostTargetOptions } from "../targets/types.ts";
@@ -38,6 +39,8 @@ export type Lucid = {
 	ledger: string;
 	/** The harness's fake of Lucid's API, which the CMS connects to. See `shared/ai.ts`. */
 	lucidApi: string;
+	/** Runs a CLI command against the live CMS database, e.g. `lucid.cli("seed", "starter")`. */
+	cli(...args: string[]): Promise<CliRun>;
 	/**
 	 * Runs queries on the CMS's database, for what the API cannot show, such as a counter it keeps
 	 * to itself. Host mode only, so call `requires("mode:host")`.
@@ -104,6 +107,7 @@ const openLucid = async (
 		uploads: target.uploads,
 		ledger: target.ledger,
 		lucidApi: context.cmsEnv.LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE,
+		cli: target.cli,
 		query: (use) => {
 			if (!target.query) {
 				throw new Error(

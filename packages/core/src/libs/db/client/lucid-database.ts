@@ -209,10 +209,14 @@ export default class LucidDatabase {
 		if (this.isTransaction) this.rollbackCallbacks.push(callback);
 	}
 
-	/** Runs the work queued with `afterRollback`. Whoever rolls back this client's transaction calls it. */
+	/**
+	 * Runs the work queued with `afterRollback`, newest first, so each undo finds things as the work
+	 * after it left them, such as a file moved after it was stored. Whoever rolls back this client's
+	 * transaction calls it.
+	 */
 	async runRollbackCallbacks(): Promise<void> {
 		this.commitCallbacks.length = 0;
-		for (const callback of this.rollbackCallbacks.splice(0)) {
+		for (const callback of this.rollbackCallbacks.splice(0).reverse()) {
 			await callback();
 		}
 	}

@@ -161,7 +161,6 @@
 	"core.toolkit.users.get-multiple.error.name": "Users Toolkit Error",
 	"core.toolkit.users.get-single.error.message": "Lucid toolkit could not fetch a user.",
 	"core.toolkit.users.get-single.error.name": "Users Toolkit Error",
-	"core.media.upload.transaction": "Upload media before opening a database transaction.",
 	"core.media.upload.file.invalid": "Provide a file, bytes or a binary stream with a filename and valid size.",
 	"core.media.upload.size.mismatch": "The uploaded file size does not match its declared size.",
 	"core.media.upload.mime.invalid": "This file type is not allowed.",
