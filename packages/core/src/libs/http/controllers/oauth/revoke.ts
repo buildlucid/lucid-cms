@@ -21,7 +21,8 @@ const factory = createFactory();
 
 const revokeController = factory.createHandlers(
 	openAPI.describeRoute(() => ({
-		description: "Revokes an OAuth refresh token and its connection.",
+		description:
+			"Revokes the connection behind an OAuth refresh or access token, ending every token issued for it.",
 		tags: ["oauth"],
 		summary: "Revoke OAuth Token",
 		parameters: [

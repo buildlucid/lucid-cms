@@ -20,6 +20,9 @@ import { ExternalScopes } from "../../permission/external-scopes.js";
 import createServiceContext from "../utils/create-service-context.js";
 import getClientAddress from "../utils/get-client-address.js";
 
+/** How long a credential's recorded use stands before a request records it again. */
+const LAST_USED_INTERVAL_MS = 60_000;
+
 const lastUsedWrites = createWritePause({
 	action: "record when a credential was last used",
 	scope: constants.logScopes.http,
@@ -57,9 +60,8 @@ type ExternalAuthenticationOptions = (
 ) & { resource?: OAuthResource };
 
 /**
- * Authenticates external requests with an integration API key or OAuth access
- * token, then exposes the resolved principal and scopes to downstream handlers.
- * Optional routes accept missing credentials but still reject invalid ones.
+ * Authenticates integration API keys or OAuth tokens and exposes principal and scopes. Optional
+ * routes allow missing credentials but reject invalid ones.
  */
 const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
@@ -120,6 +122,7 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 		}
 
 		let externalAuth: LucidExternalAuth;
+		let lastUsedAt: Date | string | null;
 		if (integrationCredential) {
 			const verifyApiKey = await serviceWrapper(
 				integrationServices.verifyApiKey,
@@ -141,7 +144,7 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 					status: 401,
 				});
 			}
-			externalAuth = verifyApiKey.data;
+			({ lastUsedAt, ...externalAuth } = verifyApiKey.data);
 		} else if (oauthCredential) {
 			const verifyAccessToken = await serviceWrapper(
 				oauthServices.verifyAccessToken,
@@ -158,7 +161,7 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 				setOAuthBearerChallenge(c, context, "invalid_token", resource);
 				throw new LucidError(verifyAccessToken.error);
 			}
-			externalAuth = verifyAccessToken.data;
+			({ lastUsedAt, ...externalAuth } = verifyAccessToken.data);
 		} else {
 			setOAuthBearerChallenge(c, context, undefined, resource);
 			throw new LucidError({
@@ -187,7 +190,11 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 		c.set("externalAuth", externalAuth);
 		const response = await next();
 
-		if (!lastUsedWrites.isPaused()) {
+		//* busy credentials record their use once a minute, not on every request
+		const recordUse =
+			lastUsedAt === null ||
+			Date.now() - new Date(lastUsedAt).getTime() >= LAST_USED_INTERVAL_MS;
+		if (recordUse && !lastUsedWrites.isPaused()) {
 			const lastUsed =
 				externalAuth.credential.type === "api-key"
 					? integrationServices.updateLastUsed(context, {
@@ -200,12 +207,14 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 							ipAddress: getClientAddress(c),
 							userAgent,
 						});
-			void lastUsed.then(
+			const recorded = lastUsed.then(
 				(result) => {
 					if (result.error) lastUsedWrites.pause();
 				},
 				() => lastUsedWrites.pause(),
 			);
+			//* Workers stop work left running after the response unless told to wait for it
+			c.get("ctx")?.waitUntil(recorded);
 		}
 
 		return response;

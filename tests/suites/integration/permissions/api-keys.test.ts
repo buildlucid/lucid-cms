@@ -1,40 +1,21 @@
 import {
 	describe,
 	expect,
-	type Lucid,
 	requires,
 	type Session,
 	test,
 } from "#harness/vitest";
 import { STORY_KEY } from "#shared/collections/story";
 import { createDocument } from "#shared/documents";
+import { createApiKey } from "#shared/integrations";
+import { callContent } from "#shared/oauth";
 import { setRolePermissions, uniqueName } from "#shared/permissions";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 
 /** Makes a personal API key for the signed-in user, and returns its secret. */
-const createPersonalKey = async (session: Session, scopes: string[]) => {
-	const created = await session.request<{ data: { apiKey: string } }>({
-		method: "POST",
-		path: "/api/v1/account/integrations",
-		body: { name: uniqueName("Personal key"), scopes },
-	});
-	expect(created.status, JSON.stringify(created.body)).toBe(200);
-	return created.body.data.apiKey;
-};
-
-/** Calls the content API with a key, as a website would. */
-const callWithKey = async (
-	lucid: Lucid,
-	apiKey: string,
-	path: string,
-): Promise<{ status: number; body: unknown }> => {
-	const response = await lucid.session().fetch(`/api/v1/content/${path}`, {
-		headers: { authorization: `Bearer ${apiKey}` },
-	});
-	const text = await response.text();
-	return { status: response.status, body: text ? JSON.parse(text) : null };
-};
+const createPersonalKey = async (session: Session, scopes: string[]) =>
+	(await createApiKey(session, "personal", { scopes })).apiKey;
 
 describe("personal API keys", () => {
 	requires("harness:outbox", `collection:${STORY_KEY}`);
@@ -49,7 +30,7 @@ describe("personal API keys", () => {
 		const owner = await lucid.user({ permissions: [READ_STORIES] });
 		const apiKey = await createPersonalKey(owner.session, [READ_STORIES]);
 		const read = () =>
-			callWithKey(
+			callContent(
 				lucid,
 				apiKey,
 				`document/${STORY_KEY}?filter[id]=${id}&version=latest`,
@@ -75,7 +56,7 @@ describe("personal API keys", () => {
 			return;
 		}
 
-		const read = await callWithKey(
+		const read = await callContent(
 			lucid,
 			created.body.data.apiKey,
 			`documents/${STORY_KEY}?version=latest`,
@@ -88,7 +69,7 @@ describe("personal API keys", () => {
 		const owner = await lucid.user({ permissions: [READ_STORIES] });
 		const apiKey = await createPersonalKey(owner.session, [READ_STORIES]);
 		const read = () =>
-			callWithKey(lucid, apiKey, `documents/${STORY_KEY}?version=latest`);
+			callContent(lucid, apiKey, `documents/${STORY_KEY}?version=latest`);
 		expect((await read()).status).toBe(200);
 
 		const locked = await admin.request({
@@ -114,8 +95,8 @@ describe("personal API keys", () => {
 		});
 		expect(system.status).toBe(201);
 
-		const asOwner = await callWithKey(lucid, personal, "account");
-		const asSystem = await callWithKey(
+		const asOwner = await callContent(lucid, personal, "account");
+		const asSystem = await callContent(
 			lucid,
 			system.body.data.apiKey,
 			"account",

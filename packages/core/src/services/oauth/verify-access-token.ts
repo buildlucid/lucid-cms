@@ -11,7 +11,10 @@ import resolveGrantAuthority from "./resolve-grant-authority.js";
 /** Verifies an OAuth access token and resolves its effective authority. */
 const verifyAccessToken: ServiceFn<
 	[{ accessToken: string; resource?: OAuthResource }],
-	LucidOAuthExternalAuth
+	LucidOAuthExternalAuth & {
+		/** When the connection's use was last recorded, which decides whether to record it again. */
+		lastUsedAt: Date | string | null;
+	}
 > = async (context, input) => {
 	let payload: Awaited<ReturnType<typeof verify>>;
 	try {
@@ -91,7 +94,13 @@ const verifyAccessToken: ServiceFn<
 		};
 	}
 
-	return resolveGrantAuthority(context, grantRes.data);
+	const authority = await resolveGrantAuthority(context, grantRes.data);
+	if (authority.error) return authority;
+
+	return {
+		error: undefined,
+		data: { ...authority.data, lastUsedAt: grantRes.data.last_used_at },
+	};
 };
 
 export default verifyAccessToken;

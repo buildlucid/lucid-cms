@@ -93,7 +93,7 @@
 - Fixed password hashing blocking the server. Hashing now runs off the main thread, two at a time so a flood of logins can't slow other requests, and existing hashes still verify. ([e031c52](https://github.com/buildlucid/lucid-cms/commit/e031c52bca645661f71988cd89bad8540cd2348d))
 - Fixed every API key and OAuth client secret check running a slow password hash. ([6f33fab](https://github.com/buildlucid/lucid-cms/commit/6f33fab4fe85577fd6fe24f050f607b07a1e44eb))
 - Fixed other sessions staying logged in after a password change or account recovery. ([3c99c8f](https://github.com/buildlucid/lucid-cms/commit/3c99c8fb45befa8ac2e9b51692e735e988521cfc))
-- Fixed reusing an OAuth refresh token not revoking the tokens issued after it. ([3c99c8f](https://github.com/buildlucid/lucid-cms/commit/3c99c8fb45befa8ac2e9b51692e735e988521cfc))
+- Fixed reusing an OAuth refresh token not revoking the tokens issued after it. Reuse now revokes the whole connection, including its access tokens and a refresh being issued at the same moment. ([3c99c8f](https://github.com/buildlucid/lucid-cms/commit/3c99c8fb45befa8ac2e9b51692e735e988521cfc))
 - Fixed two refreshes of the same session at once both getting a new session. ([8a80d7f](https://github.com/buildlucid/lucid-cms/commit/8a80d7f18a1cd9842c40cd4ecac436a3f396a619))
 - Fixed login showing whether an account exists, is locked or is suspended to someone without its password. ([8a80d7f](https://github.com/buildlucid/lucid-cms/commit/8a80d7f18a1cd9842c40cd4ecac436a3f396a619))
 - Fixed wrong passwords having no limit per account or address. Each account now allows 10 every 15 minutes, and each address 30 across logins and share link passwords. ([dfa3e3d](https://github.com/buildlucid/lucid-cms/commit/dfa3e3df8000fc0bb9aa2c070a4965ee4f067da8))
@@ -142,6 +142,9 @@
 - Fixed media URLs renaming files after their type, so `song.mp3` became `song.mpga`. ([1d8200d](https://github.com/buildlucid/lucid-cms/commit/1d8200d2b0177d54112c0c2337261c5239bd19db))
 - Fixed `GET /api/v1/jobs/{id}` failing for the job IDs that receipts return. It now takes a job ID or a row ID. ([aa2114d](https://github.com/buildlucid/lucid-cms/commit/aa2114d59ea05f7707a8ec1812c37ef763212133))
 - Fixed jobs never running when their queue lost the message, such as once Cloudflare Queues ran out of retries. The scheduler now sends a job again when it is still waiting 10 minutes after it was due. ([aa2114d](https://github.com/buildlucid/lucid-cms/commit/aa2114d59ea05f7707a8ec1812c37ef763212133))
+- Fixed a reused OAuth authorization code leaving the tokens from its first use working. The connection is now revoked, as the code may have been stolen.
+- Fixed `/api/oauth/revoke` leaving the connection and its access tokens active, and refusing access tokens. Revoking either token now ends the connection.
+- Fixed every API key and OAuth request writing when it was last used. It is now recorded at most once a minute.
 
 ## v0.19.0-alpha.0
 

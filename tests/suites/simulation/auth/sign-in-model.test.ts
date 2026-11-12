@@ -150,7 +150,10 @@ const passwordLogin = action<Model, number>({
 		}
 
 		const step = login.body.data.twoFactor;
-		const expected = user.app ? "verify" : needsSetup(user) ? "setup" : null;
+		//* a passkey answers required two-factor authentication on its own
+		const passkeyAnswers = user.required && user.passkeys.length > 0;
+		const expected =
+			user.app || passkeyAnswers ? "verify" : needsSetup(user) ? "setup" : null;
 		expect(step).toBe(expected);
 		//* no session exists until the step passes
 		if (step) {
@@ -162,6 +165,18 @@ const passwordLogin = action<Model, number>({
 				method: "POST",
 				path: "/api/v1/auth/two-factor/verify",
 				body: { code: await user.app.code() },
+			});
+			expect(verified.status).toBe(204);
+		} else if (step === "verify") {
+			const passkey = pick(user.passkeys, input);
+			const options = await visitor.request<{ data: { challenge: string } }>({
+				method: "POST",
+				path: "/api/v1/auth/two-factor/passkey/options",
+			});
+			const verified = await visitor.request({
+				method: "POST",
+				path: "/api/v1/auth/two-factor/passkey/verify",
+				body: passkey.get(options.body.data.challenge),
 			});
 			expect(verified.status).toBe(204);
 		}

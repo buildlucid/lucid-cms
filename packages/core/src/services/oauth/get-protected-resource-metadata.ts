@@ -41,7 +41,7 @@ const getProtectedResourceMetadata: ServiceFn<
 			bearer_methods_supported: ["header"],
 			scopes_supported: mcpScopes
 				? validScopes.filter((scope) => mcpScopes.has(scope))
-				: validScopes,
+				: validScopes.filter((scope) => scope !== ExternalScopes.McpAccess),
 		},
 	};
 };

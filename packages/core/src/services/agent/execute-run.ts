@@ -19,7 +19,9 @@ const executeRun: ServiceFn<
 				await input.emit?.(event);
 			},
 		});
-		if (result.error) {
+		//* a run another worker took, or that was cancelled, goes on without this slice, so its
+		//* viewers keep watching it from what's saved rather than seeing an error
+		if (result.error && result.error.key !== "agent_run_superseded") {
 			stream.publish({
 				type: "error",
 				message: context.translate(

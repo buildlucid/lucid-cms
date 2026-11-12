@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import serveFetch from "../utils/serve-fetch.ts";
+import createClientMetadata from "./create-client-metadata.ts";
 import createIdentityProvider from "./create-identity-provider.ts";
 import createLucidApi from "./lucid-api/create-lucid-api.ts";
 
@@ -13,7 +14,8 @@ type Collection = "outbox" | "ledger";
 
 /**
  * The run's stand-ins for services a CMS talks to over HTTP, which work from every runtime: an
- * outbox, a ledger of job executions, an identity provider and Lucid's own API.
+ * outbox, a ledger of job executions, an identity provider, OAuth client metadata documents at
+ * `/clients` and Lucid's own API.
  */
 export type Fakes = {
 	url: string;
@@ -63,6 +65,8 @@ const startFakes = async (): Promise<Fakes> => {
 		return new Response(null, { status: 204 });
 	};
 
+	const clientMetadata = createClientMetadata();
+
 	const server = await serveFetch(async (request) => {
 		const { pathname } = new URL(request.url);
 		const [area, ...rest] = pathname.split("/").filter(Boolean);
@@ -70,6 +74,8 @@ const startFakes = async (): Promise<Fakes> => {
 			case "outbox":
 			case "ledger":
 				return receive(area, request, rest.map(decodeURIComponent));
+			case "clients":
+				return clientMetadata(request, rest.map(decodeURIComponent));
 			case "idp":
 				return identityProvider
 					? identityProvider(request, `/${rest.join("/")}`)

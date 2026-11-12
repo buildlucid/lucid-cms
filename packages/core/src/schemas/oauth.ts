@@ -180,7 +180,8 @@ export const oauthSchemas = {
 	},
 	revoke: {
 		form: z.object({
-			token: opaqueToken,
+			//* a refresh token or an access token, which is a JWT
+			token: z.string().min(1).max(4096),
 			client_id: oauthClientId.optional(),
 			token_type_hint: z.string().trim().min(1).max(128).optional(),
 		}),

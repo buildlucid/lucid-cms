@@ -26,12 +26,14 @@ export type RunStream = {
 	events: AgentStreamEvent[];
 	/** The status the stream's `finish` event gave, or null when it ended without one. */
 	finish: AgentRunStatus | null;
-	/** The text the model streamed, joined up. */
+	/** The replies' text, joined up, from what streamed or was saved. */
 	text: string;
 	/** An `error` event's message, if the stream sent one. */
 	error: string | null;
 	/** The request's JSON body, when it answered without a stream. */
 	body: unknown;
+	/** The last event's ID, which watching the run again resumes from. */
+	cursor: string | null;
 };
 
 const expectOk = <Body>(action: string, response: ApiResponse<Body>) => {
@@ -43,8 +45,35 @@ const expectOk = <Body>(action: string, response: ApiResponse<Body>) => {
 	return response.body;
 };
 
-/** Reads a server-sent event stream to its end. */
-export const readStream = async (response: Response): Promise<RunStream> => {
+/**
+ * The replies' text, in the order they started. A saved message replaces the deltas streamed for
+ * it, as watching a run executing elsewhere sends what it saved instead of deltas.
+ */
+const textOf = (events: AgentStreamEvent[]) => {
+	const replies = new Map<string, string>();
+	for (const event of events) {
+		if (event.type === "text-delta") {
+			replies.set(
+				event.messageId,
+				(replies.get(event.messageId) ?? "") + event.text,
+			);
+		} else if (event.type === "message") {
+			replies.set(
+				event.message.id,
+				event.message.parts
+					.map((part) => (part.type === "text" ? part.text : ""))
+					.join(""),
+			);
+		}
+	}
+	return [...replies.values()].join("");
+};
+
+/** Reads a server-sent event stream to its end, leaving out the event `after` names if it's replayed. */
+export const readStream = async (
+	response: Response,
+	after?: string,
+): Promise<RunStream> => {
 	const runId = response.headers.get("x-lucid-agent-run-id");
 	const contentType = response.headers.get("content-type") ?? "";
 	if (!contentType.includes("text/event-stream")) {
@@ -57,18 +86,30 @@ export const readStream = async (response: Response): Promise<RunStream> => {
 			text: "",
 			error: null,
 			body: text ? JSON.parse(text) : null,
+			cursor: null,
 		};
 	}
 
 	const events: AgentStreamEvent[] = [];
+	let cursor: string | null = null;
 	for (const block of (await response.text()).split("\n\n")) {
-		const data = block
-			.split("\n")
+		const lines = block.split("\n");
+		const data = lines
 			.filter((line) => line.startsWith("data:"))
 			.map((line) => line.slice("data:".length).trimStart())
 			.join("\n");
+		const id = lines
+			.find((line) => line.startsWith("id:"))
+			?.slice("id:".length)
+			.trim();
+		if (id && id === after) {
+			continue;
+		}
 		if (data) {
 			events.push(JSON.parse(data) as AgentStreamEvent);
+		}
+		if (id) {
+			cursor = id;
 		}
 	}
 	const finish = events.findLast((event) => event.type === "finish");
@@ -78,15 +119,56 @@ export const readStream = async (response: Response): Promise<RunStream> => {
 		runId,
 		events,
 		finish: finish?.type === "finish" ? finish.status : null,
-		text: events
-			.map((event) => (event.type === "text-delta" ? event.text : ""))
-			.join(""),
+		text: textOf(events),
 		error: error?.type === "error" ? error.message : null,
 		body: null,
+		cursor,
 	};
 };
 
-/** Sends a JSON request that answers with a run's event stream, and reads it to its end. */
+/** How many times a stream that stopped early is followed again, as the admin does. */
+const RECONNECTS = 5;
+
+/**
+ * Resumes interrupted streams from the last event with increasing delays, covering queue handoffs
+ * and connection loss. Returns non-streamed responses unchanged.
+ */
+const followRun = async (
+	session: Session,
+	stream: RunStream,
+): Promise<RunStream> => {
+	//* a copy, so what the first stream said stays as it was
+	const followed: RunStream = { ...stream, events: [...stream.events] };
+	for (
+		let attempt = 0;
+		followed.runId &&
+		followed.status === 200 &&
+		followed.finish === null &&
+		followed.error === null &&
+		attempt < RECONNECTS;
+		attempt++
+	) {
+		await new Promise((resolve) =>
+			setTimeout(resolve, Math.min(250 * 2 ** attempt, 4_000)),
+		);
+		const next = await watchRun(
+			session,
+			followed.runId,
+			followed.cursor ?? undefined,
+		);
+		followed.events.push(...next.events);
+		followed.finish = next.finish;
+		followed.text = textOf(followed.events);
+		followed.error = next.error;
+		followed.cursor = next.cursor ?? followed.cursor;
+	}
+	return followed;
+};
+
+/**
+ * Sends a JSON request that answers with a run's event stream, and reads it until the run
+ * finishes, following it again if the stream stops early.
+ */
 const streamRequest = async (
 	session: Session,
 	path: string,
@@ -101,7 +183,7 @@ const streamRequest = async (
 		},
 		body: JSON.stringify(body),
 	});
-	return readStream(response);
+	return followRun(session, await readStream(response));
 };
 
 /** Starts a chat with an agent, the harness agent unless another is named. */
@@ -198,6 +280,7 @@ export const watchRun = async (
 				...(cursor ? { "last-event-id": cursor } : {}),
 			},
 		}),
+		cursor,
 	);
 
 /** Stops a run. */

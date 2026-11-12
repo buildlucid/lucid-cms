@@ -7,10 +7,11 @@ import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import { hashOAuthRefreshToken } from "./helpers/security.js";
 import issueOAuthTokens from "./issue-tokens.js";
+import revokeConnection from "./revoke-connection.js";
 
 /**
- * Run without an outer transaction so token-family revocation survives failed reuse attempts. Only
- * rotation is transactional.
+ * Rotates refresh tokens transactionally. Reuse revokes the connection, including concurrent
+ * replacements. Run without an outer transaction so revocation survives rejection.
  */
 const refreshAccessToken: ServiceFn<
 	[
@@ -27,7 +28,6 @@ const refreshAccessToken: ServiceFn<
 	const tokenRes = await RefreshTokens.selectSingle({
 		select: [
 			"id",
-			"family_id",
 			"grant_id",
 			"client_id",
 			"resource",
@@ -50,12 +50,11 @@ const refreshAccessToken: ServiceFn<
 	}
 
 	const token = tokenRes.data;
-	const familyId = token.family_id;
-	const revokeFamily = async (): ServiceResponse<OAuthTokenResponse> => {
-		const revokeRes = await RefreshTokens.revokeFamily({
-			familyId,
-			revokedAt: new Date().toISOString(),
-		});
+	//* each connection has one token family, so ending the connection also ends the access tokens it issued
+	const revokeGrant = async (): ServiceResponse<OAuthTokenResponse> => {
+		const revokeRes = await withTransaction(context, (context) =>
+			revokeConnection(context, { id: token.grant_id }),
+		);
 		if (revokeRes.error) return revokeRes;
 		return {
 			error: {
@@ -72,7 +71,7 @@ const refreshAccessToken: ServiceFn<
 		tokenRes.data.revoked_at !== null ||
 		new Date(tokenRes.data.expires_at).getTime() <= Date.now()
 	) {
-		return revokeFamily();
+		return revokeGrant();
 	}
 	if (
 		tokenRes.data.client_id !== input.clientId ||
@@ -129,7 +128,7 @@ const refreshAccessToken: ServiceFn<
 			familyId: consumeRes.data.family_id,
 		});
 	});
-	if (reused) return revokeFamily();
+	if (reused) return revokeGrant();
 
 	return rotateRes;
 };

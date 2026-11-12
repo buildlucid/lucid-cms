@@ -16,7 +16,10 @@ const verifyApiKey: ServiceFn<
 			apiKey: string;
 		},
 	],
-	LucidApiKeyExternalAuth
+	LucidApiKeyExternalAuth & {
+		/** When the key's use was last recorded, which decides whether to record it again. */
+		lastUsedAt: Date | string | null;
+	}
 > = async (context, data) => {
 	const Integrations = new IntegrationsRepository(context.db);
 
@@ -109,6 +112,7 @@ const verifyApiKey: ServiceFn<
 				},
 				principal: authority.data.principal,
 				scopes: authority.data.scopes,
+				lastUsedAt: integrationRes.data.last_used_at,
 			},
 		};
 	}
@@ -124,6 +128,7 @@ const verifyApiKey: ServiceFn<
 				type: "system",
 			},
 			scopes,
+			lastUsedAt: integrationRes.data.last_used_at,
 		},
 	};
 };

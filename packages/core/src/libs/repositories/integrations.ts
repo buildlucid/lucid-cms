@@ -106,6 +106,7 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 				"enabled",
 				"user_id",
 				"expires_at",
+				"last_used_at",
 				this.database.fn
 					.jsonArrayFrom(
 						eb
@@ -136,6 +137,7 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 				"enabled",
 				"user_id",
 				"expires_at",
+				"last_used_at",
 				"scopes",
 			],
 		});

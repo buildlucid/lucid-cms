@@ -56,22 +56,6 @@ export default class OAuthRefreshTokensRepository extends StaticRepository<"luci
 	}
 
 	/**
-	 * Revokes every refresh token in a rotation family.
-	 */
-	async revokeFamily(props: { familyId: string; revokedAt: string }) {
-		const query = this.db
-			.updateTable("lucid_oauth_refresh_tokens")
-			.set({ revoked_at: props.revokedAt })
-			.where("family_id", "=", props.familyId)
-			.where("revoked_at", "is", null);
-
-		const exec = await this.executeQuery(() => query.execute(), {
-			method: "revokeFamily",
-		});
-		return exec.response;
-	}
-
-	/**
 	 * Revokes every refresh token issued for a grant.
 	 */
 	async revokeGrant(props: { grantId: number; revokedAt: string }) {

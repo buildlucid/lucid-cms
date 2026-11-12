@@ -166,8 +166,9 @@ const tokenController = factory.createHandlers(
 
 		const result =
 			parsed.data.grant_type === "authorization_code"
-				? await serviceWrapper(oauthServices.exchangeAuthorizationCode, {
-						transaction: true,
+				? //* the service owns its transaction so revoking a reused code's connection isn't rolled back
+					await serviceWrapper(oauthServices.exchangeAuthorizationCode, {
+						transaction: false,
 						defaultError: { type: "authorisation" },
 					})(context, {
 						code: parsed.data.code,
