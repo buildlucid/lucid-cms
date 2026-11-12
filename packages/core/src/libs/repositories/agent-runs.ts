@@ -307,6 +307,68 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 		return exec.response;
 	}
 	/**
+	 * Checks indexed sources for deliverable input, active runs, due routines, pending content
+	 * changes or unsettled usage before scheduling an agent tick.
+	 */
+	async hasTickWork(props: { now: string }) {
+		const found = sql.lit(1).as("found");
+		const query = this.db.selectNoFrom((eb) =>
+			eb
+				.or([
+					eb.exists(
+						eb
+							.selectFrom("lucid_agent_inputs")
+							.select(found)
+							//* literals let SQLite match the partial index, which a bound IN list can't
+							.where(
+								"status",
+								"in",
+								constants.agent.deliverableInputStatuses.map((status) =>
+									sql.lit(status),
+								),
+							),
+					),
+					eb.exists(
+						eb
+							.selectFrom("lucid_agent_runs")
+							.select(found)
+							.where("status", "in", constants.agent.runStatuses.active),
+					),
+					eb.exists(
+						eb
+							.selectFrom("lucid_agent_routines")
+							.select(found)
+							.where(
+								"enabled",
+								"=",
+								this.dbAdapter.getDefault("boolean", "true"),
+							)
+							.where("next_run_at", "<=", props.now),
+					),
+					eb.exists(eb.selectFrom("lucid_agent_routine_pending").select(found)),
+					eb.exists(
+						eb
+							.selectFrom("lucid_ai_generations")
+							.select(found)
+							.where("status", "=", sql.lit("pending"))
+							.where("session_type", "=", "agent")
+							.where("feature_key", "in", constants.agent.usageFeatureKeys),
+					),
+				])
+				.as("has_work"),
+		);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "hasTickWork",
+		});
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: Number(exec.response.data?.has_work) === 1,
+		};
+	}
+	/**
 	 * Selects overdue waits that have not notified their user, filtered by screen or non-screen calls.
 	 * @remarks Separate filters prevent either maintenance batch from filling with waits handled by the other.
 	 */

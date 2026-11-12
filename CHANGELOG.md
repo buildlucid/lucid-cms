@@ -33,8 +33,8 @@
 - Plugins can now add their own hook events with `defineHookEvents`, for project hooks and deploy triggers to subscribe to. ([8996a28](https://github.com/buildlucid/lucid-cms/commit/8996a28fe2007c08a906357e96bcce6754af926a))
 - Plugins can now add their own `lucidcms` commands, which `lucidcms --help` lists when run inside a project. ([bf8f9bd](https://github.com/buildlucid/lucid-cms/commit/bf8f9bd4a85d5279e3baf2794a521e88d248a5ae))
 - Admin slots shown to signed-in users can now take a `permission`, and `adminHref` links to admin routes, which take their page title from their navigation label. ([74a262a](https://github.com/buildlucid/lucid-cms/commit/74a262a342ae1cbd278b438e0eee39091250ec74))
-- Added `http.serverTiming`, which reports how many database queries each request ran, and how long they took, in a `Server-Timing` header.
-- Job schedules can take a `when` check that skips a run with nothing to do, so quiet minutes store no jobs.
+- Added `http.serverTiming`, which reports how many database queries each request ran, and how long they took, in a `Server-Timing` header. ([9a13932](https://github.com/buildlucid/lucid-cms/commit/9a13932b428edc9160987cd6de8c58efbbee9826))
+- Job schedules can take a `when` check that skips a run with nothing to do, so quiet minutes store no jobs. ([aa2114d](https://github.com/buildlucid/lucid-cms/commit/aa2114d59ea05f7707a8ec1812c37ef763212133))
 
 ### Breaking Changes:
 
@@ -77,8 +77,8 @@
 - Renamed the runtime context's `configEntryPoint` to `buildModule`, the path of an emitted `lucid:build` module. ([3d70045](https://github.com/buildlucid/lucid-cms/commit/3d70045394d133d17481d72ceaab2baf5a8161e5))
 - Email templates now use [Kiln](https://kilnlang.com) `.kiln` files instead of Mustache, with types generated from their `props` for `toolkit.email.send` and notification emails. ([cd96ff7](https://github.com/buildlucid/lucid-cms/commit/cd96ff79eb4c910eb011ce8938f821d4ead238ab))
 - CLI commands that ask for confirmation now take `--yes` in place of `--force` and fail when there's no terminal to ask in, and `jobs:schedule` is now `jobs:run`. ([0475f3c](https://github.com/buildlucid/lucid-cms/commit/0475f3c06e25151d216ab594b864879f682c26af))
-- Media URLs are now `/cdn/<uid>/<file name>` instead of the storage key, so links keep working when a file is replaced or made private. A replacement that fails to save leaves the old file as it was. Uploads no longer take a `temporary` option.
-- Replaced `drainJobs` in `@lucidcms/core/extension` with `createJobPool`, for queues that poll the database, which starts ready jobs in free slots without waiting for earlier ones to finish.
+- Media URLs are now `/cdn/<uid>/<file name>` instead of the storage key, so links keep working when a file is replaced or made private. A replacement that fails to save leaves the old file as it was. Uploads no longer take a `temporary` option. ([1d8200d](https://github.com/buildlucid/lucid-cms/commit/1d8200d2b0177d54112c0c2337261c5239bd19db))
+- Replaced `drainJobs` in `@lucidcms/core/extension` with `createJobPool`, for queues that poll the database, which starts ready jobs in free slots without waiting for earlier ones to finish. ([aa2114d](https://github.com/buildlucid/lucid-cms/commit/aa2114d59ea05f7707a8ec1812c37ef763212133))
 
 ### Bug Fixes:
 
@@ -118,30 +118,30 @@
 - Fixed job schedules that are empty or can never run, such as 31 February, passing config checks. ([e031c52](https://github.com/buildlucid/lucid-cms/commit/e031c52bca645661f71988cd89bad8540cd2348d))
 - Fixed failed jobs on the built-in inline queue retrying straight away instead of waiting for their backoff. ([2edd5ec](https://github.com/buildlucid/lucid-cms/commit/2edd5ec3485a67e172ceaf859d20fbcf16475269))
 - Fixed admin route navigation rejecting the `notifications` and `translations` icons. ([eaf605d](https://github.com/buildlucid/lucid-cms/commit/eaf605db85f9b80bc3bbc31f2a2c8f9d962ad46f))
-- Fixed new fields being saved empty when a migration ran while the CMS was already running. They now save without a restart.
-- Fixed Diagnostics showing no pending migrations when project or plugin migrations had not run.
-- Fixed a failed project or plugin migration leaving its changes behind on SQLite and libSQL. Failed migrations are now rolled back on every database.
-- Fixed single-document collections ending up with several documents on Postgres when they were created at the same moment.
-- Fixed datetime fields reading back in a different format on Postgres. They are now UTC ISO strings on every database.
-- Fixed Cloudflare Workers keeping about 1 MB per request in memory, which crashed the local server after about 1,200 requests.
-- Fixed content API reads failing when a document relates to a collection the API key can't read. Those related documents are now left out.
-- Fixed errors that asked for a 400 or 403 status being sent as 401, such as missing integration scopes and invalid OAuth token requests.
-- Fixed document lists ignoring sorts by fields that don't exist or can't be sorted. They are now refused, as unknown filters are.
-- Fixed locking or deleting a user not ending their sessions, so unlocking or restoring them brought those sessions back.
-- Fixed ended sessions working for up to five minutes, such as after signing out everywhere or resetting a password.
-- Fixed session refreshes counting towards the sign-in limit, which could sign out a team sharing one address.
-- Fixed the password reset and email change pages always saying the link was invalid.
-- Fixed Cloudflare Workers failing every request to Lucid, so connecting to Lucid and its AI features didn't work there.
-- Fixed `/cdn` serving uploaded HTML pages and other files that can run scripts without a sandbox, so anyone who could upload could run code on the CMS's address. Only SVGs were sandboxed before.
-- Fixed reaching `media.limits.storageBytes` resetting the storage count to zero, so the limit never held. Full storage now answers 413 instead of 500.
-- Media in the bin is no longer served from `/cdn` or given a URL by the content API, though people who can browse the library still see its previews.
-- Fixed the media folder list failing on Postgres.
-- Fixed media losing its file on Postgres when two requests made it from the same upload, or deleted it while its file was replaced. Deleted files are now removed once the change is saved.
-- Fixed a visibility change that failed to save leaving its media pointing at a file that had moved.
-- Fixed image presets losing their format when `media.images.allowFormatQuery` is on and the browser asks for none Lucid makes.
-- Fixed media URLs renaming files after their type, so `song.mp3` became `song.mpga`.
-- Fixed `GET /api/v1/jobs/{id}` failing for the job IDs that receipts return. It now takes a job ID or a row ID.
-- Fixed jobs never running when their queue lost the message, such as once Cloudflare Queues ran out of retries. The scheduler now sends a job again when it is still waiting 10 minutes after it was due.
+- Fixed new fields being saved empty when a migration ran while the CMS was already running. They now save without a restart. ([c98f551](https://github.com/buildlucid/lucid-cms/commit/c98f5513a848d408e6ad15b85f0bcfb2dd2a9edf))
+- Fixed Diagnostics showing no pending migrations when project or plugin migrations had not run. ([c98f551](https://github.com/buildlucid/lucid-cms/commit/c98f5513a848d408e6ad15b85f0bcfb2dd2a9edf))
+- Fixed a failed project or plugin migration leaving its changes behind on SQLite and libSQL. Failed migrations are now rolled back on every database. ([c98f551](https://github.com/buildlucid/lucid-cms/commit/c98f5513a848d408e6ad15b85f0bcfb2dd2a9edf))
+- Fixed single-document collections ending up with several documents on Postgres when they were created at the same moment. ([9a13932](https://github.com/buildlucid/lucid-cms/commit/9a13932b428edc9160987cd6de8c58efbbee9826))
+- Fixed datetime fields reading back in a different format on Postgres. They are now UTC ISO strings on every database. ([9a13932](https://github.com/buildlucid/lucid-cms/commit/9a13932b428edc9160987cd6de8c58efbbee9826))
+- Fixed Cloudflare Workers keeping about 1 MB per request in memory, which crashed the local server after about 1,200 requests. ([9a13932](https://github.com/buildlucid/lucid-cms/commit/9a13932b428edc9160987cd6de8c58efbbee9826))
+- Fixed content API reads failing when a document relates to a collection the API key can't read. Those related documents are now left out. ([9a13932](https://github.com/buildlucid/lucid-cms/commit/9a13932b428edc9160987cd6de8c58efbbee9826))
+- Fixed errors that asked for a 400 or 403 status being sent as 401, such as missing integration scopes and invalid OAuth token requests. ([9a13932](https://github.com/buildlucid/lucid-cms/commit/9a13932b428edc9160987cd6de8c58efbbee9826))
+- Fixed document lists ignoring sorts by fields that don't exist or can't be sorted. They are now refused, as unknown filters are. ([9a13932](https://github.com/buildlucid/lucid-cms/commit/9a13932b428edc9160987cd6de8c58efbbee9826))
+- Fixed locking or deleting a user not ending their sessions, so unlocking or restoring them brought those sessions back. ([8334ab5](https://github.com/buildlucid/lucid-cms/commit/8334ab5ef48057ccfe140e76126eedb5e823c264))
+- Fixed ended sessions working for up to five minutes, such as after signing out everywhere or resetting a password. ([8334ab5](https://github.com/buildlucid/lucid-cms/commit/8334ab5ef48057ccfe140e76126eedb5e823c264))
+- Fixed session refreshes counting towards the sign-in limit, which could sign out a team sharing one address. ([8334ab5](https://github.com/buildlucid/lucid-cms/commit/8334ab5ef48057ccfe140e76126eedb5e823c264))
+- Fixed the password reset and email change pages always saying the link was invalid. ([8334ab5](https://github.com/buildlucid/lucid-cms/commit/8334ab5ef48057ccfe140e76126eedb5e823c264))
+- Fixed Cloudflare Workers failing every request to Lucid, so connecting to Lucid and its AI features didn't work there. ([8334ab5](https://github.com/buildlucid/lucid-cms/commit/8334ab5ef48057ccfe140e76126eedb5e823c264))
+- Fixed `/cdn` serving uploaded HTML pages and other files that can run scripts without a sandbox, so anyone who could upload could run code on the CMS's address. Only SVGs were sandboxed before. ([1d8200d](https://github.com/buildlucid/lucid-cms/commit/1d8200d2b0177d54112c0c2337261c5239bd19db))
+- Fixed reaching `media.limits.storageBytes` resetting the storage count to zero, so the limit never held. Full storage now answers 413 instead of 500. ([1d8200d](https://github.com/buildlucid/lucid-cms/commit/1d8200d2b0177d54112c0c2337261c5239bd19db))
+- Media in the bin is no longer served from `/cdn` or given a URL by the content API, though people who can browse the library still see its previews. ([1d8200d](https://github.com/buildlucid/lucid-cms/commit/1d8200d2b0177d54112c0c2337261c5239bd19db))
+- Fixed the media folder list failing on Postgres. ([1d8200d](https://github.com/buildlucid/lucid-cms/commit/1d8200d2b0177d54112c0c2337261c5239bd19db))
+- Fixed media losing its file on Postgres when two requests made it from the same upload, or deleted it while its file was replaced. Deleted files are now removed once the change is saved. ([1d8200d](https://github.com/buildlucid/lucid-cms/commit/1d8200d2b0177d54112c0c2337261c5239bd19db))
+- Fixed a visibility change that failed to save leaving its media pointing at a file that had moved. ([1d8200d](https://github.com/buildlucid/lucid-cms/commit/1d8200d2b0177d54112c0c2337261c5239bd19db))
+- Fixed image presets losing their format when `media.images.allowFormatQuery` is on and the browser asks for none Lucid makes. ([1d8200d](https://github.com/buildlucid/lucid-cms/commit/1d8200d2b0177d54112c0c2337261c5239bd19db))
+- Fixed media URLs renaming files after their type, so `song.mp3` became `song.mpga`. ([1d8200d](https://github.com/buildlucid/lucid-cms/commit/1d8200d2b0177d54112c0c2337261c5239bd19db))
+- Fixed `GET /api/v1/jobs/{id}` failing for the job IDs that receipts return. It now takes a job ID or a row ID. ([aa2114d](https://github.com/buildlucid/lucid-cms/commit/aa2114d59ea05f7707a8ec1812c37ef763212133))
+- Fixed jobs never running when their queue lost the message, such as once Cloudflare Queues ran out of retries. The scheduler now sends a job again when it is still waiting 10 minutes after it was due. ([aa2114d](https://github.com/buildlucid/lucid-cms/commit/aa2114d59ea05f7707a8ec1812c37ef763212133))
 
 ## v0.19.0-alpha.0
 
