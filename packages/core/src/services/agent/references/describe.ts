@@ -15,7 +15,7 @@ import type {
 	MediaListItem,
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import getDocumentLabel from "../../documents/helpers/get-document-label.js";
+import getDocumentLabels from "../../documents/helpers/get-document-labels.js";
 import getMultipleMedia from "../../media/get-multiple.js";
 
 //* matches the admin's small thumbnail preset, so previews do not load full images
@@ -130,22 +130,27 @@ const describe: ServiceFn<
 				return undefined;
 			}
 
-			const label = await getDocumentLabel({
+			const labels = await getDocumentLabels({
 				context,
 				bricks: Bricks,
 				collection: collection.data,
 				tables: tables.data,
-				documentId: reference.documentId,
-				versionId: document.data.version_id,
+				versions: [
+					{
+						documentId: reference.documentId,
+						versionId: document.data.version_id,
+					},
+				],
 			});
-			if (label.error) return label;
+			if (labels.error) return labels;
+			const [label] = labels.data;
 
 			return {
 				error: undefined,
 				data: [
 					referenceKey(reference),
 					{
-						label: label.data,
+						label,
 						...(document.data.version_type
 							? { version: document.data.version_type }
 							: {}),

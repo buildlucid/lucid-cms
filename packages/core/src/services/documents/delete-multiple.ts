@@ -83,6 +83,7 @@ const deleteMultiple: ServiceFn<
 			const accessRes = await checkDocumentAccess(context, {
 				collectionKey: data.collectionKey,
 				ids: data.ids,
+				pending: false,
 			});
 			if (accessRes.error) return accessRes;
 

@@ -8,13 +8,19 @@ import {
 import { REVIEWED_STORY_KEY } from "#shared/collections/reviewed-story";
 import { STORY_KEY } from "#shared/collections/story";
 import {
-	approveAndCompleteRequest,
 	createDocument,
 	listDocumentIds,
 	publishDocument,
 	readDocument,
 	saveDocument,
 } from "#shared/documents";
+import {
+	approve,
+	approveAndCompleteRequest,
+	openCreateRequest,
+	requestChange,
+	requestCreation,
+} from "#shared/requests";
 
 const story = (action: string) => `documents:${STORY_KEY}:${action}`;
 const reviewed = (action: string) =>
@@ -31,50 +37,25 @@ const openRequest = (
 	documentId: number,
 	targets: string[] = [],
 ) =>
-	session.request<{ data: { id: number } }>({
-		method: "POST",
-		path: "/api/v1/requests",
-		body: {
-			type,
-			title: `${type} story ${documentId}`,
-			documents: [
-				{
-					collectionKey: REVIEWED_STORY_KEY,
-					documentId,
-					targets,
-					...(type === "publish" ? { source: "latest" } : {}),
-				},
-			],
-		},
-	});
+	requestChange(session, type, [
+		{ collectionKey: REVIEWED_STORY_KEY, documentId, targets },
+	]);
 
 /** Opens a create request for a new reviewed story, returning the response. */
 const requestCreate = (session: Session, title: string) =>
-	session.request<{ data: { id: number; requestId: number } }>({
-		method: "POST",
-		path: `/api/v1/documents/${REVIEWED_STORY_KEY}/request`,
-		body: { title: `Create ${title}`, ...titled(title) },
+	requestCreation(session, REVIEWED_STORY_KEY, {
+		title: `Create ${title}`,
+		...titled(title),
 	});
 
 /** Creates a reviewed story the only way it allows: through an approved create request. */
 const createReviewedStory = async (admin: Session, title: string) => {
-	const requested = await requestCreate(admin, title);
-	expect(requested.status).toBe(201);
-	await approveAndCompleteRequest(admin, requested.body.data.requestId);
-	return requested.body.data.id;
-};
-
-/** Approves a request as a session, returning the response. */
-const approve = async (session: Session, requestId: number) => {
-	const request = await session.request<{ data: { reviewToken: string } }>({
-		path: `/api/v1/requests/${requestId}`,
+	const { id, requestId } = await openCreateRequest(admin, REVIEWED_STORY_KEY, {
+		title: `Create ${title}`,
+		...titled(title),
 	});
-	expect(request.status).toBe(200);
-	return session.request({
-		method: "POST",
-		path: `/api/v1/requests/${requestId}/approve`,
-		body: { ifUnchanged: request.body.data.reviewToken },
-	});
+	await approveAndCompleteRequest(admin, requestId);
+	return id;
 };
 
 describe("document permissions", () => {

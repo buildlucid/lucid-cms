@@ -150,6 +150,10 @@ const RichText: Component<RichTextProps> = (props) => {
 				? [...(props.extensions ?? []), mentionExtension]
 				: props.extensions;
 		},
+		//* the label and placeholder sit beside the editable area, so it is named directly
+		get label() {
+			return props.label ?? props.placeholder;
+		},
 	});
 
 	// ----------------------------------------

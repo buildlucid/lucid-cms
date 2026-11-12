@@ -39,7 +39,7 @@ type DocumentResponse = {
 };
 
 /** Throws with the response's details when a request a helper relies on fails. */
-const expectStatus = (
+export const expectStatus = (
 	action: string,
 	response: ApiResponse<unknown>,
 	status: number,
@@ -420,51 +420,4 @@ export const readContent = async (
 	}
 	expectStatus(`Reading ${collectionKey} content ${id}`, response, 200);
 	return response.body.data;
-};
-
-/**
- * Approves a request and completes it, then waits for its changes to be applied. The collection
- * must allow whoever `session` is to approve it.
- */
-export const approveAndCompleteRequest = async (
-	session: Session,
-	requestId: number,
-): Promise<void> => {
-	const request = await session.request<{ data: { reviewToken: string } }>({
-		path: `/api/v1/requests/${requestId}`,
-	});
-	expectStatus(`Reading request ${requestId}`, request, 200);
-
-	const approved = await session.request({
-		method: "POST",
-		path: `/api/v1/requests/${requestId}/approve`,
-		body: { ifUnchanged: request.body.data.reviewToken },
-	});
-	expectStatus(`Approving request ${requestId}`, approved, 204);
-
-	const completed = await session.request({
-		method: "POST",
-		path: `/api/v1/requests/${requestId}/complete`,
-	});
-	expectStatus(`Completing request ${requestId}`, completed, 202);
-
-	//* a served CMS applies the request from its queue, so it may not be done yet
-	for (let attempt = 0; attempt < 100; attempt++) {
-		const execution = await session.request<{
-			data: { status: string; error: string | null } | null;
-		}>({ path: `/api/v1/requests/${requestId}/execution` });
-		expectStatus(`Reading request ${requestId}'s execution`, execution, 200);
-
-		const status = execution.body.data?.status;
-		if (status === "completed") {
-			return;
-		}
-		if (status === "failed") {
-			throw new Error(
-				`Request ${requestId} failed: ${execution.body.data?.error}`,
-			);
-		}
-		await new Promise((resolve) => setTimeout(resolve, 100));
-	}
-	throw new Error(`Request ${requestId} was not applied in time.`);
 };

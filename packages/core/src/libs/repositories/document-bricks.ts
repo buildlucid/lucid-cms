@@ -73,6 +73,31 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 		});
 	}
 
+	/** Reads one column of many versions' rows at once, oldest row first, eg. each version's label field. */
+	async selectColumnByVersionIds(
+		props: { versionIds: number[]; column: string },
+		dynamicConfig: DynamicConfig<LucidBrickTableName>,
+	) {
+		const { ref } = this.db.dynamic;
+		const query = this.db
+			.selectFrom(dynamicConfig.tableName)
+			.select(["document_version_id", ref(props.column)])
+			.where("document_version_id", "in", props.versionIds)
+			.orderBy("id");
+
+		const exec = await this.executeQuery(
+			() =>
+				query.execute() as Promise<
+					Array<{ document_version_id: number } & Record<string, unknown>>
+				>,
+			{
+				method: "selectColumnByVersionIds",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+		return exec.response;
+	}
+
 	/** Read stored field values in bounded pages during reference schema refreshes. */
 	async selectReferenceValues(
 		props: { afterId: number; limit: number },

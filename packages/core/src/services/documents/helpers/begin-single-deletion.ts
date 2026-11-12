@@ -50,9 +50,11 @@ const beginSingleDeletion: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
+	//* a requested document only exists as its create request's proposal, so it is closed, not deleted
 	const accessRes = await checkDocumentAccess(context, {
 		collectionKey: data.collectionKey,
 		id: data.id,
+		pending: false,
 	});
 	if (accessRes.error) return accessRes;
 

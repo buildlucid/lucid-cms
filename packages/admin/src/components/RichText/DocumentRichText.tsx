@@ -63,6 +63,10 @@ const EditorField: Component<EditorFieldProps> = (props) => {
 		get options() {
 			return props.options;
 		},
+		//* the label and placeholder sit beside the editable area, so it is named directly
+		get label() {
+			return props.copy?.label ?? props.copy?.placeholder;
+		},
 	});
 
 	// ----------------------------------------

@@ -96,6 +96,8 @@ const useEditor = (config: {
 	options?: RichTextOptions;
 	/** Extra Tiptap extensions, read once when the editor is created. */
 	extensions?: Extensions;
+	/** Names the editable area for assistive technology, read once when the editor is created. */
+	label?: string;
 }): {
 	editor: Accessor<Editor | undefined>;
 	focused: Accessor<boolean>;
@@ -131,6 +133,7 @@ const useEditor = (config: {
 						options?.appearance === "seamless"
 							? "rich-text-content min-h-[60vh] py-3 text-sm text-title focus:outline-none"
 							: "rich-text-content min-h-48 p-3 text-sm text-title focus:outline-none",
+					...(config.label ? { "aria-label": config.label } : {}),
 				},
 				handleDOMEvents: {
 					click: (_view, event) => handleEditorLinkClick(container(), event),

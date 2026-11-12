@@ -9,7 +9,7 @@ import {
 	RequestDocumentsRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import getDocumentLabel from "../../documents/helpers/get-document-label.js";
+import getDocumentLabels from "../../documents/helpers/get-document-labels.js";
 import resolveNotification from "../../notifications/resolve.js";
 import sendNotification from "../../notifications/send.js";
 import { assignedNotification } from "../notifications/assigned.js";
@@ -17,10 +17,8 @@ import { workflowNotificationKeys } from "../notifications/keys.js";
 import { stageChangedNotification } from "../notifications/stage-changed.js";
 
 /**
- * Keeps assignees' to-dos in step with the workflow. New assignees are told
- * about their document and people taken off it have their to-do cleared.
- * Reaching the last stage clears everyone's to-do, and leaving it gives them
- * back. Assignees who stay on are told when the stage changes.
+ * Updates workflow to-dos for added and removed assignees. The final stage clears all to-dos;
+ * leaving it restores them. Notifies retained assignees of stage changes.
  */
 const notifyAssignees: ServiceFn<
 	[
@@ -86,15 +84,15 @@ const notifyAssignees: ServiceFn<
 	const DocumentBricks = new DocumentBricksRepository(context.db);
 	const RequestDocuments = new RequestDocumentsRepository(context.db);
 
-	const labelRes = await getDocumentLabel({
+	const labelRes = await getDocumentLabels({
 		context,
 		bricks: DocumentBricks,
 		collection: data.collection,
 		tables: data.tableNames,
-		documentId: data.documentId,
-		versionId: data.versionId,
+		versions: [{ documentId: data.documentId, versionId: data.versionId }],
 	});
 	if (labelRes.error) return labelRes;
+	const [label] = labelRes.data;
 
 	const requestRes =
 		data.versionType === "latest"
@@ -110,7 +108,7 @@ const notifyAssignees: ServiceFn<
 		collectionKey: data.collection.key,
 		documentId: data.documentId,
 		requestId: requestRes?.data?.request_id ?? null,
-		label: labelRes.data,
+		label,
 		stage: context.translate(data.stage.label),
 	};
 

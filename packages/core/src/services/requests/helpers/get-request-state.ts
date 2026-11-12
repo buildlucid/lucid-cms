@@ -11,7 +11,7 @@ import {
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { resolveEffectiveWorkflowStage } from "../../document-workflows/helpers/index.js";
-import getDocumentLabel from "../../documents/helpers/get-document-label.js";
+import getDocumentLabels from "../../documents/helpers/get-document-labels.js";
 import requiresReview from "../../documents/helpers/requires-review.js";
 import type { RequestRecord, RequestState } from "../types.js";
 
@@ -114,6 +114,12 @@ const getRequestState: ServiceFn<
 		if (versionsRes.error) return versionsRes;
 		if (workflowsRes.error) return workflowsRes;
 
+		//* labels are read together once every document's version is known
+		const labelVersions: Array<{
+			requestDocumentId: number;
+			documentId: number;
+			versionId: number;
+		}> = [];
 		for (const document of documents) {
 			//* snapshots have no stage, and stages only gate create requests while the collection requires them
 			const staged =
@@ -143,19 +149,12 @@ const getRequestState: ServiceFn<
 				source?.id ??
 				content?.id ??
 				versions.find((version) => version.type === "latest")?.id;
-			let label: string | null = null;
 			if (data.labels && labelVersionId !== undefined) {
-				const labelRes = await getDocumentLabel({
-					context,
-					bricks: DocumentBricks,
-					collection,
-					tables: tablesRes.data,
+				labelVersions.push({
+					requestDocumentId: document.id,
 					documentId: document.document_id,
 					versionId: labelVersionId,
 				});
-				if (labelRes.error) return labelRes;
-
-				label = labelRes.data;
 			}
 
 			states.set(document.id, {
@@ -166,7 +165,7 @@ const getRequestState: ServiceFn<
 					: formatter.formatBoolean(row.is_deleted)
 						? "bin"
 						: null,
-				label,
+				label: null,
 				workflowStage: !staged
 					? null
 					: approved
@@ -190,6 +189,22 @@ const getRequestState: ServiceFn<
 				source,
 				content,
 			});
+		}
+
+		if (labelVersions.length > 0) {
+			const labelsRes = await getDocumentLabels({
+				context,
+				bricks: DocumentBricks,
+				collection,
+				tables: tablesRes.data,
+				versions: labelVersions,
+			});
+			if (labelsRes.error) return labelsRes;
+
+			for (const [index, version] of labelVersions.entries()) {
+				const state = states.get(version.requestDocumentId);
+				if (state) state.label = labelsRes.data[index] ?? null;
+			}
 		}
 	}
 

@@ -5,7 +5,7 @@ import field from "../../../libs/collection/definitions/fields/field.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { DocumentBricksRepository } from "../../../libs/repositories/index.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
-import getDocumentLabel from "./get-document-label.js";
+import getDocumentLabels from "./get-document-labels.js";
 
 vi.mock(
 	"../../../libs/collection/schema/runtime/runtime-schema-selectors.js",
@@ -13,13 +13,13 @@ vi.mock(
 		getDocumentFieldsTableSchema: vi.fn().mockResolvedValue({
 			error: undefined,
 			data: {
-				columns: [],
+				columns: [{ name: "_status" }],
 			},
 		}),
 	}),
 );
 
-describe("getDocumentLabel", () => {
+describe("getDocumentLabels", () => {
 	const tables = {
 		document: "lucid_document_pages",
 		version: "lucid_document_versions_pages",
@@ -30,7 +30,7 @@ describe("getDocumentLabel", () => {
 		vi.clearAllMocks();
 	});
 
-	test("uses select option labels for useAsLabel values", async () => {
+	test("uses select option labels for useAsLabel values, and falls back for versions without one", async () => {
 		const collection = defineCollection({
 			key: "pages",
 			mode: "multiple",
@@ -60,28 +60,28 @@ describe("getDocumentLabel", () => {
 			],
 		});
 		const bricks = {
-			selectMultipleByVersionId: vi.fn().mockResolvedValue({
+			selectColumnByVersionIds: vi.fn().mockResolvedValue({
 				error: undefined,
-				data: {
-					[tables.documentFields]: [
-						{
-							_status: "published",
-						},
-					],
-				},
+				data: [
+					{ document_version_id: 2, _status: null },
+					{ document_version_id: 2, _status: "published" },
+				],
 			}),
 		};
 
-		const result = await getDocumentLabel({
-			context: {} as ServiceContext,
+		const result = await getDocumentLabels({
+			context: { translate: () => "Page" } as unknown as ServiceContext,
 			bricks: bricks as unknown as DocumentBricksRepository,
 			collection,
 			tables,
-			documentId: 1,
-			versionId: 2,
+			versions: [
+				{ documentId: 1, versionId: 2 },
+				{ documentId: 3, versionId: 4 },
+			],
 		});
 
 		expect(result.error).toBeUndefined();
-		expect(result.data).toBe("Published");
+		expect(result.data).toEqual(["Published", "Page #3"]);
+		expect(bricks.selectColumnByVersionIds).toHaveBeenCalledOnce();
 	});
 });

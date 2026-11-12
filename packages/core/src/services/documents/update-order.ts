@@ -76,6 +76,7 @@ const updateOrder: ServiceFn<
 			...(data.previousDocumentId !== null ? [data.previousDocumentId] : []),
 			...(data.nextDocumentId !== null ? [data.nextDocumentId] : []),
 		],
+		pending: false,
 	});
 	if (documentAccessRes.error) return documentAccessRes;
 

@@ -25,6 +25,8 @@ const simulation = <Model>(
 		const sequences = fc.record({
 			steps: fc.array(fc.oneof(...definition.actions), {
 				maxLength: definition.maxActions ?? DEFAULT_MAX_ACTIONS,
+				//* fast-check's default size stops arrays at 10 items, whatever the maximum
+				size: "max",
 			}),
 			faultSeed: fc.integer({ min: 0 }),
 		});

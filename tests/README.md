@@ -178,6 +178,7 @@ A simulation tries many random sequences of actions against a fresh CMS and chec
 - Keep what actions return the same on fast and slow setups, or their digests differ. Move the clock with `advanceClock` rather than waiting, and give anything timed a margin from the steps the clock moves in.
 - `variant` runs every sequence on a variant of the setup's config, such as `media-limits`.
 - `setup` runs at the start of each sequence, such as to create the users its actions work with. See `suites/simulation/auth/sign-in-model.test.ts`.
+- An action listed more than once is picked more often. Actions that move toward a state needing several steps, such as a request's second approval, can also choose only from what is ready for them, so sequences get there. See `suites/simulation/requests/request-lifecycle.test.ts`.
 
 ### Benchmarks
 

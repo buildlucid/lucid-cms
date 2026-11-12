@@ -4,7 +4,9 @@ import PageCollection from "./collections/page.ts";
 import RestrictedStoryCollection from "./collections/restricted-story.ts";
 import ReviewedStoryCollection from "./collections/reviewed-story.ts";
 import SettingsCollection from "./collections/settings.ts";
+import StagedStoryCollection from "./collections/staged-story.ts";
 import StoryCollection from "./collections/story.ts";
+import TeamStoryCollection from "./collections/team-story.ts";
 import {
 	generatedCollection,
 	isGeneratedStep,
@@ -56,6 +58,8 @@ export const sharedCollections = [
 	SettingsCollection,
 	StoryCollection,
 	ReviewedStoryCollection,
+	TeamStoryCollection,
+	StagedStoryCollection,
 	RestrictedStoryCollection,
 ];
 

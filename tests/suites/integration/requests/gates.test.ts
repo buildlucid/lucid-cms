@@ -8,13 +8,22 @@ import {
 } from "#harness/vitest";
 import { REVIEWED_STORY_KEY } from "#shared/collections/reviewed-story";
 import {
-	approveAndCompleteRequest,
 	createContentReader,
 	listDocumentIds,
 	publishDocument,
 	readContent,
 	readDocument,
 } from "#shared/documents";
+import {
+	approve,
+	approveAndCompleteRequest,
+	editProposal,
+	onlyDocument,
+	openCreateRequest,
+	openRequest,
+	readRequest,
+	requestAction,
+} from "#shared/requests";
 
 const DOCUMENTS = `/api/v1/documents/${REVIEWED_STORY_KEY}`;
 
@@ -26,17 +35,11 @@ const titled = (title: string, summary = "") => ({
 });
 
 /** Opens a create request for a new story, and returns the document and request it made. */
-const requestStory = async (admin: Session, title: string, summary = "") => {
-	const requested = await admin.request<{
-		data: { id: number; requestId: number };
-	}>({
-		method: "POST",
-		path: `${DOCUMENTS}/request`,
-		body: { title: `Create ${title}`, ...titled(title, summary) },
+const requestStory = (admin: Session, title: string, summary = "") =>
+	openCreateRequest(admin, REVIEWED_STORY_KEY, {
+		title: `Create ${title}`,
+		...titled(title, summary),
 	});
-	expect(requested.status).toBe(201);
-	return requested.body.data;
-};
 
 /** Creates a story the only way the collection allows: through an approved create request. */
 const createStory = async (admin: Session, title: string) => {
@@ -45,33 +48,10 @@ const createStory = async (admin: Session, title: string) => {
 	return id;
 };
 
-/** Opens a publish, unpublish or delete request for one story, and returns the request's ID. */
-const openRequest = async (
-	admin: Session,
-	type: "publish" | "unpublish" | "delete",
-	documentId: number,
-	targets: string[] = [],
-) => {
-	const opened = await admin.request<{ data: { id: number } }>({
-		method: "POST",
-		path: "/api/v1/requests",
-		body: {
-			type,
-			title: `${type} story ${documentId}`,
-			documents: [
-				{
-					collectionKey: REVIEWED_STORY_KEY,
-					documentId,
-					targets,
-					//* only a publish request has content to take from somewhere
-					...(type === "publish" ? { source: "latest" } : {}),
-				},
-			],
-		},
-	});
-	expect(opened.status, JSON.stringify(opened.body)).toBe(201);
-	return opened.body.data.id;
-};
+/** One reviewed story in a request, with the given targets. */
+const story = (documentId: number, targets: string[] = []) => [
+	{ collectionKey: REVIEWED_STORY_KEY, documentId, targets },
+];
 
 describe("documents that need an approved request", () => {
 	requires(`collection:${REVIEWED_STORY_KEY}`);
@@ -115,10 +95,7 @@ describe("documents that need an approved request", () => {
 		const admin = await lucid.admin();
 		const { id, requestId } = await requestStory(admin, "Abandoned");
 
-		const closed = await admin.request({
-			method: "POST",
-			path: `/api/v1/requests/${requestId}/close`,
-		});
+		const closed = await requestAction(admin, requestId, "close");
 
 		expect(closed.status).toBe(204);
 		expect(
@@ -132,10 +109,7 @@ describe("documents that need an approved request", () => {
 		const admin = await lucid.admin();
 		const { requestId } = await requestStory(admin, "Unapproved");
 
-		const completed = await admin.request({
-			method: "POST",
-			path: `/api/v1/requests/${requestId}/complete`,
-		});
+		const completed = await requestAction(admin, requestId, "complete");
 
 		expect(completed.status).toBe(409);
 	});
@@ -144,21 +118,15 @@ describe("documents that need an approved request", () => {
 		lucid,
 	}) => {
 		const admin = await lucid.admin();
-		const { id, requestId } = await requestStory(admin, "Reviewed");
-		const request = await admin.request<{
-			data: { reviewToken: string; documents: Array<{ versionId: number }> };
-		}>({ path: `/api/v1/requests/${requestId}` });
+		const { requestId } = await requestStory(admin, "Reviewed");
+		const request = await readRequest(admin, requestId);
 
-		const edited = await admin.request({
-			method: "PATCH",
-			path: `${DOCUMENTS}/${id}/${request.body.data.documents[0]?.versionId}`,
-			body: titled("Changed after review"),
-		});
-		const approved = await admin.request({
-			method: "POST",
-			path: `/api/v1/requests/${requestId}/approve`,
-			body: { ifUnchanged: request.body.data.reviewToken },
-		});
+		const edited = await editProposal(
+			admin,
+			onlyDocument(request),
+			titled("Changed after review"),
+		);
+		const approved = await approve(admin, requestId, request.reviewToken);
 
 		expect(edited.status).toBe(200);
 		expect(approved.status).toBe(409);
@@ -187,7 +155,7 @@ describe("documents that need an approved request", () => {
 
 		await approveAndCompleteRequest(
 			admin,
-			await openRequest(admin, "publish", id, ["production"]),
+			await openRequest(admin, "publish", story(id, ["production"])),
 		);
 
 		expect(
@@ -203,7 +171,7 @@ describe("documents that need an approved request", () => {
 		const id = await createStory(admin, "Coming down");
 		await approveAndCompleteRequest(
 			admin,
-			await openRequest(admin, "publish", id, ["production"]),
+			await openRequest(admin, "publish", story(id, ["production"])),
 		);
 
 		const direct = await admin.request({
@@ -215,7 +183,7 @@ describe("documents that need an approved request", () => {
 
 		await approveAndCompleteRequest(
 			admin,
-			await openRequest(admin, "unpublish", id, ["production"]),
+			await openRequest(admin, "unpublish", story(id, ["production"])),
 		);
 
 		expect(
@@ -240,7 +208,7 @@ describe("documents that need an approved request", () => {
 
 		await approveAndCompleteRequest(
 			admin,
-			await openRequest(admin, "delete", id),
+			await openRequest(admin, "delete", story(id)),
 		);
 
 		expect((await readDocument(admin, REVIEWED_STORY_KEY, id)).isDeleted).toBe(
