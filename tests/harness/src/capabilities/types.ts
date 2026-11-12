@@ -12,6 +12,10 @@ export type Capability =
 	/** A database behaviour, such as `database.sharedRowLocks` or `database.concurrentWrites`. */
 	| `database.${string}`
 	| `plugin:${string}`
+	/** The queue adapter jobs run through, such as `queue:inline` or `queue:worker`. */
+	| `queue:${string}`
+	/** A queue behaviour, such as `queue.delayedDelivery` for jobs that run at a later time. */
+	| `queue.${string}`
 	| `collection:${string}`
 	| `locale:${string}`
 	| `auth:${string}`

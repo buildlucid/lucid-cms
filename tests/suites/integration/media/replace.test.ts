@@ -43,6 +43,29 @@ describe("replacing a file", () => {
 		);
 	});
 
+	test("names its URL after a replacement with another name, and keeps old links working", async ({
+		lucid,
+	}) => {
+		const admin = await lucid.admin();
+		const id = await uploadMedia(admin, {
+			title: "Renamed",
+			file: files.png(),
+		});
+		const before = await getMedia(admin, id);
+		const replacement = files.jpeg();
+
+		expect((await replaceMedia(admin, id, replacement)).status).toBe(204);
+		const after = await getMedia(admin, id);
+
+		const uid = new URL(before.url).pathname.split("/")[2];
+		expect(new URL(after.url).pathname).toBe(`/cdn/${uid}/photo.jpg`);
+		for (const url of [before.url, after.url]) {
+			expect(await bytesOf(await fetchCdn(lucid.session(), url)), url).toEqual(
+				new Uint8Array(replacement.bytes),
+			);
+		}
+	});
+
 	test("refuses a file of another type, and keeps the old one", async ({
 		lucid,
 	}) => {

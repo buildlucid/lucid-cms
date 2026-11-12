@@ -33,12 +33,12 @@ export const JobSchedulesList: Component = () => {
 		mode: "memory",
 		schema: {
 			filters: {
-				name: textFilter(),
+				shortKey: textFilter(),
 				jobKey: textFilter(),
 				state: textFilter(),
 			},
 			sorts: {
-				name: sort({ defaultValue: "asc" }),
+				shortKey: sort({ defaultValue: "asc" }),
 				jobKey: sort(),
 				nextRunAt: sort(),
 			},

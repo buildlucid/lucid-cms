@@ -75,6 +75,7 @@ const runJob = async (options: {
 					report: path.join(directory, `${name}.result.json`),
 					events,
 					outbox: environment.outbox,
+					ledger: environment.ledger,
 				},
 			};
 			await writeJson(contextPath, context);

@@ -32,6 +32,8 @@ export const harnessEnv = z.object({
 	HARNESS_SCHEMA_STEP: z.string().optional(),
 	/** Where the `outbox` fragment posts sent emails. See `shared/fragments/outbox.ts`. */
 	HARNESS_OUTBOX: z.url().optional(),
+	/** Where probe jobs post what they did. See `shared/fragments/jobs.ts`. */
+	HARNESS_LEDGER: z.url().optional(),
 	/** The harness's identity provider, which the `authentication` fragment's providers use. */
 	HARNESS_IDP_URL: z.url().optional(),
 	/** Lucid's own API, which the harness fakes so tests never reach Lucid's servers. Read by core. */

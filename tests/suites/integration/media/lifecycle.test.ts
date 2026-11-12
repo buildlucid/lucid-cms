@@ -61,14 +61,26 @@ const signInAdmin = async (lucid: Lucid) => {
 	return session;
 };
 
-/** Runs the daily job that deletes what has been in the bin too long, and expired uploads. */
+/**
+ * Runs the daily job that deletes what has been in the bin too long, and expired uploads, and waits
+ * for it. It queues a job for each file it deletes, which a queue may run later, so check what they
+ * remove with `expect.poll`.
+ */
 const runExpiryJob = async (admin: Session) => {
-	const triggered = await admin.request({
+	const triggered = await admin.request<{ data: { jobId: string } }>({
 		method: "POST",
 		path: "/api/v1/jobs/schedules/trigger",
 		body: { scheduleKey: "core:delete-expired-data/automatic" },
 	});
 	expect(triggered.status).toBeLessThan(300);
+	await expect
+		.poll(async () => {
+			const job = await admin.request<{ data: { status: string } }>({
+				path: `/api/v1/jobs/${triggered.body.data.jobId}`,
+			});
+			return job.body.data.status;
+		})
+		.toBe("completed");
 };
 
 describe("the media bin", () => {
@@ -217,11 +229,16 @@ describe("expiring media", () => {
 		await binMedia(later, kept);
 		await runExpiryJob(later);
 
-		expect(
-			(await later.request({ path: `/api/v1/media/${expired}` })).status,
-		).toBe(404);
+		await expect
+			.poll(
+				async () =>
+					(await later.request({ path: `/api/v1/media/${expired}` })).status,
+			)
+			.toBe(404);
 		expect(await listedIn(later, [kept], "bin")).toEqual([kept]);
-		expect(await listStoredKeys(lucid.uploads)).not.toContain(expiredKey);
+		await expect
+			.poll(() => listStoredKeys(lucid.uploads))
+			.not.toContain(expiredKey);
 	});
 
 	test("files uploaded but never saved as media are removed", async ({
@@ -234,6 +251,6 @@ describe("expiring media", () => {
 		advanceClock(2 * 60 * 60 * 1000);
 		await runExpiryJob(await signInAdmin(lucid));
 
-		expect(await listStoredKeys(lucid.uploads)).not.toContain(key);
+		await expect.poll(() => listStoredKeys(lucid.uploads)).not.toContain(key);
 	});
 });

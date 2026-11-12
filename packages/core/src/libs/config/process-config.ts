@@ -1,11 +1,14 @@
 import { produce } from "immer";
+import { agentTickJob } from "../../services/agent/jobs/tick.js";
 import { createRunScheduledDeployJob } from "../../services/deploys/jobs/run-scheduled.js";
 import { startDeployRunJob } from "../../services/deploys/jobs/start-run.js";
 import { deploysTickJob } from "../../services/deploys/jobs/tick.js";
 import { deployFailedNotification } from "../../services/deploys/notifications/deploy-failed.js";
 import { deploySucceededNotification } from "../../services/deploys/notifications/deploy-succeeded.js";
+import { dispatchScheduledRequestsJob } from "../../services/requests/jobs/dispatch-scheduled.js";
 import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
+import { getAgents } from "../agent/registry.js";
 import CustomFieldSchema from "../collection/custom-fields/schema.js";
 import BrickConfigSchema from "../collection/definitions/brick/schema.js";
 import CollectionConfigSchema from "../collection/definitions/collection/schema.js";
@@ -80,8 +83,14 @@ const processConfig = async (
 	});
 
 	const hasDeploys = configRes.deploys.length > 0;
+	const hasAgents = getAgents(configRes).length > 0;
+	const hasScheduledRequests = configRes.collections.some(
+		(collection) => collection.getData.publishing.scheduling,
+	);
 	const jobDefinitions = [
 		...coreJobDefinitions,
+		...(hasAgents ? [agentTickJob] : []),
+		...(hasScheduledRequests ? [dispatchScheduledRequestsJob] : []),
 		...(hasDeploys ? [deploysTickJob, startDeployRunJob] : []),
 		...(configRes.deploys.some((deploy) => deploy.schedule)
 			? [createRunScheduledDeployJob(configRes.deploys)]

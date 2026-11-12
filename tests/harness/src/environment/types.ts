@@ -4,13 +4,14 @@ import type { DatabaseTemplate } from "../databases/types.ts";
 import type { Mode, Setup } from "../setup/types.ts";
 
 /**
- * Shared CMS resources beyond its database and address: outbox, uploads, identity provider and
- * Lucid API. Host mode isolates each CMS's outbox.
+ * Shared CMS resources beyond its database and address: outbox, job ledger, uploads, identity
+ * provider and Lucid API. Host mode isolates each CMS's outbox and ledger.
  */
 export type CmsEnv = Required<
 	Pick<
 		HarnessEnv,
 		| "HARNESS_OUTBOX"
+		| "HARNESS_LEDGER"
 		| "HARNESS_UPLOADS"
 		| "HARNESS_IDP_URL"
 		| "LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE"
@@ -25,6 +26,8 @@ export type TargetDescription =
 			url: string;
 			/** The folder holding the emails the server sent. */
 			outbox: string;
+			/** The folder holding what the server's probe jobs did. */
+			ledger: string;
 	  }
 	| { mode: "project" };
 
@@ -61,5 +64,7 @@ export type HarnessContext = {
 		events: string;
 		/** The folder holding the emails the setup's CMSs send, one folder per outbox instance. */
 		outbox: string;
+		/** The folder holding what the setup's probe jobs did, one folder per ledger instance. */
+		ledger: string;
 	};
 };

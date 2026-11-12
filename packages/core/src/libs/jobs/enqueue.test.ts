@@ -16,6 +16,7 @@ import {
 	createTestQueueAdapter,
 } from "../../utils/test-helpers/create-jobs-context.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
+import QueryCountPlugin from "../db/client/query/count-plugin.js";
 import executeHooks from "../hooks/execute-hooks.js";
 import { copy } from "../i18n/index.js";
 import type { QueueDeliveryMessage } from "../queue/types.js";
@@ -199,6 +200,48 @@ describe("enqueueing durable jobs", () => {
 			.where("job_id", "=", jobId ?? "")
 			.executeTakeFirst();
 		expect(stored).toBeUndefined();
+	});
+
+	test("sends a transaction's jobs once after it commits, and runs no dispatch query for one that enqueues none", async () => {
+		const job = defineJob({
+			key: "test:commit-once",
+			version: 1,
+			input: z.object({ value: z.number() }),
+			handler: async () => {},
+		});
+		const publish = vi.fn(async () => ({ error: undefined, data: undefined }));
+		const base = await createJobsContext(testConfig, {
+			jobs: [job],
+			adapter: createTestQueueAdapter(publish),
+		});
+		const queries = new QueryCountPlugin();
+		const context = { ...base, db: base.db.withPlugin(queries) };
+
+		const enqueueThree: ServiceFn<[], undefined> = async (service) => {
+			for (const value of [1, 2, 3]) {
+				const result = await enqueueJob(service, { job, payload: { value } });
+				if (result.error) return result;
+			}
+			return { error: undefined, data: undefined };
+		};
+		await serviceWrapper(enqueueThree, { transaction: true })(context);
+		expect(publish).toHaveBeenCalledOnce();
+		expect(publish).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.arrayContaining([
+				expect.anything(),
+				expect.anything(),
+				expect.anything(),
+			]),
+		);
+
+		const before = queries.count;
+		const readOnly: ServiceFn<[], undefined> = async (service) => {
+			await service.db.kysely.selectFrom("lucid_jobs").select("id").execute();
+			return { error: undefined, data: undefined };
+		};
+		await serviceWrapper(readOnly, { transaction: true })(context);
+		expect(queries.count - before).toBe(1);
 	});
 
 	test("delivers only after a committed job is visible", async () => {

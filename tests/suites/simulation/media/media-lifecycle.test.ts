@@ -29,8 +29,10 @@ import {
 
 /** What one media item should be: the file it serves, who may see it and whether it is binned. */
 type Item = {
-	/** Where the CDN serves it, which never changes. */
+	/** Where the CDN serves it now. Its name part follows the file. */
 	url: string;
+	/** Every URL it has been served at, which all keep working, as `/cdn` only reads the uid. */
+	links: string[];
 	file: MediaFile;
 	public: boolean;
 	binned: boolean;
@@ -43,6 +45,9 @@ type Model = {
 };
 
 type Context = SimulationContext<Model>;
+
+/** The uid in a media URL, `/cdn/<uid>/<file name>`, which a replace keeps. */
+const uidOf = (url: string) => new URL(url).pathname.split("/")[2];
 
 const KINDS = ["image", "text", "large"] as const;
 type Kind = (typeof KINDS)[number];
@@ -123,6 +128,7 @@ const upload = action<Model, { kind: Kind; variety: number; public: boolean }>({
 			const media = await getMedia(admin, uploaded.id);
 			model.media.set(uploaded.id, {
 				url: media.url,
+				links: [media.url],
 				file,
 				public: input.public,
 				binned: false,
@@ -158,7 +164,10 @@ const replace = action<Model, { item: number; variety: number }>({
 		});
 		if (replaced.status === 204) {
 			item.file = file;
-			expect((await getMedia(admin, id)).url).toBe(item.url);
+			const { url } = await getMedia(admin, id);
+			expect(uidOf(url)).toBe(uidOf(item.url));
+			item.url = url;
+			if (!item.links.includes(url)) item.links.push(url);
 		}
 		return replaced.status;
 	},
@@ -325,16 +334,18 @@ const invariants = {
 		model,
 	}: Context) => {
 		for (const [id, item] of model.media) {
-			const visitor = await fetchCdn(lucid.session(), item.url);
-			const signedIn = await fetchCdn(admin, item.url);
-			const expected = item.binned ? 404 : item.public ? 200 : 401;
+			for (const link of item.links) {
+				const visitor = await fetchCdn(lucid.session(), link);
+				const signedIn = await fetchCdn(admin, link);
+				const expected = item.binned ? 404 : item.public ? 200 : 401;
 
-			expect(visitor.status, `media ${id} to a visitor`).toBe(expected);
-			expect(signedIn.status, `media ${id} to the admin`).toBe(200);
-			expect(
-				(await bytesOf(signedIn)).equals(Buffer.from(item.file.bytes)),
-				`media ${id} serves its latest file`,
-			).toBe(true);
+				expect(visitor.status, `${link} to a visitor`).toBe(expected);
+				expect(signedIn.status, `${link} to the admin`).toBe(200);
+				expect(
+					(await bytesOf(signedIn)).equals(Buffer.from(item.file.bytes)),
+					`${link} serves media ${id}'s latest file`,
+				).toBe(true);
+			}
 		}
 	},
 

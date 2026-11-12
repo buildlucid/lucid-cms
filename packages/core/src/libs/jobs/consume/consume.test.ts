@@ -20,8 +20,7 @@ import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import { copy } from "../../i18n/index.js";
 import { cancelJob } from "../cancel.js";
 import defineJob from "../define-job.js";
-import { drainJobs } from "../drain.js";
-import { enqueueJob, enqueueJobs } from "../enqueue.js";
+import { enqueueJob } from "../enqueue.js";
 import { recoverExpiredJobs } from "../maintenance.js";
 import { consumeJob } from "./index.js";
 
@@ -198,42 +197,6 @@ describe("consuming durable jobs", () => {
 		} finally {
 			await sql`drop trigger reject_job_completion`.execute(context.db.kysely);
 		}
-	});
-
-	test("enforces the global concurrency limit", async () => {
-		let active = 0;
-		let maximumActive = 0;
-		const handler = async () => {
-			active += 1;
-			maximumActive = Math.max(maximumActive, active);
-			await new Promise((resolve) => setTimeout(resolve, 10));
-			active -= 1;
-		};
-		const job = defineJob({
-			key: "test:global-concurrency",
-			version: 1,
-			input: z.object({}),
-			handler,
-		});
-		const context = await createJobsContext(testConfig, {
-			jobs: [job],
-			adapter: createTestQueueAdapter(),
-		});
-		await enqueueJobs(context, {
-			job,
-			payload: [{}, {}, {}, {}, {}, {}],
-		});
-
-		const drained = await drainJobs(context, {
-			limit: 10,
-			maxConcurrentJobs: 2,
-		});
-
-		expect(drained).toMatchObject({
-			error: undefined,
-			data: { found: 6, processed: 6 },
-		});
-		expect(maximumActive).toBe(2);
 	});
 
 	test("cancels a queued job before its handler starts", async () => {

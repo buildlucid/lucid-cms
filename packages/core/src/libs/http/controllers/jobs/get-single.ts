@@ -17,7 +17,8 @@ const factory = createFactory();
 
 const getSingleController = factory.createHandlers(
 	openAPI.describeRoute(() => ({
-		description: "Returns a single job based on the ID.",
+		description:
+			"Returns a single job by its row ID, or by the job ID that receipts and listings return.",
 		tags: ["jobs"],
 		summary: "Get Job",
 		responses: openAPI.responses({
@@ -41,9 +42,7 @@ const getSingleController = factory.createHandlers(
 				name: copy("server:core.routes.job.fetch.error.name"),
 				message: copy("server:core.routes.job.fetch.error.message"),
 			},
-		})(context, {
-			id: Number.parseInt(id, 10),
-		});
+		})(context, /^\d+$/.test(id) ? { id: Number(id) } : { jobId: id });
 		if (job.error) throw new LucidError(job.error);
 
 		c.status(200);

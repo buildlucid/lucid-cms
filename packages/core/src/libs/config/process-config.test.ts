@@ -1,6 +1,7 @@
 import { expect, test, vi } from "vitest";
 import z from "zod";
 import { defaultPasswordSchema } from "../../constants/default-config.js";
+import { agentTickJob } from "../../services/agent/jobs/tick.js";
 import type { LucidConfig } from "../../types/config.js";
 import defineCollection from "../collection/define-collection.js";
 import field from "../collection/definitions/fields/field.js";
@@ -215,7 +216,10 @@ test("preserves job definitions from the array shorthand while merging config", 
 	expect(
 		[...getJobRegistry(processed).values()].map((definition) => definition.key),
 	).toEqual(
-		[...coreJobDefinitions, job, pluginJob].map((definition) => definition.key),
+		//* the test config has agents, so their tick is registered too
+		[...coreJobDefinitions, agentTickJob, job, pluginJob].map(
+			(definition) => definition.key,
+		),
 	);
 	expect(storedConfigJob).toMatchObject({
 		type: "job-definition",

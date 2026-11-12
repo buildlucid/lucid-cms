@@ -64,6 +64,21 @@ export default class NotificationRecipientsRepository extends StaticRepository<"
 		});
 		return exec.response;
 	}
+	/** Whether any recipient's email is due by `before`, for the email sweep's schedule check. */
+	async hasDueEmails(props: { before: string }) {
+		const query = this.db
+			.selectFrom("lucid_notification_recipients")
+			.select("notification_id")
+			.where("email_due_at", "<=", props.before)
+			.limit(1);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "hasDueEmails",
+		});
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: exec.response.data !== undefined };
+	}
 	/** Drops emails that have been due since before the cutoff, so a paused or stalled job doesn't send old news. */
 	async clearExpiredEmails(props: { before: string }) {
 		const query = this.db

@@ -52,16 +52,23 @@ export type SimulationDefinition<Model> = {
 		string,
 		(context: SimulationContext<Model>) => Promise<void>
 	>;
+	/**
+	 * Runs once a sequence's actions are done, before its invariants are checked one last time,
+	 * such as to stop faults and let every job finish. It throws when what it waits for never happens.
+	 */
+	settle?: (context: SimulationContext<Model>) => Promise<void>;
 	/** The longest sequence to try. Defaults to 20. */
 	maxActions?: number;
 	/**
 	 * Replaces adapters to inject faults, such as a queue that fails. `random` gives numbers from
 	 * 0 to 1 that follow the run's seed, so the same faults happen on a replay. `cms.uploads` is
-	 * where the CMS stores uploads, for storage that wraps the real one.
+	 * where the CMS stores uploads, for storage that wraps the real one. `model` is the sequence's
+	 * model, for adapters its actions drive, such as a queue they deliver from.
 	 */
 	adapters?: (
 		random: () => number,
 		cms: { uploads: string },
+		model: Model,
 	) => AdapterOverrides | Promise<AdapterOverrides>;
 	/** Runs every sequence on a variant of the setup's config. See `shared/variants.ts`. */
 	variant?: Variant;

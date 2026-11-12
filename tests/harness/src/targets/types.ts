@@ -10,6 +10,8 @@ export type Target = {
 	transport: Transport;
 	/** The folder holding the emails this CMS sent. */
 	outbox: string;
+	/** The folder holding what this CMS's probe jobs did. Host mode gives each CMS its own. */
+	ledger: string;
 	/** The folder Node setups store this CMS's uploads in. Host mode gives each CMS its own. */
 	uploads: string;
 	/** Runs queries on the CMS's database. Only an in-process CMS has one to hand. */

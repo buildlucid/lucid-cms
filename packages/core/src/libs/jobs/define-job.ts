@@ -32,6 +32,7 @@ const normalizeSchedules = <Input extends JobPayload | null>(
 		input: schedule.input,
 		overlap: schedule.overlap ?? "skip",
 		missed: schedule.missed ?? "run-once",
+		...(schedule.when ? { when: schedule.when } : {}),
 	}));
 
 /**

@@ -32,17 +32,28 @@ const simulation = <Model>(
 		await fc.assert(
 			fc.asyncProperty(sequences, async ({ steps, faultSeed }) => {
 				const { adapters } = definition;
+				const model = definition.model();
 				const lucid = await openLucid(context, {
 					adapterOverrides:
-						adapters && ((cms) => adapters(createRandom(faultSeed), cms)),
+						adapters &&
+						((cms) => adapters(createRandom(faultSeed), cms, model)),
 					variant: definition.variant,
 				});
 
 				try {
 					const simulated = {
-						model: definition.model(),
+						model,
 						lucid,
 						admin: await lucid.admin(),
+					};
+					const checkInvariants = async (after: string) => {
+						for (const [rule, check] of Object.entries(definition.invariants)) {
+							await check(simulated).catch((error: unknown) => {
+								throw new Error(`Invariant broken after ${after}: ${rule}`, {
+									cause: error,
+								});
+							});
+						}
 					};
 					const trace: JsonValue[] = [];
 					await definition.setup?.(simulated);
@@ -59,16 +70,12 @@ const simulation = <Model>(
 							outcome: outcome ?? null,
 						});
 
-						for (const [rule, check] of Object.entries(definition.invariants)) {
-							await check(simulated).catch((error: unknown) => {
-								throw new Error(
-									`Invariant broken after ${step.name}: ${rule}`,
-									{
-										cause: error,
-									},
-								);
-							});
-						}
+						await checkInvariants(step.name);
+					}
+
+					if (definition.settle) {
+						await definition.settle(simulated);
+						await checkInvariants("settling");
 					}
 
 					digest.update(JSON.stringify(trace));

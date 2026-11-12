@@ -30,6 +30,7 @@ const openTarget = async (
 			url: target.url,
 			transport: (request) => fetch(request),
 			outbox: target.outbox,
+			ledger: target.ledger,
 			uploads: context.cmsEnv.HARNESS_UPLOADS,
 			close: async () => {},
 		};
@@ -52,6 +53,7 @@ const openTarget = async (
 			env: {
 				...context.cmsEnv,
 				HARNESS_OUTBOX: `${context.cmsEnv.HARNESS_OUTBOX}/${instance}`,
+				HARNESS_LEDGER: `${context.cmsEnv.HARNESS_LEDGER}/${instance}`,
 				HARNESS_UPLOADS: uploads,
 				HARNESS_VARIANT: options?.variant,
 			},
@@ -65,6 +67,7 @@ const openTarget = async (
 			url: host.url,
 			transport: host.transport,
 			outbox: path.join(context.paths.outbox, instance),
+			ledger: path.join(context.paths.ledger, instance),
 			uploads,
 			query: host.query,
 			close: async () => {

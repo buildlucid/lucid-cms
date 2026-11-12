@@ -22,6 +22,8 @@ const ReviewedStoryCollection = defineCollection({
 		field.textarea("summary"),
 	],
 	publishing: {
+		//* requests can be scheduled, on setups whose queue can hold a job until its time
+		scheduling: true,
 		environments: [
 			{ key: "staging", label: "Staging" },
 			{ key: "production", label: "Production" },

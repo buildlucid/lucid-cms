@@ -6,7 +6,7 @@ import {
 	loadConfigFile,
 	resolveConfigDefinition,
 } from "@lucidcms/core/build";
-import { drainJobs, logScopes } from "@lucidcms/core/extension";
+import { createJobPool, logScopes } from "@lucidcms/core/extension";
 import {
 	createLucidAdapters,
 	createServiceContext,
@@ -34,6 +34,8 @@ const MAX_POLL_INTERVAL = 30_000;
 const POLL_INTERVAL_INC = 1_000;
 const DEFAULT_MAX_CONCURRENT_JOBS = 5;
 const DEFAULT_BATCH_SIZE = 10;
+/** The longest delay a timer can wait for. A wake-up due later sets another timer when it fires. */
+const MAX_TIMER_MS = 2_147_483_647;
 
 const options = workerData.options as WorkerQueueAdapterOptions;
 const runtime = workerData.runtime as {
@@ -125,13 +127,13 @@ const startConsumer = async () => {
 		await forwardLogsToParent(config.logger.level);
 		logsForwarded = true;
 
-		let requestPoll: () => void = () => undefined;
+		let requestPoll: (availableAt: readonly string[]) => void = () => undefined;
 		const internalQueueAdapter: QueueAdapterInstance = {
 			type: "queue-adapter",
 			key: "worker",
 			support: { delayedDelivery: true, maxDelayMs: null },
-			publish: async () => {
-				requestPoll();
+			publish: async (_context, messages) => {
+				requestPoll(messages.map((message) => message.availableAt));
 				return { error: undefined, data: undefined };
 			},
 		};
@@ -161,8 +163,17 @@ const startConsumer = async () => {
 		let pollTimeout: ReturnType<typeof setTimeout> | undefined;
 		let pollPromise: Promise<void> | undefined;
 		let pollRequested = false;
+		let wakeTimeout: ReturnType<typeof setTimeout> | undefined;
+		/** When published jobs that weren't due yet become due. */
+		const wakeTimes = new Set<number>();
 		let shuttingDown = false;
 		let shutdownPromise: Promise<void> | undefined;
+		//* polls again as each job ends, so a free slot takes the next job straight away
+		const pool = createJobPool({
+			maxConcurrentJobs: MAX_CONCURRENT_JOBS,
+			batchSize: BATCH_SIZE,
+			onSettled: () => checkNow(),
+		});
 
 		const shutdown = (options: {
 			exitCode?: number;
@@ -174,7 +185,9 @@ const startConsumer = async () => {
 					clearTimeout(pollTimeout);
 					pollTimeout = undefined;
 				}
+				clearTimeout(wakeTimeout);
 				if (pollPromise) await pollPromise;
+				await pool.settle();
 				await activeAdapters.destroy();
 				await activeDatabase.destroy();
 
@@ -195,7 +208,7 @@ const startConsumer = async () => {
 			void shutdown({ exitCode: 0 });
 		});
 
-		/** Polls for ready jobs and processes them within the configured limits. */
+		/** Starts ready jobs in the pool's free slots, without waiting for them to finish. */
 		const poll = (): Promise<void> => {
 			if (pollPromise) {
 				pollRequested = true;
@@ -204,10 +217,7 @@ const startConsumer = async () => {
 
 			pollPromise = (async () => {
 				try {
-					const jobsResult = await drainJobs(serviceContext, {
-						limit: BATCH_SIZE,
-						maxConcurrentJobs: MAX_CONCURRENT_JOBS,
-					});
+					const jobsResult = await pool.fill(serviceContext);
 					if (jobsResult.error) {
 						logger.error({
 							error: jobsResult.error,
@@ -223,11 +233,11 @@ const startConsumer = async () => {
 						message: "Jobs found",
 						owner: PLUGIN_KEY,
 						scope: logScopes.queueAdapter,
-						data: { jobs: jobsResult.data.found },
+						data: { jobs: jobsResult.data.started },
 					});
 
-					// Slow polling down while the queue is empty.
-					if (jobsResult.data.found === 0) {
+					// Slow polling down while there is nothing new to start.
+					if (jobsResult.data.started === 0) {
 						pollInterval = Math.min(
 							pollInterval + POLL_INTERVAL_INC,
 							MAX_POLL_INTERVAL,
@@ -277,10 +287,45 @@ const startConsumer = async () => {
 
 			void poll();
 		};
-		requestPoll = checkNow;
+		/** Sets a timer for the next time a published job becomes due, dropping times that have passed. */
+		const scheduleWake = () => {
+			clearTimeout(wakeTimeout);
+			const now = Date.now();
+			let next = Number.POSITIVE_INFINITY;
+			for (const time of wakeTimes) {
+				if (time <= now) wakeTimes.delete(time);
+				else next = Math.min(next, time);
+			}
+			if (shuttingDown || !Number.isFinite(next)) return;
 
-		parentPort?.on("message", ({ type }) => {
-			if (type === "CHECK_NOW") checkNow();
+			wakeTimeout = setTimeout(
+				() => {
+					checkNow();
+					scheduleWake();
+				},
+				Math.min(next - now, MAX_TIMER_MS),
+			);
+		};
+
+		/**
+		 * Polls now for published jobs that are due, and again as each of the rest becomes due, as the
+		 * idle poll may be up to 30 seconds away.
+		 */
+		const wakeFor = (availableAt: readonly string[]) => {
+			const now = Date.now();
+			const times = availableAt.map((value) => Date.parse(value));
+			if (times.length === 0 || times.some((time) => !(time > now))) {
+				checkNow();
+			}
+			for (const time of times) {
+				if (time > now) wakeTimes.add(time);
+			}
+			scheduleWake();
+		};
+		requestPoll = wakeFor;
+
+		parentPort?.on("message", ({ type, availableAt }) => {
+			if (type === "CHECK_NOW") wakeFor(availableAt ?? []);
 			if (type === "SHUTDOWN") {
 				void shutdown({ notifyParent: true });
 			}

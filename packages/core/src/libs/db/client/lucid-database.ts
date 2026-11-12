@@ -39,11 +39,18 @@ export default class LucidDatabase {
 	private readonly commitCallbacks: Array<() => Promise<unknown>> = [];
 	/** Work queued with `afterRollback` in case this client's transaction rolls back. */
 	private readonly rollbackCallbacks: Array<() => Promise<unknown>> = [];
+	/** The client a transaction was opened from. */
+	private readonly opener?: LucidDatabase;
 
 	private constructor(
 		options: LucidDatabaseOptions,
-		internals?: { registry: TableRegistry; pluginsApplied: boolean },
+		internals?: {
+			registry: TableRegistry;
+			pluginsApplied: boolean;
+			opener?: LucidDatabase;
+		},
 	) {
+		this.opener = internals?.opener;
 		this.adapter = options.adapter;
 		this.tables =
 			internals?.registry ?? new TableRegistry(options.adapter, options.tables);
@@ -61,6 +68,11 @@ export default class LucidDatabase {
 
 	get isTransaction(): boolean {
 		return this.kysely.isTransaction;
+	}
+
+	/** The client outside this one's transaction, for work queued with `afterCommit` that queries once it commits. */
+	get outsideTransaction(): LucidDatabase {
+		return this.opener?.outsideTransaction ?? this;
 	}
 
 	registerTable(definition: TableDefinition | ResolvedTableDefinition) {
@@ -124,6 +136,7 @@ export default class LucidDatabase {
 			{
 				registry: this.tables,
 				pluginsApplied: true,
+				opener: this,
 			},
 		);
 	}

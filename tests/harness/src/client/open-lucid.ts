@@ -32,6 +32,11 @@ export type Lucid = {
 	 */
 	uploads: string;
 	/**
+	 * The folder holding what the CMS's probe jobs did. In host mode it holds only this CMS's; the
+	 * served server shares one with every test. Read it with the helpers in `shared/jobs.ts`.
+	 */
+	ledger: string;
+	/**
 	 * Runs queries on the CMS's database, for what the API cannot show, such as a counter it keeps
 	 * to itself. Host mode only, so call `requires("mode:host")`.
 	 */
@@ -95,6 +100,7 @@ const openLucid = async (
 		variant,
 		url: target.url,
 		uploads: target.uploads,
+		ledger: target.ledger,
 		query: (use) => {
 			if (!target.query) {
 				throw new Error(

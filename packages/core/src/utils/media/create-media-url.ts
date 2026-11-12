@@ -2,7 +2,8 @@ import constants from "../../constants/constants.js";
 import formatMediaPath from "./format-media-path.js";
 
 /**
- * Creates the URL a media item is served at, which stays the same when its file is replaced.
+ * Creates the URL a media item is served at. `/cdn` only reads the uid, so links keep working when
+ * the file is replaced, and the name after it follows the current file.
  */
 const createMediaUrl = (props: {
 	uid: string;

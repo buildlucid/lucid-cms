@@ -557,6 +557,27 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 		});
 		return exec.response;
 	}
+	/** Marks queued jobs for sending again when they were due and sent before `sentBefore`, yet never consumed. */
+	async markStaleDispatchesPending(props: { sentBefore: string; now: string }) {
+		const query = this.db
+			.updateTable("lucid_jobs")
+			.set({
+				dispatch_status: "pending",
+				next_dispatch_at: props.now,
+				dispatched_at: null,
+				updated_at: props.now,
+			})
+			.where("status", "=", "queued")
+			.where("dispatch_status", "=", "dispatched")
+			.where("available_at", "<=", props.sentBefore)
+			.where("dispatched_at", "<=", props.sentBefore)
+			.returning("job_id");
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "markStaleDispatchesPending",
+		});
+		return exec.response;
+	}
 	/** Cancels running jobs whose lease expired after cancellation was requested. */
 	async cancelExpiredLeases(now: string) {
 		const query = this.db

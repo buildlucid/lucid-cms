@@ -1,6 +1,5 @@
 import { executeAgentRunJob } from "../../services/agent/jobs/execute-run.js";
 import { generateAgentTitleJob } from "../../services/agent/jobs/generate-title.js";
-import { agentTickJob } from "../../services/agent/jobs/tick.js";
 import { syncAnnouncementsJob } from "../../services/announcements/jobs/sync-announcements.js";
 import { deleteCollectionJob } from "../../services/collections/jobs/delete-single.js";
 import { verifyConnectionsJob } from "../../services/connection/jobs/verify-connections.js";
@@ -15,7 +14,6 @@ import { deleteAwaitingSyncMediaJob } from "../../services/media/jobs/delete-awa
 import { hardDeleteSingleMediaJob } from "../../services/media/jobs/hard-delete-single.js";
 import { updateMediaStorageJob } from "../../services/media/jobs/update-storage.js";
 import { sendNotificationEmailsJob } from "../../services/notifications/jobs/send-emails.js";
-import { dispatchScheduledRequestsJob } from "../../services/requests/jobs/dispatch-scheduled.js";
 import { executeRequestJob } from "../../services/requests/jobs/execute.js";
 import { translateDocumentsJob } from "../../services/translations/jobs/translate.js";
 import { deleteUserJob } from "../../services/users/jobs/delete-single.js";
@@ -36,12 +34,10 @@ const coreJobDefinitions = [
 	deleteDocumentJob,
 	deleteExpiredRevisionsJob,
 	executeRequestJob,
-	dispatchScheduledRequestsJob,
 	translateDocumentsJob,
 	deleteExpiredDataJob,
 	verifyConnectionsJob,
 	syncAnnouncementsJob,
-	agentTickJob,
 	executeAgentRunJob,
 	generateAgentTitleJob,
 ] as const satisfies readonly AnyJobDefinition[];

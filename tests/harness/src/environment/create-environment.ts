@@ -26,19 +26,21 @@ export type SetupEnvironment = {
 	work: string;
 	/** The folder holding the emails the setup's CMSs send, one folder per outbox instance. */
 	outbox: string;
+	/** The folder holding what the setup's probe jobs did, one folder per ledger instance. */
+	ledger: string;
 	/** What every CMS of the setup is given besides its database and address. */
 	cmsEnv: CmsEnv;
 	/** What is known without loading the setup's config, for lanes that run no CMS. */
 	baseCapabilities: Capability[];
 	/** Migrates and seeds the template database. */
 	database(): Promise<PreparedDatabase>;
-	/** Builds and starts the setup's real server, and returns its address and outbox folder. */
-	serve(): Promise<{ url: string; outbox: string }>;
+	/** Builds and starts the setup's real server, and returns its address, outbox and ledger folders. */
+	serve(): Promise<{ url: string; outbox: string; ledger: string }>;
 	destroy(): Promise<void>;
 };
 
-/** The outbox instance the served server posts to. */
-const SERVED_OUTBOX = "served";
+/** The outbox and ledger instance the served server posts to. */
+const SERVED_INSTANCE = "served";
 
 /** Runs a step once however often it is asked for, and shares the result. */
 const once = <Result>(step: () => Promise<Result>): (() => Promise<Result>) => {
@@ -62,8 +64,10 @@ const createEnvironment = (options: {
 	const { setup, directory } = options;
 	const work = path.join(directory, "work");
 	const outbox = path.join(work, "outbox");
+	const ledger = path.join(work, "ledger");
 	const cmsEnv: CmsEnv = {
 		HARNESS_OUTBOX: options.fakes.outbox(setup.name, outbox),
+		HARNESS_LEDGER: options.fakes.ledger(setup.name, ledger),
 		HARNESS_UPLOADS: path.join(work, "uploads"),
 		HARNESS_IDP_URL: options.fakes.identityProvider,
 		LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE: options.fakes.lucidApi,
@@ -107,7 +111,7 @@ const createEnvironment = (options: {
 		}),
 	);
 
-	const serve = once(async (): Promise<{ url: string; outbox: string }> => {
+	const serve = once(async () => {
 		const [{ template }] = await Promise.all([database(), build()]);
 		const copy = await resolveDriver(setup.database).clone(template.state, {
 			directory: work,
@@ -121,16 +125,22 @@ const createEnvironment = (options: {
 			directory,
 			env: {
 				...cmsEnv,
-				HARNESS_OUTBOX: `${cmsEnv.HARNESS_OUTBOX}/${SERVED_OUTBOX}`,
+				HARNESS_OUTBOX: `${cmsEnv.HARNESS_OUTBOX}/${SERVED_INSTANCE}`,
+				HARNESS_LEDGER: `${cmsEnv.HARNESS_LEDGER}/${SERVED_INSTANCE}`,
 			},
 		});
 		cleanups.push(server.stop);
-		return { url: server.url, outbox: path.join(outbox, SERVED_OUTBOX) };
+		return {
+			url: server.url,
+			outbox: path.join(outbox, SERVED_INSTANCE),
+			ledger: path.join(ledger, SERVED_INSTANCE),
+		};
 	});
 
 	return {
 		work,
 		outbox,
+		ledger,
 		cmsEnv,
 		baseCapabilities,
 		database,

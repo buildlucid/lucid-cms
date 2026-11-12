@@ -1,9 +1,11 @@
 import { cloudflare } from "@lucidcms/cloudflare";
+import { cloudflareQueues } from "@lucidcms/cloudflare-queues";
 import { cloudflareR2 } from "@lucidcms/cloudflare-r2";
 import { defineConfig, z } from "@lucidcms/core";
 import { postgres } from "@lucidcms/postgres";
 import { harnessEnv, sharedConfig } from "../../shared/config.ts";
 import { authentication } from "../../shared/fragments/auth.ts";
+import { harnessJobs } from "../../shared/fragments/jobs.ts";
 import { mediaConfig } from "../../shared/fragments/media.ts";
 import { outbox } from "../../shared/fragments/outbox.ts";
 
@@ -12,6 +14,7 @@ export const env = harnessEnv
 	.pick({
 		HARNESS_URL: true,
 		HARNESS_OUTBOX: true,
+		HARNESS_LEDGER: true,
 		HARNESS_IDP_URL: true,
 		LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE: true,
 	})
@@ -33,7 +36,12 @@ export default defineConfig({
 		...authentication(env),
 		...mediaConfig({}),
 		email: outbox(env.HARNESS_OUTBOX),
-		//* a local bucket in development, so media runs on Workers without credentials
-		plugins: [cloudflareR2()],
+		plugins: [
+			//* a local bucket in development, so media runs on Workers without credentials
+			cloudflareR2(),
+			//* a local queue in development, delivered by workerd as it would be once deployed
+			cloudflareQueues(),
+			harnessJobs(env.HARNESS_LEDGER),
+		],
 	}),
 });

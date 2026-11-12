@@ -163,6 +163,72 @@ describe("job schedules", () => {
 		expect(jobs.count).toBe(1);
 	});
 
+	test("stores a job only for occurrences its check says have work, and treats a throw as none", async () => {
+		const decisions = [false, true, "throw"] as const;
+		const checked: string[] = [];
+		const job = defineJob({
+			key: "test:checked",
+			version: 1,
+			input: z.object({}),
+			schedules: [
+				{
+					key: "every-minute",
+					cron: "* * * * *",
+					input: {},
+					//* the pull adapter never runs its jobs, which would skip the next minute as an overlap
+					overlap: "allow",
+					when: ({ scheduledFor }) => {
+						const decision = decisions[checked.length];
+						checked.push(scheduledFor);
+						if (decision === "throw") throw new Error("Nothing to read.");
+						return decision ?? false;
+					},
+				},
+			],
+			handler: async () => {},
+		});
+		const context = await createContext({ jobs: [job] });
+
+		for (const minute of ["09:15", "09:16", "09:17"]) {
+			const ticked = await runJobScheduler(
+				context,
+				new Date(`2026-08-30T${minute}:00.000Z`),
+			);
+			expect(ticked.error).toBeUndefined();
+		}
+
+		expect(checked).toEqual([
+			"2026-08-30T09:15:00.000Z",
+			"2026-08-30T09:16:00.000Z",
+			"2026-08-30T09:17:00.000Z",
+		]);
+		const jobs = await context.db.kysely
+			.selectFrom("lucid_jobs")
+			.select("scheduled_for")
+			.execute();
+		expect(
+			jobs.map((row) => new Date(row.scheduled_for ?? "").toISOString()),
+		).toEqual(["2026-08-30T09:16:00.000Z"]);
+	});
+
+	test("runs a checked schedule early from the admin without asking its check", async () => {
+		const when = vi.fn(() => false);
+		const job = defineJob({
+			key: "test:checked-trigger",
+			version: 1,
+			input: z.object({}),
+			schedules: [{ key: "manual", cron: "0 0 1 1 *", input: {}, when }],
+			handler: async () => {},
+		});
+		const context = await createContext({ jobs: [job] });
+
+		const triggered = await triggerSchedule(context, {
+			scheduleKey: "test:checked-trigger/manual",
+		});
+		expect(triggered.error).toBeUndefined();
+		expect(when).not.toHaveBeenCalled();
+	});
+
 	test("runs scheduled jobs through the inline adapter when no external queue exists", async () => {
 		const handler = vi.fn(async () => {});
 		const job = defineJob({

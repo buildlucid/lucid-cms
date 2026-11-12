@@ -2,6 +2,7 @@ import { defineConfig } from "@lucidcms/core";
 import { node } from "@lucidcms/node";
 import { pages } from "@lucidcms/pages";
 import { postgres } from "@lucidcms/postgres";
+import { workerQueues } from "@lucidcms/worker-queues";
 import {
 	getDatabaseUrl,
 	harnessEnv,
@@ -10,6 +11,7 @@ import {
 	withSchemaStep,
 } from "../../shared/config.ts";
 import { authentication } from "../../shared/fragments/auth.ts";
+import { harnessJobs } from "../../shared/fragments/jobs.ts";
 import {
 	ArticleCollection,
 	localization,
@@ -40,6 +42,9 @@ export default defineConfig({
 			plugins: [
 				...nodeMediaPlugins(env.HARNESS_UPLOADS),
 				pages({ collections: [{ key: LandingPageCollection.key }] }),
+				//* host mode runs a stand-in with the same key, as nothing is built to start the thread from
+				workerQueues(),
+				harnessJobs(env.HARNESS_LEDGER),
 			],
 		}),
 });

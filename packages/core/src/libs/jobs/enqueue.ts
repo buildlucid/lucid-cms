@@ -7,7 +7,7 @@ import type {
 import type { LucidJobs } from "../db/tables/jobs.js";
 import { copy } from "../i18n/index.js";
 import { JobsRepository } from "../repositories/index.js";
-import { flushPendingJobs } from "./dispatch.js";
+import { flushPendingJobsOnCommit } from "./dispatch.js";
 import {
 	getJobDefinitionKey,
 	getJobDefinitionRuntime,
@@ -227,9 +227,7 @@ export const enqueueJobs = async <Definition extends AnyJobDefinition>(
 		];
 	}
 
-	if (!context.db.isTransaction) {
-		await flushPendingJobs(context);
-	}
+	await flushPendingJobsOnCommit(context);
 
 	return { error: undefined, data: receipts };
 };

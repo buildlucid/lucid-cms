@@ -34,6 +34,7 @@
 - Plugins can now add their own `lucidcms` commands, which `lucidcms --help` lists when run inside a project. ([bf8f9bd](https://github.com/buildlucid/lucid-cms/commit/bf8f9bd4a85d5279e3baf2794a521e88d248a5ae))
 - Admin slots shown to signed-in users can now take a `permission`, and `adminHref` links to admin routes, which take their page title from their navigation label. ([74a262a](https://github.com/buildlucid/lucid-cms/commit/74a262a342ae1cbd278b438e0eee39091250ec74))
 - Added `http.serverTiming`, which reports how many database queries each request ran, and how long they took, in a `Server-Timing` header.
+- Job schedules can take a `when` check that skips a run with nothing to do, so quiet minutes store no jobs.
 
 ### Breaking Changes:
 
@@ -76,7 +77,8 @@
 - Renamed the runtime context's `configEntryPoint` to `buildModule`, the path of an emitted `lucid:build` module. ([3d70045](https://github.com/buildlucid/lucid-cms/commit/3d70045394d133d17481d72ceaab2baf5a8161e5))
 - Email templates now use [Kiln](https://kilnlang.com) `.kiln` files instead of Mustache, with types generated from their `props` for `toolkit.email.send` and notification emails. ([cd96ff7](https://github.com/buildlucid/lucid-cms/commit/cd96ff79eb4c910eb011ce8938f821d4ead238ab))
 - CLI commands that ask for confirmation now take `--yes` in place of `--force` and fail when there's no terminal to ask in, and `jobs:schedule` is now `jobs:run`. ([0475f3c](https://github.com/buildlucid/lucid-cms/commit/0475f3c06e25151d216ab594b864879f682c26af))
-- Media URLs are now `/cdn/<uid>/<file name>` instead of the storage key, so they stay the same when a file is replaced or made private. A replacement that fails to save leaves the old file as it was. Uploads no longer take a `temporary` option.
+- Media URLs are now `/cdn/<uid>/<file name>` instead of the storage key, so links keep working when a file is replaced or made private. A replacement that fails to save leaves the old file as it was. Uploads no longer take a `temporary` option.
+- Replaced `drainJobs` in `@lucidcms/core/extension` with `createJobPool`, for queues that poll the database, which starts ready jobs in free slots without waiting for earlier ones to finish.
 
 ### Bug Fixes:
 
@@ -138,6 +140,8 @@
 - Fixed a visibility change that failed to save leaving its media pointing at a file that had moved.
 - Fixed image presets losing their format when `media.images.allowFormatQuery` is on and the browser asks for none Lucid makes.
 - Fixed media URLs renaming files after their type, so `song.mp3` became `song.mpga`.
+- Fixed `GET /api/v1/jobs/{id}` failing for the job IDs that receipts return. It now takes a job ID or a row ID.
+- Fixed jobs never running when their queue lost the message, such as once Cloudflare Queues ran out of retries. The scheduler now sends a job again when it is still waiting 10 minutes after it was due.
 
 ## v0.19.0-alpha.0
 

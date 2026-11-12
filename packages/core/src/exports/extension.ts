@@ -22,7 +22,7 @@ export {
 	isTranslatableCopy,
 } from "../libs/i18n/index.js";
 export { consumeJob } from "../libs/jobs/consume/index.js";
-export { drainJobs } from "../libs/jobs/drain.js";
+export { createJobPool, type JobPool } from "../libs/jobs/create-job-pool.js";
 export { DEFAULT_KV_NAMESPACE } from "../libs/kv/constants.js";
 export { default as contentCacheTags } from "../libs/kv/content-cache-tags.js";
 export {

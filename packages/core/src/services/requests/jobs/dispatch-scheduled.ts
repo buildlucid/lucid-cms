@@ -7,13 +7,17 @@ import scheduleRequest, {
 	QUEUE_WINDOW_MS,
 } from "../helpers/schedule-request.js";
 
-/** Queues scheduled requests once their time is close enough for the queue to hold them. */
+/**
+ * Queues scheduled requests once their time is close enough for the queue to hold them. Requests
+ * due sooner are queued as they are scheduled or approved, so a quarter-hourly sweep of the
+ * four-hour window is enough. Registered only when a collection allows scheduling.
+ */
 export const dispatchScheduledRequestsJob = defineJob({
 	key: "core:dispatch-scheduled-requests",
 	version: 1,
 	input: z.null(),
 	schedules: [
-		{ key: "automatic", cron: "* * * * *", timezone: "UTC", input: null },
+		{ key: "automatic", cron: "*/15 * * * *", timezone: "UTC", input: null },
 	],
 	handler: async ({ context }) => {
 		if (!context.queue.support.delayedDelivery) return;

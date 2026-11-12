@@ -5,12 +5,15 @@ import serveFetch from "../utils/serve-fetch.ts";
 import createIdentityProvider from "./create-identity-provider.ts";
 import createLucidApi from "./create-lucid-api.ts";
 
-/** An outbox instance's name, which becomes a folder. */
+/** An outbox or ledger instance's name, which becomes a folder. */
 const INSTANCE = /^[a-z0-9-]{1,64}$/;
+
+/** What the fakes collect from CMSs and keep as files: sent emails, and what probe jobs did. */
+type Collection = "outbox" | "ledger";
 
 /**
  * The run's stand-ins for services a CMS talks to over HTTP, which work from every runtime: an
- * outbox, an identity provider and Lucid's own API.
+ * outbox, a ledger of job executions, an identity provider and Lucid's own API.
  */
 export type Fakes = {
 	url: string;
@@ -19,6 +22,11 @@ export type Fakes = {
 	 * returns `url`. Each CMS posts to its own instance, so tests only see their own emails.
 	 */
 	outbox(setup: string, directory: string): string;
+	/**
+	 * Keeps what a setup's probe jobs post to `<url>/<instance>` in `<directory>/<instance>`, and
+	 * returns `url`. See `shared/fragments/jobs.ts`.
+	 */
+	ledger(setup: string, directory: string): string;
 	/** The identity provider's issuer, which the `authentication` fragment's providers use. */
 	identityProvider: string;
 	/** Lucid's own API, which a CMS connects to instead of Lucid's servers. It answers at the root. */
@@ -28,17 +36,21 @@ export type Fakes = {
 
 /** Starts the run's fakes on a free local port. The runner starts them once and stops them at the end. */
 const startFakes = async (): Promise<Fakes> => {
-	const outboxes = new Map<string, string>();
+	const folders: Record<Collection, Map<string, string>> = {
+		outbox: new Map(),
+		ledger: new Map(),
+	};
 	let identityProvider: ReturnType<typeof createIdentityProvider> | undefined;
 	let lucidApi: ReturnType<typeof createLucidApi> | undefined;
 
-	const receiveEmail = async (
+	const receive = async (
+		collection: Collection,
 		request: Request,
 		[setup = "", instance = ""]: string[],
 	): Promise<Response> => {
-		const directory = outboxes.get(setup);
+		const directory = folders[collection].get(setup);
 		if (request.method !== "POST" || !directory || !INSTANCE.test(instance)) {
-			return new Response("Unknown outbox.", { status: 404 });
+			return new Response(`Unknown ${collection}.`, { status: 404 });
 		}
 
 		const folder = path.join(directory, instance);
@@ -56,7 +68,8 @@ const startFakes = async (): Promise<Fakes> => {
 		const [area, ...rest] = pathname.split("/").filter(Boolean);
 		switch (area) {
 			case "outbox":
-				return receiveEmail(request, rest.map(decodeURIComponent));
+			case "ledger":
+				return receive(area, request, rest.map(decodeURIComponent));
 			case "idp":
 				return identityProvider
 					? identityProvider(request, `/${rest.join("/")}`)
@@ -74,8 +87,12 @@ const startFakes = async (): Promise<Fakes> => {
 	return {
 		url: server.url,
 		outbox: (setup, directory) => {
-			outboxes.set(setup, directory);
+			folders.outbox.set(setup, directory);
 			return `${server.url}/outbox/${encodeURIComponent(setup)}`;
+		},
+		ledger: (setup, directory) => {
+			folders.ledger.set(setup, directory);
+			return `${server.url}/ledger/${encodeURIComponent(setup)}`;
 		},
 		identityProvider: issuer,
 		lucidApi: server.url,

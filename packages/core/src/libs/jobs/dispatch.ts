@@ -1,5 +1,6 @@
 import constants from "../../constants/constants.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
 import { copy } from "../i18n/index.js";
 import logger from "../logger/index.js";
 import { JobsRepository } from "../repositories/index.js";
@@ -117,4 +118,37 @@ export const flushPendingJobs: ServiceFn<[], { count: number }> = async (
 			return { error: undefined, data: { count } };
 		}
 	}
+};
+
+/** Transactions that already flush their jobs once they commit. */
+const flushingTransactions = new WeakSet<LucidDatabase>();
+
+/**
+ * Publishes pending jobs immediately or once after commit, preventing delivery before persistence.
+ * Empty transactions run no dispatch query. Logs failures for the next scheduler tick to retry.
+ */
+export const flushPendingJobsOnCommit = async (context: ServiceContext) => {
+	const log = (error: unknown) =>
+		logger.error({
+			error,
+			event: "jobs.dispatch.after-commit.failed",
+			message: context.translate(
+				"server:core.jobs.dispatch.after.commit.failed",
+			),
+			scope: constants.logScopes.jobs,
+		});
+
+	if (!context.db.isTransaction) {
+		const dispatch = await flushPendingJobs(context);
+		if (dispatch.error) log(dispatch.error);
+		return;
+	}
+	if (flushingTransactions.has(context.db)) return;
+	flushingTransactions.add(context.db);
+
+	const committed = { ...context, db: context.db.outsideTransaction };
+	await context.db.afterCommit(async () => {
+		const dispatch = await flushPendingJobs(committed);
+		if (dispatch.error) log(dispatch.error);
+	});
 };

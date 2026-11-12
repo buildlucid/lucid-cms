@@ -13,6 +13,7 @@
 	},
 	"dependencies": {
 		"@lucidcms/cloudflare": "*",
+		"@lucidcms/cloudflare-queues": "*",
 		"@lucidcms/cloudflare-r2": "*",
 		"@lucidcms/core": "*",
 		"@lucidcms/filesystem": "*",
@@ -22,7 +23,8 @@
 		"@lucidcms/postgres": "*",
 		"@lucidcms/sharp": "*",
 		"@lucidcms/sqlite": "*",
-		"@lucidcms/sqlite-kv": "*"
+		"@lucidcms/sqlite-kv": "*",
+		"@lucidcms/worker-queues": "*"
 	},
 	"devDependencies": {
 		"@electric-sql/pglite": "^0.5.16",

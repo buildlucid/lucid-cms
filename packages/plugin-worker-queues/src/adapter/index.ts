@@ -145,9 +145,13 @@ const workerQueueAdapter = (
 				return destroyPromise;
 			},
 		},
-		publish: async () => {
+		publish: async (_context, messages) => {
 			try {
-				worker?.postMessage({ type: "CHECK_NOW" });
+				//* the consumer polls again once each job is due, not only on its next idle poll
+				worker?.postMessage({
+					type: "CHECK_NOW",
+					availableAt: messages.map((message) => message.availableAt),
+				});
 				return { error: undefined, data: undefined };
 			} catch (cause) {
 				return {

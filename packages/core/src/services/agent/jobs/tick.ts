@@ -43,6 +43,7 @@ const tick: JobService = async ({ context }) => {
 	return { error: undefined, data: undefined };
 };
 
+/** Runs the agent tick each minute. Registered only when agents are in use. */
 export const agentTickJob = defineJob({
 	key: "core:agent-tick",
 	version: 1,

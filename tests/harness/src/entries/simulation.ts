@@ -10,6 +10,10 @@ export type {
 } from "../migrations/types.ts";
 export { default as recordDigest } from "../report/record-digest.ts";
 export { default as action } from "../simulation/action.ts";
+export {
+	default as createManualQueue,
+	type ManualQueue,
+} from "../simulation/manual-queue.ts";
 export { default as getRunOptions } from "../simulation/get-run-options.ts";
 export { default as simulation } from "../simulation/simulation.ts";
 export type { Session } from "../client/types.ts";

@@ -12,14 +12,17 @@ const isJobMessage = (body: unknown): body is { version: 1; jobId: string } =>
 	"jobId" in body &&
 	typeof body.jobId === "string";
 
-/** Consumes Lucid jobs delivered by Cloudflare Queues, acknowledging or retrying each message. */
+/**
+ * Consumes Lucid jobs delivered by Cloudflare Queues, acknowledging or retrying each message. A
+ * batch's messages run side by side, so a slow job doesn't hold up the others in its batch.
+ */
 const queue: CloudflareWorkerHandler<MessageBatch> = async ({
 	event: batch,
 	invocation,
 }) => {
 	const serviceContext = await invocation.getServiceContext();
 
-	for (const message of batch.messages) {
+	const consume = async (message: Message) => {
 		try {
 			if (!isJobMessage(message.body)) {
 				logger.error({
@@ -28,7 +31,7 @@ const queue: CloudflareWorkerHandler<MessageBatch> = async ({
 					scope: logScopes.queueAdapter,
 				});
 				message.ack();
-				continue;
+				return;
 			}
 			const { jobId } = message.body;
 
@@ -46,7 +49,7 @@ const queue: CloudflareWorkerHandler<MessageBatch> = async ({
 						? undefined
 						: { delaySeconds: Math.ceil(result.delayMs / 1000) },
 				);
-				continue;
+				return;
 			}
 			message.ack();
 		} catch (error) {
@@ -61,7 +64,9 @@ const queue: CloudflareWorkerHandler<MessageBatch> = async ({
 			});
 			message.retry();
 		}
-	}
+	};
+
+	await Promise.all(batch.messages.map(consume));
 };
 
 export default queue;

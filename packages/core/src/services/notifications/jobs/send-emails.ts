@@ -61,7 +61,21 @@ export const sendNotificationEmailsJob = defineJob({
 	input,
 	transaction: true,
 	schedules: [
-		{ key: "automatic", cron: "* * * * *", timezone: "UTC", input: null },
+		{
+			key: "automatic",
+			cron: "* * * * *",
+			timezone: "UTC",
+			input: null,
+			//* only stores a job in minutes with an email to send
+			when: async ({ context }) => {
+				const Recipients = new NotificationRecipientsRepository(context.db);
+				const due = await Recipients.hasDueEmails({
+					before: new Date().toISOString(),
+				});
+				if (due.error) throw new LucidError(due.error);
+				return due.data;
+			},
+		},
 	],
 	handler: async (args) => {
 		const result = await sendNotificationEmails(args);

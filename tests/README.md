@@ -98,11 +98,15 @@ describe("creating documents", () => {
 - `lucid.invite()` invites a user without accepting, and returns the token from the email, for tests of how invitations are accepted.
 - `lucid.email({ to, template })` waits for an email the CMS sent and returns the newest, with the data it was rendered from, such as a magic link's `loginLink` and `code`. `after` waits for one more than that many. `lucid.emails()` lists them without waiting. In host mode each CMS has its own outbox, so a test only sees its own emails. Send emails to users the test made, as the served server's outbox is shared.
 - In served mode every test shares one server and database, so create the data you need and do not assume the database is empty.
+- A served Worker's cron trigger fires at the start of every minute, as it would on Cloudflare. workerd never fires cron triggers by itself, so the harness asks it to. Its local queue sends one batch at a time, so a job that runs for long holds up every other test's jobs there.
 - `useVariant(name)` at the top of a file runs its tests on a CMS with a change to the setup's config, such as no password login. See `shared/variants.ts`. Variants only run in host mode.
 - `advanceClock(ms)` moves the clock forward for the rest of the test, such as past a token's expiry. It only works in host mode, where the CMS shares the test's clock. Sign in again on a new session after a long jump, as the shared admin's tokens would be renewed in the future.
 - `lucid.query(use)` runs queries on the CMS's database, for what the API can't show, such as the storage count media limits are checked against. It only works in host mode.
 - `lucid.uploads` is the folder Node setups store uploads in. In host mode each CMS has its own, so a test can compare the files on disk with what the database holds. See `findStorageDrift` in `shared/media.ts`.
 - The `migrations` fixture gives empty databases for tests that migrate themselves. See `suites/integration/migrations`.
+- Every setup registers probe jobs from `shared/fragments/jobs.ts`, whose `steps` say what each attempt does: succeed, fail, throw or hang. Each attempt posts what it did to a ledger, which `executions()` in `shared/jobs.ts` reads from `lucid.ledger`. `enqueueProbe()` enqueues one through a harness-only route, and `waitForJob()` waits for its status. See `suites/integration/jobs`.
+- `tick(lucid)` runs one job scheduler tick, as a runtime's timer does each minute. `tick(lucid, at)` picks its time, which moves the scheduler's cursor for everyone on the CMS, so it is host mode only. `resetScheduler()` puts the cursor back after a test that ticked ahead. On a queue without delayed delivery, `waitForJob()` ticks every second while it waits, as retries there only run on a tick.
+- In host mode a setup with the worker queue runs a stand-in with the same key, as there is no build to start the worker thread from. It runs jobs in the test process through the same job pool as the worker, so jobs on those setups run in the background in both modes.
 - Helpers for documents, media, permissions and signing in live in `shared/`. Each route the CMS serves needs a rule in `shared/permissions.ts`, as `suites/integration/permissions/routes.test.ts` fails on a route without one.
 
 ### Skip what a setup cannot do
@@ -132,6 +136,9 @@ Capabilities are read from each setup's config, so most need no upkeep:
 | `harness:identityProvider`     | the `authentication` fragment |
 | `feature:mediaStorage`         | any media storage adapter     |
 | `plugin:filesystem`            | the `node-media` fragment     |
+| `plugin:harness-jobs`          | the `jobs` fragment           |
+| `queue:inline`, `queue:worker` | the queue adapter             |
+| `queue.delayedDelivery`        | the queue adapter's support   |
 
 A setup can correct the list in its `setup.ts` with `capabilities: { add, remove }`.
 
@@ -165,7 +172,10 @@ A simulation tries many random sequences of actions against a fresh CMS and chec
 - Replay it with the seed it prints: `npm run harness -- --lane simulation --seed 42`.
 - `--simulation-runs` sets how many sequences each simulation tries. A simulation may take a minute per sequence before it times out, so it needs no timeout of its own.
 - Each simulation records a digest of what its actions returned. The report compares digests between setups for the same seed, so a database that behaves differently is flagged even when no rule breaks.
-- `adapters` swaps in faulty adapters, such as a queue that drops deliveries. `withFaults` builds one. It is given the folder the CMS stores uploads in, for storage that wraps the real one. See `suites/simulation/media/media-lifecycle.test.ts`.
+- `adapters` swaps in faulty adapters, such as a queue that drops deliveries. `withFaults` builds one. It is given the folder the CMS stores uploads in, for storage that wraps the real one, and the sequence's model, for adapters its actions drive. See `suites/simulation/media/media-lifecycle.test.ts`.
+- `createManualQueue()` is a queue the actions drive by hand. It holds what the CMS publishes until an action delivers a message, delivers it twice, loses it or refuses the next publishes. See `suites/simulation/jobs/job-lifecycle.test.ts`.
+- `settle` runs once a sequence's actions are done, before the rules are checked one last time, such as to let every job finish. It throws when what it waits for never happens.
+- Keep what actions return the same on fast and slow setups, or their digests differ. Move the clock with `advanceClock` rather than waiting, and give anything timed a margin from the steps the clock moves in.
 - `variant` runs every sequence on a variant of the setup's config, such as `media-limits`.
 - `setup` runs at the start of each sequence, such as to create the users its actions work with. See `suites/simulation/auth/sign-in-model.test.ts`.
 
@@ -231,6 +241,7 @@ To support another engine, add a driver in `harness/src/databases/` and register
 Each run also starts a small local server for services a CMS reaches over HTTP, so they work from every runtime, Workers included. See `harness/src/fakes/`.
 
 - An outbox. The `outbox` fragment posts each email to `HARNESS_OUTBOX`, and the harness keeps it in the setup's run folder for `lucid.email()`.
+- A ledger. Probe jobs post what each attempt did to `HARNESS_LEDGER`, which is kept like the outbox, and the probe `checked` schedule posts each time the scheduler asks its `when` check. Host mode gives each CMS its own.
 - An OAuth 2.0 and OpenID Connect identity provider at `HARNESS_IDP_URL`, for the `authentication` fragment's providers. It checks clients, redirects and PKCE like a real one.
 - Lucid's own API, at `LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE`, so connecting to Lucid and features that call it never reach Lucid's servers. It answers the discovery and client registration a connection starts with.
 

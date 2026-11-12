@@ -36,6 +36,23 @@ export interface MenuItemProps {
 /** A menu item. */
 const MenuItem: Component<MenuItemProps> = (props) => {
 	// ----------------------------------------
+	// State & Hooks
+	let closesWhenChosen: boolean | undefined;
+
+	// ----------------------------------------
+	// Functions
+	const closes = () =>
+		closesWhenChosen ??
+		(props.closeOnSelect !== false && props.unavailable !== true);
+	const select = () => {
+		closesWhenChosen = closes();
+		props.onSelect?.();
+		queueMicrotask(() => {
+			closesWhenChosen = undefined;
+		});
+	};
+
+	// ----------------------------------------
 	// Render
 	const body = () => (
 		<>
@@ -59,10 +76,8 @@ const MenuItem: Component<MenuItemProps> = (props) => {
 					disabled={props.disabled}
 					aria-disabled={props.unavailable || undefined}
 					aria-busy={props.loading || undefined}
-					closeOnSelect={
-						props.closeOnSelect !== false && props.unavailable !== true
-					}
-					onSelect={() => props.onSelect?.()}
+					closeOnSelect={closes()}
+					onSelect={select}
 					onFocus={() => props.onHighlight?.()}
 					onClick={(event) => event.stopPropagation()}
 					class={menuItemClasses(props)}
@@ -82,10 +97,8 @@ const MenuItem: Component<MenuItemProps> = (props) => {
 				disabled={props.disabled}
 				aria-disabled={props.unavailable || undefined}
 				aria-busy={props.loading || undefined}
-				closeOnSelect={
-					props.closeOnSelect !== false && props.unavailable !== true
-				}
-				onSelect={() => props.onSelect?.()}
+				closeOnSelect={closes()}
+				onSelect={select}
 				onFocus={() => props.onHighlight?.()}
 				onClick={(event: MouseEvent) => {
 					event.stopPropagation();

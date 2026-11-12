@@ -576,6 +576,23 @@ export const routes = {
 		"documents:landing-page:update",
 		{ plugin: "pages" },
 	),
+	//* plugins: the harness's probe job routes, which every setup registers for job tests
+	"POST /api/v1/harness/jobs": needs("jobs:run", {
+		plugin: "harness-jobs",
+		body: { tag: "route-check", steps: ["succeed"] },
+	}),
+	"POST /api/v1/harness/jobs/cancel": needs("jobs:run", {
+		plugin: "harness-jobs",
+		body: { jobId: "missing-job" },
+	}),
+	"POST /api/v1/harness/jobs/deliver": needs("jobs:run", {
+		plugin: "harness-jobs",
+		body: { jobId: "missing-job" },
+	}),
+	"POST /api/v1/harness/scheduler/tick": needs("jobs:run", {
+		plugin: "harness-jobs",
+		body: {},
+	}),
 } satisfies Record<RouteKey, RouteEntry>;
 
 /** Splits a route key into its method and its path with every `{name}` filled in. */

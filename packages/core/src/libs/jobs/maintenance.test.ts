@@ -16,7 +16,7 @@ import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import defineJob from "./define-job.js";
 import { flushPendingJobs } from "./dispatch.js";
 import { enqueueJob } from "./enqueue.js";
-import { recoverExpiredJobs } from "./maintenance.js";
+import { maintainJobQueue, recoverExpiredJobs } from "./maintenance.js";
 
 const testConfig = getTestConfig();
 
@@ -134,5 +134,43 @@ describe("recovering expired job leases", () => {
 			lease_token: null,
 			attempts: 1,
 		});
+	});
+});
+
+describe("resending lost dispatches", () => {
+	test("sends a queued job again once it is long overdue, as its message may have been lost", async () => {
+		const job = defineJob({
+			key: "test:lost-dispatch",
+			version: 1,
+			input: z.object({ value: z.number() }),
+			handler: async () => {},
+		});
+		const publish = vi.fn(async () => ({ error: undefined, data: undefined }));
+		const context = await createJobsContext(testConfig, {
+			jobs: [job],
+			adapter: createTestQueueAdapter(publish, "test-push"),
+		});
+		const lost = await enqueueJob(context, { job, payload: { value: 1 } });
+		const recent = await enqueueJob(context, { job, payload: { value: 2 } });
+		if (lost.error || recent.error)
+			throw new Error("Failed to enqueue the test jobs");
+		publish.mockClear();
+
+		const longAgo = new Date(Date.now() - 11 * 60_000).toISOString();
+		await context.db.kysely
+			.updateTable("lucid_jobs")
+			.set({ available_at: longAgo, dispatched_at: longAgo })
+			.where("job_id", "=", lost.data.jobId)
+			.execute();
+
+		await maintainJobQueue(context);
+		expect(publish).toHaveBeenCalledOnce();
+		expect(publish).toHaveBeenCalledWith(context, [
+			expect.objectContaining({ jobId: lost.data.jobId }),
+		]);
+
+		//* once sent again, it waits as long again before another resend
+		await maintainJobQueue(context);
+		expect(publish).toHaveBeenCalledOnce();
 	});
 });

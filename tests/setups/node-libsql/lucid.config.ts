@@ -9,6 +9,7 @@ import {
 	withSchemaStep,
 } from "../../shared/config.ts";
 import { authentication } from "../../shared/fragments/auth.ts";
+import { harnessJobs } from "../../shared/fragments/jobs.ts";
 import { mediaConfig } from "../../shared/fragments/media.ts";
 import { nodeMediaPlugins } from "../../shared/fragments/node-media.ts";
 import { outbox } from "../../shared/fragments/outbox.ts";
@@ -29,6 +30,7 @@ export default defineConfig({
 				...nodeMediaPlugins(env.HARNESS_UPLOADS),
 				//* every test database keeps its own keys in the one KV file, so no cached response is shared
 				sqliteKV({ namespace: env.HARNESS_DATABASE_URL }),
+				harnessJobs(env.HARNESS_LEDGER),
 			],
 		}),
 });

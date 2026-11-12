@@ -35,8 +35,8 @@ const getSlugifiedExtension = (extension: string | null | undefined) => {
 };
 
 /**
- * Formats the path a media item is served at under `/cdn`: its uid, then a readable file name. The
- * uid outlasts the file, so replacing it never changes the URL.
+ * Formats `/cdn/<uid>/<name>`. Only the UID resolves the file, so old links survive replacement
+ * and renaming.
  */
 const formatMediaPath = (props: {
 	uid: string;

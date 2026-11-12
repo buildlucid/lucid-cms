@@ -1,7 +1,10 @@
 import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
-/** Validates the completion time. Null clears the schedule. */
+/**
+ * Validates the completion time, rounding it up to the minute so a request never completes before
+ * the time asked for. Null clears the schedule.
+ */
 const parseSchedule = (data: {
 	scheduledAt: string | null;
 	scheduledTimezone?: string | null;
@@ -41,7 +44,9 @@ const parseSchedule = (data: {
 		};
 	}
 
-	date.setUTCSeconds(0, 0);
+	if (date.getUTCSeconds() !== 0 || date.getUTCMilliseconds() !== 0) {
+		date.setUTCSeconds(60, 0);
+	}
 	return {
 		error: undefined,
 		data: { scheduledAt: date.toISOString(), timezone },

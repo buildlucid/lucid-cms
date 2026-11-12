@@ -48,10 +48,35 @@ export const recoverExpiredJobs: ServiceFn<
 	};
 };
 
-/** Recovers abandoned work and retries durable queue dispatches. */
+/** How long a sent job may stay queued past its time before it is sent again. */
+const STALE_DISPATCH_MS = 10 * 60_000;
+
+/**
+ * Resends overdue, unconsumed jobs to recover lost queue messages. Duplicate delivery is safe
+ * because only one consumer can claim a job.
+ */
+export const resendStaleDispatches: ServiceFn<[], { resent: number }> = async (
+	context,
+) => {
+	const now = new Date();
+	const Jobs = new JobsRepository(context.db);
+
+	const marked = await Jobs.markStaleDispatchesPending({
+		sentBefore: new Date(now.getTime() - STALE_DISPATCH_MS).toISOString(),
+		now: now.toISOString(),
+	});
+	if (marked.error) return marked;
+
+	return { error: undefined, data: { resent: marked.data.length } };
+};
+
+/** Recovers abandoned work, resends lost dispatches and retries failed ones. */
 export const maintainJobQueue: ServiceFn<[], undefined> = async (context) => {
 	const recovery = await recoverExpiredJobs(context);
 	if (recovery.error) return recovery;
+
+	const resent = await resendStaleDispatches(context);
+	if (resent.error) return resent;
 
 	const dispatch = await flushPendingJobs(context);
 	if (dispatch.error) return dispatch;

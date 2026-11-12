@@ -11,3 +11,7 @@
 
 - Renamed from `@lucidcms/plugin-cloudflare-queues` to `@lucidcms/cloudflare-queues`, and versions now match `@lucidcms/core`.
 - Development publishes to a local queue and consumes jobs with the Worker handler, as deployed, since Lucid's development server runs the Worker in workerd. Removed the inline development path.
+
+### Bug Fixes:
+
+- Fixed a slow job holding up the other jobs delivered in its batch.

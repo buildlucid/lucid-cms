@@ -5,6 +5,7 @@ import { copy } from "../../i18n/index.js";
 import logger from "../../logger/index.js";
 import { JobsRepository } from "../../repositories/index.js";
 import { enqueueJob } from "../enqueue.js";
+import checkSchedule from "./check-schedule.js";
 import { advanceSchedulerCursor, readSchedulerCursor } from "./cursor.js";
 import { getDueScheduleOccurrence } from "./occurrences.js";
 import {
@@ -55,6 +56,17 @@ const runDueSchedules: ServiceFn<[scheduledAt: Date], undefined> = async (
 				});
 				continue;
 			}
+		}
+
+		if (!(await checkSchedule(context, { binding, scheduledFor }))) {
+			logger.debug({
+				event: "jobs.schedule.skipped.check",
+				message:
+					"Skipped a scheduled job because its check found nothing to do",
+				scope: constants.logScopes.scheduler,
+				data: { scheduleKey: binding.key, scheduledFor },
+			});
+			continue;
 		}
 
 		const enqueued = await enqueueJob(context, {

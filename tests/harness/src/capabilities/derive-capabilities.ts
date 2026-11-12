@@ -1,6 +1,7 @@
 import type { ResolvedLucidConfig } from "@lucidcms/core/types";
 import { PROVIDERS } from "../../../shared/fragments/auth.ts";
 import { OUTBOX_ADAPTER_KEY } from "../../../shared/fragments/outbox.ts";
+import getConfiguredQueue from "../utils/get-configured-queue.ts";
 import type { Capability } from "./types.ts";
 
 /** Lists the names whose flag is on, as capabilities with the given prefix. */
@@ -12,9 +13,22 @@ const enabled = <Prefix extends string>(
 		.filter(([, on]) => on)
 		.map(([name]) => `${prefix}${name}` as const);
 
+/** The queue adapter's key, and whether it can hold jobs until a later time. */
+const queueCapabilities = (config: ResolvedLucidConfig): Capability[] => {
+	const queue = getConfiguredQueue(config);
+	if (!queue) {
+		return [];
+	}
+	return [
+		`queue:${queue.key}`,
+		...enabled("queue.", { delayedDelivery: queue.support.delayedDelivery }),
+	];
+};
+
 /** Reads what a setup can do from its resolved config. */
 const deriveCapabilities = (config: ResolvedLucidConfig): Capability[] => [
 	`database:${config.db.adapter}`,
+	...queueCapabilities(config),
 	...enabled("database.", config.db.config.support),
 	//* official plugins are keyed by package name, so `@lucidcms/pages` reads as `plugin:pages`
 	...config.plugins.map(

@@ -61,6 +61,19 @@ export type JobScheduleOverlap = z.infer<typeof jobScheduleOverlapSchema>;
 /** Controls what happens when the runtime misses one or more occurrences. */
 export type JobScheduleMissed = z.infer<typeof jobScheduleMissedSchema>;
 
+/**
+ * Skips due occurrences with no work. Admin and CLI runs bypass this check.
+ *
+ * @remarks Runs inside the scheduler transaction; keep it to a quick read. A throw skips the
+ * occurrence.
+ */
+export type JobScheduleCheck = (args: {
+	context: ServiceContext;
+	toolkit: Toolkit;
+	/** The occurrence being decided, as an ISO string. */
+	scheduledFor: string;
+}) => boolean | Promise<boolean>;
+
 /** A resolved schedule attached to a job definition. */
 export type JobSchedule = ScheduleTiming & {
 	/** Stable identifier, unique within the job definition. */
@@ -72,6 +85,13 @@ export type JobSchedule = ScheduleTiming & {
 	readonly overlap: JobScheduleOverlap;
 	/** The resolved missed-occurrence policy. */
 	readonly missed: JobScheduleMissed;
+	/**
+	 * Skips due occurrences with no work. Admin and CLI runs bypass this check.
+	 *
+	 * @remarks Runs inside the scheduler transaction; keep it to a quick read. A throw skips the
+	 * occurrence.
+	 */
+	readonly when?: JobScheduleCheck;
 };
 
 /** Options for attaching a recurring schedule to a job definition. */
@@ -85,6 +105,13 @@ export type DefineJobSchedule<Input extends JobPayload | null> =
 		readonly overlap?: JobScheduleOverlap;
 		/** How to handle occurrences missed between scheduler ticks. Defaults to run-once. */
 		readonly missed?: JobScheduleMissed;
+		/**
+		 * Skips due occurrences with no work. Admin and CLI runs bypass this check.
+		 *
+		 * @remarks Runs inside the scheduler transaction; keep it to a quick read. A throw skips the
+		 * occurrence.
+		 */
+		readonly when?: JobScheduleCheck;
 	};
 
 /** Identifies how a durable job was created. */
