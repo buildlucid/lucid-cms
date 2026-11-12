@@ -8,11 +8,12 @@ import {
 	fc,
 	requires,
 	type Session,
-	type SimulationContext,
 	simulation,
+	type SimulationContext,
+	sorted,
 	withFaults,
 } from "#harness/simulation";
-import { IMAGE_PRESET, MEDIA_LIMITS } from "#shared/fragments/media";
+import { IMAGE_PRESET, MEDIA_LIMITS } from "#shared/config/fragments/media";
 import {
 	completeUpload,
 	createMedia,
@@ -25,7 +26,7 @@ import {
 	sendUpload,
 	startUpload,
 	sumStoredSizes,
-} from "#shared/media";
+} from "#shared/helpers/media";
 
 /** What one media item should be: the file it serves, who may see it and whether it is binned. */
 type Item = {
@@ -134,7 +135,6 @@ const upload = action<Model, { kind: Kind; variety: number; public: boolean }>({
 				binned: false,
 			});
 		}
-		return uploaded.status;
 	},
 });
 
@@ -151,11 +151,11 @@ const replace = action<Model, { item: number; variety: number }>({
 		const started = await startUpload(admin, file, {
 			public: input.variety % 2 === 0 ? item.public : !item.public,
 		});
-		if (started.status !== 200) return started.status;
+		if (started.status !== 200) return;
 		const sent = await sendUpload(admin, started.body.data, file);
-		if (!sent.ok) return sent.status;
+		if (!sent.ok) return;
 		const completed = await completeUpload(admin, started.body.data.sessionId);
-		if (completed.status !== 200) return completed.status;
+		if (completed.status !== 200) return;
 
 		const replaced = await admin.request({
 			method: "PATCH",
@@ -169,7 +169,6 @@ const replace = action<Model, { item: number; variety: number }>({
 			item.url = url;
 			if (!item.links.includes(url)) item.links.push(url);
 		}
-		return replaced.status;
 	},
 });
 
@@ -188,7 +187,6 @@ const toggleVisibility = action<Model, number>({
 			item.public = !item.public;
 			expect((await getMedia(admin, id)).url).toBe(item.url);
 		}
-		return updated.status;
 	},
 });
 
@@ -206,7 +204,6 @@ const requestVariant = action<Model, number>({
 			query: { preset: IMAGE_PRESET.name },
 		});
 		expect(served.status).toBe(200);
-		return served.status;
 	},
 });
 
@@ -216,11 +213,10 @@ const clearVariants = action<Model, number>({
 	when: some(isImage),
 	run: async ({ admin, model, input }) => {
 		const [id] = pick(model, input, isImage);
-		const cleared = await admin.request({
+		await admin.request({
 			method: "DELETE",
 			path: `/api/v1/media/${id}/processed`,
 		});
-		return cleared.status;
 	},
 });
 
@@ -236,7 +232,6 @@ const bin = action<Model, number>({
 		});
 		expect(deleted.status).toBe(204);
 		item.binned = true;
-		return deleted.status;
 	},
 });
 
@@ -253,7 +248,6 @@ const restore = action<Model, number>({
 		});
 		expect(restored.status).toBe(204);
 		item.binned = false;
-		return restored.status;
 	},
 });
 
@@ -270,7 +264,6 @@ const deletePermanently = action<Model, number>({
 		if (deleted.status === 204) {
 			model.media.delete(id);
 		}
-		return deleted.status;
 	},
 });
 
@@ -281,10 +274,10 @@ const abandonUpload = action<Model, number>({
 	run: async ({ admin, input }) => {
 		const file = fileOf("text", input);
 		const started = await startUpload(admin, file);
-		if (started.status !== 200) return started.status;
+		if (started.status !== 200) return;
 		const sent = await sendUpload(admin, started.body.data, file);
-		if (!sent.ok) return sent.status;
-		return (await completeUpload(admin, started.body.data.sessionId)).status;
+		if (!sent.ok) return;
+		await completeUpload(admin, started.body.data.sessionId);
 	},
 });
 
@@ -299,8 +292,6 @@ const actions = [
 	deletePermanently,
 	abandonUpload,
 ];
-
-const sorted = (ids: number[]) => ids.toSorted((a, b) => a - b);
 
 const bytesOf = async (response: Response) =>
 	Buffer.from(await response.arrayBuffer());

@@ -1,5 +1,6 @@
+import type { OAuthConnection } from "@lucidcms/core/types";
 import { describe, expect, type Lucid, requires, test } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	authorize,
 	callContent,
@@ -8,27 +9,16 @@ import {
 	OAUTH_PATHS,
 	oauthResources,
 	readClaims,
-} from "#shared/oauth";
+} from "#shared/helpers/oauth";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 const STORIES_PATH = `documents/${STORY_KEY}?version=latest`;
-
-type Connection = {
-	id: number;
-	name: string;
-	clientId: string;
-	clientName: string;
-	principalType: "user" | "system";
-	userId: number | null;
-	scopes: string[];
-	lastUsedAt: string | null;
-};
 
 type Person = Awaited<ReturnType<Lucid["user"]>>;
 
 const accountConnections = async (person: Person) =>
 	(
-		await person.session.request<{ data: Connection[] }>({
+		await person.session.request<{ data: OAuthConnection[] }>({
 			path: "/api/v1/account/oauth-connections",
 		})
 	).body.data;
@@ -87,7 +77,7 @@ describe("managing OAuth connections", () => {
 		const { tokens, id } = await connect(lucid, person);
 		const path = `/api/v1/account/oauth-connections/${id}`;
 
-		const renamed = await person.session.request<{ data: Connection }>({
+		const renamed = await person.session.request<{ data: OAuthConnection }>({
 			method: "PATCH",
 			path,
 			body: { name: "My Reader" },
@@ -135,7 +125,7 @@ describe("managing OAuth connections", () => {
 			permissions: ["users:read", "users:update"],
 		});
 		const { tokens, id } = await connect(lucid, owner);
-		const listed = await manager.session.request<{ data: Connection[] }>({
+		const listed = await manager.session.request<{ data: OAuthConnection[] }>({
 			path: `/api/v1/users/${owner.id}/oauth-connections`,
 		});
 		expect(listed.body.data.map((connection) => connection.id)).toEqual([id]);
@@ -171,7 +161,7 @@ describe("managing OAuth connections", () => {
 			principalType: "system",
 		});
 
-		const listed = await reader.session.request<{ data: Connection[] }>({
+		const listed = await reader.session.request<{ data: OAuthConnection[] }>({
 			path: "/api/v1/integrations/oauth",
 		});
 		expect(listed.body.data).toContainEqual(

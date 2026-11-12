@@ -1,8 +1,8 @@
+import { finishRoutine, script } from "#harness/client";
 import { expect, requires, test } from "#harness/playwright";
-import { createRoutine } from "#shared/agent";
-import { repliesIn } from "#shared/agent-pages";
-import { finishRoutine, script } from "#shared/agent-script";
-import { connectLucid } from "#shared/ai";
+import { createRoutine } from "#shared/helpers/agent";
+import { repliesIn } from "#shared/helpers/agent-pages";
+import { connectLucid } from "#shared/helpers/ai";
 
 test.describe("routines", () => {
 	requires("agent:harness", "harness:outbox");

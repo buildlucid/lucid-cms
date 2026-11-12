@@ -5,10 +5,11 @@ import {
 	describe,
 	expect,
 	fc,
+	pick,
 	requires,
 	type Session,
-	type SimulationContext,
 	simulation,
+	type SimulationContext,
 } from "#harness/simulation";
 import {
 	type AuthenticatorApp,
@@ -19,7 +20,7 @@ import {
 	type Passkey,
 	sendLogin,
 	signInWithPasskey,
-} from "#shared/auth";
+} from "#shared/helpers/auth";
 
 /** How long a login counts as recent for adding a way in. */
 const RECENT_MS = 10 * 60_000;
@@ -64,16 +65,6 @@ type Context = SimulationContext<Model>;
 /** Required two-factor authentication with nothing to answer it, which ends sessions at their next refresh. */
 const needsSetup = (user: User) =>
 	user.required && user.app === null && user.passkeys.length === 0;
-
-const pick = <Item>(items: Item[], index: number): Item => {
-	const item = items[index % items.length];
-	if (item === undefined) {
-		throw new Error(
-			"Nothing to pick. The action's `when` should rule this out.",
-		);
-	}
-	return item;
-};
 
 const userOf = (model: Model, signedIn: SignedIn) => {
 	const user = model.users.find(
@@ -146,7 +137,7 @@ const passwordLogin = action<Model, number>({
 		const login = await sendLogin(visitor, user.credentials);
 		if (user.locked) {
 			expect(login.status).toBe(401);
-			return "locked";
+			return;
 		}
 
 		const step = login.body.data.twoFactor;
@@ -198,7 +189,6 @@ const passwordLogin = action<Model, number>({
 			user.recoveryCodes = confirmed.body.data.recoveryCodes;
 		}
 		track(model, user, visitor);
-		return step;
 	},
 });
 
@@ -230,7 +220,6 @@ const recoveryLogin = action<Model, { user: number; code: number }>({
 			user.usedRecoveryCodes.push(code);
 			track(model, user, visitor);
 		}
-		return unused;
 	},
 });
 
@@ -262,7 +251,6 @@ const passkeyLogin = action<Model, { user: number; passkey: number }>({
 		if (works) {
 			track(model, user, visitor);
 		}
-		return works;
 	},
 });
 
@@ -304,13 +292,12 @@ const turnOnApp = action<Model, number>({
 				body: {},
 			});
 			expect(refused.body.code).toBe("reauthentication_required");
-			return "reauthenticate";
+			return;
 		}
 		const { app, recoveryCodes } = await enableTwoFactor(entry.session);
 		user.app = app;
 		user.recoveryCodes = recoveryCodes;
 		user.usedRecoveryCodes = [];
-		return "on";
 	},
 });
 
@@ -345,7 +332,6 @@ const turnOffApp = action<Model, number>({
 			user.recoveryCodes = [];
 			user.usedRecoveryCodes = [];
 		}
-		return allowed;
 	},
 });
 
@@ -361,10 +347,9 @@ const addPasskeyAction = action<Model, number>({
 				path: "/api/v1/account/passkeys/options",
 			});
 			expect(refused.body.code).toBe("reauthentication_required");
-			return "reauthenticate";
+			return;
 		}
 		user.passkeys.push(await addPasskey(entry.session, lucid.url));
-		return "added";
 	},
 });
 
@@ -397,7 +382,6 @@ const removePasskey = action<Model, { session: number; passkey: number }>({
 			user.passkeys = user.passkeys.filter((item) => item !== passkey);
 			user.removedPasskeys.push(passkey);
 		}
-		return allowed;
 	},
 });
 

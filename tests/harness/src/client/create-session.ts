@@ -1,4 +1,4 @@
-import { CLIENT_ADDRESS_HEADER } from "../../../shared/config.ts";
+import { CLIENT_ADDRESS_HEADER } from "./contract.ts";
 import type { ApiRequest, ApiResponse, Session, Transport } from "./types.ts";
 
 const CSRF_HEADER = "x-csrf-token";

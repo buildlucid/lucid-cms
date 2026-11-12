@@ -33,9 +33,6 @@ benchmark({
 				label: "Build peak memory",
 				unit: "bytes",
 				value: build.peakMemoryBytes,
-				//* memory varies between runs and machines as timings do
-				tolerance: 0.15,
-				blocking: false,
 			},
 			"server.size": {
 				label: "Server size",

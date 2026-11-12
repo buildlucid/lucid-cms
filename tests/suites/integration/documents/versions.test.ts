@@ -5,12 +5,13 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument, readDocument, saveDocument } from "#shared/documents";
-
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
+import { STORY_KEY } from "#shared/config/collections/story";
+import {
+	createDocument,
+	readDocument,
+	saveDocument,
+	titled,
+} from "#shared/helpers/documents";
 
 /** Lists a story's revisions, newest first. */
 const listRevisions = async (admin: Session, id: number) => {

@@ -5,7 +5,7 @@ import {
 	requires,
 	test,
 } from "#harness/vitest";
-import { PROBE_RETRY } from "#shared/fragments/jobs";
+import { PROBE_RETRY } from "#shared/config/fragments/jobs";
 import {
 	cancelJob,
 	enqueueProbe,
@@ -16,7 +16,7 @@ import {
 	uniqueTag,
 	waitForExecution,
 	waitForJob,
-} from "#shared/jobs";
+} from "#shared/helpers/jobs";
 
 /** Past the minute a lease lasts without being renewed. */
 const LEASE_EXPIRED_MS = 61_000;

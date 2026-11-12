@@ -24,7 +24,6 @@ const action = <Model, Input extends JsonValue | undefined = undefined>(
 
 	return input.map((value) => ({
 		name: definition.name,
-		input: value ?? null,
 		when: definition.when ?? (() => true),
 		run: (context) => definition.run({ ...context, input: value }),
 		[fc.toStringMethod]: () =>

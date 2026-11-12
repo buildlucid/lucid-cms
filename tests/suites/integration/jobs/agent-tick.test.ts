@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, requires, test } from "#harness/vitest";
-import { resetScheduler, tick } from "#shared/jobs";
+import { resetScheduler, tick } from "#shared/helpers/jobs";
 
 //* its own file, as the shared admin can't be used after another test moves the clock
 describe("the agent tick", () => {

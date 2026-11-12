@@ -5,8 +5,8 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { uploadMedia } from "#shared/media";
-import { uniqueName } from "#shared/permissions";
+import { uploadMedia } from "#shared/helpers/media";
+import { uniqueName } from "#shared/helpers/permissions";
 
 const UPLOADER = ["media:create", "media:update"];
 

@@ -1,6 +1,7 @@
+import type { Job } from "@lucidcms/core/types";
 import { describe, expect, type Lucid, requires, test } from "#harness/vitest";
-import { PROBE_SCHEDULES } from "#shared/fragments/jobs";
-import { executions, type Job, resetScheduler, tick } from "#shared/jobs";
+import { PROBE_SCHEDULES } from "#shared/config/fragments/jobs";
+import { executions, resetScheduler, tick } from "#shared/helpers/jobs";
 
 /** When the probe schedules run in a month: half past twelve on the first, in UTC. */
 const occurrence = (month: number) =>

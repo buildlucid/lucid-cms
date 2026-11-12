@@ -1,3 +1,4 @@
+import { failTurn, reply, type ScriptFailure, script } from "#harness/client";
 import { describe, expect, requires, test } from "#harness/vitest";
 import {
 	createChat,
@@ -7,13 +8,7 @@ import {
 	runAgentTick,
 	sendMessage,
 	waitForRun,
-} from "#shared/agent";
-import {
-	failTurn,
-	reply,
-	type ScriptFailure,
-	script,
-} from "#shared/agent-script";
+} from "#shared/helpers/agent";
 import {
 	chargedFor,
 	AGENT_MODELS,
@@ -21,7 +16,7 @@ import {
 	modelRequests,
 	transcriptViolations,
 	usageSession,
-} from "#shared/ai";
+} from "#shared/helpers/ai";
 
 describe("when Lucid's model fails", () => {
 	requires("agent:harness", "harness:outbox");

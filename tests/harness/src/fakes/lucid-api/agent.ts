@@ -1,12 +1,12 @@
+import { plain } from "./generate.ts";
+import { modelFor } from "./models.ts";
 import {
 	decodeScript,
 	encodeScript,
 	SCRIPT_END_REPLY,
 	type Script,
 	type ScriptTurn,
-} from "../../../../shared/agent-script.ts";
-import { plain } from "./generate.ts";
-import { modelFor } from "./models.ts";
+} from "./script.ts";
 import type { FakeConnection, FakeState } from "./state.ts";
 import type { AgentEntry } from "./types.ts";
 import { modelUsage, remoteError } from "./usage.ts";

@@ -14,8 +14,11 @@ export const WORKER_QUEUE_KEY = "worker";
 const POLL_INTERVAL_MS = 100;
 
 /**
- * Host-mode worker queue using the same job pool as the built consumer. Polls when idle, on
- * publication and after completion. Uses real timers because `advanceClock` only changes `Date`.
+ * Host-mode stand-in for the worker queue, with the same key, as there is no build to start the
+ * worker thread from. It runs jobs in the test process through the same job pool as the built
+ * consumer, so jobs on setups with the worker queue run in the background in both modes. Polls
+ * when idle, on publication and after completion. Uses real timers because `advanceClock` only
+ * changes `Date`.
  */
 const createHostWorkerQueue = () => {
 	let invocation: LucidInvocation | undefined;

@@ -1,3 +1,4 @@
+import type { RequestExecution } from "@lucidcms/core/types";
 import {
 	describe,
 	expect,
@@ -5,11 +6,16 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { REVIEWED_STORY_KEY } from "#shared/collections/reviewed-story";
-import { STORY_KEY } from "#shared/collections/story";
-import { TEAM_STORY_KEY } from "#shared/collections/team-story";
-import { createDocument, expectStatus, readDocument } from "#shared/documents";
-import { waitForJob } from "#shared/jobs";
+import { REVIEWED_STORY_KEY } from "#shared/config/collections/reviewed-story";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { TEAM_STORY_KEY } from "#shared/config/collections/team-story";
+import {
+	createDocument,
+	expectStatus,
+	readDocument,
+	titled,
+} from "#shared/helpers/documents";
+import { waitForJob } from "#shared/helpers/jobs";
 import {
 	approve,
 	blockerCodes,
@@ -20,14 +26,9 @@ import {
 	openCreateRequest,
 	openRequest,
 	readRequest,
-	type RequestExecution,
 	requestAction,
 	requestTeam,
-} from "#shared/requests";
-
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
+} from "#shared/helpers/requests";
 
 /** Sets or, with null, removes when a request completes, returning the response. */
 const schedule = (session: Session, requestId: number, at: Date | null) =>

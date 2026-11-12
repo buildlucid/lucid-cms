@@ -6,17 +6,17 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { listDocumentIds, readDocument } from "#shared/documents";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { SEEDED, SEEDS } from "#shared/config/seeds/seeds";
+import { STARTER } from "#shared/config/seeds/starter";
+import { readSeeded } from "#shared/config/seeds/state";
+import { listDocumentIds, readDocument } from "#shared/helpers/documents";
 import {
 	fetchCdn,
 	findStorageDrift,
 	getMedia,
 	type MediaFile,
-} from "#shared/media";
-import { SEEDED, SEEDS } from "#shared/seeds/seeds";
-import { STARTER } from "#shared/seeds/starter";
-import { readSeeded } from "#shared/seeds/state";
+} from "#shared/helpers/media";
 
 const migrated = migratedTo("seeds");
 

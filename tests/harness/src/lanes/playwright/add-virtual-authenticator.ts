@@ -2,7 +2,8 @@ import type { Page } from "@playwright/test";
 
 /**
  * Adds a Chromium-only virtual passkey authenticator that always passes user verification.
- * Passkeys belong to the browser context.
+ * Passkeys belong to the browser context. The served server is at `localhost`, as browsers only
+ * allow passkeys on a domain, and the login page offers its passkeys as soon as it opens.
  */
 const addVirtualAuthenticator = async (page: Page) => {
 	const cdp = await page.context().newCDPSession(page);

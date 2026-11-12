@@ -6,9 +6,9 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument } from "#shared/documents";
-import { openRequest } from "#shared/requests";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { createDocument } from "#shared/helpers/documents";
+import { openRequest } from "#shared/helpers/requests";
 
 /** Opens a request to publish this many new stories to staging. */
 const openRequestFor = async (admin: Session, stories: number) => {

@@ -1,5 +1,5 @@
 import { describe, expect, type Lucid, requires, test } from "#harness/vitest";
-import { PROBE_JOBS, PROBE_RETRY } from "#shared/fragments/jobs";
+import { PROBE_JOBS, PROBE_RETRY } from "#shared/config/fragments/jobs";
 import {
 	enqueueProbe,
 	executions,
@@ -8,7 +8,7 @@ import {
 	uniqueTag,
 	waitForExecution,
 	waitForJob,
-} from "#shared/jobs";
+} from "#shared/helpers/jobs";
 
 describe("running jobs", () => {
 	requires("plugin:harness-jobs");

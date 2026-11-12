@@ -7,14 +7,14 @@ import {
 	runPool,
 	type ServedCms,
 } from "#harness/performance";
-import { IMAGE_PRESET } from "#shared/fragments/media";
+import { IMAGE_PRESET } from "#shared/config/fragments/media";
 import {
 	createMedia,
 	files,
 	getMedia,
 	uploadFile,
 	uploadMedia,
-} from "#shared/media";
+} from "#shared/helpers/media";
 
 /** How many images the CMS holds while it is timed. */
 const IMAGES = 200;

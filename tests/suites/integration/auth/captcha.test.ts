@@ -1,14 +1,17 @@
+import { CAPTCHA_TOKEN } from "#harness/client";
 import {
 	describe,
 	expect,
+	requires,
 	type Session,
 	test,
 	useVariant,
 } from "#harness/vitest";
-import { sendLogin } from "#shared/auth";
-import { CAPTCHA_TOKEN } from "#shared/fragments/auth";
+import { sendLogin } from "#shared/helpers/auth";
 
 useVariant("captcha");
+//* every test signs in as someone the admin invited
+requires("harness:outbox");
 
 const CAPTCHA_HEADER = "lucid-captcha-token";
 

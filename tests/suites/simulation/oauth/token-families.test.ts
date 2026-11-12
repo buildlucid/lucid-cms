@@ -3,12 +3,13 @@ import {
 	describe,
 	expect,
 	fc,
+	pick,
 	requires,
 	type Session,
-	type SimulationContext,
 	simulation,
+	type SimulationContext,
 } from "#harness/simulation";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	callContent,
 	connectClient,
@@ -16,7 +17,7 @@ import {
 	type OAuthClient,
 	refreshTokens,
 	revokeToken,
-} from "#shared/oauth";
+} from "#shared/helpers/oauth";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 const STORIES_PATH = `documents/${STORY_KEY}?version=latest`;
@@ -42,16 +43,6 @@ const ready = (model: Model) => {
 		throw new Error("The sequence's setup didn't run.");
 	}
 	return { person: model.person, client: model.client };
-};
-
-const pick = <T>(items: T[], choice: number) => {
-	const item = items[choice % items.length];
-	if (item === undefined) {
-		throw new Error(
-			"Nothing to pick. The action's `when` should rule this out.",
-		);
-	}
-	return item;
 };
 
 const hasFamilies = (model: Model) => model.families.length > 0;
@@ -97,11 +88,10 @@ const refresh = action<Model, { family: number; token: number }>({
 			expect(answer.status).toBe(200);
 			family.refreshTokens.push(answer.body.refresh_token);
 			family.accessToken = answer.body.access_token;
-			return { refreshed: true };
+			return;
 		}
 		expect(answer.status).toBe(400);
 		family.live = false;
-		return { refreshed: false };
 	},
 });
 

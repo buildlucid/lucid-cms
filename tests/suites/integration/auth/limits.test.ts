@@ -6,7 +6,7 @@ import {
 	requires,
 	test,
 } from "#harness/vitest";
-import { sendLogin } from "#shared/auth";
+import { sendLogin } from "#shared/helpers/auth";
 
 /** Wrong passwords allowed per account, and per address, in 15 minutes. */
 const ACCOUNT_LIMIT = 10;

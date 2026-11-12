@@ -5,15 +5,16 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { TEAM_STORY_KEY } from "#shared/collections/team-story";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { TEAM_STORY_KEY } from "#shared/config/collections/team-story";
 import {
 	createContentReader,
 	createDocument,
 	listDocumentIds,
 	readContent,
 	readDocument,
-} from "#shared/documents";
+	titled,
+} from "#shared/helpers/documents";
 import {
 	approve,
 	approveAndCompleteRequest,
@@ -25,11 +26,7 @@ import {
 	readRequest,
 	requestAction,
 	requestTeam,
-} from "#shared/requests";
-
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
+} from "#shared/helpers/requests";
 
 /** Opens a create request for a story as the admin, which needs no review to create one directly. */
 const requestStory = (admin: Session, title: string) =>

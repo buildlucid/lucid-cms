@@ -1,6 +1,6 @@
 import { describe, expect, requires, test } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { OAUTH_PATHS } from "#shared/oauth";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { OAUTH_PATHS } from "#shared/helpers/oauth";
 
 type ServerMetadata = {
 	issuer: string;

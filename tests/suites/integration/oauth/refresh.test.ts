@@ -6,7 +6,7 @@ import {
 	requires,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	callContent,
 	connectClient,
@@ -14,7 +14,7 @@ import {
 	OAUTH_PATHS,
 	refreshTokens,
 	revokeToken,
-} from "#shared/oauth";
+} from "#shared/helpers/oauth";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 const STORIES_PATH = `documents/${STORY_KEY}?version=latest`;

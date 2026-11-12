@@ -1,3 +1,4 @@
+import { callTool, reply, script } from "#harness/client";
 import { describe, expect, requires, test } from "#harness/vitest";
 import {
 	createChat,
@@ -6,9 +7,8 @@ import {
 	sendMessage,
 	toolCallsOf,
 	watchRun,
-} from "#shared/agent";
-import { callTool, reply, script } from "#shared/agent-script";
-import { connectLucid, modelRequests } from "#shared/ai";
+} from "#shared/helpers/agent";
+import { connectLucid, modelRequests } from "#shared/helpers/ai";
 
 describe("chatting with an agent", () => {
 	requires("agent:harness");

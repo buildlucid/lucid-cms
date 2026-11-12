@@ -1,12 +1,12 @@
 import { describe, expect, requires, test } from "#harness/vitest";
-import { FALLBACK_IMAGE_URL } from "#shared/fragments/media";
+import { FALLBACK_IMAGE_URL } from "#shared/config/fragments/media";
 import {
 	fetchCdn,
 	files,
 	getMedia,
 	type MediaFile,
 	uploadMedia,
-} from "#shared/media";
+} from "#shared/helpers/media";
 
 const SANDBOX =
 	"sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:";
@@ -113,24 +113,28 @@ describe("serving media from the CDN", () => {
 		expect(signedIn.status).toBe(200);
 	});
 
-	test("hides someone's personal files from people who can't read all media", async ({
-		lucid,
-	}) => {
-		const owner = await lucid.user({
-			permissions: ["media:create", "media:update"],
-		});
-		const id = await uploadMedia(owner.session, {
-			title: "Mine",
-			file: files.png(),
-			owned: true,
-		});
-		const { url } = await getMedia(owner.session, id);
-		const other = await lucid.user({ permissions: ["media:read"] });
-		const readsAll = await lucid.user({ permissions: ["media:read-all"] });
+	describe("with other people", () => {
+		requires("harness:outbox");
 
-		expect((await fetchCdn(owner.session, url)).status).toBe(200);
-		expect((await fetchCdn(other.session, url)).status).toBe(404);
-		expect((await fetchCdn(readsAll.session, url)).status).toBe(200);
+		test("hides someone's personal files from people who can't read all media", async ({
+			lucid,
+		}) => {
+			const owner = await lucid.user({
+				permissions: ["media:create", "media:update"],
+			});
+			const id = await uploadMedia(owner.session, {
+				title: "Mine",
+				file: files.png(),
+				owned: true,
+			});
+			const { url } = await getMedia(owner.session, id);
+			const other = await lucid.user({ permissions: ["media:read"] });
+			const readsAll = await lucid.user({ permissions: ["media:read-all"] });
+
+			expect((await fetchCdn(owner.session, url)).status).toBe(200);
+			expect((await fetchCdn(other.session, url)).status).toBe(404);
+			expect((await fetchCdn(readsAll.session, url)).status).toBe(200);
+		});
 	});
 
 	test.for<{ name: string; file: MediaFile; sandboxed: boolean }>([
@@ -214,17 +218,24 @@ describe("media in the bin", () => {
 		expect(restored.status).toBe(200);
 	});
 
-	test("isn't shown to someone who can't browse the library", async ({
-		lucid,
-	}) => {
-		const admin = await lucid.admin();
-		const id = await uploadMedia(admin, { title: "Binned", file: files.png() });
-		const { url } = await getMedia(admin, id);
-		const outsider = await lucid.user({ permissions: [] });
+	describe("with another person", () => {
+		requires("harness:outbox");
 
-		await admin.request({ method: "DELETE", path: `/api/v1/media/${id}` });
+		test("isn't shown to someone who can't browse the library", async ({
+			lucid,
+		}) => {
+			const admin = await lucid.admin();
+			const id = await uploadMedia(admin, {
+				title: "Binned",
+				file: files.png(),
+			});
+			const { url } = await getMedia(admin, id);
+			const outsider = await lucid.user({ permissions: [] });
 
-		expect((await fetchCdn(outsider.session, url)).status).toBe(404);
+			await admin.request({ method: "DELETE", path: `/api/v1/media/${id}` });
+
+			expect((await fetchCdn(outsider.session, url)).status).toBe(404);
+		});
 	});
 
 	test("isn't served through a preset either", async ({ lucid }) => {

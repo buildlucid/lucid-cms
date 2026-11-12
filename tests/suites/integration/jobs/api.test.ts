@@ -1,30 +1,18 @@
 import { randomUUID } from "node:crypto";
+import type { Job, JobScheduleSummary } from "@lucidcms/core/types";
 import { describe, expect, type Lucid, requires, test } from "#harness/vitest";
 import {
 	PROBE_CRON,
 	PROBE_JOBS,
 	PROBE_SCHEDULES,
-} from "#shared/fragments/jobs";
+} from "#shared/config/fragments/jobs";
 import {
 	cancelJob,
 	enqueueProbe,
-	type Job,
 	readJob,
 	uniqueTag,
 	waitForJob,
-} from "#shared/jobs";
-
-type Schedule = {
-	key: string;
-	jobKey: string;
-	cron: string;
-	timezone: string;
-	overlap: "skip" | "allow";
-	missed: "skip" | "run-once";
-	state: "active" | "paused";
-	nextRunAt: string;
-	lastRun: { jobId: string; status: string } | null;
-};
+} from "#shared/helpers/jobs";
 
 const listJobs = async (
 	lucid: Lucid,
@@ -116,7 +104,7 @@ describe("the job schedules API", () => {
 		lucid,
 	}) => {
 		const admin = await lucid.admin();
-		const response = await admin.request<{ data: Schedule[] }>({
+		const response = await admin.request<{ data: JobScheduleSummary[] }>({
 			path: "/api/v1/jobs/schedules",
 			query: { "filter[jobKey]": PROBE_JOBS.scheduled, perPage: 50 },
 		});
@@ -166,7 +154,7 @@ describe("the job schedules API", () => {
 		expect((await runSchedule(lucid, PROBE_SCHEDULES.runNow)).status).toBe(409);
 
 		const admin = await lucid.admin();
-		const listed = await admin.request<{ data: Schedule[] }>({
+		const listed = await admin.request<{ data: JobScheduleSummary[] }>({
 			path: "/api/v1/jobs/schedules",
 			query: { "filter[key]": PROBE_SCHEDULES.runNow },
 		});

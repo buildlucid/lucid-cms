@@ -1,10 +1,22 @@
 import {
+	callTool,
+	failTurn,
+	finishRoutine,
+	reply,
+	script,
+} from "#harness/client";
+import {
 	advanceClock,
 	describe,
 	expect,
 	requires,
 	test,
 } from "#harness/vitest";
+import {
+	BRIEF_KEY,
+	CODE_ROUTINE_TAGS,
+	CODE_ROUTINES,
+} from "#shared/config/fragments/ai";
 import {
 	codeRoutine,
 	createRoutine,
@@ -15,14 +27,7 @@ import {
 	runRoutine,
 	toolCallsOf,
 	waitForRun,
-} from "#shared/agent";
-import {
-	callTool,
-	failTurn,
-	finishRoutine,
-	reply,
-	script,
-} from "#shared/agent-script";
+} from "#shared/helpers/agent";
 import {
 	connectLucid,
 	modelRequests,
@@ -30,13 +35,8 @@ import {
 	readEffects,
 	uniqueGate,
 	waitAtGate,
-} from "#shared/ai";
-import { createDocument } from "#shared/documents";
-import {
-	BRIEF_KEY,
-	CODE_ROUTINE_TAGS,
-	CODE_ROUTINES,
-} from "#shared/fragments/ai";
+} from "#shared/helpers/ai";
+import { createDocument } from "#shared/helpers/documents";
 
 const MINUTE = 60_000;
 

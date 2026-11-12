@@ -82,20 +82,6 @@ const renderMarkdown = (report: RunReport): string => {
 		}
 	}
 
-	if (report.mismatches.length > 0) {
-		lines.push("### Simulations that differed between setups", "");
-		for (const mismatch of report.mismatches) {
-			lines.push(
-				`- \`${mismatch.id}\` with seed \`${mismatch.seed}\`: ${Object.entries(
-					mismatch.digests,
-				)
-					.map(([setup, digest]) => `${setup} \`${digest.slice(0, 12)}\``)
-					.join(", ")}`,
-			);
-		}
-		lines.push("");
-	}
-
 	if (report.neverRan.length > 0) {
 		lines.push(
 			"### Tests that applied to no setup",

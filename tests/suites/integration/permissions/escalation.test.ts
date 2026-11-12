@@ -5,7 +5,7 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { uniqueName } from "#shared/permissions";
+import { uniqueName } from "#shared/helpers/permissions";
 
 /** Permissions the managers in these tests hold, besides managing users or roles. */
 const HELD = ["media:read", "media:create"];

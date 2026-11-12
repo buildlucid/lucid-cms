@@ -1,4 +1,5 @@
 import path from "node:path";
+import type { Job } from "@lucidcms/core/types";
 import {
 	benchmark,
 	countQueries,
@@ -7,8 +8,7 @@ import {
 	runMeasured,
 	type ServedCms,
 } from "#harness/performance";
-import { HARNESS_JOB_ROUTES } from "#shared/fragments/jobs";
-import type { Job } from "#shared/jobs";
+import { HARNESS_JOB_ROUTES } from "#shared/config/fragments/jobs";
 
 const REQUESTS = 20;
 const MINUTE_MS = 60_000;

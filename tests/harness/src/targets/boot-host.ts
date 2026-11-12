@@ -4,7 +4,7 @@ import {
 	prepareTranslations,
 } from "@lucidcms/core/runtime";
 import type { KyselyDB, ResolvedLucidConfig } from "@lucidcms/core/types";
-import type { HarnessEnv } from "../../../shared/config.ts";
+import type { HarnessEnv } from "../setup/harness-env.ts";
 import getConfiguredQueue from "../utils/get-configured-queue.ts";
 import createHostWorkerQueue, {
 	WORKER_QUEUE_KEY,

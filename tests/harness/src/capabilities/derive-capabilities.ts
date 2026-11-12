@@ -1,6 +1,6 @@
 import type { ResolvedLucidConfig } from "@lucidcms/core/types";
-import { PROVIDERS } from "../../../shared/fragments/auth.ts";
-import { OUTBOX_ADAPTER_KEY } from "../../../shared/fragments/outbox.ts";
+import { PROVIDERS } from "../../../shared/config/fragments/auth.ts";
+import { OUTBOX_ADAPTER_KEY } from "../fakes/outbox.ts";
 import getConfiguredQueue from "../utils/get-configured-queue.ts";
 import type { Capability } from "./types.ts";
 

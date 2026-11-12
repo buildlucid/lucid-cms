@@ -5,8 +5,8 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { createFolder, getMedia, uploadMedia } from "#shared/media";
-import { uniqueName } from "#shared/permissions";
+import { createFolder, getMedia, uploadMedia } from "#shared/helpers/media";
+import { uniqueName } from "#shared/helpers/permissions";
 
 const moveFolder = (session: Session, id: number, parentFolderId: number) =>
 	session.request({
@@ -79,20 +79,24 @@ describe("media folders", () => {
 		expect(JSON.stringify(hierarchy.body)).not.toContain(`"id":${child},`);
 	});
 
-	test("personal media can't be filed in a folder", async ({ lucid }) => {
-		const owner = await lucid.user({
-			permissions: ["media:create", "media:update"],
-		});
-		const admin = await lucid.admin();
-		const folder = await createFolder(admin, uniqueName("Library only"));
-		const id = await uploadMedia(owner.session, {
-			title: "Personal",
-			owned: true,
-		});
+	describe("with another person", () => {
+		requires("harness:outbox");
 
-		const moved = await moveMedia(owner.session, id, folder);
+		test("personal media can't be filed in a folder", async ({ lucid }) => {
+			const owner = await lucid.user({
+				permissions: ["media:create", "media:update"],
+			});
+			const admin = await lucid.admin();
+			const folder = await createFolder(admin, uniqueName("Library only"));
+			const id = await uploadMedia(owner.session, {
+				title: "Personal",
+				owned: true,
+			});
 
-		expect(moved.status).toBe(400);
-		expect((await getMedia(owner.session, id)).folderId).toBeNull();
+			const moved = await moveMedia(owner.session, id, folder);
+
+			expect(moved.status).toBe(400);
+			expect((await getMedia(owner.session, id)).folderId).toBeNull();
+		});
 	});
 });

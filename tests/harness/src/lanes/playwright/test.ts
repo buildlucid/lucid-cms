@@ -1,10 +1,10 @@
 import { type BrowserContext, test as base, type Page } from "@playwright/test";
-import { CLIENT_ADDRESS_HEADER } from "../../../../shared/config.ts";
 import {
 	describeMissing,
 	findMissing,
 } from "../../capabilities/find-missing.ts";
 import type { Capability } from "../../capabilities/types.ts";
+import { CLIENT_ADDRESS_HEADER } from "../../client/contract.ts";
 import { nextAddress } from "../../client/create-session.ts";
 import openLucid, { type Lucid } from "../../client/open-lucid.ts";
 import type { Session } from "../../client/types.ts";
@@ -37,7 +37,8 @@ export const test = base.extend<
 	{
 		/**
 		 * Opens a page for another session, such as `lucid.user()`, leaving the default page signed in
-		 * as admin.
+		 * as admin. Only one person can have a document open for editing, so give each page its own
+		 * document. See `suites/e2e/permissions/access.spec.ts`.
 		 */
 		pageAs: (session: Session) => Promise<Page>;
 	},

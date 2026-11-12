@@ -8,14 +8,15 @@ export type {
 	MigrationDatabase,
 	PrepareDatabase,
 } from "../migrations/types.ts";
-export { default as recordDigest } from "../report/record-digest.ts";
 export { default as action } from "../simulation/action.ts";
 export {
 	default as createManualQueue,
 	type ManualQueue,
 } from "../simulation/manual-queue.ts";
 export { default as getRunOptions } from "../simulation/get-run-options.ts";
+export { default as pick } from "../simulation/pick.ts";
 export { default as simulation } from "../simulation/simulation.ts";
+export { default as sorted } from "../simulation/sorted.ts";
 export type { Session } from "../client/types.ts";
 export type { SimulationContext } from "../simulation/types.ts";
 export { default as withFaults } from "../simulation/with-faults.ts";

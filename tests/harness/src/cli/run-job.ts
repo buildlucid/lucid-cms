@@ -82,7 +82,7 @@ const runJob = async (options: {
 
 			//* started after the target is ready, so a server's build does not count as test time
 			const startedAt = Date.now();
-			observer.start({ events, log: options.live ? undefined : log });
+			observer.start(events);
 			const running = await startCommand({
 				...job.lane.command({
 					filters: job.filters,

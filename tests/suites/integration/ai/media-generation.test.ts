@@ -1,3 +1,4 @@
+import { failGenerate } from "#harness/client";
 import {
 	describe,
 	expect,
@@ -5,14 +6,13 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { failGenerate } from "#shared/agent-script";
 import {
 	chargedFor,
 	connectLucid,
 	generateRequests,
 	usageSession,
-} from "#shared/ai";
-import { createMedia, getMedia } from "#shared/media";
+} from "#shared/helpers/ai";
+import { createMedia, getMedia } from "#shared/helpers/media";
 
 type Generation = {
 	requestId: string;

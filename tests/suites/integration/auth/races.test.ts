@@ -12,7 +12,7 @@ import {
 	isSignedIn,
 	linkToken,
 	sendLogin,
-} from "#shared/auth";
+} from "#shared/helpers/auth";
 
 /** How many requests race for each one-time secret. Kept under the account's ten wrong codes an hour. */
 const RACERS = 6;

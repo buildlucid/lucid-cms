@@ -7,10 +7,7 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { isSignedIn, sendLogin } from "#shared/auth";
-
-const refresh = (session: Session) =>
-	session.request({ method: "POST", path: "/api/v1/auth/token" });
+import { isSignedIn, refreshSession, sendLogin } from "#shared/helpers/auth";
 
 const cookieValue = (session: Session, name: string) =>
 	session.cookies().find((cookie) => cookie.name === name)?.value;
@@ -61,15 +58,15 @@ describe("sessions", () => {
 		const otherDevice = await signInAgain(lucid, user.credentials);
 		const stolen = cookieValue(user.session, "_refresh");
 
-		expect((await refresh(user.session)).ok).toBe(true);
+		expect((await refreshSession(user.session)).ok).toBe(true);
 		expect(cookieValue(user.session, "_refresh")).not.toBe(stolen);
 
-		const replayed = await refresh(withRefreshToken(lucid, stolen));
+		const replayed = await refreshSession(withRefreshToken(lucid, stolen));
 		expect(replayed.status).toBe(401);
 
 		//* the user's own refreshed session and their other device end with it
-		expect((await refresh(user.session)).status).toBe(401);
-		expect((await refresh(otherDevice)).status).toBe(401);
+		expect((await refreshSession(user.session)).status).toBe(401);
+		expect((await refreshSession(otherDevice)).status).toBe(401);
 	});
 
 	test("end on logout, and the refresh token can't be used after", async ({
@@ -84,7 +81,9 @@ describe("sessions", () => {
 		});
 		expect(logout.status).toBe(204);
 		expect(await isSignedIn(user.session)).toBe(false);
-		expect((await refresh(withRefreshToken(lucid, token))).status).toBe(401);
+		expect((await refreshSession(withRefreshToken(lucid, token))).status).toBe(
+			401,
+		);
 	});
 
 	test("on other devices end at once when the user signs out everywhere", async ({
@@ -101,7 +100,7 @@ describe("sessions", () => {
 		expect(await isSignedIn(user.session)).toBe(false);
 		//* before its access token expires, as well as at its next refresh
 		expect(await isSignedIn(otherDevice)).toBe(false);
-		expect((await refresh(otherDevice)).status).toBe(401);
+		expect((await refreshSession(otherDevice)).status).toBe(401);
 
 		//* a new login works straight after
 		expect(await isSignedIn(await signInAgain(lucid, user.credentials))).toBe(
@@ -133,7 +132,7 @@ describe("sessions", () => {
 
 		for (const user of [locked, deleted]) {
 			expect(await isSignedIn(user.session)).toBe(false);
-			expect((await refresh(user.session)).status).toBe(401);
+			expect((await refreshSession(user.session)).status).toBe(401);
 			expect((await sendLogin(lucid.session(), user.credentials)).status).toBe(
 				401,
 			);
@@ -152,12 +151,12 @@ describe("sessions over time", () => {
 		//* access tokens last five minutes
 		advanceClock(6 * 60_000);
 		expect(await isSignedIn(user.session)).toBe(false);
-		expect((await refresh(user.session)).ok).toBe(true);
+		expect((await refreshSession(user.session)).ok).toBe(true);
 		expect(await isSignedIn(user.session)).toBe(true);
 
 		//* refresh tokens last seven days
 		advanceClock(8 * 24 * 60 * 60_000);
-		expect((await refresh(user.session)).status).toBe(401);
+		expect((await refreshSession(user.session)).status).toBe(401);
 		expect(await isSignedIn(user.session)).toBe(false);
 	});
 });

@@ -1,6 +1,6 @@
-import type { HarnessEnv } from "../../../shared/config.ts";
 import type { Capability } from "../capabilities/types.ts";
 import type { DatabaseTemplate } from "../databases/types.ts";
+import type { HarnessEnv } from "../setup/harness-env.ts";
 import type { Mode, Setup } from "../setup/types.ts";
 
 /**

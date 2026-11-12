@@ -5,30 +5,27 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { REVIEWED_STORY_KEY } from "#shared/collections/reviewed-story";
-import { STORY_KEY } from "#shared/collections/story";
+import { REVIEWED_STORY_KEY } from "#shared/config/collections/reviewed-story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	createDocument,
 	listDocumentIds,
 	publishDocument,
 	readDocument,
 	saveDocument,
-} from "#shared/documents";
+	titled,
+} from "#shared/helpers/documents";
+import { story } from "#shared/helpers/permissions";
 import {
 	approve,
 	approveAndCompleteRequest,
 	openCreateRequest,
 	requestChange,
 	requestCreation,
-} from "#shared/requests";
+} from "#shared/helpers/requests";
 
-const story = (action: string) => `documents:${STORY_KEY}:${action}`;
 const reviewed = (action: string) =>
 	`documents:${REVIEWED_STORY_KEY}:${action}`;
-
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
 
 /** Opens a request for one reviewed story, returning the response so a test can check a refusal. */
 const openRequest = (

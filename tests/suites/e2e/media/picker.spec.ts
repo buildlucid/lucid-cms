@@ -1,8 +1,8 @@
 import { expect, requires, test } from "#harness/playwright";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument, readDocument } from "#shared/documents";
-import { files, uploadMedia } from "#shared/media";
-import { uniqueName } from "#shared/permissions";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { createDocument, readDocument } from "#shared/helpers/documents";
+import { files, uploadMedia } from "#shared/helpers/media";
+import { uniqueName } from "#shared/helpers/permissions";
 
 test.describe("picking media for a document", () => {
 	requires("feature:mediaStorage", `collection:${STORY_KEY}`);

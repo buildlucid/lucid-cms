@@ -1,5 +1,4 @@
 import { beforeEach, test as base, onTestFinished, vi } from "vitest";
-import type { Variant } from "../../../../shared/variants.ts";
 import {
 	describeMissing,
 	findMissing,
@@ -13,14 +12,7 @@ import createMigrationTemplates, {
 } from "../../migrations/create-migration-templates.ts";
 import createMigrations from "../../migrations/create-migrations.ts";
 import type { Migrations } from "../../migrations/types.ts";
-import type { JsonObject } from "../../utils/json.ts";
-
-declare module "vitest" {
-	interface TaskMeta {
-		/** Extra data for the harness report, such as a simulation's seed and digest. */
-		harness?: JsonObject;
-	}
-}
+import type { Variant } from "../../setup/variants.ts";
 
 /** The setup's database driver in host mode, which is the only mode with migration databases. */
 const getHostDriver = () => {
@@ -66,8 +58,11 @@ export const test = base.extend<{
 		{ scope: "file" },
 	],
 	/**
-	 * Databases for a test to migrate itself. It needs host mode, so call `requires("mode:host")`
-	 * in files that use it.
+	 * Empty databases for a test to migrate itself. Each has its own uploads folder,
+	 * `database.uploads`, and its own folder for project seeds, so `findStorageDrift(database)`
+	 * checks what a seed stored. Seed tests use the `seeds` config versions in
+	 * `shared/config/migrations/steps.ts`. It needs host mode, so call `requires("mode:host")` in
+	 * files that use it. See `suites/integration/migrations` and `suites/integration/seeds`.
 	 */
 	migrations: async ({ migrationTemplates }, use) => {
 		const migrations = createMigrations({
@@ -107,7 +102,7 @@ export const requires = (...required: Capability[]): void => {
 /**
  * Runs the file's tests on a CMS with a variant of the setup's config, such as one without
  * password login. Host mode only, so other modes report the file as not applicable. Call it at
- * the top of a file. See `shared/variants.ts`.
+ * the top of a file. See `setup/variants.ts`.
  */
 export const useVariant = (variant: Variant): void => {
 	requires("mode:host");
@@ -117,6 +112,8 @@ export const useVariant = (variant: Variant): void => {
 /**
  * Moves the clock forward for the rest of the test, such as past a token's expiry. Time keeps
  * running from there. Host mode only, as the CMS shares the test's clock. Timers are left alone.
+ * Sign in again on a new session after a long jump, as the shared admin's tokens would be renewed
+ * in the future.
  */
 export const advanceClock = (ms: number): void => {
 	if (loadContext().mode !== "host") {

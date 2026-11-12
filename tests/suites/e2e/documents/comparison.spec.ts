@@ -1,5 +1,5 @@
 import { expect, requires, test } from "#harness/playwright";
-import { openCreateRequest } from "#shared/requests";
+import { openCreateRequest } from "#shared/helpers/requests";
 
 const GUIDE = "guide";
 

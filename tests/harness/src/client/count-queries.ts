@@ -1,6 +1,6 @@
 const QUERIES = /(?:^|,)\s*db;[^,]*desc="(\d+) queries"/;
 
-/** Reads query counts from `Server-Timing`, enabled for every setup in `shared/config.ts`. */
+/** Reads query counts from `Server-Timing`, enabled for every setup in `shared/config/config.ts`. */
 const countQueries = (response: { headers: Headers }): number => {
 	const match = response.headers.get("server-timing")?.match(QUERIES);
 	if (!match?.[1]) {

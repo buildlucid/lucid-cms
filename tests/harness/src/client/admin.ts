@@ -1,4 +1,4 @@
-import { CAPTCHA_TOKEN } from "../../../shared/fragments/auth.ts";
+import { CAPTCHA_TOKEN } from "./contract.ts";
 import type { Credentials, Session } from "./types.ts";
 import waitForEmail, { listEmails } from "./wait-for-email.ts";
 
@@ -89,7 +89,7 @@ export const login = async (
 		?.twoFactor;
 	if (step) {
 		throw new Error(
-			`Logging in as ${credentials.username} stopped at the two-factor ${step} step. Sign in with the helpers in shared/auth.ts instead.`,
+			`Logging in as ${credentials.username} stopped at the two-factor ${step} step. Sign in with the helpers in shared/helpers/auth.ts instead.`,
 		);
 	}
 };

@@ -14,6 +14,8 @@ const MINUTE_MS = 60_000;
 /**
  * Fires the Worker's cron trigger at the start of every minute, as Cloudflare does once deployed.
  * workerd never fires cron triggers by itself; it only runs `scheduled` when asked at this path.
+ * Its local queue sends one batch at a time, so a job that runs for long holds up every other
+ * test's jobs on the served Worker.
  */
 const startCronTrigger = (port: number) => {
 	let timer: ReturnType<typeof setTimeout> | undefined;

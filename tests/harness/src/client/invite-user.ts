@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { Variant } from "../../../shared/variants.ts";
+import type { Variant } from "../setup/variants.ts";
 import { expectOk, login } from "./admin.ts";
 import type { Credentials, Session } from "./types.ts";
 import waitForEmail from "./wait-for-email.ts";

@@ -1,12 +1,14 @@
 import escapePattern from "../utils/escape-pattern.ts";
 import quoteArgument from "../utils/quote-argument.ts";
-import type { Failure } from "./list-failures.ts";
 
 /**
- * Builds a rerun command for a failed lane, narrowing to the test file and name when available.
+ * The command that runs a lane run again, narrowed to one test's file and name when given. Used
+ * for failures in the live output and the end report.
  */
-const createRerunCommand = (failure: Failure): string => {
-	const { lane, test } = failure;
+const createRerunCommand = (
+	lane: { setup: string; lane: string; mode: string },
+	test?: { file: string; name: string },
+): string => {
 	const args = [
 		"--setup",
 		lane.setup,

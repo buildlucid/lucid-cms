@@ -7,8 +7,8 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { addPasskey, enableTwoFactor } from "#shared/auth";
-import { PROVIDERS } from "#shared/fragments/auth";
+import { PROVIDERS } from "#shared/config/fragments/auth";
+import { addPasskey, enableTwoFactor } from "#shared/helpers/auth";
 
 /** Longer than the ten minutes a login counts as recent for. */
 const LATER = 11 * 60_000;

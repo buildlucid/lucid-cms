@@ -4,7 +4,7 @@ import {
 	type PrepareDatabase,
 	type Session,
 } from "#harness/vitest";
-import { ARTICLE_KEY } from "#shared/migrations/collections/article";
+import { ARTICLE_KEY } from "#shared/config/migrations/collections/article";
 
 const ARTICLES = `/api/v1/documents/${ARTICLE_KEY}`;
 

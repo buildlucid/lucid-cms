@@ -1,8 +1,8 @@
 import { ADMIN, expect, type Page, requires, test } from "#harness/playwright";
-import { RESTRICTED_STORY_KEY } from "#shared/collections/restricted-story";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument } from "#shared/documents";
-import { createRole, setRolePermissions } from "#shared/permissions";
+import { RESTRICTED_STORY_KEY } from "#shared/config/collections/restricted-story";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { createDocument } from "#shared/helpers/documents";
+import { createRole, setRolePermissions } from "#shared/helpers/permissions";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 const restricted = (action: string) =>

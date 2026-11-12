@@ -46,7 +46,7 @@ const measureRequests = async (options: {
 			unit: "ms",
 			value: Number(at(durations, 0.95).toFixed(2)),
 		},
-		//* exact, unlike timings, so a change in it fails a comparison
+		//* exact, unlike timings, so any change from the last run is real
 		[`${options.key}.queries`]: {
 			label: `${options.label} (database queries)`,
 			unit: "count",

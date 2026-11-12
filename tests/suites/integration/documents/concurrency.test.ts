@@ -5,13 +5,13 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	createDocument,
 	type DocumentInput,
 	readDocument,
 	valuesOf,
-} from "#shared/documents";
+} from "#shared/helpers/documents";
 
 /** A story whose every part names the same writer, so a mix of two saves is easy to spot. */
 const writtenBy = (writer: string) =>

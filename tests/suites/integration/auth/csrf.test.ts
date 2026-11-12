@@ -4,7 +4,7 @@ import {
 	type RouteKey,
 	resolveRoute,
 	routes,
-} from "#shared/permissions";
+} from "#shared/helpers/permissions";
 
 /** Routes that change something without a session, so a forged request has nothing to ride on. */
 const EXEMPT: Partial<Record<RouteKey, string>> = {

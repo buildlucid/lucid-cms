@@ -8,7 +8,7 @@ import {
 	simulation,
 } from "#harness/simulation";
 import type { Session } from "#harness/vitest";
-import { createRole } from "#shared/permissions";
+import { createRole } from "#shared/helpers/permissions";
 
 /** Permissions the simulation hands out, each with a read that needs only it. */
 const PROBES = {

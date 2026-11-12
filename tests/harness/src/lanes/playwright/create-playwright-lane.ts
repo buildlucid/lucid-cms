@@ -17,8 +17,13 @@ const createPlaywrightLane = (
 			"test",
 			"--config",
 			path.join(paths.harness, "lanes/playwright/playwright.config.ts"),
-			//* Playwright reads file filters as patterns, so plain text is escaped
-			...filters.files.map(escapePattern),
+			//* Playwright matches file filters as patterns against the absolute path, ignoring
+			//* case. Each one is escaped and tied to the lane's folder, so it cannot match a
+			//* folder above the repo
+			...filters.files.map(
+				(file) =>
+					`${escapePattern(path.join(paths.suites, lane.key))}.*${escapePattern(file)}`,
+			),
 			...(filters.tests.length > 0 ? ["-g", filters.tests.join("|")] : []),
 			...passthrough,
 		],

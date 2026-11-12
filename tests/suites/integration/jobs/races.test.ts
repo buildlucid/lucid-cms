@@ -7,7 +7,7 @@ import {
 	readJob,
 	uniqueTag,
 	waitForJob,
-} from "#shared/jobs";
+} from "#shared/helpers/jobs";
 
 /** How far ahead the job is due, so every delivery can arrive at the moment it becomes ready. */
 const DUE_IN_MS = 1_500;

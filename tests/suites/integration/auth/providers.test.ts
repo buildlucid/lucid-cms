@@ -7,13 +7,13 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
+import { PROVIDERS } from "#shared/config/fragments/auth";
 import {
 	finishProviderSignIn,
 	isSignedIn,
 	signInWithProvider,
 	startProviderSignIn,
-} from "#shared/auth";
-import { PROVIDERS } from "#shared/fragments/auth";
+} from "#shared/helpers/auth";
 
 const providers = Object.values(PROVIDERS);
 

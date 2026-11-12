@@ -1,3 +1,4 @@
+import { callTool, reply, script } from "#harness/client";
 import {
 	action,
 	describe,
@@ -8,16 +9,15 @@ import {
 	type SimulationContext,
 	simulation,
 } from "#harness/simulation";
+import { HARNESS_AGENT } from "#shared/config/fragments/ai";
 import {
 	createChat,
 	getMessages,
 	sendMessage,
 	toolCallsOf,
-} from "#shared/agent";
-import { callTool, reply, script } from "#shared/agent-script";
-import { connectLucid, transcriptViolations } from "#shared/ai";
-import { HARNESS_AGENT } from "#shared/fragments/ai";
-import { setRolePermissions } from "#shared/permissions";
+} from "#shared/helpers/agent";
+import { connectLucid, transcriptViolations } from "#shared/helpers/ai";
+import { setRolePermissions } from "#shared/helpers/permissions";
 
 const COLLECTIONS = ["story", "page"] as const;
 type Collection = (typeof COLLECTIONS)[number];
@@ -63,7 +63,6 @@ const grant = action<Model, { person: number; grants: boolean[] }>({
 		const chosen = person(model, input.person);
 		chosen.grants = GRANTS.filter((_, index) => input.grants[index]);
 		await setRolePermissions(admin, chosen.roleId, [CHAT, ...chosen.grants]);
-		return { grants: chosen.grants };
 	},
 });
 
@@ -89,7 +88,6 @@ const read = action<Model, { person: number; collection: Collection }>({
 			path: `/api/v1/documents/${input.collection}/latest`,
 		});
 		expect(tool === "complete").toBe(api.status === 200);
-		return { tool, api: api.status };
 	},
 });
 
@@ -127,7 +125,6 @@ const create = action<Model, { person: number; collection: Collection }>({
 			`documents:${input.collection}:read`,
 		);
 		expect(tool === "complete").toBe(api.status !== 403 && canRead);
-		return { tool, api: api.status === 403 ? 403 : "allowed" };
 	},
 });
 

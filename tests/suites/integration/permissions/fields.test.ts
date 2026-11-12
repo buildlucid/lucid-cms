@@ -5,14 +5,14 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { RESTRICTED_STORY_KEY } from "#shared/collections/restricted-story";
+import { RESTRICTED_STORY_KEY } from "#shared/config/collections/restricted-story";
 import {
 	type BrickInput,
 	createDocument,
 	type DocumentInput,
 	readDocument,
 	saveDocument,
-} from "#shared/documents";
+} from "#shared/helpers/documents";
 
 const DOCUMENTS = `/api/v1/documents/${RESTRICTED_STORY_KEY}`;
 const access = (action: string) =>

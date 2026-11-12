@@ -1,7 +1,7 @@
 import { expect, type Page, requires, test } from "#harness/playwright";
 import type { Lucid } from "#harness/playwright";
-import { skipPasskeyPrompt, submitLogin } from "#shared/auth-pages";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { skipPasskeyPrompt, submitLogin } from "#shared/helpers/auth-pages";
 import {
 	createOAuthClient,
 	createPkce,
@@ -10,7 +10,7 @@ import {
 	type OAuthClient,
 	oauthResources,
 	readCallback,
-} from "#shared/oauth";
+} from "#shared/helpers/oauth";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 

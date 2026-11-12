@@ -24,10 +24,9 @@ export type ProgressEventBody =
 			name: string;
 			status: TestStatus;
 			durationMs: number;
-			/** The first line of the first error, for a failed test. */
+			/** The first error with its causes, for a failed test. The live output shortens it. */
 			error?: string;
-	  }
-	| { type: "file-end"; file: string };
+	  };
 
 export type ProgressEvent = ProgressEventBody & {
 	/** When it happened, in milliseconds since the epoch. */

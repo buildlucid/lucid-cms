@@ -1,5 +1,4 @@
 import type { Mode } from "../setup/types.ts";
-import type { JsonObject } from "../utils/json.ts";
 
 /**
  * - `skipped`: someone turned the test off.
@@ -26,15 +25,13 @@ export type TestRecord = {
 	/** True when it only passed after a retry. */
 	flaky: boolean;
 	errors: string[];
-	/** Extra data a test attached, such as a simulation's seed and digest. */
-	meta?: JsonObject;
 };
 
 export type MeasurementUnit = "ms" | "bytes" | "count";
 
 /** One number a performance lane measured for a setup, such as how long a build took. */
 export type Measurement = {
-	/** The same in every setup and run, such as `build.duration`, so runs can be compared. */
+	/** The same in every setup and run, such as `build.duration`, so a run can show the last one's value. */
 	id: string;
 	label: string;
 	unit: MeasurementUnit;
@@ -43,10 +40,6 @@ export type Measurement = {
 	samples: number[];
 	/** How much the samples varied, as a share of the median. Zero for exact measures such as sizes. */
 	spread: number;
-	/** The share it may grow between runs before that counts as a regression, such as 0.15 for 15%. */
-	tolerance: number;
-	/** Whether a regression should fail a comparison, rather than only be reported. */
-	blocking: boolean;
 };
 
 /** What a lane's reporter writes when it finishes. */
@@ -77,23 +70,8 @@ export type RunSummary = Record<TestStatus, number> & {
 	flaky: number;
 };
 
-/** A simulation whose outcome differed between setups for the same seed. */
-export type DifferentialMismatch = {
-	id: string;
-	seed: number;
-	/** The digest each setup produced. */
-	digests: Record<string, string>;
-};
-
-/**
- * The shape of `report.json`. Raise it whenever a change would make an older report read
- * wrongly, so comparisons skip a baseline they cannot trust.
- */
-export const REPORT_VERSION = 1;
-
-/** A whole harness run: every lane run, plus totals. */
+/** A whole harness run: every lane run, plus totals. The shape of `report.json`. */
 export type RunReport = {
-	version: number;
 	runId: string;
 	startedAt: string;
 	durationMs: number;
@@ -104,8 +82,15 @@ export type RunReport = {
 	/** True when the run was cancelled, so lanes that had not finished are missing or failed. */
 	stopped?: boolean;
 	lanes: LaneReport[];
-	mismatches: DifferentialMismatch[];
 	/** Tests that applied to no setup in the run, which points at a mistyped or unmet `requires()`. */
 	neverRan: string[];
 	summary: RunSummary;
+};
+
+/** What later runs need from earlier ones, kept in `.harness/history.json`. */
+export type History = {
+	/** How long each lane run took last time, by job key, such as `node-sqlite/integration/host`. */
+	lanes: Record<string, number>;
+	/** Each measurement's last median, by setup and then measurement ID. */
+	measurements: Record<string, Record<string, number>>;
 };

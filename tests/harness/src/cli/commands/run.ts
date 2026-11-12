@@ -3,11 +3,10 @@ import { getRunPrefix } from "../../databases/create-database-name.ts";
 import { resolveDriver } from "../../databases/get-driver.ts";
 import startFakes from "../../fakes/start-fakes.ts";
 import lanes from "../../lanes/get-lanes.ts";
-import createDashboardView from "../../monitor/create-dashboard-view.ts";
 import createMonitor from "../../monitor/create-monitor.ts";
-import createPlainView from "../../monitor/create-plain-view.ts";
 import buildRunReport from "../../report/build-run-report.ts";
-import loadPreviousReports from "../../report/load-previous-reports.ts";
+import readHistory from "../../report/read-history.ts";
+import updateHistory from "../../report/update-history.ts";
 import ensureServices from "../../services/ensure-services.ts";
 import { loadSetups } from "../../setup/load-setups.ts";
 import createLimiter from "../../utils/create-limiter.ts";
@@ -17,6 +16,7 @@ import checkBeforeRun from "../check-before-run.ts";
 import createPlan from "../create-plan.ts";
 import finishRun from "../finish-run.ts";
 import profiles from "../profiles.ts";
+import pruneRuns from "../prune-runs.ts";
 import runSetup from "../run-setup.ts";
 import type { Job, RunOptions, SetupPlan } from "../types.ts";
 
@@ -40,7 +40,8 @@ const selectJobs = (
 
 /**
  * Runs selected lanes with bounded concurrency, then measurement lanes sequentially. Ctrl+C cleans
- * up and writes a report; a second exits immediately. Removes databases left by test processes.
+ * up and writes a report; a second exits immediately. Removes databases left by test processes,
+ * and run folders beyond the newest few.
  */
 const runCommand = async (options: RunOptions): Promise<number> => {
 	const startedAt = new Date();
@@ -59,25 +60,23 @@ const runCommand = async (options: RunOptions): Promise<number> => {
 		);
 	}
 
-	//* one runner's own output is the most useful thing to show, and it would break the dashboard
+	await pruneRuns(runId);
+	//* one runner's own output is the most useful thing to show, and it would break the status block
 	const live = jobCount === 1;
-	const previous = await loadPreviousReports();
+	const history = await readHistory();
 	const monitor = createMonitor({
 		runId,
-		profile: options.profile,
-		seed: options.seed,
 		directory,
 		plans,
-		previous,
+		concurrency: options.concurrency,
+		history,
 		filtered:
 			options.files.length > 0 ||
 			options.tests.length > 0 ||
 			options.passthrough.length > 0 ||
 			options.retry !== undefined,
-		view:
-			live || options.plain || !process.stdout.isTTY || process.env.CI
-				? createPlainView()
-				: createDashboardView(),
+		plain:
+			live || options.plain || !process.stdout.isTTY || Boolean(process.env.CI),
 	});
 
 	const controller = new AbortController();
@@ -104,7 +103,6 @@ const runCommand = async (options: RunOptions): Promise<number> => {
 			).map((plan) => plan.setup.database),
 			{ directory, report: monitor.phase, warn: monitor.warn },
 		);
-		monitor.phase(undefined);
 	}
 
 	const fakes = await startFakes();
@@ -149,27 +147,26 @@ const runCommand = async (options: RunOptions): Promise<number> => {
 	process.off("SIGTERM", stop);
 
 	const stopped = controller.signal.aborted;
-	const code = await finishRun(
-		buildRunReport({
-			runId,
-			startedAt,
-			seed: options.seed,
-			lanes: reports,
-			stopped,
-			complete:
-				profiles[options.profile].complete &&
-				!stopped &&
-				[
-					options.setups,
-					options.lanes,
-					options.modes,
-					options.files,
-					options.tests,
-				].every((filter) => filter.length === 0) &&
-				options.retry === undefined,
-		}),
-		{ directory, previous },
-	);
+	const report = buildRunReport({
+		runId,
+		startedAt,
+		seed: options.seed,
+		lanes: reports,
+		stopped,
+		complete:
+			profiles[options.profile].complete &&
+			!stopped &&
+			[
+				options.setups,
+				options.lanes,
+				options.modes,
+				options.files,
+				options.tests,
+			].every((filter) => filter.length === 0) &&
+			options.retry === undefined,
+	});
+	const code = await finishRun(report, { directory, history });
+	await updateHistory(report);
 	return stopped ? STOPPED_EXIT_CODE : code;
 };
 

@@ -1,6 +1,7 @@
+import type { Job } from "@lucidcms/core/types";
 import { expect, type Page, requires, test } from "#harness/playwright";
-import { PROBE_SCHEDULES } from "#shared/fragments/jobs";
-import { cancelJob, type Job } from "#shared/jobs";
+import { PROBE_SCHEDULES } from "#shared/config/fragments/jobs";
+import { cancelJob } from "#shared/helpers/jobs";
 
 /** Filters the schedules list, the page's first table, down to one schedule by its own key. */
 const showSchedule = async (page: Page, name: string) => {

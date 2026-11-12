@@ -1,6 +1,6 @@
 import { expect, type Page, requires, test } from "#harness/playwright";
-import { linkToken } from "#shared/auth";
-import { skipPasskeyPrompt, submitLogin } from "#shared/auth-pages";
+import { linkToken } from "#shared/helpers/auth";
+import { skipPasskeyPrompt, submitLogin } from "#shared/helpers/auth-pages";
 
 /** Logs in on the login page, then skips the passkey prompt that follows. */
 const logIn = async (

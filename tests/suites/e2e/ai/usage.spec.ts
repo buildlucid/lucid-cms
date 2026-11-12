@@ -1,7 +1,7 @@
+import { reply, script } from "#harness/client";
 import { expect, requires, test } from "#harness/playwright";
-import { createChat, sendMessage } from "#shared/agent";
-import { reply, script } from "#shared/agent-script";
-import { connectLucid } from "#shared/ai";
+import { createChat, sendMessage } from "#shared/helpers/agent";
+import { connectLucid } from "#shared/helpers/ai";
 
 test.describe("AI usage", () => {
 	requires("agent:harness", "harness:outbox");

@@ -90,12 +90,8 @@ class HarnessReporter implements Reporter {
 			name: test.fullName,
 			status: toStatus(result.state, skipReason),
 			durationMs: Math.round(test.diagnostic()?.duration ?? 0),
-			error: result.errors?.[0]?.message.split("\n")[0],
+			error: result.errors?.[0] && formatError(result.errors[0]),
 		});
-	}
-
-	onTestModuleEnd(module: TestModule): void {
-		emitProgress({ type: "file-end", file: toFile(module) });
 	}
 
 	async onTestRunEnd(
@@ -121,7 +117,6 @@ class HarnessReporter implements Reporter {
 				skipReason: readSkipReason(skipReason).reason,
 				flaky: test.diagnostic()?.flaky ?? false,
 				errors: (result.errors ?? []).map(formatError),
-				meta: test.meta().harness,
 			};
 		};
 

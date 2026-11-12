@@ -1,10 +1,9 @@
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { paths } from "../utils/paths.ts";
-import findMismatches from "./find-mismatches.ts";
 import findNeverRan from "./find-never-ran.ts";
 import summarize from "./summarize.ts";
-import { type LaneReport, REPORT_VERSION, type RunReport } from "./types.ts";
+import type { LaneReport, RunReport } from "./types.ts";
 
 /** Asks git a question about the checkout, or returns null outside a repository. */
 const git = (...args: string[]): string | null => {
@@ -45,7 +44,6 @@ const buildRunReport = (options: {
 	/** Whether the run covered every setup, lane and mode, so a test that applied nowhere is worth flagging. */
 	complete: boolean;
 }): RunReport => ({
-	version: REPORT_VERSION,
 	runId: options.runId,
 	startedAt: options.startedAt.toISOString(),
 	durationMs: options.durationMs ?? Date.now() - options.startedAt.getTime(),
@@ -58,7 +56,6 @@ const buildRunReport = (options: {
 	ci: Boolean(process.env.CI),
 	...(options.stopped ? { stopped: true } : {}),
 	lanes: options.lanes.map(withoutLocalPaths),
-	mismatches: findMismatches(options.lanes),
 	neverRan: options.complete ? findNeverRan(options.lanes) : [],
 	summary: summarize(options.lanes),
 });

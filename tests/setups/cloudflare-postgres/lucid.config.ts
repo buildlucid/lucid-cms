@@ -3,18 +3,10 @@ import { cloudflareQueues } from "@lucidcms/cloudflare-queues";
 import { cloudflareR2 } from "@lucidcms/cloudflare-r2";
 import { defineConfig, z } from "@lucidcms/core";
 import { postgres } from "@lucidcms/postgres";
-import {
-	harnessEnv,
-	sharedCollections,
-	sharedConfig,
-} from "../../shared/config.ts";
-import { aiCollections, aiConfig } from "../../shared/fragments/ai.ts";
-import { authentication } from "../../shared/fragments/auth.ts";
-import { harnessJobs } from "../../shared/fragments/jobs.ts";
-import { mediaConfig } from "../../shared/fragments/media.ts";
-import { outbox } from "../../shared/fragments/outbox.ts";
-import seedsPlugin from "../../shared/seeds/plugin.ts";
-import { workingSeeds } from "../../shared/seeds/seeds.ts";
+import { harnessEnv } from "#harness/config";
+import { harnessConfig } from "../../shared/config/config.ts";
+import seedsPlugin from "../../shared/config/seeds/plugin.ts";
+import { workingSeeds } from "../../shared/config/seeds/seeds.ts";
 
 /** A Worker reads its database from a Hyperdrive binding, which `cloudflare.config.ts` points at the harness's database. */
 export const env = harnessEnv
@@ -38,23 +30,17 @@ export default defineConfig({
 	db: postgres((values) => ({
 		url: env.parse(values).LUCID_DB.connectionString,
 	})),
-	config: (env) => ({
-		...sharedConfig({ url: env.HARNESS_URL }),
-		...authentication(env),
-		...mediaConfig({}),
-		...aiConfig(env),
-		email: outbox(env.HARNESS_OUTBOX),
-		collections: [...sharedCollections, ...aiCollections],
-		//* a Worker can't read schema steps, so seed tests use the seeds registered here, which run inside it
-		seeds: workingSeeds,
-		sources: { seeds: ["../../shared/seeds/files"] },
-		plugins: [
-			//* a local bucket in development, so media runs on Workers without credentials
-			cloudflareR2(),
-			//* a local queue in development, delivered by workerd as it would be once deployed
-			cloudflareQueues(),
-			harnessJobs(env.HARNESS_LEDGER),
-			seedsPlugin(undefined),
-		],
-	}),
+	config: (env) =>
+		harnessConfig(env, {
+			//* a Worker can't read schema steps, so seed tests use the seeds registered here, which run inside it
+			seeds: workingSeeds,
+			sources: { seeds: ["../../shared/config/seeds/files"] },
+			plugins: [
+				//* a local bucket in development, so media runs on Workers without credentials
+				cloudflareR2(),
+				//* a local queue in development, delivered by workerd as it would be once deployed
+				cloudflareQueues(),
+				seedsPlugin(undefined),
+			],
+		}),
 });

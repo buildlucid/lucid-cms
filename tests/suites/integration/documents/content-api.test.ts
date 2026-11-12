@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, requires, test } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	type ContentDocument,
 	createContentReader,
@@ -11,7 +11,7 @@ import {
 	readContent,
 	saveDocument,
 	valuesOf,
-} from "#shared/documents";
+} from "#shared/helpers/documents";
 
 const titled = (title: string, marker = "unmarked") => ({
 	fields: [

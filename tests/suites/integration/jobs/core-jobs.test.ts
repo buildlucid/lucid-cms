@@ -6,17 +6,17 @@ import {
 	requires,
 	test,
 } from "#harness/vitest";
-import { PROBE_JOBS } from "#shared/fragments/jobs";
+import { PROBE_JOBS } from "#shared/config/fragments/jobs";
 import {
 	enqueueProbe,
 	resetScheduler,
 	tick,
 	uniqueTag,
 	waitForJob,
-} from "#shared/jobs";
+} from "#shared/helpers/jobs";
 
 describe("notification emails", () => {
-	requires("plugin:harness-jobs");
+	requires("plugin:harness-jobs", "harness:outbox");
 	//* it moves the CMS's clock forward
 	requires("mode:host");
 

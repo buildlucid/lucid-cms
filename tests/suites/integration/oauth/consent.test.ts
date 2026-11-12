@@ -1,3 +1,4 @@
+import type { OAuthAuthorizationRequest } from "@lucidcms/core/types";
 import {
 	advanceClock,
 	describe,
@@ -7,7 +8,7 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	authorize,
 	createOAuthClient,
@@ -19,18 +20,9 @@ import {
 	oauthResources,
 	readCallback,
 	readClaims,
-} from "#shared/oauth";
+} from "#shared/helpers/oauth";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
-
-type AuthorizationRequest = {
-	clientId: string;
-	clientName: string;
-	scopes: string[];
-	userScopes: string[];
-	systemScopes: string[];
-	canConnectAsSystem: boolean;
-};
 
 /**
  * Starts client authorization and returns its consent request. Create the client before advancing
@@ -67,7 +59,7 @@ const startConsent = async (
 };
 
 const readRequest = (person: Session, requestId: string) =>
-	person.request<{ data: AuthorizationRequest }>({
+	person.request<{ data: OAuthAuthorizationRequest }>({
 		path: OAUTH_PATHS.authorization(requestId),
 	});
 

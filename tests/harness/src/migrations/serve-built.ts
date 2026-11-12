@@ -21,7 +21,7 @@ const serveBuilt = async (options: {
 	uploads?: string;
 }): Promise<{
 	url: string;
-	/** The harness's fake of Lucid's API, which the server connects to. See `shared/ai.ts`. */
+	/** The harness's fake of Lucid's API, which the server connects to. See `shared/helpers/ai.ts`. */
 	lucidApi: string;
 	/** A session signed in as the admin on this server. */
 	admin: Session;

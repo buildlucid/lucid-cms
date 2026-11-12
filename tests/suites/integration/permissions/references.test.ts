@@ -5,15 +5,15 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	createDocument,
 	type FieldInput,
 	readDocument,
-} from "#shared/documents";
-import { uploadMedia } from "#shared/media";
+} from "#shared/helpers/documents";
+import { uploadMedia } from "#shared/helpers/media";
+import { story } from "#shared/helpers/permissions";
 
-const story = (action: string) => `documents:${STORY_KEY}:${action}`;
 const EDITOR = [story("read"), story("update")];
 
 const title = (value: string): FieldInput => ({

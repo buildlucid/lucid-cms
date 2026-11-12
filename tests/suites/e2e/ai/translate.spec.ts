@@ -1,6 +1,6 @@
 import { expect, requires, test } from "#harness/playwright";
-import { connectLucid } from "#shared/ai";
-import { createDocument } from "#shared/documents";
+import { connectLucid } from "#shared/helpers/ai";
+import { createDocument } from "#shared/helpers/documents";
 
 const GUIDE = "guide";
 

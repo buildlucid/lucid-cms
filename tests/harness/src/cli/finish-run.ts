@@ -1,7 +1,6 @@
 import hasFailures from "../report/has-failures.ts";
 import renderConsole from "../report/renderers/render-console.ts";
-import sendToPosthog from "../report/sinks/send-to-posthog.ts";
-import type { RunReport } from "../report/types.ts";
+import type { History, RunReport } from "../report/types.ts";
 import writeRunReport from "../report/write-run-report.ts";
 
 /** Writes a finished run's reports, prints its summary and returns the process exit code. */
@@ -9,12 +8,11 @@ const finishRun = async (
 	report: RunReport,
 	options: {
 		directory: string;
-		/** Earlier reports, newest first, which the summary compares with. */
-		previous: readonly RunReport[];
+		/** What earlier runs measured, shown beside this run's measurements. */
+		history?: History;
 	},
 ): Promise<number> => {
 	await writeRunReport(report, options.directory);
-	await sendToPosthog(report);
 
 	console.log(
 		renderConsole(report, {

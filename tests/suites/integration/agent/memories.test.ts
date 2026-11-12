@@ -1,4 +1,5 @@
 import type { AgentMemories } from "@lucidcms/core/types";
+import { callTool, reply, script } from "#harness/client";
 import {
 	describe,
 	expect,
@@ -6,15 +7,14 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
+import { HARNESS_AGENT } from "#shared/config/fragments/ai";
 import {
 	createChat,
 	pendingInteraction,
 	respond,
 	sendMessage,
-} from "#shared/agent";
-import { callTool, reply, script } from "#shared/agent-script";
-import { connectLucid, modelRequests } from "#shared/ai";
-import { HARNESS_AGENT } from "#shared/fragments/ai";
+} from "#shared/helpers/agent";
+import { connectLucid, modelRequests } from "#shared/helpers/ai";
 
 const readMemories = async (session: Session) => {
 	const response = await session.request<{ data: AgentMemories }>({

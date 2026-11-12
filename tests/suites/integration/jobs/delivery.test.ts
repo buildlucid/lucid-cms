@@ -5,7 +5,7 @@ import {
 	requestProbe,
 	uniqueTag,
 	waitForJob,
-} from "#shared/jobs";
+} from "#shared/helpers/jobs";
 
 /** How far ahead delayed jobs are asked for, long enough to see them wait. */
 const DELAY_MS = 2_000;
@@ -47,7 +47,8 @@ describe("delivering jobs", () => {
 
 			for (const { tag, runAt, jobId } of jobs) {
 				const job = await waitForJob(lucid, jobId, "completed");
-				expect(Date.parse(job.availableAt)).toBe(runAt.getTime());
+				//* a job with no start time would give 0 here, and fail
+				expect(new Date(job.availableAt ?? 0).getTime()).toBe(runAt.getTime());
 				const started = await executions(lucid, { tag, event: "started" });
 				expect(started).toHaveLength(1);
 				const startedAt = Date.parse(started[0]?.at ?? "");

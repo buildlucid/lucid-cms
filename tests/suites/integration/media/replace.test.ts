@@ -1,5 +1,5 @@
 import { describe, expect, requires, test } from "#harness/vitest";
-import { IMAGE_PRESET } from "#shared/fragments/media";
+import { IMAGE_PRESET } from "#shared/config/fragments/media";
 import {
 	countVariants,
 	fetchCdn,
@@ -11,7 +11,7 @@ import {
 	replaceMedia,
 	sumStoredSizes,
 	uploadMedia,
-} from "#shared/media";
+} from "#shared/helpers/media";
 
 const bytesOf = async (response: Response) =>
 	new Uint8Array(await response.arrayBuffer());

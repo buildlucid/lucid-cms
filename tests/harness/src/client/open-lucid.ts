@@ -1,10 +1,10 @@
 import type { KyselyDB } from "@lucidcms/core/types";
-import type { OutboxEmail } from "../../../shared/fragments/outbox.ts";
-import type { Variant } from "../../../shared/variants.ts";
 import type { Capability } from "../capabilities/types.ts";
 import type { HarnessContext } from "../environment/types.ts";
+import type { OutboxEmail } from "../fakes/outbox.ts";
 import type { CliRun } from "../migrations/types.ts";
 import type { Mode } from "../setup/types.ts";
+import type { Variant } from "../setup/variants.ts";
 import openTarget from "../targets/open-target.ts";
 import type { HostTargetOptions } from "../targets/types.ts";
 import { ADMIN, login, loginWithMagicLink } from "./admin.ts";
@@ -28,25 +28,32 @@ export type Lucid = {
 	/** The address of the CMS. Only reachable from outside the test process in served mode. */
 	url: string;
 	/**
-	 * The folder Node setups store uploads in. In host mode it holds only this CMS's files; the
-	 * served server shares one with every test.
+	 * The folder Node setups store uploads in. In host mode it holds only this CMS's files, so a
+	 * test can compare them with the database with `findStorageDrift`; the served server shares one
+	 * with every test.
 	 */
 	uploads: string;
 	/**
 	 * The folder holding what the CMS's probe jobs did. In host mode it holds only this CMS's; the
-	 * served server shares one with every test. Read it with the helpers in `shared/jobs.ts`.
+	 * served server shares one with every test. Read it with the helpers in `shared/helpers/jobs.ts`.
 	 */
 	ledger: string;
-	/** The harness's fake of Lucid's API, which the CMS connects to. See `shared/ai.ts`. */
+	/** The harness's fake of Lucid's API, which the CMS connects to. See `shared/helpers/ai.ts`. */
 	lucidApi: string;
-	/** Runs a CLI command against the live CMS database, e.g. `lucid.cli("seed", "starter")`. */
+	/**
+	 * Runs a `lucidcms` command on the CMS's database while the CMS runs, as a project runs one
+	 * beside its server, such as `lucid.cli("seed", "starter")`. See `suites/integration/seeds/served.test.ts`.
+	 */
 	cli(...args: string[]): Promise<CliRun>;
 	/**
 	 * Runs queries on the CMS's database, for what the API cannot show, such as a counter it keeps
 	 * to itself. Host mode only, so call `requires("mode:host")`.
 	 */
 	query<Result>(use: (kysely: KyselyDB) => Promise<Result>): Promise<Result>;
-	/** A new visitor who is not signed in. */
+	/**
+	 * A new visitor who is not signed in, with their own cookies, client address and rate limits.
+	 * It answers exactly as the CMS does.
+	 */
 	session(): Session;
 	/**
 	 * A visitor signed in as the seeded super admin. Signs in once, then reuses the session, which
@@ -54,15 +61,22 @@ export type Lucid = {
 	 */
 	admin(): Promise<Session>;
 	/**
-	 * Creates and signs in a new user. Requires `harness:outbox`. Optional `permissions` creates a
-	 * dedicated role with exactly those grants.
+	 * Invites and signs in a new user through the outbox. Optional `permissions` creates a dedicated
+	 * role, returned as `roleId` for later changes. Requires `harness:outbox`. See
+	 * `suites/integration/auth/invitations.test.ts`.
 	 */
 	user(options?: InviteOptions): Promise<InvitedUser>;
-	/** Invites a new user without accepting, for tests of how invitations are accepted. */
+	/**
+	 * Invites a new user without accepting, and returns the token from the email, for tests of how
+	 * invitations are accepted. Requires `harness:outbox`.
+	 */
 	invite(options?: InviteOptions): Promise<Invitation>;
-	/** The emails this CMS sent that match, oldest first. Served mode shares one outbox. */
+	/**
+	 * Returns matching emails oldest first with template data such as `loginLink` and `code`. Host
+	 * outboxes are isolated; served tests must use their own recipients. Requires `harness:outbox`.
+	 */
 	emails(match: EmailMatch): Promise<OutboxEmail[]>;
-	/** Waits for an email this CMS sent and returns the newest. `after` waits for one more than that many. */
+	/** Waits for an email like `emails()` finds and returns the newest. `after` waits for one more than that many. */
 	email(match: EmailMatch & { after?: number }): Promise<OutboxEmail>;
 	close(): Promise<void>;
 };
@@ -74,6 +88,14 @@ const openLucid = async (
 ): Promise<Lucid> => {
 	const target = await openTarget(context, options);
 	const variant = options?.variant;
+	//* fails at once, saying what to do, rather than timing out on an email that never comes
+	const needs = (capability: Capability, helper: string) => {
+		if (!context.capabilities.includes(capability)) {
+			throw new Error(
+				`${helper} needs ${capability}, which ${context.setup.name} lacks. Call requires("${capability}").`,
+			);
+		}
+	};
 	const session = () =>
 		createSession({ url: target.url, transport: target.transport });
 	let admin: Promise<Session> | undefined;
@@ -86,6 +108,7 @@ const openLucid = async (
 				renews: true,
 			});
 			if (variant === "passwordless") {
+				needs("harness:outbox", "Signing in without a password");
 				await loginWithMagicLink(signedIn, {
 					email: ADMIN.email,
 					outbox: target.outbox,
@@ -118,22 +141,32 @@ const openLucid = async (
 		},
 		session,
 		admin: signInAdmin,
-		user: async (invite = {}) =>
-			inviteUser({
+		user: async (invite = {}) => {
+			needs("harness:outbox", "lucid.user()");
+			return inviteUser({
 				admin: await signInAdmin(),
 				visitor: session(),
 				outbox: target.outbox,
 				invite,
 				variant,
-			}),
-		invite: async (invite = {}) =>
-			sendInvitation({
+			});
+		},
+		invite: async (invite = {}) => {
+			needs("harness:outbox", "lucid.invite()");
+			return sendInvitation({
 				admin: await signInAdmin(),
 				outbox: target.outbox,
 				invite,
-			}),
-		emails: (match) => listEmails(target.outbox, match),
-		email: (match) => waitForEmail(target.outbox, match),
+			});
+		},
+		emails: async (match) => {
+			needs("harness:outbox", "lucid.emails()");
+			return listEmails(target.outbox, match);
+		},
+		email: async (match) => {
+			needs("harness:outbox", "lucid.email()");
+			return waitForEmail(target.outbox, match);
+		},
 		close: target.close,
 	};
 };

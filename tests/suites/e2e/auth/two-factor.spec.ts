@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, requires, test } from "#harness/playwright";
-import { createAuthenticatorApp, enableTwoFactor } from "#shared/auth";
-import { skipPasskeyPrompt, submitLogin } from "#shared/auth-pages";
+import { createAuthenticatorApp, enableTwoFactor } from "#shared/helpers/auth";
+import { skipPasskeyPrompt, submitLogin } from "#shared/helpers/auth-pages";
 
 test.describe("two-factor authentication", () => {
 	requires("harness:outbox", "auth:password");

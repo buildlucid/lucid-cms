@@ -7,14 +7,14 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	createContentReader,
 	createDocument,
 	createStoryTargets,
 	fullStory,
 	publishDocument,
-} from "#shared/documents";
+} from "#shared/helpers/documents";
 
 const DOCUMENTS = `/api/v1/documents/${STORY_KEY}`;
 

@@ -1,5 +1,5 @@
 import { describe, expect, requires, test, useVariant } from "#harness/vitest";
-import { IMAGE_PRESET, MEDIA_LIMITS } from "#shared/fragments/media";
+import { IMAGE_PRESET, MEDIA_LIMITS } from "#shared/config/fragments/media";
 import {
 	countVariants,
 	createMedia,
@@ -13,7 +13,7 @@ import {
 	sumStoredSizes,
 	uploadFile,
 	uploadMedia,
-} from "#shared/media";
+} from "#shared/helpers/media";
 
 useVariant("media-limits");
 

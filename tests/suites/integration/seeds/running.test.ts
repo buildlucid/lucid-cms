@@ -1,6 +1,6 @@
 import { describe, expect, migratedTo, requires, test } from "#harness/vitest";
-import { SEEDED, SEEDS } from "#shared/seeds/seeds";
-import { readSeeded } from "#shared/seeds/state";
+import { SEEDED, SEEDS } from "#shared/config/seeds/seeds";
+import { readSeeded } from "#shared/config/seeds/state";
 
 /** Every seed in the `seeds` step, in the order `--all` runs them. */
 const ALL = [
@@ -29,39 +29,44 @@ describe("running seeds", { concurrent: true, timeout: 120_000 }, () => {
 		});
 	});
 
-	test("runs every seed with --all, once each and in name order", async ({
-		migrations,
-	}) => {
-		const database = await migrations.database(migrated);
+	describe("every seed", () => {
+		//* one of them uploads an image
+		requires("feature:mediaStorage");
 
-		const run = await database.cli("seeds", "seed", "--all");
-		expect(run.code, run.output).toBe(0);
-		expect(run.output).toContain(`${ALL.length} seed(s) completed`);
-		const order = [...run.output.matchAll(/Running seed "([^"]+)"/g)].map(
-			([, name]) => name,
-		);
-		expect(order).toEqual(ALL);
+		test("runs every seed with --all, once each and in name order", async ({
+			migrations,
+		}) => {
+			const database = await migrations.database(migrated);
 
-		expect((await readSeeded(database)).records).toEqual({
-			...Object.fromEntries(ALL.map((name) => [name, 1])),
-			[SEEDED.jobRecord]: 1,
-		});
-	});
-
-	test("can run again without making anything twice", async ({
-		migrations,
-	}) => {
-		const database = await migrations.database(migrated);
-
-		for (const attempt of [1, 2]) {
 			const run = await database.cli("seeds", "seed", "--all");
-			expect(run.code, `run ${attempt}\n${run.output}`).toBe(0);
-		}
+			expect(run.code, run.output).toBe(0);
+			expect(run.output).toContain(`${ALL.length} seed(s) completed`);
+			const order = [...run.output.matchAll(/Running seed "([^"]+)"/g)].map(
+				([, name]) => name,
+			);
+			expect(order).toEqual(ALL);
 
-		const seeded = await readSeeded(database);
-		expect(seeded.records[SEEDS.stories]).toBe(2);
-		//* two stories, one with an image, and the starter story with its image
-		expect(seeded).toMatchObject({ stories: 4, media: 2 });
+			expect((await readSeeded(database)).records).toEqual({
+				...Object.fromEntries(ALL.map((name) => [name, 1])),
+				[SEEDED.jobRecord]: 1,
+			});
+		});
+
+		test("can run again without making anything twice", async ({
+			migrations,
+		}) => {
+			const database = await migrations.database(migrated);
+
+			for (const attempt of [1, 2]) {
+				const run = await database.cli("seeds", "seed", "--all");
+				expect(run.code, `run ${attempt}\n${run.output}`).toBe(0);
+			}
+
+			const seeded = await readSeeded(database);
+			expect(seeded.records[SEEDS.stories]).toBe(2);
+			//* two stories, one with an image, and the starter story with its image
+			expect(seeded).toMatchObject({ stories: 4, media: 2 });
+		});
 	});
 
 	test.for([

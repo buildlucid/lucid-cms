@@ -1,11 +1,11 @@
 import { describe, expect, requires, test } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	authorize,
 	createOAuthClient,
 	OAUTH_PATHS,
 	oauthResources,
-} from "#shared/oauth";
+} from "#shared/helpers/oauth";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 

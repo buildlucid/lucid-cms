@@ -1,13 +1,13 @@
 import type { AiCredits, AiUsageSession } from "@lucidcms/core/types";
+import { callTool, reply, script } from "#harness/client";
 import { describe, expect, requires, test } from "#harness/vitest";
-import { createChat, getChat, sendMessage } from "#shared/agent";
-import { callTool, reply, script } from "#shared/agent-script";
+import { createChat, getChat, sendMessage } from "#shared/helpers/agent";
 import {
 	changeConnection,
 	chargedFor,
 	connectLucid,
 	describeConnection,
-} from "#shared/ai";
+} from "#shared/helpers/ai";
 
 describe("AI usage", () => {
 	requires("agent:harness");

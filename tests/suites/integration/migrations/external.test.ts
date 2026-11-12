@@ -7,9 +7,12 @@ import {
 	sql,
 	test,
 } from "#harness/vitest";
-import { EXTERNAL_TABLES } from "#shared/migrations/external/notes";
-import { PLUGIN_MIGRATION } from "#shared/migrations/external/plugin";
-import { FAILING_MIGRATION, INLINE_MIGRATION } from "#shared/migrations/steps";
+import { EXTERNAL_TABLES } from "#shared/config/migrations/external/notes";
+import { PLUGIN_MIGRATION } from "#shared/config/migrations/external/plugin";
+import {
+	FAILING_MIGRATION,
+	INLINE_MIGRATION,
+} from "#shared/config/migrations/steps";
 
 const FILE_MIGRATION = "1790000000003-harness-file-notes";
 

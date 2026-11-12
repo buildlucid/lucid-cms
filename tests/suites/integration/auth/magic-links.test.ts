@@ -7,7 +7,7 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { isSignedIn, linkToken } from "#shared/auth";
+import { isSignedIn, linkToken } from "#shared/helpers/auth";
 
 const send = (session: Session, email: string) =>
 	session.request({

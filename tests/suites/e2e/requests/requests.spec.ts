@@ -1,16 +1,16 @@
 import { expect, type Page, requires, test } from "#harness/playwright";
-import { REVIEWED_STORY_KEY } from "#shared/collections/reviewed-story";
-import { listDocumentIds, readDocument } from "#shared/documents";
+import { REVIEWED_STORY_KEY } from "#shared/config/collections/reviewed-story";
+import {
+	listDocumentIds,
+	readDocument,
+	titled,
+} from "#shared/helpers/documents";
 import {
 	authorPermissions,
 	createThroughRequest,
 	readRequest,
 	reviewerPermissions,
-} from "#shared/requests";
-
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
+} from "#shared/helpers/requests";
 
 /** The request a page has open, from its address. */
 const requestIdOf = (page: Page) => {

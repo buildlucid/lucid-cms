@@ -1,6 +1,6 @@
 import { readdir } from "node:fs/promises";
 import path from "node:path";
-import type { OutboxEmail } from "../../../shared/fragments/outbox.ts";
+import type { OutboxEmail } from "../fakes/outbox.ts";
 import { readJson } from "../utils/json.ts";
 
 const TIMEOUT_MS = 10_000;

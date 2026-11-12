@@ -1,7 +1,7 @@
 import { describe, expect, migratedTo, requires, test } from "#harness/vitest";
-import { findStorageDrift } from "#shared/media";
-import { SEEDS } from "#shared/seeds/seeds";
-import { readSeeded } from "#shared/seeds/state";
+import { SEEDS } from "#shared/config/seeds/seeds";
+import { readSeeded } from "#shared/config/seeds/state";
+import { findStorageDrift } from "#shared/helpers/media";
 
 const migrated = migratedTo("seeds");
 

@@ -5,15 +5,16 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { REVIEWED_STORY_KEY } from "#shared/collections/reviewed-story";
-import { TEAM_STORY_KEY } from "#shared/collections/team-story";
+import { REVIEWED_STORY_KEY } from "#shared/config/collections/reviewed-story";
+import { TEAM_STORY_KEY } from "#shared/config/collections/team-story";
 import {
 	createContentReader,
 	publishDocument,
 	readContent,
 	readDocument,
 	saveDocument,
-} from "#shared/documents";
+	titled,
+} from "#shared/helpers/documents";
 import {
 	acknowledgeTarget,
 	approve,
@@ -28,11 +29,7 @@ import {
 	requestAction,
 	requestTeam,
 	setTargets,
-} from "#shared/requests";
-
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
+} from "#shared/helpers/requests";
 
 /** A reviewed story in one request, with the given targets. */
 const reviewed = (documentId: number, targets: string[]) => [

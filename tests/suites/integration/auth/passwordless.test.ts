@@ -1,8 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { describe, expect, test, useVariant } from "#harness/vitest";
-import { isSignedIn, sendLogin } from "#shared/auth";
+import { describe, expect, requires, test, useVariant } from "#harness/vitest";
+import { isSignedIn, sendLogin } from "#shared/helpers/auth";
 
 useVariant("passwordless");
+//* without passwords, everyone signs in through an email
+requires("harness:outbox");
 
 describe("without password login", () => {
 	test("refuses passwords and password resets", async ({ lucid }) => {

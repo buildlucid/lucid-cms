@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, requires, test } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	createDocument,
 	listDocumentIds,
 	readDocument,
-} from "#shared/documents";
+} from "#shared/helpers/documents";
 
 const marked = (title: string, marker: string) => ({
 	fields: [

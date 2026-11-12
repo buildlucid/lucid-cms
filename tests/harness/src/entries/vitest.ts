@@ -19,7 +19,6 @@ export {
 	test,
 	useVariant,
 } from "../lanes/vitest/test.ts";
-export { default as recordDigest } from "../report/record-digest.ts";
 export { default as migratedTo } from "../migrations/migrated-to.ts";
 export type {
 	CliRun,

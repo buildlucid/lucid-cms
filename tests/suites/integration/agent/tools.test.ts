@@ -1,3 +1,4 @@
+import { callTool, callTools, reply, script } from "#harness/client";
 import { describe, expect, requires, test } from "#harness/vitest";
 import {
 	createChat,
@@ -6,14 +7,13 @@ import {
 	respond,
 	sendMessage,
 	toolCallsOf,
-} from "#shared/agent";
-import { callTool, callTools, reply, script } from "#shared/agent-script";
+} from "#shared/helpers/agent";
 import {
 	connectLucid,
 	modelRequests,
 	readEffects,
 	uniqueTag,
-} from "#shared/ai";
+} from "#shared/helpers/ai";
 
 /** The tool result the model was sent for a call, from the request after it. */
 const toolResult = async (
@@ -215,27 +215,36 @@ describe("agent tools", () => {
 			expect(right.finish).toBe("completed");
 		});
 
-		test("only lets the person the run acts for answer", async ({ lucid }) => {
-			await connectLucid(lucid);
-			const admin = await lucid.admin();
-			const chat = await createChat(admin);
-			const other = await lucid.user({ superAdmin: true });
+		describe("with another person", () => {
+			requires("harness:outbox");
 
-			const asked = await sendMessage(
-				admin,
-				chat.id,
-				script(callTool("lucid_ask_user", { question: "Sure?" }), reply("OK.")),
-			);
-			const { interaction } = await pendingInteraction(admin, chat.id);
+			test("only lets the person the run acts for answer", async ({
+				lucid,
+			}) => {
+				await connectLucid(lucid);
+				const admin = await lucid.admin();
+				const chat = await createChat(admin);
+				const other = await lucid.user({ superAdmin: true });
 
-			const answered = await respond(other.session, asked.runId ?? "", {
-				interactionId: interaction.id,
-				response: { answer: "Yes" },
+				const asked = await sendMessage(
+					admin,
+					chat.id,
+					script(
+						callTool("lucid_ask_user", { question: "Sure?" }),
+						reply("OK."),
+					),
+				);
+				const { interaction } = await pendingInteraction(admin, chat.id);
+
+				const answered = await respond(other.session, asked.runId ?? "", {
+					interactionId: interaction.id,
+					response: { answer: "Yes" },
+				});
+				expect(answered.status).toBe(404);
+				expect(
+					(await pendingInteraction(admin, chat.id)).interaction.status,
+				).toBe("pending");
 			});
-			expect(answered.status).toBe(404);
-			expect(
-				(await pendingInteraction(admin, chat.id)).interaction.status,
-			).toBe("pending");
 		});
 	});
 

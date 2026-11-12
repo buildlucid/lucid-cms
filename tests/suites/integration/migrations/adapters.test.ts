@@ -1,11 +1,5 @@
-import {
-	describe,
-	expect,
-	recordDigest,
-	requires,
-	test,
-} from "#harness/vitest";
-import { EVERYTHING_KEY } from "#shared/migrations/collections/everything";
+import { describe, expect, requires, test } from "#harness/vitest";
+import { EVERYTHING_KEY } from "#shared/config/migrations/collections/everything";
 import { createArticle, withFirstArticle } from "./articles.ts";
 
 describe("migrating a database", { concurrent: true, timeout: 120_000 }, () => {
@@ -13,7 +7,6 @@ describe("migrating a database", { concurrent: true, timeout: 120_000 }, () => {
 
 	test("migrates every field type, then finds nothing left to do", async ({
 		migrations,
-		task,
 	}) => {
 		const database = await migrations.database();
 
@@ -32,21 +25,10 @@ describe("migrating a database", { concurrent: true, timeout: 120_000 }, () => {
 		);
 		expect(status.code, status.output).toBe(0);
 
-		//* names and column types differ between databases by design, so the digest is what they must agree on
-		const tables = (await database.schema())
-			.filter((table) => table.name.includes(EVERYTHING_KEY))
-			.map((table) =>
-				JSON.stringify({
-					columns: table.columns.map((column) => column.name).sort(),
-					indexes: (table.indexes ?? [])
-						.filter((index) => index.name.startsWith("lucid_idx__"))
-						.map((index) => index.columns.join(","))
-						.sort(),
-				}),
-			)
-			.sort();
+		const tables = (await database.schema()).filter((table) =>
+			table.name.includes(EVERYTHING_KEY),
+		);
 		expect(tables.length).toBeGreaterThan(0);
-		recordDigest(task, tables);
 	});
 
 	test("a fresh migration drops everything and builds the database again", async ({

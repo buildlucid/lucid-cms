@@ -6,11 +6,12 @@ import {
 	expect,
 	fc,
 	requires,
-	type SimulationContext,
 	simulation,
+	type SimulationContext,
+	sorted,
 	withFaults,
 } from "#harness/simulation";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	type ContentReader,
 	createContentReader,
@@ -20,7 +21,7 @@ import {
 	readContent,
 	readDocument,
 	valuesOf,
-} from "#shared/documents";
+} from "#shared/helpers/documents";
 
 const DOCUMENTS = `/api/v1/documents/${STORY_KEY}`;
 const ENVIRONMENTS = ["staging", "production"] as const;
@@ -104,7 +105,6 @@ const createStory = action<Model, string>({
 			revisions: [],
 			binned: false,
 		});
-		return id;
 	},
 });
 
@@ -150,7 +150,6 @@ const publishStory = action<Model, { story: number; environment: Environment }>(
 			if (allowed) {
 				story.published[input.environment] = story.latest;
 			}
-			return published.status;
 		},
 	},
 );
@@ -180,7 +179,6 @@ const unpublishStory = action<
 		if (unpublished.status === 204) {
 			delete story.published[input.environment];
 		}
-		return unpublished.status;
 	},
 });
 
@@ -213,7 +211,6 @@ const restoreRevision = action<Model, { story: number; revision: number }>({
 		const content = story.revisions[index] as string;
 		story.revisions.push(story.latest);
 		story.latest = content;
-		return content;
 	},
 });
 
@@ -278,8 +275,6 @@ const readerOf = async ({ admin, lucid, model }: Context) => {
 	model.reader ??= await createContentReader(admin, lucid.session);
 	return model.reader;
 };
-
-const sorted = (ids: number[]) => ids.toSorted((a, b) => a - b);
 
 const invariants = {
 	"latest holds the whole of the last save": async ({

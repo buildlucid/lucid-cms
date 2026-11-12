@@ -9,9 +9,9 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument, readDocument } from "#shared/documents";
-import { IMAGE_PRESET } from "#shared/fragments/media";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { IMAGE_PRESET } from "#shared/config/fragments/media";
+import { createDocument, readDocument } from "#shared/helpers/documents";
 import {
 	countVariants,
 	createFolder,
@@ -23,8 +23,8 @@ import {
 	sumStoredSizes,
 	uploadFile,
 	uploadMedia,
-} from "#shared/media";
-import { uniqueName } from "#shared/permissions";
+} from "#shared/helpers/media";
+import { uniqueName } from "#shared/helpers/permissions";
 
 const DAY = 24 * 60 * 60 * 1000;
 

@@ -1,3 +1,4 @@
+import type { Integration } from "@lucidcms/core/types";
 import {
 	advanceClock,
 	describe,
@@ -7,14 +8,10 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import {
-	createApiKey,
-	type Integration,
-	KEY_PATHS,
-} from "#shared/integrations";
-import { callContent } from "#shared/oauth";
-import { uniqueName } from "#shared/permissions";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { createApiKey, KEY_PATHS } from "#shared/helpers/integrations";
+import { callContent } from "#shared/helpers/oauth";
+import { uniqueName } from "#shared/helpers/permissions";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 const STORIES_PATH = `documents/${STORY_KEY}?version=latest`;

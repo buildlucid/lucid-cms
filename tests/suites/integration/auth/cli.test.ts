@@ -13,7 +13,7 @@ import {
 	isSignedIn,
 	sendLogin,
 	signInWithPasskey,
-} from "#shared/auth";
+} from "#shared/helpers/auth";
 
 describe("lockout recovery from the command line", () => {
 	requires("mode:host", "auth:password");

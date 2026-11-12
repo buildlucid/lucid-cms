@@ -1,5 +1,5 @@
 import { describe, expect, requires, test } from "#harness/vitest";
-import { IMAGE_PRESET } from "#shared/fragments/media";
+import { IMAGE_PRESET } from "#shared/config/fragments/media";
 import {
 	countVariants,
 	fetchCdn,
@@ -8,7 +8,7 @@ import {
 	readStorageCounter,
 	sumStoredSizes,
 	uploadMedia,
-} from "#shared/media";
+} from "#shared/helpers/media";
 
 /** Reads a lossy WebP's width and height from its VP8 frame header. */
 const webpSize = (bytes: Buffer) => {

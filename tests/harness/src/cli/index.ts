@@ -1,6 +1,5 @@
 import { availableParallelism } from "node:os";
 import { parseArgs } from "node:util";
-import compareCommand from "./commands/compare.ts";
 import listCommand from "./commands/list.ts";
 import mergeCommand from "./commands/merge.ts";
 import runCommand from "./commands/run.ts";
@@ -22,7 +21,6 @@ Commands
   status   Show whether the latest run is still going, and how far it has got
   list     Show the setups, lanes and what a run would do
   merge    Join report.json files from several runs into one report
-  compare  Show what changed between an older report.json and a newer one
 
 Options
   --profile <name>       What to cover. Defaults to local. One of:
@@ -40,10 +38,9 @@ Options
   --simulation-runs <n>  Random sequences each simulation tries. Defaults to 10
   --performance-runs <n> Samples each benchmark takes. Defaults to 5
   --no-services          Do not start Docker services. Postgres then runs in memory
-  --plain                Print a line per change instead of the live dashboard
+  --plain                Print plain lines instead of the live status block
   --json                 With list, print setup names as JSON. With status, print the run's state
   --complete             With merge, the reports cover every setup, so flag tests that ran nowhere
-  --report-only          With compare, never fail on a regression
 
 Examples
   npm run harness
@@ -53,10 +50,9 @@ Examples
   npm run harness -- --lane performance
   npm run harness -- status
   npm run harness -- merge a/report.json b/report.json
-  npm run harness -- compare base/report.json .harness/latest/report.json
 `;
 
-const COMMANDS = ["run", "status", "list", "merge", "compare"] as const;
+const COMMANDS = ["run", "status", "list", "merge"] as const;
 type Command = (typeof COMMANDS)[number];
 
 const isCommand = (value: string | undefined): value is Command =>
@@ -112,7 +108,6 @@ const main = async (): Promise<number> => {
 			plain: { type: "boolean", default: false },
 			json: { type: "boolean", default: false },
 			complete: { type: "boolean", default: false },
-			"report-only": { type: "boolean", default: false },
 			help: { type: "boolean", short: "h", default: false },
 		},
 	});
@@ -152,13 +147,6 @@ const main = async (): Promise<number> => {
 		}
 		case "merge": {
 			return mergeCommand(rest, { complete: values.complete });
-		}
-		case "compare": {
-			return compareCommand({
-				base: rest[0],
-				head: rest[1],
-				reportOnly: values["report-only"],
-			});
 		}
 		case "run": {
 			const cores = availableParallelism();

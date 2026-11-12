@@ -1,4 +1,10 @@
-import type { AgentConversation } from "@lucidcms/core/types";
+import {
+	callTool,
+	failTurn,
+	reply,
+	type ScriptTurn,
+	script,
+} from "#harness/client";
 import {
 	action,
 	describe,
@@ -20,14 +26,7 @@ import {
 	retryChat,
 	runAgentTick,
 	sendMessage,
-} from "#shared/agent";
-import {
-	callTool,
-	failTurn,
-	reply,
-	type ScriptTurn,
-	script,
-} from "#shared/agent-script";
+} from "#shared/helpers/agent";
 import {
 	chargedFor,
 	connectLucid,
@@ -37,7 +36,7 @@ import {
 	uniqueGate,
 	usageSession,
 	waitAtGate,
-} from "#shared/ai";
+} from "#shared/helpers/ai";
 
 const MAX_CHATS = 3;
 const POLL_MS = 50;
@@ -126,7 +125,7 @@ const HOLDING = ["waiting", "interrupted"];
 
 /**
  * Waits for runs and pending inputs to settle, except paused queues or runs waiting for input.
- * Allows background queues to deliver the next message before reading outcomes.
+ * Allows background queues to deliver the next message before the next action.
  */
 const quiet = async (admin: Session, chatId: string) => {
 	const deadline = Date.now() + QUIET_TIMEOUT_MS;
@@ -149,13 +148,6 @@ const quiet = async (admin: Session, chatId: string) => {
 	);
 };
 
-/** What an action reports: the chat's latest run once it is quiet. */
-const outcome = (chat: AgentConversation) => ({
-	status: chat.latestRun?.status ?? null,
-	waitingFor: chat.latestRun?.waitingFor ?? null,
-	queuePaused: chat.queuePaused,
-});
-
 const pick = (model: Model, index: number) =>
 	model.chats[index % model.chats.length] as Chat;
 
@@ -171,7 +163,6 @@ const newChat = action<Model, { automatic: boolean }>({
 			confirmationMode: input.automatic ? "automatic" : "tool-defaults",
 		});
 		model.chats.push({ id: chat.id, tags: [], sent: 0 });
-		return { chats: model.chats.length };
 	},
 });
 
@@ -191,7 +182,7 @@ const send = action<Model, { chat: number; kind: Kind }>({
 			chat.id,
 			script(...turnsFor(input.kind, nextTag(chat))),
 		);
-		return outcome(await quiet(admin, chat.id));
+		await quiet(admin, chat.id);
 	},
 });
 
@@ -208,7 +199,7 @@ const hold = action<Model, { chat: number }>({
 			before.latestRun?.status === "interrupted" ||
 			before.queuePaused
 		) {
-			return { held: false };
+			return;
 		}
 		const gate = uniqueGate("held");
 		chat.sent++;
@@ -219,7 +210,6 @@ const hold = action<Model, { chat: number }>({
 		);
 		await waitAtGate(lucid, gate);
 		model.held = { chat, gate, stream };
-		return { held: true };
 	},
 });
 
@@ -229,12 +219,7 @@ const queueBehind = action<Model>({
 	run: async ({ admin, model }) => {
 		const held = model.held as Held;
 		held.chat.sent++;
-		const queued = await queueMessage(
-			admin,
-			held.chat.id,
-			script(reply("Queued reply.")),
-		);
-		return { status: queued.status, runId: queued.body.data.runId };
+		await queueMessage(admin, held.chat.id, script(reply("Queued reply.")));
 	},
 });
 
@@ -245,13 +230,9 @@ const steer = action<Model>({
 		const held = model.held as Held;
 		const runId = (await getChat(admin, held.chat.id)).latestRun?.id ?? "";
 		held.chat.sent++;
-		const steered = await queueMessage(
-			admin,
-			held.chat.id,
-			script(reply("Steered reply.")),
-			{ steer: runId },
-		);
-		return { status: steered.status };
+		await queueMessage(admin, held.chat.id, script(reply("Steered reply.")), {
+			steer: runId,
+		});
 	},
 });
 
@@ -264,7 +245,7 @@ const release = action<Model>({
 		model.held = undefined;
 		await openGate(lucid, held.gate);
 		await held.stream;
-		return outcome(await quiet(admin, held.chat.id));
+		await quiet(admin, held.chat.id);
 	},
 });
 
@@ -275,13 +256,10 @@ const stop = action<Model>({
 		const held = model.held as Held;
 		model.held = undefined;
 		const runId = (await getChat(admin, held.chat.id)).latestRun?.id ?? "";
-		const cancelled = await cancelRun(admin, runId);
+		await cancelRun(admin, runId);
 		await openGate(lucid, held.gate);
 		await held.stream;
-		return {
-			cancelled: cancelled.status,
-			...outcome(await quiet(admin, held.chat.id)),
-		};
+		await quiet(admin, held.chat.id);
 	},
 });
 
@@ -297,7 +275,7 @@ const answer = action<Model, { chat: number; accept: boolean }>({
 		const chat = idle[input.chat % idle.length] as Chat;
 		const current = await quiet(admin, chat.id);
 		if (current.latestRun?.status !== "waiting") {
-			return { answered: false };
+			return;
 		}
 		const { interaction, widget } = await pendingInteraction(admin, chat.id);
 		await respond(admin, current.latestRun.id, {
@@ -305,7 +283,7 @@ const answer = action<Model, { chat: number; accept: boolean }>({
 			action: input.accept ? "submit" : "cancel",
 			response: widget.key === "lucid-question" ? { answer: "Yes" } : {},
 		});
-		return { answered: true, ...outcome(await quiet(admin, chat.id)) };
+		await quiet(admin, chat.id);
 	},
 });
 
@@ -318,10 +296,10 @@ const retry = action<Model, { chat: number }>({
 		const chat = idle[input.chat % idle.length] as Chat;
 		const current = await quiet(admin, chat.id);
 		if (current.latestRun?.status !== "failed") {
-			return { retried: false };
+			return;
 		}
 		await retryChat(admin, chat.id);
-		return { retried: true, ...outcome(await quiet(admin, chat.id)) };
+		await quiet(admin, chat.id);
 	},
 });
 
@@ -330,11 +308,9 @@ const tick = action<Model>({
 	when: (model) => model.chats.length > 0 && !model.held,
 	run: async ({ admin, lucid, model }) => {
 		await runAgentTick(lucid);
-		const outcomes = [];
 		for (const chat of model.chats) {
-			outcomes.push(outcome(await quiet(admin, chat.id)));
+			await quiet(admin, chat.id);
 		}
-		return outcomes;
 	},
 });
 

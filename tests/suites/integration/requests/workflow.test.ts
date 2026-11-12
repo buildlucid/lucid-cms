@@ -5,8 +5,11 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STAGED_STORY_KEY, STAGES } from "#shared/collections/staged-story";
-import { expectStatus, saveDocument } from "#shared/documents";
+import {
+	STAGED_STORY_KEY,
+	STAGES,
+} from "#shared/config/collections/staged-story";
+import { expectStatus, saveDocument, titled } from "#shared/helpers/documents";
 import {
 	approve,
 	approveAndCompleteRequest,
@@ -16,13 +19,9 @@ import {
 	openCreateRequest,
 	openRequest,
 	readRequest,
-} from "#shared/requests";
+} from "#shared/helpers/requests";
 
 const DOCUMENTS = `/api/v1/documents/${STAGED_STORY_KEY}`;
-
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
 
 /** Moves latest, or a request's proposal when given its version, to a workflow stage, returning the response. */
 const moveStage = (

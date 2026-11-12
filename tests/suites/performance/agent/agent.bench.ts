@@ -1,4 +1,5 @@
 import path from "node:path";
+import { callTool, reply, script } from "#harness/client";
 import {
 	benchmark,
 	countQueries,
@@ -11,9 +12,8 @@ import {
 	queueMessage,
 	sendMessage,
 	waitForRun,
-} from "#shared/agent";
-import { callTool, reply, script } from "#shared/agent-script";
-import { connectSession } from "#shared/ai";
+} from "#shared/helpers/agent";
+import { connectSession } from "#shared/helpers/ai";
 
 /** How many runs each sample times for every metric. */
 const RUNS = 10;
@@ -35,7 +35,7 @@ const median = (values: number[]) =>
  * Times what the CMS adds to an agent run, with Lucid's model answering at once from the harness's
  * fake: a one-turn reply, a run with two tool turns, and a reply in a chat with a long history.
  * Query counts come from a run started without a stream, which only counts the whole run where the
- * queue runs it inline. Everything here is report-only.
+ * queue runs it inline.
  */
 benchmark<Prepared>({
 	id: "agent",
@@ -116,7 +116,6 @@ benchmark<Prepared>({
 					label: `${options.label} (database queries)`,
 					unit: "count",
 					value: countQueries(queued),
-					blocking: false,
 				},
 			};
 		};

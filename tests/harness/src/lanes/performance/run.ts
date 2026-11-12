@@ -150,17 +150,12 @@ for (const { file, benchmark } of selected) {
 			...test,
 			status: "failed",
 			durationMs: Date.now() - startedAt,
-			error: message.split("\n")[0],
+			error: message,
 		});
 	} finally {
 		//* a benchmark that fails before its cleanup leaves its servers running in process groups of
 		//* their own, which would outlive the lane
 		await stopAllCommands();
-	}
-
-	const last = byFile.get(file)?.at(-1);
-	if (last?.benchmark === benchmark) {
-		emitProgress({ type: "file-end", file });
 	}
 }
 

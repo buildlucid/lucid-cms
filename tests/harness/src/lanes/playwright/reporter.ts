@@ -79,7 +79,7 @@ class HarnessReporter implements Reporter {
 			name: getFullName(test),
 			status: toStatus(test, result),
 			durationMs: Math.round(result.duration),
-			error: result.errors[0]?.message?.split("\n")[0],
+			error: result.errors[0] && formatError(result.errors[0]),
 		});
 	}
 

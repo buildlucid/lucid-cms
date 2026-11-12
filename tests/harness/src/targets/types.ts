@@ -1,8 +1,8 @@
 import type { createLucidHost } from "@lucidcms/core/runtime";
 import type { KyselyDB } from "@lucidcms/core/types";
-import type { Variant } from "../../../shared/variants.ts";
 import type { Transport } from "../client/types.ts";
 import type { CliRun } from "../migrations/types.ts";
+import type { Variant } from "../setup/variants.ts";
 
 /** A CMS that tests can send requests to. */
 export type Target = {
@@ -39,6 +39,6 @@ export type HostTargetOptions = {
 		| ((cms: {
 				uploads: string;
 		  }) => AdapterOverrides | Promise<AdapterOverrides>);
-	/** Runs the CMS with a variant of the setup's config. See `shared/variants.ts`. */
+	/** Runs the CMS with a variant of the setup's config. See `setup/variants.ts`. */
 	variant?: Variant;
 };

@@ -1,6 +1,6 @@
 import { describe, expect, type Lucid, requires, test } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument } from "#shared/documents";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { createDocument } from "#shared/helpers/documents";
 
 type RpcResponse = {
 	result?: {

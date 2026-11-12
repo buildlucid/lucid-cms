@@ -12,6 +12,8 @@ export const paths = {
 	suites: path.join(root, "suites"),
 	/** Reports, logs and databases from runs. Ignored by git. */
 	output: path.join(root, ".harness"),
+	/** What later runs need from earlier ones. See `updateHistory`. */
+	history: path.join(root, ".harness", "history.json"),
 	harness: path.join(root, "harness/src"),
 	bin: path.resolve(root, "../node_modules/.bin"),
 } as const;

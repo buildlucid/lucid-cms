@@ -5,9 +5,9 @@ import {
 	requires,
 	test,
 } from "#harness/playwright";
-import { linkToken, signInWithProvider } from "#shared/auth";
-import { skipPasskeyPrompt, submitLogin } from "#shared/auth-pages";
-import { PROVIDERS } from "#shared/fragments/auth";
+import { PROVIDERS } from "#shared/config/fragments/auth";
+import { linkToken, signInWithProvider } from "#shared/helpers/auth";
+import { skipPasskeyPrompt, submitLogin } from "#shared/helpers/auth-pages";
 
 test.describe("signing in", () => {
 	requires("harness:outbox");

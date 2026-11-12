@@ -1,4 +1,5 @@
 import type { AgentSubagents } from "@lucidcms/core/types";
+import { callTool, reply, script } from "#harness/client";
 import {
 	describe,
 	expect,
@@ -6,6 +7,7 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
+import { HARNESS_AGENT, HELPER_AGENT } from "#shared/config/fragments/ai";
 import {
 	cancelRun,
 	createChat,
@@ -13,8 +15,7 @@ import {
 	queueMessage,
 	sendMessage,
 	waitForRun,
-} from "#shared/agent";
-import { callTool, reply, script } from "#shared/agent-script";
+} from "#shared/helpers/agent";
 import {
 	connectLucid,
 	modelRequests,
@@ -22,8 +23,7 @@ import {
 	transcriptViolations,
 	uniqueGate,
 	waitAtGate,
-} from "#shared/ai";
-import { HARNESS_AGENT, HELPER_AGENT } from "#shared/fragments/ai";
+} from "#shared/helpers/ai";
 
 const subagentsOf = async (session: Session, chatId: string) => {
 	const response = await session.request<{ data: AgentSubagents }>({

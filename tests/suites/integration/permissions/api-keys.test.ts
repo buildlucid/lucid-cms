@@ -5,11 +5,11 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument } from "#shared/documents";
-import { createApiKey } from "#shared/integrations";
-import { callContent } from "#shared/oauth";
-import { setRolePermissions, uniqueName } from "#shared/permissions";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { createDocument } from "#shared/helpers/documents";
+import { createApiKey } from "#shared/helpers/integrations";
+import { callContent } from "#shared/helpers/oauth";
+import { setRolePermissions, uniqueName } from "#shared/helpers/permissions";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 

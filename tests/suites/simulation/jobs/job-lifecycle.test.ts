@@ -1,4 +1,4 @@
-import type { QueueDeliveryMessage } from "@lucidcms/core/types";
+import type { Job, QueueDeliveryMessage } from "@lucidcms/core/types";
 import {
 	action,
 	advanceClock,
@@ -15,17 +15,16 @@ import {
 	PROBE_JOBS,
 	type ProbeStep,
 	SLOW_PROBE_RETRY,
-} from "#shared/fragments/jobs";
+} from "#shared/config/fragments/jobs";
 import {
 	cancelJob,
 	deliverJob,
 	enqueueProbe,
 	executions,
-	type Job,
 	type JobStatus,
 	tick,
 	uniqueTag,
-} from "#shared/jobs";
+} from "#shared/helpers/jobs";
 
 const MAX_JOBS = 6;
 /** A minute and a second, so every dispatch retry and first job retry is due after it. */
@@ -75,9 +74,6 @@ const startedAttempts = ({ lucid }: Context, job: ModelJob) =>
 const stepFor = (job: ModelJob, attempt: number) =>
 	job.steps[Math.min(attempt, job.steps.length) - 1];
 
-const indexOf = (model: Model, jobId: string) =>
-	model.jobs.findIndex((job) => job.jobId === jobId);
-
 /**
  * Delivers one message as a push queue would. A delivery the job wasn't ready for goes back on
  * the queue, as the consumer asks; duplicates of a delivery that ran are dropped.
@@ -96,7 +92,6 @@ const deliverMessage = async (
 	if (early) {
 		context.model.queue.putBack(message);
 	}
-	return ran ? "ran" : early ? "early" : "ignored";
 };
 
 const enqueue = action<
@@ -131,7 +126,6 @@ const enqueue = action<
 			transaction: input.transaction,
 			runAt: runAt?.getTime() ?? Date.now(),
 		});
-		return { job: model.jobs.length - 1 };
 	},
 });
 
@@ -149,7 +143,6 @@ const enqueueAgain = action<Model, number>({
 			idempotencyKey: job.tag,
 		});
 		expect(jobId, "the same idempotency key gave another job").toBe(job.jobId);
-		return { job: indexOf(model, jobId) };
 	},
 });
 
@@ -159,13 +152,9 @@ const deliver = action<Model, { pick: number; times: number }>({
 	when: (model) => model.queue.pending.length > 0,
 	run: async (context) => {
 		const message = context.model.queue.take(context.input.pick);
-		if (!message) {
-			return null;
+		if (message) {
+			await deliverMessage(context, message, context.input.times);
 		}
-		return {
-			job: indexOf(context.model, message.jobId),
-			result: await deliverMessage(context, message, context.input.times),
-		};
 	},
 });
 
@@ -178,8 +167,7 @@ const loseMessage = action<Model, number>({
 	input: fc.nat(),
 	when: (model) => model.queue.pending.length > 0,
 	run: async ({ model, input }) => {
-		const message = model.queue.take(input);
-		return message ? { job: indexOf(model, message.jobId) } : null;
+		model.queue.take(input);
 	},
 });
 
@@ -194,7 +182,6 @@ const cancel = action<Model, number>({
 		if (result.type === "cancelled") {
 			job.startedWhenCancelled = (await startedAttempts(context, job)).length;
 		}
-		return { job: input % model.jobs.length, result: result.type };
 	},
 });
 

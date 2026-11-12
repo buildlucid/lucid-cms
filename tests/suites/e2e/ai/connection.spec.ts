@@ -5,7 +5,7 @@ import {
 	signInTo,
 	test,
 } from "#harness/playwright";
-import { composerIn } from "#shared/agent-pages";
+import { composerIn } from "#shared/helpers/agent-pages";
 
 type Server = { url: string; admin: Session; stop(): Promise<void> };
 

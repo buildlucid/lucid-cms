@@ -1,6 +1,6 @@
 import { expect, requires, test } from "#harness/playwright";
-import { files, uploadMedia } from "#shared/media";
-import { uniqueName } from "#shared/permissions";
+import { files, uploadMedia } from "#shared/helpers/media";
+import { uniqueName } from "#shared/helpers/permissions";
 
 test.describe("sharing media", () => {
 	requires("feature:mediaStorage");

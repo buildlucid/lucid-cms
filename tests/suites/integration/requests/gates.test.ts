@@ -6,14 +6,14 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { REVIEWED_STORY_KEY } from "#shared/collections/reviewed-story";
+import { REVIEWED_STORY_KEY } from "#shared/config/collections/reviewed-story";
 import {
 	createContentReader,
 	listDocumentIds,
 	publishDocument,
 	readContent,
 	readDocument,
-} from "#shared/documents";
+} from "#shared/helpers/documents";
 import {
 	approve,
 	approveAndCompleteRequest,
@@ -23,7 +23,7 @@ import {
 	openRequest,
 	readRequest,
 	requestAction,
-} from "#shared/requests";
+} from "#shared/helpers/requests";
 
 const DOCUMENTS = `/api/v1/documents/${REVIEWED_STORY_KEY}`;
 

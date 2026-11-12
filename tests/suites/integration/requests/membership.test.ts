@@ -1,8 +1,12 @@
 import { describe, expect, requires, test } from "#harness/vitest";
-import { REVIEWED_STORY_KEY } from "#shared/collections/reviewed-story";
-import { STORY_KEY } from "#shared/collections/story";
-import { TEAM_STORY_KEY } from "#shared/collections/team-story";
-import { createDocument, readDocument } from "#shared/documents";
+import { REVIEWED_STORY_KEY } from "#shared/config/collections/reviewed-story";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { TEAM_STORY_KEY } from "#shared/config/collections/team-story";
+import {
+	createDocument,
+	readDocument,
+	titled,
+} from "#shared/helpers/documents";
 import {
 	approve,
 	completeRequest,
@@ -12,11 +16,7 @@ import {
 	readRequest,
 	requestTeam,
 	reviewerPermissions,
-} from "#shared/requests";
-
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
+} from "#shared/helpers/requests";
 
 describe("the documents in a request", () => {
 	requires(`collection:${STORY_KEY}`);

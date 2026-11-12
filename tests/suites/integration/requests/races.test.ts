@@ -6,10 +6,14 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { TEAM_STORY_KEY } from "#shared/collections/team-story";
-import { createDocument, readDocument } from "#shared/documents";
-import { waitForJob } from "#shared/jobs";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { TEAM_STORY_KEY } from "#shared/config/collections/team-story";
+import {
+	createDocument,
+	readDocument,
+	titled,
+} from "#shared/helpers/documents";
+import { waitForJob } from "#shared/helpers/jobs";
 import {
 	approve,
 	approverIds,
@@ -20,11 +24,7 @@ import {
 	readRequest,
 	requestAction,
 	requestTeam,
-} from "#shared/requests";
-
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
+} from "#shared/helpers/requests";
 
 /** Opens a request to publish a new story to staging, with its proposal titled `title`. */
 const openStoryRequest = async (admin: Session, title: string) => {

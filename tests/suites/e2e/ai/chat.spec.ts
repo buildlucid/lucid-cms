@@ -1,7 +1,7 @@
+import { callTool, reply, script } from "#harness/client";
 import { expect, requires, test } from "#harness/playwright";
-import { createChat, sendMessage, waitForRun } from "#shared/agent";
-import { repliesIn, sendFromComposer } from "#shared/agent-pages";
-import { callTool, reply, script } from "#shared/agent-script";
+import { createChat, sendMessage, waitForRun } from "#shared/helpers/agent";
+import { repliesIn, sendFromComposer } from "#shared/helpers/agent-pages";
 import {
 	connectLucid,
 	openGate,
@@ -9,7 +9,7 @@ import {
 	uniqueGate,
 	uniqueTag,
 	waitAtGate,
-} from "#shared/ai";
+} from "#shared/helpers/ai";
 
 test.describe("chatting with an agent", () => {
 	requires("agent:harness", "harness:outbox");

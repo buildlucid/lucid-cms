@@ -1,7 +1,7 @@
+import { failGenerate } from "#harness/client";
 import { describe, expect, requires, test } from "#harness/vitest";
-import { failGenerate } from "#shared/agent-script";
-import { connectLucid, generateRequests } from "#shared/ai";
-import { createDocument } from "#shared/documents";
+import { connectLucid, generateRequests } from "#shared/helpers/ai";
+import { createDocument } from "#shared/helpers/documents";
 
 const GUIDE = "guide";
 

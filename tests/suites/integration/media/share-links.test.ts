@@ -1,3 +1,4 @@
+import type { MediaShareLink } from "@lucidcms/core/types";
 import {
 	advanceClock,
 	describe,
@@ -6,16 +7,14 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { files, uploadMedia } from "#shared/media";
-
-type ShareLink = { id: number; token: string };
+import { files, uploadMedia } from "#shared/helpers/media";
 
 const createLink = async (
 	session: Session,
 	mediaId: number,
 	body: { password?: string; expiresAt?: string } = {},
 ) => {
-	const created = await session.request<{ data: ShareLink }>({
+	const created = await session.request<{ data: MediaShareLink }>({
 		method: "POST",
 		path: `/api/v1/media/${mediaId}/share-links`,
 		body,
@@ -144,25 +143,31 @@ describe("media share links", () => {
 		expect((await stream(lucid.session(), link.token)).status).toBe(404);
 	});
 
-	test("can't be made for someone else's personal media", async ({ lucid }) => {
-		const owner = await lucid.user({
-			permissions: ["media:create", "media:update"],
-		});
-		const id = await uploadMedia(owner.session, {
-			title: "Personal",
-			owned: true,
-		});
-		const other = await lucid.user({
-			permissions: ["media:read-all", "media:create"],
-		});
+	describe("with other people", () => {
+		requires("harness:outbox");
 
-		const created = await other.session.request({
-			method: "POST",
-			path: `/api/v1/media/${id}/share-links`,
-			body: {},
-		});
+		test("can't be made for someone else's personal media", async ({
+			lucid,
+		}) => {
+			const owner = await lucid.user({
+				permissions: ["media:create", "media:update"],
+			});
+			const id = await uploadMedia(owner.session, {
+				title: "Personal",
+				owned: true,
+			});
+			const other = await lucid.user({
+				permissions: ["media:read-all", "media:create"],
+			});
 
-		expect(created.status).toBeGreaterThanOrEqual(400);
+			const created = await other.session.request({
+				method: "POST",
+				path: `/api/v1/media/${id}/share-links`,
+				body: {},
+			});
+
+			expect(created.status).toBeGreaterThanOrEqual(400);
+		});
 	});
 });
 

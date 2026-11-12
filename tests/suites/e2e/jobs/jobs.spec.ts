@@ -1,6 +1,6 @@
 import { expect, requires, test } from "#harness/playwright";
-import { PROBE_JOBS, PROBE_RETRY } from "#shared/fragments/jobs";
-import { enqueueProbe, uniqueTag, waitForJob } from "#shared/jobs";
+import { PROBE_JOBS, PROBE_RETRY } from "#shared/config/fragments/jobs";
+import { enqueueProbe, uniqueTag, waitForJob } from "#shared/helpers/jobs";
 
 test.describe("jobs in the admin", () => {
 	requires("plugin:harness-jobs");

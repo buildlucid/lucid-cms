@@ -6,8 +6,8 @@ import {
 	sql,
 	test,
 } from "#harness/vitest";
-import { ARTICLE_KEY } from "#shared/migrations/collections/article";
-import { EVERYTHING_KEY } from "#shared/migrations/collections/everything";
+import { ARTICLE_KEY } from "#shared/config/migrations/collections/article";
+import { EVERYTHING_KEY } from "#shared/config/migrations/collections/everything";
 import {
 	createArticle,
 	FIRST_ARTICLE,

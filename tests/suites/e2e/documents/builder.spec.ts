@@ -1,6 +1,6 @@
 import { expect, requires, test } from "#harness/playwright";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument, readDocument } from "#shared/documents";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { createDocument, readDocument } from "#shared/helpers/documents";
 
 test.describe("editing a document in the builder", () => {
 	requires(`collection:${STORY_KEY}`);

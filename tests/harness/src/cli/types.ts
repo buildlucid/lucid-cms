@@ -54,7 +54,7 @@ export type RunOptions = PlanFilters & {
 	performanceRuns: number;
 	/** Whether to start the Docker services that setups need. */
 	services: boolean;
-	/** Prints one line per change instead of drawing the live dashboard. */
+	/** Prints plain lines instead of drawing the live status block. */
 	plain: boolean;
 	/** Extra arguments for the lane's test runner. */
 	passthrough: string[];

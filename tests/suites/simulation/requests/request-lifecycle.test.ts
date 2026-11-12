@@ -1,3 +1,4 @@
+import type { RequestBlocker } from "@lucidcms/core/types";
 import {
 	action,
 	describe,
@@ -5,17 +6,22 @@ import {
 	fc,
 	requires,
 	type Session,
-	type SimulationContext,
 	simulation,
+	type SimulationContext,
+	sorted,
 } from "#harness/simulation";
-import { TEAM_STORY_KEY } from "#shared/collections/team-story";
-import { listDocumentIds, readDocument, saveDocument } from "#shared/documents";
+import { TEAM_STORY_KEY } from "#shared/config/collections/team-story";
+import {
+	listDocumentIds,
+	readDocument,
+	saveDocument,
+	titled,
+} from "#shared/helpers/documents";
 import {
 	approve,
 	approverIds,
 	authorPermissions,
 	blockerCodes,
-	type Blocker,
 	commentsOf,
 	createWithTeam,
 	editProposal,
@@ -28,7 +34,7 @@ import {
 	reviewerPermissions,
 	setTargets,
 	waitForRequestRun,
-} from "#shared/requests";
+} from "#shared/helpers/requests";
 
 const DOCUMENTS = `/api/v1/documents/${TEAM_STORY_KEY}`;
 const ENVIRONMENTS = ["staging", "production"] as const;
@@ -95,10 +101,6 @@ const actor = fc.oneof(
 	{ arbitrary: fc.constant<Person>("author"), weight: 1 },
 );
 
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
-
 const sessionOf = (model: Model, who: Person) => {
 	const found = model.people[who];
 	if (!found) {
@@ -158,12 +160,15 @@ const canWrite = (request: Request, who: Person) =>
 	request.by === "author";
 
 /** Why the model expects a request can't be approved. Only open requests have blockers. */
-const blockersOf = (model: Model, request: Request): Blocker["code"][] => {
+const blockersOf = (
+	model: Model,
+	request: Request,
+): RequestBlocker["code"][] => {
 	if (!open(request)) {
 		return [];
 	}
 	const story = storyOf(model, request);
-	const codes: Blocker["code"][] = [];
+	const codes: RequestBlocker["code"][] = [];
 	if (story.binned) {
 		codes.push("document_deleted");
 	} else if (!request.approved) {
@@ -435,12 +440,13 @@ const approveRequest = action<Model, { request: number; by: Person }>({
 	name: "approve",
 	input: requestInput,
 	when: (model) => model.requests.length > 0,
-	run: ({ model, input }) =>
-		approveAs(
+	run: async ({ model, input }) => {
+		await approveAs(
 			model,
 			pick(newestFirst(model), input.request, () => true),
 			input.by,
-		),
+		);
+	},
 });
 
 /** A reviewer who could approve the request now: not whoever asked, and not one who already did. */
@@ -492,7 +498,6 @@ const withdrawApproval = action<Model, { request: number; by: Person }>({
 			request.approvals.delete(input.by);
 			request.approved = false;
 		}
-		return withdrawn.status;
 	},
 });
 
@@ -550,12 +555,13 @@ const completeRequest = action<Model, { request: number; by: Person }>({
 	name: "complete",
 	input: requestInput,
 	when: (model) => model.requests.length > 0,
-	run: ({ model, input }) =>
-		completeAs(
+	run: async ({ model, input }) => {
+		await completeAs(
 			model,
 			pick(newestFirst(model), input.request, () => true),
 			input.by,
-		),
+		);
+	},
 });
 
 const approvedAndOpen = (request: Request) => open(request) && request.approved;
@@ -588,7 +594,6 @@ const closeRequest = action<Model, { request: number; by: Person }>({
 		if (expected === 204) {
 			request.status = "closed";
 		}
-		return closed.status;
 	},
 });
 
@@ -617,7 +622,6 @@ const reopenRequest = action<Model, { request: number; by: Person }>({
 			request.status = "open";
 			dismiss(request);
 		}
-		return reopened.status;
 	},
 });
 
@@ -706,7 +710,6 @@ const acknowledge = action<Model, { request: number; by: Person }>({
 		if (expected === 204) {
 			request.acknowledged.set(target, story.versions[target]);
 		}
-		return acknowledged.status;
 	},
 });
 
@@ -797,8 +800,6 @@ const unpublishStaging = action<Model, number>({
 
 const repeat = <Item>(item: Item, times: number): Item[] =>
 	Array.from({ length: times }, () => item);
-
-const sorted = (ids: number[]) => ids.toSorted((a, b) => a - b);
 
 const invariants = {
 	"every story holds what was last saved, created or published to it": async ({

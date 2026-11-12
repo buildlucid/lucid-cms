@@ -8,7 +8,7 @@ import {
 	simulation,
 } from "#harness/simulation";
 import type { Session } from "#harness/vitest";
-import { uniqueName } from "#shared/permissions";
+import { uniqueName } from "#shared/helpers/permissions";
 
 /** Permissions managers may hold some of, and try to hand out. */
 const CONTENT = [
@@ -115,7 +115,6 @@ const managerCreatesRole = action<
 		if (allowed) {
 			model.roles.set(created.body.data.id, new Set(input.permissions));
 		}
-		return created.status;
 	},
 });
 
@@ -150,7 +149,6 @@ const managerUpdatesRole = action<
 		if (allowed) {
 			model.roles.set(roleId, new Set(input.permissions));
 		}
-		return updated.status;
 	},
 });
 
@@ -176,7 +174,6 @@ const managerDeletesRole = action<Model, { manager: number; role: number }>({
 				user.roles.delete(roleId);
 			}
 		}
-		return deleted.status;
 	},
 });
 
@@ -214,7 +211,6 @@ const managerSetsRoles = action<
 		if (allowed) {
 			target.roles = new Set(roleIds);
 		}
-		return updated.status;
 	},
 });
 

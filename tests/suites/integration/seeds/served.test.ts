@@ -1,8 +1,8 @@
 import { describe, expect, requires, test } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { listDocumentIds, readDocument } from "#shared/documents";
-import { fetchCdn, getMedia } from "#shared/media";
-import { SEEDED, SEEDS } from "#shared/seeds/seeds";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { SEEDED, SEEDS } from "#shared/config/seeds/seeds";
+import { listDocumentIds, readDocument } from "#shared/helpers/documents";
+import { fetchCdn, getMedia } from "#shared/helpers/media";
 
 describe("seeds beside a running server", { timeout: 120_000 }, () => {
 	//* only setups that register the seeds outside a schema step, as a Worker can't read one

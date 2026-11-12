@@ -1,15 +1,12 @@
 import { describe, expect, requires, test } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	createDocument,
 	publishDocument,
 	readDocument,
 	saveDocument,
-} from "#shared/documents";
-
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
+	titled,
+} from "#shared/helpers/documents";
 
 describe("publishing documents", () => {
 	requires(`collection:${STORY_KEY}`);

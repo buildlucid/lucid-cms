@@ -1,6 +1,6 @@
 import { expect, type Page, requires, test } from "#harness/playwright";
-import { fetchCdn, files, getMedia, uploadMedia } from "#shared/media";
-import { uniqueName } from "#shared/permissions";
+import { fetchCdn, files, getMedia, uploadMedia } from "#shared/helpers/media";
+import { uniqueName } from "#shared/helpers/permissions";
 
 /** A file for the browser's file picker. */
 const asPickedFile = (file: {

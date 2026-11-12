@@ -1,20 +1,12 @@
-import {
-	describe,
-	expect,
-	requires,
-	type Session,
-	test,
-} from "#harness/vitest";
+import { describe, expect, requires, test } from "#harness/vitest";
 import {
 	addPasskey,
 	createPasskey,
 	isSignedIn,
+	refreshSession,
 	type RegistrationOptions,
 	signInWithPasskey,
-} from "#shared/auth";
-
-const refresh = (session: Session) =>
-	session.request({ method: "POST", path: "/api/v1/auth/token" });
+} from "#shared/helpers/auth";
 
 describe("passkeys", () => {
 	requires("harness:outbox", "auth:passkeys");
@@ -72,7 +64,7 @@ describe("passkeys", () => {
 			path: `/api/v1/users/${user.id}/passkeys`,
 		});
 		expect(reset.status).toBe(204);
-		expect((await refresh(user.session)).status).toBe(401);
+		expect((await refreshSession(user.session)).status).toBe(401);
 		expect((await signInWithPasskey(lucid.session(), passkey)).ok).toBe(false);
 	});
 

@@ -1,3 +1,4 @@
+import { callTool, reply, script } from "#harness/client";
 import { describe, expect, requires, test } from "#harness/vitest";
 import {
 	cancelRun,
@@ -8,15 +9,14 @@ import {
 	sendMessage,
 	toolCallsOf,
 	waitForRun,
-} from "#shared/agent";
-import { callTool, reply, script } from "#shared/agent-script";
+} from "#shared/helpers/agent";
 import {
 	connectLucid,
 	modelRequests,
 	openGate,
 	uniqueGate,
 	waitAtGate,
-} from "#shared/ai";
+} from "#shared/helpers/ai";
 
 /** The text of each saved message, in order. */
 const transcript = async (

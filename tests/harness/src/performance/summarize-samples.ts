@@ -10,9 +10,6 @@ const median = (values: readonly number[]): number => {
 		: upper;
 };
 
-const TIMING_TOLERANCE = 0.15;
-const EXACT_TOLERANCE = 0.01;
-
 /** Scales the median absolute deviation to match a standard deviation for normal data. */
 const MAD_TO_DEVIATION = 1.4826;
 
@@ -40,10 +37,6 @@ const summarizeSamples = (
 			value: middle,
 			samples: values,
 			spread: middle === 0 ? 0 : (deviation * MAD_TO_DEVIATION) / middle,
-			tolerance:
-				metric.tolerance ??
-				(metric.unit === "ms" ? TIMING_TOLERANCE : EXACT_TOLERANCE),
-			blocking: metric.blocking ?? metric.unit !== "ms",
 		};
 	});
 };

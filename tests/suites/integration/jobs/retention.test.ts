@@ -1,3 +1,4 @@
+import type { Job } from "@lucidcms/core/types";
 import {
 	ADMIN,
 	advanceClock,
@@ -9,11 +10,10 @@ import {
 } from "#harness/vitest";
 import {
 	enqueueProbe,
-	type Job,
 	resetScheduler,
 	uniqueTag,
 	waitForJob,
-} from "#shared/jobs";
+} from "#shared/helpers/jobs";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

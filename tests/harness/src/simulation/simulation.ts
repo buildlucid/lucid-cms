@@ -1,9 +1,7 @@
-import { createHash } from "node:crypto";
 import fc from "fast-check";
 import openLucid from "../client/open-lucid.ts";
 import loadContext from "../environment/load-context.ts";
 import { test } from "../lanes/vitest/test.ts";
-import type { JsonValue } from "../utils/json.ts";
 import createRandom from "./create-random.ts";
 import getRunOptions from "./get-run-options.ts";
 import type { SimulationDefinition } from "./types.ts";
@@ -12,15 +10,19 @@ const DEFAULT_MAX_ACTIONS = 20;
 
 /**
  * Runs random action sequences against fresh CMS instances, checking invariants after each action.
- * Shrinks failures for seeded replay and records result digests for cross-setup comparisons.
+ * A failure is shrunk to the shortest sequence that still fails, and replays with the seed it
+ * prints: `npm run harness -- --lane simulation --seed 42`. `--simulation-runs` sets how many
+ * sequences it tries, and the lane gives each a minute before it times out, so a simulation needs
+ * no timeout of its own. Move the clock with `advanceClock` rather than waiting, and give anything
+ * timed a margin from the steps the clock moves in, so a sequence plays out the same on fast and
+ * slow setups. See `suites/simulation/documents/document-lifecycle.test.ts`.
  */
 const simulation = <Model>(
 	name: string,
 	definition: SimulationDefinition<Model>,
 ): void => {
-	test(name, async ({ task }) => {
+	test(name, async () => {
 		const context = loadContext();
-		const digest = createHash("sha256");
 
 		const sequences = fc.record({
 			steps: fc.array(fc.oneof(...definition.actions), {
@@ -57,7 +59,6 @@ const simulation = <Model>(
 							});
 						}
 					};
-					const trace: JsonValue[] = [];
 					await definition.setup?.(simulated);
 
 					for (const step of steps) {
@@ -65,13 +66,7 @@ const simulation = <Model>(
 							continue;
 						}
 
-						const outcome = await step.run(simulated);
-						trace.push({
-							action: step.name,
-							input: step.input,
-							outcome: outcome ?? null,
-						});
-
+						await step.run(simulated);
 						await checkInvariants(step.name);
 					}
 
@@ -79,20 +74,12 @@ const simulation = <Model>(
 						await definition.settle(simulated);
 						await checkInvariants("settling");
 					}
-
-					digest.update(JSON.stringify(trace));
 				} finally {
 					await lucid.close();
 				}
 			}),
 			getRunOptions(),
 		);
-
-		task.meta.harness = {
-			seed: context.seed,
-			runs: context.simulationRuns,
-			digest: digest.digest("hex"),
-		};
 	});
 };
 

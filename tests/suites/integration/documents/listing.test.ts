@@ -6,8 +6,8 @@ import {
 	requires,
 	type Session,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument, listDocumentIds } from "#shared/documents";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { createDocument, listDocumentIds } from "#shared/helpers/documents";
 
 /** The stories every test here lists: a title, a number, and a hero heading for some. */
 const STORIES = [

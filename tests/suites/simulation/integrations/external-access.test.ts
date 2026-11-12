@@ -3,14 +3,15 @@ import {
 	describe,
 	expect,
 	fc,
+	pick,
 	requires,
 	type Session,
-	type SimulationContext,
 	simulation,
+	type SimulationContext,
 } from "#harness/simulation";
 import { login } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { createApiKey } from "#shared/integrations";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { createApiKey } from "#shared/helpers/integrations";
 import {
 	authorize,
 	callContent,
@@ -20,8 +21,8 @@ import {
 	type OAuthClient,
 	oauthResources,
 	readClaims,
-} from "#shared/oauth";
-import { setRolePermissions } from "#shared/permissions";
+} from "#shared/helpers/oauth";
+import { setRolePermissions } from "#shared/helpers/permissions";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 
@@ -86,16 +87,6 @@ const permissionSet = fc.subarray(PERMISSIONS);
 const allows = (person: Person, scope: Scope) => {
 	const permission = PROBES[scope].permission;
 	return permission === null || person.held.has(permission);
-};
-
-const pick = <T>(items: T[], choice: number) => {
-	const item = items[choice % items.length];
-	if (item === undefined) {
-		throw new Error(
-			"Nothing to pick. The action's `when` should rule this out.",
-		);
-	}
-	return item;
 };
 
 const manager = (model: Model) => {

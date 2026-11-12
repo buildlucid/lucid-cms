@@ -5,7 +5,7 @@ import {
 	signInTo,
 	test,
 } from "#harness/playwright";
-import { ARTICLE_KEY } from "#shared/migrations/collections/article";
+import { ARTICLE_KEY } from "#shared/config/migrations/collections/article";
 
 type Server = { url: string; admin: Session };
 

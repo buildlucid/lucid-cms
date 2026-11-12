@@ -1,3 +1,4 @@
+import { callTool, failGenerate, reply, script } from "#harness/client";
 import { describe, expect, requires, test } from "#harness/vitest";
 import {
 	createChat,
@@ -6,15 +7,14 @@ import {
 	respond,
 	sendMessage,
 	toolCallsOf,
-} from "#shared/agent";
-import { callTool, failGenerate, reply, script } from "#shared/agent-script";
+} from "#shared/helpers/agent";
 import {
 	chargedFor,
 	connectLucid,
 	generateRequests,
 	modelRequests,
 	usageSession,
-} from "#shared/ai";
+} from "#shared/helpers/ai";
 
 /** The output the model was sent for the last call of a tool. */
 const resultOf = async (

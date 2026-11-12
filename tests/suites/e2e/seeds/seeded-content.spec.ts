@@ -6,9 +6,9 @@ import {
 	signInTo,
 	test,
 } from "#harness/playwright";
-import { STORY_KEY } from "#shared/collections/story";
-import { SEEDED, SEEDS } from "#shared/seeds/seeds";
-import { STARTER } from "#shared/seeds/starter";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { SEEDED, SEEDS } from "#shared/config/seeds/seeds";
+import { STARTER } from "#shared/config/seeds/starter";
 
 /** Runs one seed, which has to succeed. */
 const seed = async (database: MigrationDatabase, name: string) => {

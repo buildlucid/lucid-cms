@@ -1,6 +1,6 @@
 import { describe, expect, type Lucid, requires, test } from "#harness/vitest";
-import { createContentReader } from "#shared/documents";
-import { files, getMedia, uploadMedia } from "#shared/media";
+import { createContentReader } from "#shared/helpers/documents";
+import { files, getMedia, uploadMedia } from "#shared/helpers/media";
 
 /** Library, personal and binned media, for checking what a website can see. */
 const createMediaOfEachKind = async (lucid: Lucid) => {

@@ -1,4 +1,5 @@
 import type { AgentRoutineTrigger } from "@lucidcms/core/types";
+import { callTool, finishRoutine, script } from "#harness/client";
 import {
 	action,
 	advanceClock,
@@ -9,16 +10,15 @@ import {
 	type SimulationContext,
 	simulation,
 } from "#harness/simulation";
+import { BRIEF_KEY } from "#shared/config/fragments/ai";
 import {
 	createRoutine,
 	getChat,
 	runAgentTick,
 	runRoutine,
-} from "#shared/agent";
-import { callTool, finishRoutine, script } from "#shared/agent-script";
-import { connectLucid } from "#shared/ai";
-import { createDocument } from "#shared/documents";
-import { BRIEF_KEY } from "#shared/fragments/ai";
+} from "#shared/helpers/agent";
+import { connectLucid } from "#shared/helpers/ai";
+import { createDocument } from "#shared/helpers/documents";
 
 const MAX_ROUTINES = 3;
 /** A minute and a second, so a routine due each minute is always due after it. */
@@ -157,7 +157,6 @@ const addRoutine = action<Model, { kind: Routine["kind"]; writes: boolean }>({
 			eventWindows: 0,
 			eventsOwed: 0,
 		});
-		return { routines: model.routines.length };
 	},
 });
 
@@ -179,7 +178,6 @@ const toggle = action<Model, { routine: number }>({
 			body: { enabled: routine.enabled },
 		});
 		expect(updated.status).toBe(200);
-		return { enabled: routine.enabled };
 	},
 });
 
@@ -212,7 +210,6 @@ const runNow = action<Model, { routine: number }>({
 		routine.owed = false;
 		routine.maybe = false;
 		await quiet(context);
-		return { status: started.status };
 	},
 });
 
@@ -238,11 +235,6 @@ const aMinutePasses = action<Model>({
 				routine.owed = false;
 			}
 		}
-		const counts = [];
-		for (const routine of context.model.routines) {
-			counts.push(await countRuns(context, routine));
-		}
-		return counts;
 	},
 });
 

@@ -1,4 +1,3 @@
-import type { ProfileKey } from "../cli/profiles.ts";
 import type { RunSummary, TestStatus } from "../report/types.ts";
 import type { Mode } from "../setup/types.ts";
 
@@ -23,25 +22,24 @@ export type RunningTest = {
 	progress?: { done: number; total: number };
 };
 
-/** A test that has finished, with how long it took last time when an earlier run had it. */
+/** A test that has finished. */
 export type FinishedTest = {
-	job: string;
 	file: string;
+	/** Describe blocks and name joined by ` > `. */
 	name: string;
 	status: TestStatus;
-	durationMs: number;
-	previousMs?: number;
+	/** The first error with its causes, for a failed test. */
 	error?: string;
 };
 
-/** One lane run as the dashboard sees it. */
+/** One lane run as the live output sees it. */
 export type JobState = {
 	key: string;
 	setup: string;
 	lane: string;
 	mode: Mode;
-	/** What its tests are called. Measuring lanes run benchmarks. */
-	unit: "tests" | "benchmarks";
+	/** It measures, so it runs alone at the end of the run. */
+	exclusive: boolean;
 	status: JobStatus;
 	/** What it is waiting on while preparing, such as building the server. */
 	phase?: string;
@@ -50,14 +48,12 @@ export type JobState = {
 	finishedAt?: number;
 	/** When it last reported anything, to tell a quiet job from a busy one. */
 	activeAt?: number;
-	/** How long its test runner took in the latest earlier run that had it. */
+	/** How long its test runner took last time, from `.harness/history.json`. */
 	previousMs?: number;
 	/** `collected` counts files whose tests are known, so the test total is final once it reaches `total`. */
-	files: { total?: number; collected: number; done: number };
+	files: { total?: number; collected: number };
 	tests: { total: number; done: number; failed: number };
 	running: RunningTest[];
-	/** Its log file, relative to the run's folder. */
-	log?: string;
 	/** What its results came to once it finished. */
 	result?: {
 		summary: RunSummary;
@@ -67,42 +63,33 @@ export type JobState = {
 	};
 };
 
-/** Everything a view needs to draw a run. Plain data, so it is also what `status.json` holds. */
+/** Everything the live output needs to draw a run. Plain data, so it is also what `status.json` holds. */
 export type RunState = {
 	runId: string;
-	profile: ProfileKey;
-	seed: number;
 	/** The process running it, so `status` can tell a crashed run from a running one. */
 	pid: number;
 	startedAt: number;
 	finishedAt?: number;
-	/** What the run is doing before any lane starts, such as starting Docker services. */
-	phase?: string;
 	/** True once the run was cancelled and is cleaning up. */
 	stopping: boolean;
-	/** How long the latest earlier run of exactly these lanes took, for a time estimate. */
-	previousMs?: number;
+	/** How many lanes run at once, for the time estimate. */
+	concurrency: number;
+	/** How wide lane lines' setup and lane columns are: as wide as the plan's longest. */
+	columns: { setup: number; lane: number };
 	jobs: JobState[];
-	/** Every failed test so far, oldest first. */
-	failures: FinishedTest[];
-	/** The slowest tests so far, slowest first. */
-	slowest: FinishedTest[];
-	warnings: string[];
 };
 
-/** Something worth a line of its own in plain output. The dashboard shows these through the state. */
+/** Something that gets a permanent line of its own. See `formatNote`. */
 export type RunNote =
-	| { type: "phase"; scope: string; message: string }
-	| { type: "job-start"; job: JobState }
+	| { type: "phase"; message: string }
+	| { type: "warning"; message: string }
+	| { type: "stopping" }
 	| { type: "job-end"; job: JobState }
-	| { type: "test-failed"; job: JobState; test: FinishedTest }
-	| { type: "warning"; message: string };
+	| { type: "test-failed"; job: JobState; test: FinishedTest };
 
-/** Draws a run as it happens. */
+/** Shows a run as it happens. It reads the run's state itself, which the monitor keeps up to date. */
 export type RunView = {
-	/** Called on every change and on a timer, with the whole state. */
-	render(state: RunState): void;
 	notify(note: RunNote): void;
-	/** Draws the final state and stops drawing, before the end-of-run report prints. */
-	stop(state: RunState): void;
+	/** Stops drawing, before the end-of-run report prints. */
+	stop(): void;
 };

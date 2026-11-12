@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import {
 	PROVIDER_CLIENT_SECRET,
 	PROVIDERS,
-} from "../../../shared/fragments/auth.ts";
+} from "../../../shared/config/fragments/auth.ts";
 
 /** Query parameters a test adds to a provider's sign-in address to say who signs in, or to refuse. */
 export const IDENTITY_PARAMS = {

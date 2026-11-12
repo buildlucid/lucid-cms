@@ -1,3 +1,4 @@
+import { reply, script } from "#harness/client";
 import {
 	countQueries,
 	describe,
@@ -10,9 +11,8 @@ import {
 	queueMessage,
 	sendMessage,
 	waitForRun,
-} from "#shared/agent";
-import { reply, script } from "#shared/agent-script";
-import { connectLucid } from "#shared/ai";
+} from "#shared/helpers/agent";
+import { connectLucid } from "#shared/helpers/ai";
 
 /**
  * The most queries a one-turn reply may run, from the message arriving to its run ending. Raise it

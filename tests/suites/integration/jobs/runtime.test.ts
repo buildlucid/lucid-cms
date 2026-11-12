@@ -1,6 +1,10 @@
+import type { Job } from "@lucidcms/core/types";
 import { describe, expect, requires, test } from "#harness/vitest";
-import { PROBE_SCHEDULES, SCHEDULE_CHECK_TAG } from "#shared/fragments/jobs";
-import { executions, type Job } from "#shared/jobs";
+import {
+	PROBE_SCHEDULES,
+	SCHEDULE_CHECK_TAG,
+} from "#shared/config/fragments/jobs";
+import { executions } from "#shared/helpers/jobs";
 
 describe("the runtime's job scheduler", () => {
 	requires("plugin:harness-jobs");

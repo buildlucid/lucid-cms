@@ -8,7 +8,7 @@ import {
 	replaceMedia,
 	uploadFile,
 	uploadMedia,
-} from "#shared/media";
+} from "#shared/helpers/media";
 
 describe("media changed at the same time", () => {
 	requires("feature:mediaStorage");

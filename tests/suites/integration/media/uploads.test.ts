@@ -11,7 +11,7 @@ import {
 	startUpload,
 	uploadFile,
 	uploadMedia,
-} from "#shared/media";
+} from "#shared/helpers/media";
 
 const UPLOADER = ["media:create", "media:update"];
 
@@ -58,28 +58,35 @@ describe("uploading media", () => {
 		expect(media.url).toMatch(/\/sound\.mp3$/);
 	});
 
-	test("only the person who started an upload can finish or abort it", async ({
-		lucid,
-	}) => {
-		const admin = await lucid.admin();
-		const other = await lucid.user({ permissions: UPLOADER });
-		const file = files.text("Mine\n");
-		const started = await startUpload(admin, file);
-		await sendUpload(admin, started.body.data, file);
+	describe("with another person", () => {
+		requires("harness:outbox");
 
-		const completedByOther = await completeUpload(
-			other.session,
-			started.body.data.sessionId,
-		);
-		const abortedByOther = await other.session.request({
-			method: "DELETE",
-			path: `/api/v1/media/upload-session/${started.body.data.sessionId}`,
+		test("only the person who started an upload can finish or abort it", async ({
+			lucid,
+		}) => {
+			const admin = await lucid.admin();
+			const other = await lucid.user({ permissions: UPLOADER });
+			const file = files.text("Mine\n");
+			const started = await startUpload(admin, file);
+			await sendUpload(admin, started.body.data, file);
+
+			const completedByOther = await completeUpload(
+				other.session,
+				started.body.data.sessionId,
+			);
+			const abortedByOther = await other.session.request({
+				method: "DELETE",
+				path: `/api/v1/media/upload-session/${started.body.data.sessionId}`,
+			});
+			const completed = await completeUpload(
+				admin,
+				started.body.data.sessionId,
+			);
+
+			expect(completedByOther.status).toBe(404);
+			expect(abortedByOther.status).toBe(404);
+			expect(completed.status).toBe(200);
 		});
-		const completed = await completeUpload(admin, started.body.data.sessionId);
-
-		expect(completedByOther.status).toBe(404);
-		expect(abortedByOther.status).toBe(404);
-		expect(completed.status).toBe(200);
 	});
 
 	test("an aborted upload can't be finished or made into media", async ({

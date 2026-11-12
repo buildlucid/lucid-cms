@@ -1,11 +1,12 @@
 import { describe, expect, requires, test } from "#harness/vitest";
-import { REVIEWED_STORY_KEY } from "#shared/collections/reviewed-story";
-import { STORY_KEY } from "#shared/collections/story";
+import { REVIEWED_STORY_KEY } from "#shared/config/collections/reviewed-story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	createDocument,
 	publishDocument,
 	readDocument,
-} from "#shared/documents";
+	titled,
+} from "#shared/helpers/documents";
 import {
 	acknowledgeTarget,
 	approve,
@@ -16,11 +17,7 @@ import {
 	openRequest,
 	readRequest,
 	requestChange,
-} from "#shared/requests";
-
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
+} from "#shared/helpers/requests";
 
 describe("requests for documents in the bin", () => {
 	requires(`collection:${STORY_KEY}`);

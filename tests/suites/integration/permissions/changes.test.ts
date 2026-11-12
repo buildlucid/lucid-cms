@@ -1,7 +1,7 @@
 import { describe, expect, requires, test } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument } from "#shared/documents";
-import { createRole } from "#shared/permissions";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { createDocument } from "#shared/helpers/documents";
+import { createRole } from "#shared/helpers/permissions";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 const READ_PAGES = "documents:page:read";

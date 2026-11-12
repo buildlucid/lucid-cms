@@ -20,7 +20,7 @@ import {
 	resolveRoute,
 	routes,
 	setRolePermissions,
-} from "#shared/permissions";
+} from "#shared/helpers/permissions";
 
 const entries = Object.entries(routes) as Array<[RouteKey, RouteEntry]>;
 
@@ -117,7 +117,7 @@ describe("route access", () => {
 
 		expect(
 			servedKeys.filter((key) => !listed.has(key)),
-			"Routes with no rule in shared/permissions.ts",
+			"Routes with no rule in shared/helpers/permissions.ts",
 		).toEqual([]);
 		expect(
 			servedBy(lucid, entries)

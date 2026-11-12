@@ -1,8 +1,12 @@
 import { expect, requires, test } from "#harness/playwright";
-import { STORY_KEY } from "#shared/collections/story";
-import { KEY_PATHS } from "#shared/integrations";
-import { callContent, connectClient, createOAuthClient } from "#shared/oauth";
-import { uniqueName } from "#shared/permissions";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { KEY_PATHS } from "#shared/helpers/integrations";
+import {
+	callContent,
+	connectClient,
+	createOAuthClient,
+} from "#shared/helpers/oauth";
+import { uniqueName } from "#shared/helpers/permissions";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 const STORIES_PATH = `documents/${STORY_KEY}?version=latest`;

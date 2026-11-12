@@ -3,12 +3,12 @@ import type { FinishedTest, JobState } from "./types.ts";
 
 /**
  * Updates a job with one event from its events file. Returns the test that finished, if the
- * event ended one, so the monitor can record failures and slow tests.
+ * event ended one, so the monitor can report failures.
  */
 const applyEvent = (
 	job: JobState,
 	event: ProgressEvent,
-): Omit<FinishedTest, "previousMs"> | undefined => {
+): FinishedTest | undefined => {
 	job.activeAt = event.at;
 	const isTest = (test: { file: string; name: string }) =>
 		"name" in event && test.file === event.file && test.name === event.name;
@@ -48,17 +48,11 @@ const applyEvent = (
 				job.tests.failed++;
 			}
 			return {
-				job: job.key,
 				file: event.file,
 				name: event.name,
 				status: event.status,
-				durationMs: event.durationMs,
 				error: event.error,
 			};
-		}
-		case "file-end": {
-			job.files.done++;
-			return undefined;
 		}
 	}
 };

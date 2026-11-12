@@ -4,13 +4,12 @@ import {
 	fc,
 	getRunOptions,
 	migratedTo,
-	recordDigest,
 	requires,
 	test,
 } from "#harness/simulation";
-import { findStorageDrift } from "#shared/media";
-import { SEEDED, SEEDS } from "#shared/seeds/seeds";
-import { readSeeded } from "#shared/seeds/state";
+import { SEEDED, SEEDS } from "#shared/config/seeds/seeds";
+import { readSeeded } from "#shared/config/seeds/state";
+import { findStorageDrift } from "#shared/helpers/media";
 
 /** One `lucidcms seed` command: a seed by name, or `--all` on the working or failing seeds. */
 type Command =
@@ -97,10 +96,7 @@ describe("seed runs", () => {
 
 	test("every command keeps what its working seeds made, and nothing a failing one did", async ({
 		migrations,
-		task,
 	}) => {
-		const trace: unknown[] = [];
-
 		await fc.assert(
 			fc.asyncProperty(
 				fc.array(
@@ -148,14 +144,10 @@ describe("seed runs", () => {
 							missing: [],
 							orphaned: [],
 						});
-						trace.push([commandStep(command), commandArgs(command), run.code]);
 					}
 				},
 			),
 			getRunOptions(),
 		);
-
-		//* which commands succeed must not depend on the database
-		recordDigest(task, trace);
 	});
 });

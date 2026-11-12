@@ -1,10 +1,10 @@
 import crypto from "node:crypto";
+import { files } from "../../utils/media-files.ts";
 import {
 	findGenerateFailure,
 	findGenerateGate,
 	unescapeMarkdown,
-} from "../../../../shared/agent-script.ts";
-import { files } from "../../../../shared/media.ts";
+} from "./script.ts";
 import type { FakeConnection, FakeState, GenerateRequest } from "./state.ts";
 import type { AiFeature, GenerateEntry } from "./types.ts";
 import { modelUsage, remoteError, webUsage } from "./usage.ts";

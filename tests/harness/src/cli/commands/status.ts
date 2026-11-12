@@ -2,7 +2,7 @@ import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import pc from "picocolors";
 import { STATUS_FILE } from "../../monitor/create-monitor.ts";
-import renderDashboard from "../../monitor/render-dashboard.ts";
+import renderStatus from "../../monitor/render-status.ts";
 import type { RunState } from "../../monitor/types.ts";
 import formatDuration from "../../utils/format-duration.ts";
 import { readJson } from "../../utils/json.ts";
@@ -67,16 +67,15 @@ const statusCommand = async (options: { json: boolean }): Promise<number> => {
 					`Not running · process ${state.pid} ended without finishing, ${ago(savedAt)} ago. Logs are in ${directory}`,
 				)
 			: pc.green(
-					`Finished ${ago(state.finishedAt ?? savedAt)} ago · ${path.join(directory, "report.html")}`,
+					`Finished ${ago(state.finishedAt ?? savedAt)} ago · ${path.join(directory, "summary.md")}`,
 				);
 
 	console.log(summary);
-	console.log("");
 	console.log(
-		renderDashboard(state, {
+		renderStatus(state, {
 			width: process.stdout.columns ?? 120,
 			//* a snapshot is printed once, so it can be as tall as it needs
-			height: 1000,
+			height: Number.POSITIVE_INFINITY,
 			//* a run that ended is shown as it was when it last saved
 			now: running ? Date.now() : (state.finishedAt ?? savedAt),
 		}),

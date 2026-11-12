@@ -7,6 +7,7 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
+import { PROVIDERS } from "#shared/config/fragments/auth";
 import {
 	type AuthenticatorApp,
 	addPasskey,
@@ -19,8 +20,7 @@ import {
 	signInWithPasskey,
 	signInWithProvider,
 	TWO_FACTOR_COOKIE,
-} from "#shared/auth";
-import { PROVIDERS } from "#shared/fragments/auth";
+} from "#shared/helpers/auth";
 
 /** A user with an authenticator app, signed in on the session that set it up. */
 const userWithApp = async (lucid: Lucid) => {

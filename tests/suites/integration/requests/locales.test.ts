@@ -5,8 +5,12 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument, expectStatus, saveDocument } from "#shared/documents";
+import { STORY_KEY } from "#shared/config/collections/story";
+import {
+	createDocument,
+	expectStatus,
+	saveDocument,
+} from "#shared/helpers/documents";
 import {
 	approve,
 	completeRequest,
@@ -15,7 +19,7 @@ import {
 	openRequest,
 	readRequest,
 	requestChange,
-} from "#shared/requests";
+} from "#shared/helpers/requests";
 
 const ARTICLE = "article";
 

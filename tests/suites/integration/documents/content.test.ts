@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, requires, test } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	createDocument,
 	createStoryTargets,
@@ -9,7 +9,7 @@ import {
 	readDocument,
 	saveDocument,
 	valuesOf,
-} from "#shared/documents";
+} from "#shared/helpers/documents";
 
 describe("document content", () => {
 	requires(`collection:${STORY_KEY}`);

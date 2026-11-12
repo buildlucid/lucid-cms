@@ -1,47 +1,32 @@
 import path from "node:path";
 import pc from "picocolors";
 import stringWidth from "string-width";
-import compareMeasurements from "../../compare/compare-measurements.ts";
-import type { MeasurementChange } from "../../compare/types.ts";
 import registeredLanes from "../../lanes/get-lanes.ts";
 import { MODES } from "../../setup/types.ts";
-import createJobKey from "../../utils/create-job-key.ts";
+import describeTest from "../../utils/describe-test.ts";
 import formatDuration from "../../utils/format-duration.ts";
 import formatMeasurement from "../../utils/format-measurement.ts";
 import formatTable from "../../utils/format-table.ts";
 import createRerunCommand from "../create-rerun-command.ts";
-import findPreviousLane from "../find-previous-lane.ts";
 import groupMeasurements from "../group-measurements.ts";
 import listFailures from "../list-failures.ts";
+import shortenError from "../shorten-error.ts";
 import summarizeBySetup from "../summarize-by-setup.ts";
 import summarize from "../summarize.ts";
-import type { LaneReport, RunReport, TestRecord } from "../types.ts";
+import type { History, LaneReport, Measurement, RunReport } from "../types.ts";
 
-const MAX_ERROR_LINES = 6;
 const SLOWEST = 5;
 
 type Options = {
 	/** The run's folder, which log paths are relative to. */
 	directory: string;
-	/** Earlier reports, newest first, to say what changed since the last run. */
-	previous: readonly RunReport[];
+	/** What earlier runs measured, shown beside this run's measurements. */
+	history?: History;
 	/** The terminal's width. */
 	width: number;
 };
 
 const heading = (text: string) => pc.bold(text.toUpperCase());
-
-/** Keeps an error's message and causes but drops stack frames, so it stays short in a terminal. */
-const shorten = (error: string, indent: string): string[] =>
-	error
-		.split("\n")
-		.filter((line) => line.trim() !== "" && !/^\s+at /.test(line))
-		.slice(0, MAX_ERROR_LINES)
-		.map((line) => `${indent}${line}`);
-
-/** A test's file and full name as people read them. */
-const describeTest = (test: TestRecord) =>
-	[test.file, ...test.groups, test.name].join(" › ");
 
 /** Turns a path into a link the terminal can open, where the terminal supports them. */
 const link = (file: string): string =>
@@ -52,15 +37,11 @@ const link = (file: string): string =>
 /** The first line: whether the run passed, and the counts behind that. */
 const renderVerdict = (report: RunReport): string => {
 	const { summary } = report;
-	const failed =
-		summary.failed > 0 || summary.errors > 0 || report.mismatches.length > 0;
+	const failed = summary.failed > 0 || summary.errors > 0;
 	const problems = [
 		summary.failed > 0 ? `${summary.failed} failed` : null,
 		summary.errors > 0
 			? `${summary.errors} lane error${summary.errors > 1 ? "s" : ""}`
-			: null,
-		report.mismatches.length > 0
-			? `${report.mismatches.length} setups disagreed`
 			: null,
 	].filter((part) => part !== null);
 	const counts = [
@@ -102,15 +83,15 @@ const renderFailures = (report: RunReport, directory: string): string[] => {
 		const { lane, test } = failure;
 		lines.push(
 			"",
-			`${pc.red("✗")} ${pc.bold(`${lane.setup} ${lane.lane} ${lane.mode}`)}${test ? ` ${describeTest(test)}` : pc.dim(" outside any test")}`,
-			...shorten(failure.error, "    ").map((line) => pc.red(line)),
+			`${pc.red("✗")} ${pc.bold(`${lane.setup} ${lane.lane} ${lane.mode}`)}${test ? ` ${describeTest(test.file, [...test.groups, test.name])}` : pc.dim(" outside any test")}`,
+			...shortenError(failure.error).map((line) => `    ${pc.red(line)}`),
 		);
 		if (lane.log) {
 			lines.push(
 				`  ${pc.dim("Log  ")}  ${link(path.join(directory, lane.log))}`,
 			);
 		}
-		lines.push(`  ${pc.dim("Again")}  ${createRerunCommand(failure)}`);
+		lines.push(`  ${pc.dim("Again")}  ${createRerunCommand(lane, test)}`);
 	}
 	return lines;
 };
@@ -192,42 +173,27 @@ const renderSetups = (report: RunReport, width: number): string[] => {
 	];
 };
 
-/** A change since the last run, when it counts: ▲ for worse, ▼ for better. */
-const renderChange = (change: MeasurementChange | undefined): string => {
-	if (!change || change.change === null) {
-		return "";
-	}
-	const percent = `${Math.round(Math.abs(change.change) * 100)}%`;
-	if (change.verdict === "regression") {
-		return (change.blocking ? pc.red : pc.yellow)(` ▲${percent}`);
-	}
-	if (change.verdict === "improvement") {
-		return pc.green(` ▼${percent}`);
-	}
-	return "";
-};
+/** A measured value, with the last run's beside it when there was one. */
+const describeValue = (
+	measurement: Measurement,
+	previous: number | undefined,
+	format: (value: number) => string,
+): string =>
+	`${format(measurement.value)}${previous === undefined ? "" : pc.dim(` (was ${format(previous)})`)}`;
 
 /**
  * A table with a row per measurement and a column per setup. A timing's query count shares its
- * cell, and each value is marked when it changed since the last run beyond its tolerance.
+ * cell, and each value has the last run's beside it.
  */
 const renderMeasurements = (
 	report: RunReport,
-	previous: readonly RunReport[],
+	history: History | undefined,
 ): string[] => {
 	const measured = report.lanes.filter((lane) => lane.measurements.length > 0);
 	if (measured.length === 0) {
 		return [];
 	}
 
-	const changes = new Map(
-		compareMeasurements(
-			measured.flatMap((head) => {
-				const base = findPreviousLane(previous, createJobKey(head));
-				return base ? [{ base, head }] : [];
-			}),
-		).map((change) => [`${change.setup}/${change.id}`, change]),
-	);
 	const groups = new Map(
 		measured.map((lane) => [lane.setup, groupMeasurements(lane.measurements)]),
 	);
@@ -243,11 +209,15 @@ const renderMeasurements = (
 			return pc.dim("–");
 		}
 		const { value, queries } = group;
+		const previous = history?.measurements[setup];
 		return [
-			`${formatMeasurement(value.value, value.unit)}${renderChange(changes.get(`${setup}/${id}`))}`,
+			describeValue(value, previous?.[value.id], (number) =>
+				formatMeasurement(number, value.unit),
+			),
 			queries
-				? pc.dim(`${queries.value}q`) +
-					renderChange(changes.get(`${setup}/${queries.id}`))
+				? describeValue(queries, previous?.[queries.id], (number) =>
+						pc.dim(`${number}q`),
+					)
 				: null,
 		]
 			.filter((part) => part !== null)
@@ -264,16 +234,13 @@ const renderMeasurements = (
 			]),
 		]),
 		pc.dim(
-			"Medians. q is database queries. ▲▼ mark changes since the last run beyond each tolerance. 95th percentiles are in the HTML report.",
+			"Medians. q is database queries. 95th percentiles and spread are in summary.md.",
 		),
 	];
 };
 
-/** The slowest tests, with how much they changed since the last run. */
-const renderSlowest = (
-	report: RunReport,
-	previous: readonly RunReport[],
-): string[] => {
+/** The slowest tests in the run. */
+const renderSlowest = (report: RunReport): string[] => {
 	const tests = report.lanes
 		.flatMap((lane) =>
 			lane.tests
@@ -289,21 +256,10 @@ const renderSlowest = (
 	return [
 		"",
 		heading("Slowest tests"),
-		...tests.map(({ lane, test }) => {
-			const before = findPreviousLane(previous, createJobKey(lane))?.tests.find(
-				(candidate) => candidate.id === test.id,
-			);
-			const change = before ? test.durationMs - before.durationMs : 0;
-			const changed =
-				before &&
-				Math.abs(change) >= 1000 &&
-				Math.abs(change) >= before.durationMs * 0.2
-					? (change > 0 ? pc.yellow : pc.green)(
-							`  ${change > 0 ? "+" : "−"}${formatDuration(Math.abs(change))} vs last run`,
-						)
-					: "";
-			return `${formatDuration(test.durationMs).padStart(7)}  ${pc.dim(`${lane.setup} ${lane.lane} ${lane.mode}`)}  ${describeTest(test)}${changed}`;
-		}),
+		...tests.map(
+			({ lane, test }) =>
+				`${formatDuration(test.durationMs).padStart(7)}  ${pc.dim(`${lane.setup} ${lane.lane} ${lane.mode}`)}  ${describeTest(test.file, [...test.groups, test.name])}`,
+		),
 	];
 };
 
@@ -317,21 +273,10 @@ const renderConsole = (report: RunReport, options: Options): string => {
 		renderVerdict(report),
 		...renderFailures(report, options.directory),
 		...renderSetups(report, options.width),
-		...renderMeasurements(report, options.previous),
-		...renderSlowest(report, options.previous),
+		...renderMeasurements(report, options.history),
+		...renderSlowest(report),
 	];
 
-	if (report.mismatches.length > 0) {
-		lines.push("", heading("Setups that disagreed"));
-		for (const mismatch of report.mismatches) {
-			lines.push(
-				`${pc.red("≠")} ${mismatch.id} ${pc.dim(`seed ${mismatch.seed}`)}`,
-				...Object.entries(mismatch.digests).map(
-					([setup, digest]) => `    ${setup}: ${digest.slice(0, 12)}`,
-				),
-			);
-		}
-	}
 	if (report.neverRan.length > 0) {
 		lines.push("", heading("Applied to no setup"));
 		for (const id of report.neverRan) {
@@ -339,10 +284,7 @@ const renderConsole = (report: RunReport, options: Options): string => {
 		}
 	}
 
-	lines.push(
-		"",
-		`${pc.dim("Report")}  ${link(path.join(options.directory, "report.html"))}`,
-	);
+	lines.push("", `${pc.dim("Run   ")}  ${link(options.directory)}`);
 	if (listFailures(report).length > 0) {
 		lines.push(`${pc.dim("Again ")}  npm run harness -- --failed`);
 	}

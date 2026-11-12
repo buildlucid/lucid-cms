@@ -1,6 +1,6 @@
 import { expect, requires, test } from "#harness/playwright";
-import { connectLucid } from "#shared/ai";
-import { files, uploadMedia } from "#shared/media";
+import { connectLucid } from "#shared/helpers/ai";
+import { files, uploadMedia } from "#shared/helpers/media";
 
 test.describe("AI media generation", () => {
 	requires("feature:mediaStorage", "harness:outbox");

@@ -16,7 +16,7 @@ import {
 	uniqueTag,
 	waitForExecution,
 	waitForJob,
-} from "#shared/jobs";
+} from "#shared/helpers/jobs";
 
 /** A running job learns it was cancelled when it next renews its lease, every 20 seconds. */
 const HEARTBEAT_MS = 20_000;

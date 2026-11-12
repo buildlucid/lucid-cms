@@ -1,6 +1,6 @@
 import type { InferredTable, KyselyDB } from "@lucidcms/core/types";
-import type { GeneratedStep } from "../../../shared/migrations/collections/generated.ts";
-import type { SchemaStepKey } from "../../../shared/migrations/steps.ts";
+import type { GeneratedStep } from "../../../shared/config/migrations/collections/generated.ts";
+import type { SchemaStepKey } from "../../../shared/config/migrations/steps.ts";
 import type { Session } from "../client/types.ts";
 
 /** A registered or generated schema step, or null for the setup's config as it is. */

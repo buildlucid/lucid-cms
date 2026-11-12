@@ -13,7 +13,7 @@ import {
 	connectLucid,
 	describeConnection,
 	readLedger,
-} from "#shared/ai";
+} from "#shared/helpers/ai";
 
 /** Disconnects the CMS, as tests in a file share one and may have connected it. */
 const disconnect = async (admin: Session) => {

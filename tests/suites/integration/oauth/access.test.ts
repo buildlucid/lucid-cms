@@ -1,13 +1,13 @@
 import { describe, expect, type Lucid, requires, test } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument } from "#shared/documents";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { createDocument } from "#shared/helpers/documents";
 import {
 	callContent,
 	connectClient,
 	createOAuthClient,
 	oauthResources,
-} from "#shared/oauth";
-import { setRolePermissions } from "#shared/permissions";
+} from "#shared/helpers/oauth";
+import { setRolePermissions } from "#shared/helpers/permissions";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 const STORIES_PATH = `documents/${STORY_KEY}?version=latest`;

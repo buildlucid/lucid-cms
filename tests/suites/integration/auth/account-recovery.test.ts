@@ -7,21 +7,19 @@ import {
 	type Session,
 	test,
 } from "#harness/vitest";
+import { PROVIDERS } from "#shared/config/fragments/auth";
 import {
 	addPasskey,
 	enableTwoFactor,
 	isSignedIn,
 	linkToken,
+	refreshSession,
 	sendLogin,
 	signInWithPasskey,
 	signInWithProvider,
-} from "#shared/auth";
-import { PROVIDERS } from "#shared/fragments/auth";
+} from "#shared/helpers/auth";
 
 const NEW_PASSWORD = "Harness-new-password-2!";
-
-const refresh = (session: Session) =>
-	session.request({ method: "POST", path: "/api/v1/auth/token" });
 
 const requestReset = (session: Session, email: string) =>
 	session.request<{ data: { message: string } }>({
@@ -62,7 +60,7 @@ describe("password resets", () => {
 		expect((await resetPassword(lucid.session(), token)).status).toBe(204);
 		expect((await resetPassword(lucid.session(), token)).ok).toBe(false);
 
-		expect((await refresh(user.session)).status).toBe(401);
+		expect((await refreshSession(user.session)).status).toBe(401);
 		const old = await sendLogin(lucid.session(), user.credentials);
 		expect(old.status).toBe(401);
 		const changed = await sendLogin(lucid.session(), {
@@ -191,8 +189,8 @@ describe("email changes", () => {
 		expect(reverted.status).toBe(204);
 
 		expect(await isSignedIn(intruder)).toBe(false);
-		expect((await refresh(intruder)).status).toBe(401);
-		expect((await refresh(owner.session)).status).toBe(401);
+		expect((await refreshSession(intruder)).status).toBe(401);
+		expect((await refreshSession(owner.session)).status).toBe(401);
 		const withPasskey = lucid.session();
 		expect((await signInWithPasskey(withPasskey, passkey)).ok).toBe(false);
 		if (canUseProviders) {

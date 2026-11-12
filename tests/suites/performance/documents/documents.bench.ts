@@ -7,7 +7,7 @@ import {
 	runPool,
 	type ServedCms,
 } from "#harness/performance";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	type ContentReader,
 	createContentReader,
@@ -15,7 +15,7 @@ import {
 	createStoryTargets,
 	fullStory,
 	publishDocument,
-} from "#shared/documents";
+} from "#shared/helpers/documents";
 
 /** How many stories the CMS holds while it is timed. */
 const STORIES = 300;

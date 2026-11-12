@@ -1,4 +1,7 @@
+import { callTool, reply, script } from "#harness/client";
 import { describe, expect, requires, test } from "#harness/vitest";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { HARNESS_AGENT, HELPER_AGENT } from "#shared/config/fragments/ai";
 import {
 	createChat,
 	getMessages,
@@ -6,11 +9,12 @@ import {
 	queueMessage,
 	sendMessage,
 	toolCallsOf,
-} from "#shared/agent";
-import { callTool, reply, script } from "#shared/agent-script";
-import { changeConnection, connectLucid, modelRequests } from "#shared/ai";
-import { STORY_KEY } from "#shared/collections/story";
-import { HARNESS_AGENT, HELPER_AGENT } from "#shared/fragments/ai";
+} from "#shared/helpers/agent";
+import {
+	changeConnection,
+	connectLucid,
+	modelRequests,
+} from "#shared/helpers/ai";
 
 const chatWith = (agent: string) => `agents:${agent}:chat`;
 

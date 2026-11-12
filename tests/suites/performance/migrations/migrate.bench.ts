@@ -5,7 +5,7 @@ import {
 	type Metric,
 	runMeasured,
 } from "#harness/performance";
-import type { SchemaStepKey } from "#shared/migrations/steps";
+import type { SchemaStepKey } from "#shared/config/migrations/steps";
 
 /** Runs a `lucidcms` command against a database, and returns how long the whole command took. */
 const time = async (

@@ -1,5 +1,4 @@
 import path from "node:path";
-import { connectSession } from "../../../shared/ai.ts";
 import applyChanges from "../capabilities/apply-changes.ts";
 import type { Capability } from "../capabilities/types.ts";
 import { ADMIN, login } from "../client/admin.ts";
@@ -7,6 +6,7 @@ import createSession from "../client/create-session.ts";
 import { getRunPrefix } from "../databases/create-database-name.ts";
 import { resolveDriver } from "../databases/get-driver.ts";
 import type { DatabaseTemplate } from "../databases/types.ts";
+import { connectSession } from "../fakes/lucid-api/connect.ts";
 import type { Fakes } from "../fakes/start-fakes.ts";
 import getLauncher from "../servers/get-launcher.ts";
 import type { Setup } from "../setup/types.ts";
@@ -38,8 +38,8 @@ export type SetupEnvironment = {
 	/** Migrates and seeds the template database. */
 	database(): Promise<PreparedDatabase>;
 	/**
-	 * Builds and starts the setup's real server, connected to the fake Lucid API, and returns its
-	 * address, outbox and ledger folders.
+	 * Builds and starts the setup's real server, connected to the fake Lucid API when it has AI
+	 * features, and returns its address, outbox and ledger folders.
 	 */
 	serve(): Promise<
 		Omit<Extract<TargetDescription, { mode: "served" }>, "mode">
@@ -120,7 +120,10 @@ const createEnvironment = (options: {
 	);
 
 	const serve = once(async () => {
-		const [{ template }] = await Promise.all([database(), build()]);
+		const [{ template, capabilities }] = await Promise.all([
+			database(),
+			build(),
+		]);
 		const copy = await resolveDriver(setup.database).clone(template.state, {
 			directory: work,
 			name: `${prefix}_served`,
@@ -142,12 +145,14 @@ const createEnvironment = (options: {
 
 		//* served tests share one connection to Lucid. Connecting here stops them racing to make
 		//* their own, where the last client registered replaces the connection the others were given
-		const admin = createSession({
-			url: server.url,
-			transport: (request) => fetch(request),
-		});
-		await login(admin, ADMIN);
-		await connectSession(admin);
+		if (capabilities.includes("feature:ai")) {
+			const admin = createSession({
+				url: server.url,
+				transport: (request) => fetch(request),
+			});
+			await login(admin, ADMIN);
+			await connectSession(admin);
+		}
 
 		return {
 			url: server.url,

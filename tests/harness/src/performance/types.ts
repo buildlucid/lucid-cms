@@ -9,16 +9,6 @@ export type Metric = {
 	unit: MeasurementUnit;
 	/** Lower is better, for every unit. */
 	value: number;
-	/**
-	 * The share it may grow between runs before that counts as a regression.
-	 * Defaults to 0.15 for timings, which vary between machines, and 0.01 for everything else.
-	 */
-	tolerance?: number;
-	/**
-	 * Whether a regression should fail a comparison, rather than only be reported.
-	 * Defaults to false for timings and true for everything else.
-	 */
-	blocking?: boolean;
 };
 
 export type BenchmarkContext = {
@@ -47,9 +37,12 @@ export type ServedCms = Awaited<ReturnType<typeof serveBuilt>>;
  * once for all its samples, such as a server full of content, makes it in `prepare`.
  */
 export type Benchmark<Prepared = undefined> = {
-	/** Starts every measurement's ID, such as `build` in `build.duration`. Keep it stable, as runs are compared by it. */
+	/** Starts every measurement's ID, such as `build` in `build.duration`. Keep it stable, as the report shows each one's value from the last run beside it. */
 	id: string;
-	/** Samples to take first and throw away, so caches are warm. Defaults to 1. */
+	/**
+	 * Samples to take first and throw away, so caches are warm. Defaults to 1. Set it to 0 and warm
+	 * up more cheaply in `prepare`, as the migrate and documents benchmarks do.
+	 */
 	warmups?: number;
 } & (
 	| {

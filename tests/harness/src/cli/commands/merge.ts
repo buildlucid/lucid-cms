@@ -1,11 +1,11 @@
 import path from "node:path";
 import buildRunReport from "../../report/build-run-report.ts";
-import { REPORT_VERSION, type RunReport } from "../../report/types.ts";
+import type { RunReport } from "../../report/types.ts";
 import { readJson } from "../../utils/json.ts";
 import { paths } from "../../utils/paths.ts";
 import finishRun from "../finish-run.ts";
 
-/** Merges per-setup CI reports into one report for cross-setup comparisons. */
+/** Merges per-setup CI reports into one report, so CI shows one summary for every setup. */
 const mergeCommand = async (
 	files: string[],
 	options: { complete: boolean },
@@ -20,12 +20,6 @@ const mergeCommand = async (
 	const [first] = reports;
 	if (!first) {
 		throw new Error("Give the report.json files to merge.");
-	}
-
-	if (reports.some((report) => report.version !== REPORT_VERSION)) {
-		throw new Error(
-			`Every report must be in format ${REPORT_VERSION}. Run them again with this version of the harness.`,
-		);
 	}
 
 	const runId = `merged-${first.runId}`;
@@ -43,8 +37,6 @@ const mergeCommand = async (
 
 	return finishRun(merged, {
 		directory: path.join(paths.output, "runs", runId),
-		//* merged runs come from CI, where there are no earlier local runs to compare with
-		previous: [],
 	});
 };
 

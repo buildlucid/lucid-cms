@@ -1,5 +1,5 @@
 import { loadConfigFile } from "@lucidcms/core/build";
-import type { HarnessEnv } from "../../../shared/config.ts";
+import type { HarnessEnv } from "../setup/harness-env.ts";
 
 /**
  * Loads a setup's config in this process with the given environment, instead of the process's own.

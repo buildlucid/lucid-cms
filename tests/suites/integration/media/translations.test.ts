@@ -1,5 +1,5 @@
 import { describe, expect, requires, test } from "#harness/vitest";
-import { uploadMedia } from "#shared/media";
+import { uploadMedia } from "#shared/helpers/media";
 
 describe("media text in locales", () => {
 	requires("feature:mediaStorage");

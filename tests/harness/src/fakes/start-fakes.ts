@@ -26,7 +26,7 @@ export type Fakes = {
 	outbox(setup: string, directory: string): string;
 	/**
 	 * Keeps what a setup's probe jobs post to `<url>/<instance>` in `<directory>/<instance>`, and
-	 * returns `url`. See `shared/fragments/jobs.ts`.
+	 * returns `url`. See `shared/config/fragments/jobs.ts`.
 	 */
 	ledger(setup: string, directory: string): string;
 	/** The identity provider's issuer, which the `authentication` fragment's providers use. */

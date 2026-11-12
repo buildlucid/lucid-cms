@@ -6,7 +6,8 @@ import {
 	requires,
 	test,
 } from "#harness/vitest";
-import { TEAM_STORY_KEY } from "#shared/collections/team-story";
+import { TEAM_STORY_KEY } from "#shared/config/collections/team-story";
+import { titled } from "#shared/helpers/documents";
 import {
 	approve,
 	approverIds,
@@ -20,11 +21,7 @@ import {
 	requestAction,
 	requestNotifications,
 	requestTeam,
-} from "#shared/requests";
-
-const titled = (title: string) => ({
-	fields: [{ key: "title", type: "text", value: title }],
-});
+} from "#shared/helpers/requests";
 
 describe("reviewing requests", () => {
 	requires("harness:outbox", `collection:${TEAM_STORY_KEY}`);

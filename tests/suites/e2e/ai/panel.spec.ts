@@ -1,9 +1,9 @@
+import { callTool, reply, script } from "#harness/client";
 import { expect, requires, test } from "#harness/playwright";
-import { sendFromComposer } from "#shared/agent-pages";
-import { callTool, reply, script } from "#shared/agent-script";
-import { connectLucid } from "#shared/ai";
-import { STORY_KEY } from "#shared/collections/story";
-import { createDocument } from "#shared/documents";
+import { STORY_KEY } from "#shared/config/collections/story";
+import { sendFromComposer } from "#shared/helpers/agent-pages";
+import { connectLucid } from "#shared/helpers/ai";
+import { createDocument } from "#shared/helpers/documents";
 
 test.describe("the agent panel beside a document", () => {
 	requires(`collection:${STORY_KEY}`, "harness:outbox");

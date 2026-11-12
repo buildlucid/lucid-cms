@@ -1,5 +1,6 @@
+import type { OAuthClient } from "@lucidcms/core/types";
 import { describe, expect, requires, test } from "#harness/vitest";
-import { STORY_KEY } from "#shared/collections/story";
+import { STORY_KEY } from "#shared/config/collections/story";
 import {
 	authorize,
 	callContent,
@@ -7,19 +8,11 @@ import {
 	createOAuthClient,
 	OAUTH_PATHS,
 	oauthResources,
-} from "#shared/oauth";
-import { uniqueName } from "#shared/permissions";
+} from "#shared/helpers/oauth";
+import { uniqueName } from "#shared/helpers/permissions";
 
 const READ_STORIES = `documents:${STORY_KEY}:read`;
 const CLIENTS_PATH = "/api/v1/integrations/oauth-clients";
-
-type Client = {
-	id: number;
-	clientId: string;
-	authMethod: "none" | "client_secret_basic";
-	redirectUris: string[];
-	enabled: boolean;
-};
 
 describe("OAuth clients", () => {
 	requires(`collection:${STORY_KEY}`);
@@ -32,7 +25,7 @@ describe("OAuth clients", () => {
 			authMethod: "client_secret_basic",
 		});
 
-		const read = await admin.request<{ data: Client }>({
+		const read = await admin.request<{ data: OAuthClient }>({
 			path: `${CLIENTS_PATH}/${client.id}`,
 		});
 		const listed = await admin.request({ path: CLIENTS_PATH });
@@ -82,39 +75,43 @@ describe("OAuth clients", () => {
 		expect((await create(["https://app.example/callback"])).ok).toBe(true);
 	});
 
-	test("changing the redirects drops sign-ins started for the old ones", async ({
-		lucid,
-	}) => {
-		const admin = await lucid.admin();
-		const client = await createOAuthClient(admin);
-		const { content } = await oauthResources(lucid);
-		const waiting = await authorize(lucid.session(), {
-			client,
-			scope: READ_STORIES,
-			resource: content,
-		});
-		expect(waiting.requestId).not.toBeNull();
+	describe("with another person", () => {
+		requires("harness:outbox");
 
-		const updated = await admin.request<{ data: Client }>({
-			method: "PATCH",
-			path: `${CLIENTS_PATH}/${client.id}`,
-			body: { redirectUris: ["https://app.example/new-callback"] },
-		});
-		expect(updated.body.data.redirectUris).toEqual([
-			"https://app.example/new-callback",
-		]);
+		test("changing the redirects drops sign-ins started for the old ones", async ({
+			lucid,
+		}) => {
+			const admin = await lucid.admin();
+			const client = await createOAuthClient(admin);
+			const { content } = await oauthResources(lucid);
+			const waiting = await authorize(lucid.session(), {
+				client,
+				scope: READ_STORIES,
+				resource: content,
+			});
+			expect(waiting.requestId).not.toBeNull();
 
-		const viewer = await lucid.user({ permissions: [READ_STORIES] });
-		const pending = await viewer.session.request({
-			path: OAUTH_PATHS.authorization(waiting.requestId ?? ""),
+			const updated = await admin.request<{ data: OAuthClient }>({
+				method: "PATCH",
+				path: `${CLIENTS_PATH}/${client.id}`,
+				body: { redirectUris: ["https://app.example/new-callback"] },
+			});
+			expect(updated.body.data.redirectUris).toEqual([
+				"https://app.example/new-callback",
+			]);
+
+			const viewer = await lucid.user({ permissions: [READ_STORIES] });
+			const pending = await viewer.session.request({
+				path: OAUTH_PATHS.authorization(waiting.requestId ?? ""),
+			});
+			const oldRedirect = await authorize(lucid.session(), {
+				client,
+				scope: READ_STORIES,
+				resource: content,
+			});
+			expect(pending.status).toBe(404);
+			expect(oldRedirect.status).toBe(400);
 		});
-		const oldRedirect = await authorize(lucid.session(), {
-			client,
-			scope: READ_STORIES,
-			resource: content,
-		});
-		expect(pending.status).toBe(404);
-		expect(oldRedirect.status).toBe(400);
 	});
 
 	describe("disabled and enabled again", () => {

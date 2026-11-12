@@ -1,5 +1,5 @@
 import { describe, expect, requires, type Step, test } from "#harness/vitest";
-import { SEEDS } from "#shared/seeds/seeds";
+import { SEEDS } from "#shared/config/seeds/seeds";
 
 const WORKING = [
 	SEEDS.file,

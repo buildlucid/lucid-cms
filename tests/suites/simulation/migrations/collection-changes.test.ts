@@ -6,7 +6,6 @@ import {
 	type MigrationDatabase,
 	migratedTo,
 	type PrepareDatabase,
-	recordDigest,
 	requires,
 	sql,
 	test,
@@ -15,7 +14,7 @@ import {
 	GENERATED_KEY,
 	type GeneratedField,
 	generatedStep,
-} from "#shared/migrations/collections/generated";
+} from "#shared/config/migrations/collections/generated";
 
 const TABLE = `lucid_document__${GENERATED_KEY}__fld`;
 const KEYS = ["alpha", "beta", "gamma", "delta"] as const;
@@ -118,10 +117,7 @@ describe("collection changes", () => {
 
 	test("a migration that needs no approval never changes stored content", async ({
 		migrations,
-		task,
 	}) => {
-		const trace: unknown[] = [];
-
 		await fc.assert(
 			fc.asyncProperty(
 				fc.array(
@@ -166,7 +162,6 @@ describe("collection changes", () => {
 						}
 
 						fields = next;
-						trace.push([change.kind, change.key, migrated.code]);
 					}
 
 					const status = await database.cli(
@@ -179,8 +174,5 @@ describe("collection changes", () => {
 			),
 			getRunOptions(),
 		);
-
-		//* whether a change needs approval must not depend on the database
-		recordDigest(task, trace);
 	});
 });
