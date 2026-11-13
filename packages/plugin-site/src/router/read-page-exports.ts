@@ -2,12 +2,13 @@ import { LucidError, logger } from "@lucidcms/core";
 import { PLUGIN_KEY } from "../constants.js";
 import type { SiteKiln } from "../site/create-site-kiln.js";
 
-/** Page export settings, with `mode`, `revalidate` and `cacheControl` read as literals without executing the template. */
+/** Page export settings, with `mode`, `revalidate`, `cacheControl` and `sitemap` read as literals without executing the template. */
 export type PageExports = {
 	mode?: "ssr" | "isr";
 	revalidate?: number;
 	cacheControl?: string;
 	paths: boolean;
+	sitemap?: boolean;
 };
 
 const readPageExports = async (
@@ -47,12 +48,21 @@ const readPageExports = async (
 				}
 				settings.cacheControl = entry.value;
 				break;
+			case "sitemap":
+				if (typeof entry.value !== "boolean") {
+					throw new LucidError({
+						scope: PLUGIN_KEY,
+						message: `'${template}' must export sitemap as the literal true or false. Pages without route parameters are listed unless false; pages with them only when true.`,
+					});
+				}
+				settings.sitemap = entry.value;
+				break;
 			default:
 				logger.warn({
 					scope: PLUGIN_KEY,
 					event: "plugin-site.page.unknown-export",
 					dedupeKey: `${PLUGIN_KEY}:unknown-export:${template}:${entry.name}`,
-					message: `'${template}' exports '${entry.name}', which the site plugin doesn't use. Pages can export paths, mode, revalidate and cacheControl.`,
+					message: `'${template}' exports '${entry.name}', which the site plugin doesn't use. Pages can export paths, mode, revalidate, cacheControl and sitemap.`,
 				});
 		}
 	}

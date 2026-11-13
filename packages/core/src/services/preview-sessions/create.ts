@@ -148,7 +148,7 @@ const create: ServiceFn<
 				: (routePath?.[locale] ?? null);
 	const token = randomBytes(32).toString("base64url");
 
-	const siteUrl = getSiteUrl(context);
+	const siteUrl = getSiteUrl(context.config, locale);
 	let resolvedUrl: string | URL | null;
 	try {
 		resolvedUrl = preview.url

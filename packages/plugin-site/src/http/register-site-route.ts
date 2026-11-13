@@ -7,14 +7,21 @@ import { findRoute } from "rou3";
 import coalesceRenders from "../cache/coalesce-renders.js";
 import readStoredPage from "../cache/read-stored-page.js";
 import renderStoredPage from "../cache/render-stored-page.js";
-import { ISLANDS_URL, PLUGIN_KEY, storeKeys } from "../constants.js";
+import {
+	HTML_CONTENT_TYPE,
+	ISLANDS_URL,
+	PLUGIN_KEY,
+	storeKeys,
+} from "../constants.js";
 import { SiteNotFoundError } from "../errors.js";
 import createSiteMarkup from "../preview/create-site-markup.js";
 import { pageMarkup } from "../preview/page-markup.js";
 import readPreview from "../preview/read-preview.js";
+import getContentType from "../router/get-content-type.js";
 import getRouteParams from "../router/get-route-params.js";
-import createSiteLoader, { type Site } from "../site/create-site-loader.js";
+import type { Site } from "../site/create-site-loader.js";
 import readSiteModule from "../site/read-site-module.js";
+import type shareSiteLoader from "../site/share-site-loader.js";
 import type { SitePluginOptionsInternal, SiteState } from "../types.js";
 import decode from "../utils/decode.js";
 import isLucidPath from "../utils/is-lucid-path.js";
@@ -39,34 +46,47 @@ const canStorePages = (context: ServiceContext) => {
 	return false;
 };
 
+/**
+ * Serves the site's pages. `files` serves only file pages, such as `pages/sitemap.xml.kiln`, so they
+ * answer before plugins' routes at the same path, and passes every other request on, including all
+ * of them while the site fails to load. `pages` serves islands and every other page after all other
+ * routes, and reports a site that fails to load. No page shares a path with a public file, which
+ * development and builds report.
+ */
 const registerSiteRoute =
-	(options: SitePluginOptionsInternal): HttpExtensionRegister =>
+	(
+		options: SitePluginOptionsInternal,
+		siteLoader: ReturnType<typeof shareSiteLoader>,
+		serves: "files" | "pages",
+	): HttpExtensionRegister =>
 	(app, config) => {
-		const getSite = createSiteLoader(options, config);
+		const getSite = siteLoader(config);
 
-		app.get(
-			`${ISLANDS_URL}:id`,
-			defineMiddleware(async ({ hono, toolkit, context }) => {
-				const site = await getSite({ context });
-				try {
-					return await renderIsland({
-						hono,
-						context,
-						toolkit,
-						site,
-						id: hono.req.param("id") ?? "",
-					});
-				} catch (error) {
-					logger.error({
-						scope: PLUGIN_KEY,
-						event: "plugin-site.island.failed",
-						message: "Failed to render an island",
-						error,
-					});
-					return hono.text("Island failed to render", 500);
-				}
-			}),
-		);
+		if (serves === "pages") {
+			app.get(
+				`${ISLANDS_URL}:id`,
+				defineMiddleware(async ({ hono, toolkit, context }) => {
+					const site = await getSite({ context });
+					try {
+						return await renderIsland({
+							hono,
+							context,
+							toolkit,
+							site,
+							id: hono.req.param("id") ?? "",
+						});
+					} catch (error) {
+						logger.error({
+							scope: PLUGIN_KEY,
+							event: "plugin-site.island.failed",
+							message: "Failed to render an island",
+							error,
+						});
+						return hono.text("Island failed to render", 500);
+					}
+				}),
+			);
+		}
 
 		app.get(
 			"/*",
@@ -77,12 +97,22 @@ const registerSiteRoute =
 					await next();
 					return;
 				}
+				// File pages end in their extension, so other paths needn't load the site.
+				if (serves === "files" && getContentType(path) === HTML_CONTENT_TYPE) {
+					await next();
+					return;
+				}
 
 				const development = context.runtimeContext?.compiled === false;
 				let site: Site;
 				try {
 					site = await getSite({ context });
 				} catch (error) {
+					// A site that can't load serves no file pages, and the pages route reports why.
+					if (serves === "files") {
+						await next();
+						return;
+					}
 					// Show site-loading failures, including invalid page exports, as development error pages.
 					if (!development) throw error;
 					logger.error({
@@ -93,6 +123,15 @@ const registerSiteRoute =
 					});
 					const data = readSiteModule(context.runtimeContext)?.data ?? null;
 					return hono.html(createDevErrorPage({ error, data }), 500);
+				}
+
+				const match = findRoute(site.router, "GET", pathname);
+				if (
+					serves === "files" &&
+					(!match || match.data.contentType === HTML_CONTENT_TYPE)
+				) {
+					await next();
+					return;
 				}
 
 				// The query string, such as a preview token, must survive the redirect.
@@ -127,7 +166,6 @@ const registerSiteRoute =
 				const cacheable = !preview && !development;
 
 				try {
-					const match = findRoute(site.router, "GET", pathname);
 					if (!match) throw new SiteNotFoundError();
 
 					const cacheControl = cacheable ? match.data.cacheControl : undefined;

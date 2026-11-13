@@ -11,7 +11,7 @@ const renderSiteModule = (props: {
 	components: Array<{ name: string; integration: string }>;
 	/** Server renderer modules by integration name. */
 	renderers: Array<{ name: string; server: string }>;
-	/** Development component globs that reload the module when files are added. */
+	/** Development component globs that reload the module when files are added. Vite rejects an empty list, so none is emitted without UI integrations. */
 	componentGlobs?: string[];
 }) => {
 	const json = JSON.stringify;
@@ -19,7 +19,7 @@ const renderSiteModule = (props: {
 		`export const data = ${json(props.data)};`,
 		`const templateFiles = import.meta.glob(${json(`${props.base}**/*.kiln`)}, { query: ${json(props.templateQuery)}, import: "default" });`,
 		`export const templates = Object.fromEntries(Object.entries(templateFiles).map(([file, load]) => [file.slice(${props.base.length}), load]));`,
-		...(props.componentGlobs
+		...(props.componentGlobs?.length
 			? [`import.meta.glob(${json(props.componentGlobs)});`]
 			: []),
 		`export const components = {\n${props.components

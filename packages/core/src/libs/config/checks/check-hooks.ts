@@ -1,7 +1,7 @@
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import getHookKind from "../../hooks/get-hook-kind.js";
 
-/** Checks that each config hook subscribes to an event Lucid or a configured plugin registers. */
+/** Checks that each config hook subscribes to an event Lucid or a configured plugin registers. Optional hooks without one are already left out. */
 const checkHooks = (config: Pick<ResolvedLucidConfig, "hooks" | "plugins">) => {
 	for (const hook of config.hooks) {
 		const event = String(hook.event);

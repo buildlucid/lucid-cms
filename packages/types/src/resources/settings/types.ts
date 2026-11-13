@@ -12,8 +12,10 @@ export type SettingsInclude =
 
 export interface Settings {
 	site?: {
-		/** The website's absolute URL, or null when none is configured. */
+		/** The default locale's website URL, or null when none is configured. */
 		url: string | null;
+		/** Each content locale's website URL, keyed by locale code. Locales without their own use the default locale's. */
+		locales: Record<string, string>;
 	};
 	ai?: {
 		enabled: boolean;

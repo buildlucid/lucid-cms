@@ -25,6 +25,7 @@ describe("site", () => {
 			const draft = {
 				http: { extensions: [], routes: [] as Array<{ path: string }> },
 				admin: { slots: [] as Array<{ slot: string }> },
+				hooks: [],
 			};
 			sitePlugin({ mode }).configure?.(draft as never);
 			return draft;

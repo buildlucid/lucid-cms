@@ -2,21 +2,13 @@ import { KilnRenderError } from "@lucidkiln/core";
 import { findRoute } from "rou3";
 import { HTML_CONTENT_TYPE } from "../../constants.js";
 import { SiteNotFoundError, SiteRedirectError } from "../../errors.js";
+import getPageFile from "../../router/get-page-file.js";
 import getRouteParams from "../../router/get-route-params.js";
 import type { Site } from "../../site/create-site-loader.js";
 import renderOptions from "../../site/render-options.js";
-import type { SiteState } from "../../types.js";
+import type { SiteState, SiteStaticFile } from "../../types.js";
 import escapeHtml from "../../utils/escape-html.js";
 import findPageLinks from "./find-page-links.js";
-
-/** A file a static build writes, by its path within the output folder. */
-export type StaticFile = { path: string; body: string };
-
-/** HTML pages are written as `index.html` in their path's folder; other files keep their path. */
-const toFile = (routePath: string, contentType: string) =>
-	contentType === HTML_CONTENT_TYPE
-		? `${routePath.replace(/\/+$/, "")}/index.html`
-		: routePath;
 
 const redirectPage = (location: string) => {
 	const url = escapeHtml(location);
@@ -29,7 +21,7 @@ const renderStaticPage = async (props: {
 	routePath: string;
 	state: SiteState;
 }): Promise<
-	| { written: true; file: StaticFile; links: string[] }
+	| { written: true; file: SiteStaticFile; links: string[] }
 	| { written: false; reason: string }
 > => {
 	const { routePath } = props;
@@ -49,7 +41,7 @@ const renderStaticPage = async (props: {
 
 		return {
 			written: true,
-			file: { path: toFile(routePath, match.data.contentType), body },
+			file: { path: getPageFile(routePath, match.data.contentType), body },
 			links: isHtml ? findPageLinks(body) : [],
 		};
 	} catch (error) {
@@ -63,7 +55,7 @@ const renderStaticPage = async (props: {
 			return {
 				written: true,
 				file: {
-					path: toFile(routePath, HTML_CONTENT_TYPE),
+					path: getPageFile(routePath, HTML_CONTENT_TYPE),
 					body: redirectPage(cause.location),
 				},
 				links: [],

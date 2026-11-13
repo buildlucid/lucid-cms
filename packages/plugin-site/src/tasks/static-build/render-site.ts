@@ -1,23 +1,28 @@
-import { definePluginTask, z } from "@lucidcms/core";
+import { definePluginTask, LucidError, z } from "@lucidcms/core";
 import { errorPages } from "../../constants.js";
+import hookEvents from "../../hook-events/index.js";
 import createSiteLoader from "../../site/create-site-loader.js";
 import renderOptions from "../../site/render-options.js";
+import resolvePathLocale from "../../site/resolve-path-locale.js";
 import type {
 	BuiltSiteData,
 	SitePluginOptionsInternal,
 	SiteState,
+	SiteStaticFile,
 } from "../../types.js";
 import eachLimited from "../../utils/each-limited.js";
 import isRecord from "../../utils/is-record.js";
+import assertOneDomain from "./assert-one-domain.js";
 import collectPagePaths from "./collect-page-paths.js";
-import renderStaticPage, { type StaticFile } from "./render-static-page.js";
+import renderStaticPage from "./render-static-page.js";
+import resolveHookFiles from "./resolve-hook-files.js";
 import warnUnbuiltPages from "./warn-unbuilt-pages.js";
 
 const CONCURRENCY = 8;
 
 /** What the `build` task hands back to `site:build`, which writes it out and reports it. */
 export type StaticBuild = {
-	files: StaticFile[];
+	files: SiteStaticFile[];
 	/** How many paths the pages' `paths` exports listed. */
 	total: number;
 	/** Paths that made no file, with the reason. */
@@ -35,7 +40,10 @@ const inputSchema = z.object({
 	publicPaths: z.array(z.string()),
 });
 
-/** Runs the `build` task for `site:build`, rendering every listed static page inside the runtime with database access and assets from its client build. */
+/**
+ * Runs the `build` task for `site:build`, rendering every listed static page inside the runtime with database access and
+ * assets from its client build, then adding the files `site.staticFiles` hooks give.
+ */
 const renderSite = (options: SitePluginOptionsInternal) =>
 	definePluginTask({
 		input: inputSchema,
@@ -48,18 +56,14 @@ const renderSite = (options: SitePluginOptionsInternal) =>
 				context,
 				data,
 			});
+			assertOneDomain(site.config);
 
 			// Static builds have no request, so the locale option only sees the path.
 			const state = (routePath: string): SiteState => ({
 				toolkit,
 				context,
 				path: routePath,
-				locale: site.config.resolveLocale({
-					path: routePath,
-					url: null,
-					header: () => null,
-					cookie: () => undefined,
-				}),
+				locale: resolvePathLocale(site.config, routePath),
 				preview: null,
 				version: site.config.getVersion,
 			});
@@ -71,7 +75,7 @@ const renderSite = (options: SitePluginOptionsInternal) =>
 
 			// Exports run before any page renders, so there is no request path.
 			const paths = await collectPagePaths({ site, state: state(""), warn });
-			const files: StaticFile[] = [];
+			const files: SiteStaticFile[] = [];
 			const failures: StaticBuild["failures"] = [];
 			const built = new Set<string>();
 			const skipped: string[] = [];
@@ -125,6 +129,19 @@ const renderSite = (options: SitePluginOptionsInternal) =>
 					publicPaths: new Set(publicPaths),
 					warn,
 				});
+
+				// Hooks run once every page rendered, so a hook's error can't hide failed pages.
+				const hooked = await hookEvents.execute(context, "staticFiles", {
+					meta: { environment: site.config.environment },
+					data: { files: [] },
+				});
+				if (hooked.error) throw new LucidError(hooked.error);
+				files.push(
+					...resolveHookFiles({
+						files: hooked.data.files,
+						taken: new Set([...files.map((file) => file.path), ...publicPaths]),
+					}),
+				);
 			}
 
 			return {

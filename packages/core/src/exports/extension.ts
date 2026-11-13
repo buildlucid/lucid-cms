@@ -42,6 +42,9 @@ export {
 export { default as pluginDirectory } from "../libs/plugins/plugin-directory.js";
 export { default as pluginPublicPath } from "../libs/plugins/plugin-public-path.js";
 export { resolveRelatedDocumentVersionType } from "../services/documents/helpers/resolve-relation-version-type.js";
+export { default as getSiteUrl } from "../utils/helpers/get-site-url.js";
+export { default as getSiteUrls } from "../utils/helpers/get-site-urls.js";
+export { default as getUrlHosts } from "../utils/helpers/get-url-hosts.js";
 export {
 	buildDownloadContentDisposition,
 	getFileMetadata,

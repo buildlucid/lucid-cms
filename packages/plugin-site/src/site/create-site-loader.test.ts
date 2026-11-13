@@ -1,7 +1,11 @@
 import type { ResolvedLucidConfig, ServiceContext } from "@lucidcms/core/types";
 import { describe, expect, test } from "vitest";
 import { PLUGIN_KEY } from "../constants.js";
-import type { SiteModule, SitePluginOptionsInternal } from "../types.js";
+import type {
+	SiteModule,
+	SitePluginOptionsInternal,
+	SitePublicFile,
+} from "../types.js";
 import createSiteLoader from "./create-site-loader.js";
 
 const config = {
@@ -17,8 +21,12 @@ const options: SitePluginOptionsInternal = {
 };
 
 /** A development site module whose index template reads `source.index`. */
-const devModule = (source: { index: string }, revision = "1"): SiteModule => ({
-	data: { kind: "dev", prefix: "site/", revision },
+const devModule = (
+	source: { index: string },
+	revision = "1",
+	publicFiles: SitePublicFile[] = [],
+): SiteModule => ({
+	data: { kind: "dev", prefix: "site/", revision, publicFiles },
 	templates: { "pages/index.kiln": async () => source.index },
 	components: {},
 	renderers: {},
@@ -70,6 +78,19 @@ describe("createSiteLoader", () => {
 		);
 		expect(await namespaceFor("https://b.test")).not.toBe(
 			await namespaceFor("https://a.test"),
+		);
+	});
+
+	test("fails to load a development site whose page shares a path with a public file", async () => {
+		const getSite = createSiteLoader(options, config);
+		const context = contextFor(
+			devModule({ index: "Home" }, "1", [
+				{ path: "/index.html", file: "public/index.html" },
+			]),
+		);
+
+		await expect(getSite({ context })).rejects.toThrow(
+			"'/index.html': 'pages/index.kiln' and 'public/index.html'",
 		);
 	});
 

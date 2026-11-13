@@ -50,7 +50,7 @@ const getDiagnostics: ServiceFn<[], Diagnostics> = async (context) => {
 			diagnostics: {
 				version: packageJson.version,
 				generatedAt,
-				siteUrl: getSiteUrl(context),
+				siteUrl: getSiteUrl(context.config),
 				runtime: context.runtimeContext?.runtime ?? null,
 				runtimeVersion: nodeVersion ? `v${nodeVersion}` : null,
 				packages: getInstalledPackages({

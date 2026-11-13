@@ -9,62 +9,124 @@ export type LinkedDocument = {
 	locale: string | null;
 };
 
-/** The route paths a link's address could be stored as: without the site's base path, and with or without a trailing slash. */
-const toRoutePaths = (url: URL, siteUrl: string | null) => {
-	let path = url.pathname;
+/** The website a link is on: its site URL's base path, and the locales it's for, or null when it implies none. */
+type LinkSite = {
+	base: string;
+	locales: string[] | null;
+};
+
+/** A link's decoded path; a malformed escape is kept as it's written. */
+const decodePath = (url: URL) => {
 	try {
-		path = decodeURI(path);
+		return decodeURI(url.pathname);
 	} catch {
-		//* a malformed escape is looked up as it's written
+		return url.pathname;
 	}
-	const site = siteUrl ? new URL(siteUrl) : null;
-	const base = site?.pathname.replace(/\/+$/, "") ?? "";
-	if (site?.origin === url.origin && base && path.startsWith(`${base}/`)) {
-		path = path.slice(base.length);
-	}
-	const trimmed = path.length > 1 ? path.replace(/\/+$/, "") : path;
-	return trimmed === "/" ? ["/"] : [trimmed, `${trimmed}/`];
 };
 
 /**
- * Matches a site link to a document route in the supplied readable collections. Returns null if
- * unmatched.
+ * Matches the link's origin and longest containing site base path, returning that URL's locales.
+ * Unlocalized or unmatched sites imply no locale.
+ */
+const findLinkSite = (props: {
+	url: URL;
+	path: string;
+	siteUrl: string | null;
+	siteUrls: Record<string, string>;
+}): LinkSite => {
+	const siteUrls: Array<[string | null, string]> = Object.entries(
+		props.siteUrls,
+	);
+	if (siteUrls.length === 0 && props.siteUrl) {
+		siteUrls.push([null, props.siteUrl]);
+	}
+	const sites = siteUrls.flatMap(([locale, siteUrl]) => {
+		const url = new URL(siteUrl);
+		const base = decodePath(url).replace(/\/+$/, "");
+		return url.origin === props.url.origin &&
+			(props.path === base || props.path.startsWith(`${base}/`))
+			? [{ locale, base }]
+			: [];
+	});
+	if (sites.length === 0) return { base: "", locales: null };
+
+	const base = sites.reduce(
+		(longest, site) =>
+			site.base.length > longest.length ? site.base : longest,
+		"",
+	);
+	const locales = sites.flatMap((site) =>
+		site.base === base && site.locale !== null ? [site.locale] : [],
+	);
+	return { base, locales: locales.length > 0 ? locales : null };
+};
+
+/** The route paths a link's path could be stored as below its website's base path: with or without a trailing slash. */
+const toRoutePaths = (path: string, base: string) => {
+	const route = path.slice(base.length).replace(/\/+$/, "") || "/";
+	return route === "/" ? ["/"] : [route, `${route}/`];
+};
+
+/**
+ * The locale a document's route has one of the paths in, among `locales` when given. Null when
+ * every locale shares its path; undefined when it doesn't have the path in those locales.
+ */
+const findRouteLocale = (
+	document: InternalCollectionDocument,
+	paths: string[],
+	locales: string[] | null,
+) => {
+	const routePath = document.route?.path;
+	if (!routePath || typeof routePath !== "object") return null;
+
+	const codes = Object.entries(routePath).flatMap(([code, path]) =>
+		typeof path === "string" && paths.includes(path) ? [code] : [],
+	);
+	return locales === null
+		? (codes[0] ?? null)
+		: codes.find((code) => locales.includes(code));
+};
+
+/**
+ * Matches a site-relative link against readable collection routes in the site's locales. Shared or
+ * unmatched sites accept any locale; the first match wins. Returns null if unmatched.
  */
 export const findLinkedDocument = async (props: {
 	url: URL;
+	/** The default locale's website URL, the only one when there are no content locales. */
 	siteUrl: string | null;
+	/** Each content locale's website URL, keyed by locale code. */
+	siteUrls: Record<string, string>;
 	collections: Collection[];
 }): Promise<LinkedDocument | null> => {
-	const paths = toRoutePaths(props.url, props.siteUrl);
-	const matches = await Promise.all(
+	const path = decodePath(props.url);
+	const site = findLinkSite({ ...props, path });
+	const paths = toRoutePaths(path, site.base);
+	//* filters match a path in any locale, and a path is at most one document's in each
+	const perPage = Math.max(Object.keys(props.siteUrls).length, 1);
+
+	const candidates = await Promise.all(
 		props.collections.map(async (collection) => {
-			if (!collection.routing) return null;
+			if (!collection.routing) return [];
 			try {
 				const response = await getMultipleReq({
 					collectionKey: collection.key,
 					versionType: "latest",
 					query: {
 						filters: { [`fields.${collection.routing.field}:in`]: paths },
-						perPage: 1,
+						perPage,
 					},
 					displayErrorToast: false,
 				});
-				const document = response.data[0];
-				return document ? { collection, document } : null;
+				return response.data.map((document) => ({ collection, document }));
 			} catch {
-				return null;
+				return [];
 			}
 		}),
 	);
-	const match = matches.find((item) => item !== null);
-	if (!match) return null;
-
-	const routePath = match.document.route?.path;
-	const locale =
-		routePath && typeof routePath === "object"
-			? (Object.entries(routePath).find(
-					([, path]) => typeof path === "string" && paths.includes(path),
-				)?.[0] ?? null)
-			: null;
-	return { ...match, locale };
+	for (const candidate of candidates.flat()) {
+		const locale = findRouteLocale(candidate.document, paths, site.locales);
+		if (locale !== undefined) return { ...candidate, locale };
+	}
+	return null;
 };

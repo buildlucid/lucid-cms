@@ -275,6 +275,12 @@ const CaptchaAdapterSchema = z.custom<
 	},
 );
 
+//* an absolute website URL, or a path resolved against the CMS's url
+const SiteUrlSchema = z.union([
+	z.url({ protocol: /^https?$/ }),
+	z.string().regex(/^\/(?![/\\])/, "Use a path that starts with /."),
+]);
+
 const ContentSecurityPolicySchema = z
 	.strictObject({
 		defaultSrc: z.array(z.string()).optional(),
@@ -330,10 +336,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		})
 		.transform((value) => value.replace(/\/+$/, "")),
 	siteUrl: z
-		.union([
-			z.url({ protocol: /^https?$/ }),
-			z.string().regex(/^\/(?![/\\])/, "Use a path that starts with /."),
-		])
+		.union([SiteUrlSchema, z.record(z.string(), SiteUrlSchema)])
 		.optional(),
 	role: z.enum(["primary", "content"]),
 	http: z.strictObject({

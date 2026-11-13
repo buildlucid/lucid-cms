@@ -4,9 +4,12 @@ import createViteAssetFunction from "./vite-asset.js";
 describe("viteAsset()", () => {
 	test("returns the source URL in development and the built file's URL once built", () => {
 		expect(
-			createViteAssetFunction({ kind: "dev", prefix: "site/", revision: "1" })(
-				"./images/logo.svg",
-			),
+			createViteAssetFunction({
+				kind: "dev",
+				prefix: "site/",
+				revision: "1",
+				publicFiles: [],
+			})("./images/logo.svg"),
 		).toBe("/site/images/logo.svg");
 		expect(
 			createViteAssetFunction({

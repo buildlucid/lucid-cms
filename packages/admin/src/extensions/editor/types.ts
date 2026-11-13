@@ -147,6 +147,8 @@ export type DocumentEditor = {
 		| {
 				readonly field: string;
 				readonly path: string | undefined;
+				/** Whether each locale has its own path, rather than one every locale shares. */
+				readonly localized: boolean;
 		  }
 		| undefined;
 	/** The document can't be edited, eg. another tab holds it or it's an older version. */

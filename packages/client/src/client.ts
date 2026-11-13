@@ -15,6 +15,10 @@ import {
 	createPreviewsClient,
 	type LucidPreviewsClient,
 } from "./resources/previews.js";
+import {
+	createRoutesClient,
+	type LucidRoutesClient,
+} from "./resources/routes.js";
 import { createTransport } from "./transport/fetcher.js";
 import type { CreateClientOptions } from "./types/transport.js";
 
@@ -29,6 +33,8 @@ export interface LucidClient {
 	media: LucidMediaClient;
 	/** Public preview endpoints. */
 	previews: LucidPreviewsClient;
+	/** Routes that plugins and projects add beneath `/api/v1/content/e`. */
+	routes: LucidRoutesClient;
 }
 
 /**
@@ -65,5 +71,6 @@ export const createClient = (options: CreateClientOptions): LucidClient => {
 		locales: createLocalesClient(transport),
 		media: createMediaClient(transport),
 		previews: createPreviewsClient(transport),
+		routes: createRoutesClient(transport),
 	};
 };

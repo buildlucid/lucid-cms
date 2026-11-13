@@ -15,6 +15,7 @@ import CollectionConfigSchema from "../collection/definitions/collection/schema.
 import { getFieldSetState } from "../collection/definitions/fields/index.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import createDeployTriggerHooks from "../deploys/trigger-hooks.js";
+import getHookKind from "../hooks/get-hook-kind.js";
 import { getJobRegistry } from "../jobs/registry.js";
 import { initializeLogger } from "../logger/index.js";
 import type { LoggerOverride } from "../logger/types.js";
@@ -41,6 +42,7 @@ import checkLocales from "./checks/check-locales.js";
 import checkMagicLink from "./checks/check-magic-link.js";
 import checkNotificationDefinitions from "./checks/check-notification-definitions.js";
 import checkRepeaterDepth from "./checks/check-repeater-depth.js";
+import checkSiteUrl from "./checks/check-site-url.js";
 import checkSkillDefinitions from "./checks/check-skill-definitions.js";
 import checkToolDefinitions from "./checks/check-tool-definitions.js";
 import checkToolkitDefinitions from "./checks/check-toolkit-definitions.js";
@@ -125,7 +127,16 @@ const processConfig = async (
 		jobs: jobDefinitions,
 		notifications: notificationDefinitions,
 		transfers: transferDefinitions,
-		hooks: [...configRes.hooks, ...createDeployTriggerHooks(configRes.deploys)],
+		hooks: [
+			//* optional hooks subscribe to plugins that may not be configured, so ones without a registered event are left out
+			...configRes.hooks.filter(
+				(hook) =>
+					!hook.optional ||
+					getHookKind(configRes, hook.service, String(hook.event)) !==
+						undefined,
+			),
+			...createDeployTriggerHooks(configRes.deploys),
+		],
 	};
 
 	if (!options?.skipValidation) {
@@ -164,6 +175,7 @@ const processConfig = async (
 		// i18n checks
 		checkLocales(configRes.localization);
 		checkLocales(configRes.translations);
+		checkSiteUrl(configRes);
 
 		// create / check job registry
 		getJobRegistry(configRes);

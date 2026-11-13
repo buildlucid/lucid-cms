@@ -2,6 +2,7 @@ import path from "node:path";
 import type { LucidPluginCliFactory } from "@lucidcms/core/types";
 import type { SitePluginOptionsInternal } from "../types.js";
 import clearCache from "./clear-cache.js";
+import listPublicFiles from "./list-public-files.js";
 import buildSite from "./static/build-site.js";
 import resolveIntegrations from "./ui/resolve-integrations.js";
 import uiVitePlugins from "./ui/ui-vite-plugins.js";
@@ -29,6 +30,7 @@ const siteCli: LucidPluginCliFactory<SitePluginOptionsInternal> = (options) => {
 						root: root(props.projectRoot),
 						ui,
 						runtime: props.runtime,
+						publicFiles: listPublicFiles(props.publicFiles, props.projectRoot),
 					}),
 					...(ui
 						? await uiVitePlugins({

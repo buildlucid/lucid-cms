@@ -12,11 +12,16 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { createBuilder } from "vite";
 import { expect, test } from "vitest";
+import type { SitePublicFile } from "../../types.js";
 import siteClientBuildPlugin from "./site-client-build-plugin.js";
 import type { SiteViteContext } from "./types.js";
 
 /** Builds the client environment of a site whose only template is `template`, as `site:build` does without the admin. */
-const buildSite = async (template: string, files: Record<string, string>) => {
+const buildSite = async (
+	template: string,
+	files: Record<string, string>,
+	publicFiles: SitePublicFile[] = [],
+) => {
 	const root = await realpath(
 		await mkdtemp(path.join(tmpdir(), "lucid-site-")),
 	);
@@ -30,22 +35,23 @@ const buildSite = async (template: string, files: Record<string, string>) => {
 		ui: null,
 		extensions: [],
 		runtime: "node",
+		publicFiles,
 		prefix: "site/",
 		viteRoot: root,
 		clientBuild: null,
 	};
-	const builder = await createBuilder({
-		root,
-		configFile: false,
-		logLevel: "silent",
-		appType: "custom",
-		// As Lucid's builds do, so the config resolves once.
-		builder: { sharedConfigBuild: true },
-		plugins: [siteClientBuildPlugin(context)],
-	});
-	const { client } = builder.environments;
-	if (!client) throw new Error("Expected Vite's client environment.");
 	try {
+		const builder = await createBuilder({
+			root,
+			configFile: false,
+			logLevel: "silent",
+			appType: "custom",
+			// As Lucid's builds do, so the config resolves once.
+			builder: { sharedConfigBuild: true },
+			plugins: [siteClientBuildPlugin(context)],
+		});
+		const { client } = builder.environments;
+		if (!client) throw new Error("Expected Vite's client environment.");
 		await builder.build(client);
 		return {
 			clientBuild: context.clientBuild,
@@ -79,4 +85,14 @@ test("builds sites whose templates only name single files", async () => {
 	const logo = clientBuild?.data.manifest["site/logo.svg"]?.file;
 	expect(logo).toMatch(/^assets\/logo-.+\.svg$/);
 	expect(files).toEqual([path.basename(logo ?? "")]);
+});
+
+test("stops a build whose page shares a path with a public file", async () => {
+	await expect(
+		buildSite("<h1>Home</h1>", {}, [
+			{ path: "/index.html", file: "public/index.html" },
+		]),
+	).rejects.toThrow(
+		"'/index.html': 'pages/index.kiln' and 'public/index.html'",
+	);
 });

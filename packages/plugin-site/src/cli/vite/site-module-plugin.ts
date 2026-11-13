@@ -59,6 +59,7 @@ const siteModulePlugin = (context: SiteViteContext): Plugin => ({
 						kind: "dev",
 						prefix: context.prefix,
 						revision: crypto.randomUUID().slice(0, 8),
+						publicFiles: context.publicFiles,
 					},
 					base,
 					templateQuery: TEMPLATE_QUERY,

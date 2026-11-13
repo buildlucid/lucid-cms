@@ -14,12 +14,14 @@ export const isContentRouteDefinition = (
 /**
  * Defines a custom route beneath `/api/v1/content/e` with explicit external
  * access rules. Add it to `config.http.routes`.
+ * JSON responses use the `{ data }` envelope from `formatAPIResponse`, which
+ * `client.routes.request()` in `@lucidcms/client` reads.
  *
  * @example
  * ```ts
- * const sitemapRoute = defineContentApiRoute({
+ * const publishedPagesRoute = defineContentApiRoute({
  *   method: "get",
- *   path: "/sitemap",
+ *   path: "/published-pages",
  *   access: {
  *     type: "scoped",
  *     scopes: [ExternalScopes.DocumentRead("pages")],
@@ -31,7 +33,7 @@ export const isContentRouteDefinition = (
  *     });
  *     if (result.error) throw new LucidError(result.error);
  *
- *     return hono.json(result.data);
+ *     return hono.json(formatAPIResponse(hono, { data: result.data }));
  *   },
  * });
  * ```

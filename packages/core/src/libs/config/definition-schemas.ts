@@ -32,6 +32,7 @@ const hookShape = z.strictObject({
 	event: z.string(),
 	handler,
 	order: z.number().optional(),
+	optional: z.boolean().optional(),
 });
 
 const hookEvents = new Map(

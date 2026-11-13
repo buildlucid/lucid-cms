@@ -7,7 +7,7 @@ import {
 	type NavigationActionVariant,
 } from "@/utils/navigation";
 
-/** Opens `siteUrl` in a new tab when configured. */
+/** Opens the website, the default locale's when each locale has its own, in a new tab when configured. */
 export const SiteLink: Component<{
 	size?: "sm" | "md";
 	variant?: NavigationActionVariant;

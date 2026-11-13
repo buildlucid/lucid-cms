@@ -13,6 +13,7 @@
 - Added `@lucidcms/admin/toolbar`, the `<lucid-toolbar>` that used to come from `@lucidcms/client/toolbar`.
 - The admin now serves the builder's preview script at `/admin/preview.js`, and draws the preview's edit controls itself.
 - Added an `action` option to `toast`.
+- Added a `useSiteUrl` hook, which returns your website's address.
 - Added a `checkbox` item type to `ActionMenu`.
 - `Tabs` now scroll in one row, with fades and arrows, instead of wrapping when they don't fit.
 

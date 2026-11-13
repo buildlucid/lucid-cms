@@ -23,6 +23,7 @@ interface SettingsPropsT {
 	kvKey: string;
 	databaseKey: string;
 	siteUrl: string | null;
+	siteUrls: Record<string, string>;
 }
 
 const formatSingle = (props: {
@@ -40,7 +41,10 @@ const formatSingle = (props: {
 	const response: Settings = {};
 
 	if (includeSet.has("site")) {
-		response.site = { url: props.settings.siteUrl };
+		response.site = {
+			url: props.settings.siteUrl,
+			locales: props.settings.siteUrls,
+		};
 	}
 
 	if (includeSet.has("ai")) {

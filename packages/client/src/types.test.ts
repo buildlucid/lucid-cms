@@ -1,6 +1,7 @@
 import { expectTypeOf, test } from "vitest";
 import { createClient } from "./index.js";
 import { createDocumentsClient } from "./resources/documents.js";
+import { createRoutesClient } from "./resources/routes.js";
 import type {
 	CollectionDocument,
 	CollectionDocumentFilterInput,
@@ -357,4 +358,30 @@ test("document reads with a locale that may be undefined may return either shape
 		"page",
 		boolean
 	> | null>();
+});
+
+test("custom route data is typed by the caller, or a string for text", () => {
+	const client = createRoutesClient({
+		request: async () => ({}) as never,
+	});
+	type Data<T> =
+		Extract<Awaited<T>, { error: undefined }> extends { data: infer D }
+			? D
+			: never;
+
+	const json = client.request<Array<{ id: number }>>({ path: "/search" });
+	const untyped = client.request({ path: "/search" });
+	const text = client.request({ path: "/feed.xml", responseType: "text" });
+
+	expectTypeOf<Data<typeof json>>().toEqualTypeOf<Array<{ id: number }>>();
+	expectTypeOf<Data<typeof untyped>>().toEqualTypeOf<unknown>();
+	expectTypeOf<Data<typeof text>>().toEqualTypeOf<string>();
+
+	// @ts-expect-error filter is written in the document list syntax
+	void client.request({ path: "/search", query: { filter: "a" } });
+	void client.request({ path: "/search", method: "POST", body: { term: "a" } });
+	// @ts-expect-error GET routes take no body
+	void client.request({ path: "/search", body: { term: "a" } });
+	// @ts-expect-error paths are relative to the custom route prefix
+	void client.request({ path: "search" });
 });

@@ -1,6 +1,8 @@
 import { readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import type { Plugin, Rolldown } from "vite";
+import assertNoPublicConflicts from "../../router/assert-no-public-conflicts.js";
+import createPageRouter from "../../router/create-page-router.js";
 import type { ViteManifestChunk } from "../../types.js";
 import { hydrationId, hydrationName } from "../../ui/hydration-ids.js";
 import type { BuiltUi, UiAssets } from "../../ui/site-ui.js";
@@ -82,6 +84,11 @@ const siteClientBuildPlugin = (
 			if (name !== "client") return;
 
 			const templates = await readTemplates(context.root);
+			// Checked as the config resolves, so a build stops before it builds or site:build writes anything.
+			assertNoPublicConflicts(
+				createPageRouter(Object.keys(templates)).pages,
+				context.publicFiles,
+			);
 			analysis = {
 				...(await findVitePaths(templates)),
 				components: context.ui

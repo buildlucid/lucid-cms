@@ -54,7 +54,7 @@ declare module "@lucidkiln/core" {
 				options?: DocumentListOptions,
 			) => Promise<ContentList<ContentDocument<Key, true>>>
 		>;
-		/** A collection's document URLs in the site's locales, such as for `{% export paths = documentPaths("page") %}`. */
+		/** A collection's document URLs in the locales of the render's domain, every site locale unless `siteUrl` puts them on several, such as for `{% export paths = documentPaths("page") %}`. */
 		documentPaths: RenderAware<
 			(
 				render: RenderInfo<SiteState>,
@@ -146,6 +146,8 @@ export type SiteData =
 			prefix: string;
 			/** Changes when a site file other than a template changes, such as a UI component, so cached pages are left behind. */
 			revision: string;
+			/** The project's public files, which no page may share a path with. A change to them restarts the server. */
+			publicFiles: SitePublicFile[];
 	  }
 	| {
 			kind: "build";
@@ -190,7 +192,7 @@ export type SiteRoute = {
 	params: Record<string, string>;
 };
 
-/** What a page's `paths` export lists for a static build: URLs, or values for its file name's parameters. */
+/** What a page's `paths` export lists for a static build, and for the sitemap with `sitemap = true`: URLs, or values for its file name's parameters. */
 export type SitePagePaths = Array<string | Record<string, string | number>>;
 
 export type SitePreview = Extract<
@@ -198,15 +200,21 @@ export type SitePreview = Extract<
 	{ kind: "preview" }
 >;
 
-/** Inputs to the site's `locale` option, with only the path available during static builds. */
+/**
+ * Inputs to the site's `locale` option. Static builds and the sitemap have no request, so headers
+ * and cookies read as missing there and a locale chosen by them is whatever the option falls back to.
+ */
 export type SiteLocaleContext = {
-	/** Decoded request path, without a trailing slash. */
+	/** Decoded request path, without a trailing slash; empty while `paths` exports are evaluated. */
 	path: string;
-	/** The request URL, or null in static builds. */
+	/**
+	 * The request URL. In the sitemap, the page's URL on the domain being listed, or that domain's
+	 * site URL while `paths` exports are evaluated. Null in static builds.
+	 */
 	url: URL | null;
-	/** Reads a request header and adds it to the response's `Vary`; null in static builds. */
+	/** Reads a request header and adds it to the response's `Vary`; null in static builds and the sitemap. */
 	header: (name: string) => string | null;
-	/** Reads a request cookie and adds `Cookie` to the response's `Vary`; undefined in static builds. */
+	/** Reads a request cookie and adds `Cookie` to the response's `Vary`; undefined in static builds and the sitemap. */
 	cookie: (name: string) => string | undefined;
 };
 
@@ -250,7 +258,7 @@ export type SiteFunctionContext = {
 			collection: Key,
 			options?: DocumentListOptions,
 		) => Promise<ContentList<ContentDocument<Key, true>>>;
-		/** A collection's document URLs in the site's locales, the shape a page's `paths` export accepts. */
+		/** A collection's document URLs in the locales of the render's domain, every site locale unless `siteUrl` puts them on several, the shape a page's `paths` export accepts. */
 		documentPaths: (collection: CollectionDocumentKey) => Promise<string[]>;
 		media: (
 			id: number,
@@ -278,7 +286,14 @@ export type SitePluginOptions = {
 	mode?: SiteMode;
 	/** Content locales the site renders, defaulting to every CMS locale. */
 	locales?: string[];
-	/** Chooses a render's locale from the site's locales, such as by path prefix, domain or cookie, or uses the default locale when omitted. */
+	/**
+	 * Chooses a render's locale, such as by path prefix or cookie. The request's domain decides which locales are possible:
+	 * with a `siteUrl` record, those whose URL is on its host, with hosts the record doesn't name on the default locale's
+	 * domain; otherwise every site locale. A domain with one locale renders it without calling the option, so the option
+	 * only chooses between locales that share a domain, and returning one from another domain is an error. When omitted,
+	 * each domain renders its first locale in the order of `locales`, the default locale first. Static builds need every
+	 * site URL on one domain.
+	 */
 	locale?: (context: SiteLocaleContext) => string;
 	/** Default `Cache-Control` for SSR and ISR pages, overridable per page, and for 404 pages; prefer `s-maxage` over browser caching that cannot be purged and bypass CDN caches for the `lucid_preview` cookie. */
 	cacheControl?: string;
@@ -342,6 +357,18 @@ export type SitePage = {
 	revalidate?: number;
 	/** The page's `cacheControl` export, or the site's default, sent as-is outside previews and development. */
 	cacheControl?: string;
-	/** Whether the page has a `paths` export, which static builds evaluate for dynamic pages. */
+	/** Whether the page has a `paths` export, which static builds evaluate for dynamic pages, as the sitemap does for those exporting `sitemap = true`. */
 	paths: boolean;
+	/**
+	 * The page's `sitemap` export, for the SEO plugin's sitemap: `false` leaves the page and the
+	 * documents it renders out, and `true` lists a page with route parameters from its `paths`
+	 * export. Pages without route parameters are listed unless it is `false`.
+	 */
+	sitemap?: boolean;
 };
+
+/** A file a static build writes, by its path within the output folder, such as `/sitemap.xml`. */
+export type SiteStaticFile = { path: string; body: string };
+
+/** A project public file, by its public path, such as `/robots.txt`, and its file from the project root, such as `public/robots.txt`. */
+export type SitePublicFile = { path: string; file: string };

@@ -13,6 +13,14 @@ export default defineConfig([
 		deps: { onlyBundle: false },
 	},
 	{
+		entry: { index: "src/client.ts" },
+		outDir: "dist/client",
+		dts: true,
+		format: "esm",
+		sourcemap: true,
+		clean: true,
+	},
+	{
 		entry: { components: "src/admin/components/index.ts" },
 		outDir: "dist/admin",
 		format: "esm",

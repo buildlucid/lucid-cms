@@ -1,44 +1,15 @@
-import { LucidError, z } from "@lucidcms/core";
+import { LucidError } from "@lucidcms/core";
 import type { CollectionDefinition } from "@lucidcms/core/types";
 import { PLUGIN_KEY } from "../constants.js";
-import type { SeoPluginOptions } from "../types.js";
-
-const optionsSchema = z.strictObject({
-	siteUrl: z.url({ protocol: /^https?$/ }).optional(),
-	collections: z
-		.array(
-			z.strictObject({
-				key: z.string().trim().min(1),
-				localized: z.boolean().optional(),
-				brickKey: z.string().trim().min(1).default("seo"),
-			}),
-		)
-		.min(1),
-});
+import type { SeoPluginOptionsInternal } from "./parse-plugin-options.js";
+import resolveSeoLocalized from "./resolve-seo-localized.js";
 
 /** Resolve and check every target before mutating the configuration. */
 const resolvePluginOptions = (
-	given: SeoPluginOptions,
+	options: SeoPluginOptionsInternal,
 	collections: CollectionDefinition[],
-) => {
-	const parsed = optionsSchema.safeParse(given);
-	if (!parsed.success) {
-		throw new LucidError({
-			scope: PLUGIN_KEY,
-			message: `Invalid SEO plugin options: ${parsed.error.message}`,
-		});
-	}
-
-	const seen = new Set<string>();
-	return parsed.data.collections.map((target) => {
-		if (seen.has(target.key)) {
-			throw new LucidError({
-				scope: PLUGIN_KEY,
-				message: `SEO collection '${target.key}' is configured more than once.`,
-			});
-		}
-		seen.add(target.key);
-
+) =>
+	options.collections.map((target) => {
 		const collection = collections.find((item) => item.key === target.key);
 		if (!collection) {
 			throw new LucidError({
@@ -59,11 +30,7 @@ const resolvePluginOptions = (
 		return {
 			collection,
 			brickKey: target.brickKey,
-			localized:
-				target.localized ??
-				(collection.config.localized !== false &&
-					collection.config.localized !== undefined),
+			localized: resolveSeoLocalized(target, collection),
 		};
 	});
-};
 export default resolvePluginOptions;

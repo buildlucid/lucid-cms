@@ -1,4 +1,6 @@
-export type ParsedJsonResponse =
+import type { LucidResponseType } from "../../types/transport.js";
+
+export type ParsedResponse =
 	| {
 			ok: true;
 			data: unknown;
@@ -9,13 +11,22 @@ export type ParsedJsonResponse =
 	  };
 
 /**
- * Parses JSON once from the raw response and returns an explicit success/error result for transport flow.
+ * Reads the body once and returns an explicit success/error result for transport flow. Successful
+ * text responses stay text; other bodies are parsed as JSON, which must include data on success.
  */
-export const parseJsonResponse = async (
+export const parseResponse = async (
 	response: Response,
-): Promise<ParsedJsonResponse> => {
+	responseType: LucidResponseType = "json",
+): Promise<ParsedResponse> => {
 	try {
 		const text = await response.text();
+		if (responseType === "text" && response.ok) {
+			return {
+				ok: true,
+				data: text,
+			};
+		}
+
 		const data: unknown = text ? JSON.parse(text) : undefined;
 		if (
 			response.ok &&

@@ -1,0 +1,20 @@
+{
+	"plugin.seo.toolkit.sitemap.error.name": "SEO Toolkit Error",
+	"plugin.seo.toolkit.sitemap.error.message": "Lucid toolkit could not build the sitemap.",
+	"plugin.seo.sitemap.disabled": "The sitemap is turned off in the SEO plugin's options.",
+	"plugin.seo.sitemap.site.url.missing": "Set siteUrl in your Lucid config, so the sitemap can build absolute page URLs.",
+	"plugin.seo.sitemap.routing.missing": "Sitemap collection '{{collection}}' has no routing, so its pages have no paths to list. Add routing, such as with the pages plugin, or leave it out of the sitemap's collections.",
+	"plugin.seo.sitemap.environment.unknown": "'{{environment}}' isn't an environment of any collection.",
+	"plugin.seo.sitemap.environment.ambiguous": "Cannot tell which environment the sitemap lists, because collections end in different environments: {{environments}}. Pass an environment, or set the SEO plugin's sitemap environment.",
+	"plugin.seo.sitemap.documents.fetch.failed": "Could not read the '{{collection}}' pages for the sitemap.",
+	"plugin.seo.sitemap.entry.invalid": "A seo.sitemapEntries hook returned an invalid sitemap entry: {{issue}}",
+	"plugin.seo.sitemap.entry.offsite": "A seo.sitemapEntries hook returned {{url}}, which isn't on a configured site URL's origin ({{origins}}). A sitemap can only list its own site's pages.",
+	"plugin.seo.sitemap.file.clash": "Two sitemap files are named '{{file}}'. Rename a collection, or give the hook's entries another file.",
+	"plugin.seo.sitemap.file.not.found": "The sitemap has no '{{file}}' file.",
+	"plugin.seo.sitemap.empty": "The sitemap lists no pages on this site origin, so it has no index.",
+	"plugin.seo.toolkit.robots.error.name": "SEO Toolkit Error",
+	"plugin.seo.toolkit.robots.error.message": "Lucid toolkit could not write robots.txt.",
+	"plugin.seo.robots.disabled": "robots.txt is turned off in the SEO plugin's options.",
+	"plugin.seo.robots.site.url.missing": "Set siteUrl in your Lucid config, so robots.txt knows which site it is for.",
+	"plugin.seo.origin.unknown": "'{{origin}}' isn't one of the configured site origins: {{origins}}."
+}

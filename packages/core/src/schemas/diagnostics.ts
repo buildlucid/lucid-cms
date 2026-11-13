@@ -40,7 +40,8 @@ const diagnosticsResponseSchema = z.object({
 			example: "https://cms.example.com",
 		}),
 		siteUrl: z.string().nullable().meta({
-			description: "The website's URL, or null when none is configured",
+			description:
+				"The default locale's website URL, or null when none is configured",
 			example: "https://example.com/",
 		}),
 		telemetry: z.boolean().meta({

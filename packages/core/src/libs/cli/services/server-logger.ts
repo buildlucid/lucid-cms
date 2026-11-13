@@ -2,6 +2,8 @@ import type { AddressInfo } from "node:net";
 import { clearScreenDown, cursorTo } from "node:readline";
 import type { ResolvedServerUrls } from "vite";
 import constants from "../../../constants/constants.js";
+import type { ResolvedLucidConfig } from "../../../types/config.js";
+import getSiteUrl from "../../../utils/helpers/get-site-url.js";
 import {
 	createPrefix,
 	formatTimestamp,
@@ -31,7 +33,8 @@ export const getServerUrl = (
 /** Prints the introduction once per CLI session, with the website when `siteUrl` is set. */
 export const logServerReady = (props: {
 	url: string;
-	site?: string;
+	/** The config's `siteUrl` and locales, whose default locale's website is listed. */
+	config: Pick<ResolvedLucidConfig, "siteUrl" | "localization">;
 	/** Whether the server serves the OpenAPI documentation, from `http.openAPI.enabled`. */
 	apiDocs: boolean;
 	heading: string;
@@ -58,15 +61,19 @@ export const logServerReady = (props: {
 	});
 };
 
-/** Logs the admin and Lucid documentation URLs, resolving a configured website against the server URL and including OpenAPI when enabled. */
+/**
+ * Logs the admin and Lucid documentation URLs, with the default locale's website resolved against
+ * the server URL and OpenAPI when enabled.
+ */
 const logServerUrls = (props: {
 	url: string;
-	site?: string;
+	config: Pick<ResolvedLucidConfig, "siteUrl" | "localization">;
 	apiDocs: boolean;
 }) => {
-	const { url, site } = props;
+	const { url } = props;
+	const site = getSiteUrl({ ...props.config, url });
 	const links = [
-		site && { label: "🌐 Website", href: new URL(site, url).toString() },
+		site && { label: "🌐 Website", href: site },
 		{ label: "🔐 Admin", href: `${url}/admin` },
 		props.apiDocs && {
 			label: "📚 API Docs",

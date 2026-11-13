@@ -81,7 +81,7 @@ const serveCommand = async () => {
 
 		logServerReady({
 			url: getServerUrl(server.resolvedUrls, server.httpServer.address()),
-			site: project.config.siteUrl,
+			config: project.config,
 			apiDocs: project.config.http.openAPI.enabled,
 			heading: "Serving the build",
 		});

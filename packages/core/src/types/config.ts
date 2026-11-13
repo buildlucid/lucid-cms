@@ -374,8 +374,9 @@ export interface LucidConfig {
 	url: string;
 	/**
 	 * The URL of the website that renders your content, such as `https://example.com`, or a path such as `/` on the CMS's domain.
+	 * For a domain per language, give a URL per content locale. The default locale needs one, and locales without one use it.
 	 */
-	siteUrl?: string;
+	siteUrl?: string | Record<string, string>;
 	/**
 	 * What this deployment serves, defaulting to `primary`. Set it for builds as well as at runtime,
 	 * as it decides whether the admin is built.
@@ -763,7 +764,7 @@ export interface LucidConfig {
 export interface ResolvedLucidConfig {
 	access: AccessGroup[];
 	url: string;
-	siteUrl?: string;
+	siteUrl?: string | Record<string, string>;
 	role: LucidRole;
 	logger: {
 		level: LogLevel;

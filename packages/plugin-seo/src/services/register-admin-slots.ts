@@ -1,9 +1,9 @@
 import type { AdminSlot } from "@lucidcms/admin/types";
 import altGuidanceConfig from "../admin/components/AltGuidance/config.js";
-import indexingGuidanceConfig from "../admin/components/IndexingGuidance/config.js";
-import seoPreviewConfig, {
-	type SeoPreviewOptions,
-} from "../admin/components/SeoPreview/config.js";
+import indexingGuidanceConfig, {
+	type IndexingGuidanceOptions,
+} from "../admin/components/IndexingGuidance/config.js";
+import seoPreviewConfig from "../admin/components/SeoPreview/config.js";
 import seoSummaryConfig from "../admin/components/SeoSummary/config.js";
 import textGuidanceConfig from "../admin/components/TextGuidance/config.js";
 
@@ -11,12 +11,12 @@ import textGuidanceConfig from "../admin/components/TextGuidance/config.js";
 const registerAdminSlots = (
 	collection: string,
 	brick: string,
-	previewOptions: SeoPreviewOptions,
+	options: IndexingGuidanceOptions,
 ): AdminSlot[] => [
 	seoSummaryConfig(collection, brick),
-	seoPreviewConfig(collection, brick, previewOptions),
+	seoPreviewConfig(collection, brick),
 	...textGuidanceConfig(collection, brick),
 	...altGuidanceConfig(collection, brick),
-	indexingGuidanceConfig(collection, brick),
+	indexingGuidanceConfig(collection, brick, options),
 ];
 export default registerAdminSlots;

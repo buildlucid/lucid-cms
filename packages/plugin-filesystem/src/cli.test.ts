@@ -17,6 +17,7 @@ const resolvePluginConfig = async (
 		config: {} as never,
 		projectRoot,
 		runtime: "node",
+		publicFiles: [],
 	});
 	const plugin = vite?.plugins?.[0];
 	return plugin &&

@@ -36,6 +36,7 @@ test("reloads pages when code outside the site directory that a site file import
 				ui: null,
 				extensions: [],
 				runtime: "node",
+				publicFiles: [],
 				prefix: "site/",
 				viteRoot: root,
 				clientBuild: null,

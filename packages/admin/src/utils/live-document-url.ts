@@ -2,6 +2,7 @@ import type { Collection, InternalCollectionDocument } from "@types";
 
 /** Resolves the document's live path on the site origin using the final environment or latest when none exist, returning null without a site, publication or path. */
 export const getLiveDocumentUrl = (props: {
+	/** The website URL of `locale`, as each locale may have its own domain. */
 	siteUrl: string | null;
 	environments: Pick<Collection["publishing"]["environments"][number], "key">[];
 	document: Pick<

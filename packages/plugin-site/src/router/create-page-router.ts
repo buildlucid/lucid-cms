@@ -2,12 +2,14 @@ import { LucidError } from "@lucidcms/core";
 import { addRoute, createRouter } from "rou3";
 import { buildTree, toRou3 } from "unrouting";
 import {
+	HTML_CONTENT_TYPE,
 	PAGES_DIRECTORY,
 	PLUGIN_KEY,
 	TEMPLATE_EXTENSION,
 } from "../constants.js";
 import type { SiteMode, SitePage } from "../types.js";
 import getContentType from "./get-content-type.js";
+import isDynamicPattern from "./is-dynamic-pattern.js";
 import isPageTemplate from "./is-page-template.js";
 import type { PageExports } from "./read-page-exports.js";
 
@@ -46,9 +48,21 @@ const assertExportsFit = (
 			message: `'${page.template}' exports revalidate, which only applies to pages rendered with ISR.`,
 		});
 	}
+	if (page.sitemap === true && page.contentType !== HTML_CONTENT_TYPE) {
+		throw new LucidError({
+			scope: PLUGIN_KEY,
+			message: `'${page.template}' exports sitemap = true, but the sitemap only lists HTML pages.`,
+		});
+	}
+	if (page.sitemap === true && isDynamicPattern(page.pattern) && !page.paths) {
+		throw new LucidError({
+			scope: PLUGIN_KEY,
+			message: `'${page.template}' exports sitemap = true, but the sitemap lists a page with route parameters from its paths export. Add one, such as {% export paths = documentPaths("page") %}.`,
+		});
+	}
 };
 
-/** Routes the templates in `pages/`, with each page's `mode`, `revalidate`, `cacheControl` and `paths` exports keyed by template. */
+/** Routes the templates in `pages/`, with each page's `mode`, `revalidate`, `cacheControl`, `paths` and `sitemap` exports keyed by template. */
 const createPageRouter = (
 	templateNames: Iterable<string>,
 	options: {
@@ -99,6 +113,7 @@ const createPageRouter = (
 			revalidate: exported.revalidate,
 			cacheControl: exported.cacheControl ?? options.cacheControl,
 			paths: exported.paths,
+			sitemap: exported.sitemap,
 		};
 		assertExportsFit(page, exported, siteMode);
 		addRoute(router, "GET", item.path, page);

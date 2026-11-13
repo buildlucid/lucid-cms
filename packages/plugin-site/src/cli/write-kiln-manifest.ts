@@ -29,7 +29,7 @@ const writeKilnManifest = async (props: {
 			loader: memoryLoader({}),
 			config: createSiteConfig(props.config, props.options, null),
 			options: props.options,
-			data: { kind: "dev", prefix: "", revision: "" },
+			data: { kind: "dev", prefix: "", revision: "", publicFiles: [] },
 			lookupTranslation: () => undefined,
 		});
 

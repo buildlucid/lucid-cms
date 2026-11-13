@@ -4,6 +4,7 @@ import type { Loader } from "@lucidkiln/core";
 import type { RouterContext } from "rou3";
 import createFragmentCache from "../cache/create-fragment-cache.js";
 import { PLUGIN_KEY } from "../constants.js";
+import assertNoPublicConflicts from "../router/assert-no-public-conflicts.js";
 import createPageRouter from "../router/create-page-router.js";
 import isDynamicPattern from "../router/is-dynamic-pattern.js";
 import isPageTemplate from "../router/is-page-template.js";
@@ -116,8 +117,10 @@ const loadSite = async (props: {
 		exports,
 	});
 
-	if (props.options.mode === "static" && data.kind === "dev") {
-		warnMissingPaths(pages);
+	// Builds check their public files before anything is built.
+	if (data.kind === "dev") {
+		assertNoPublicConflicts(pages, data.publicFiles);
+		if (props.options.mode === "static") warnMissingPaths(pages);
 	}
 
 	return {

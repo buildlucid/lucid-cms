@@ -546,6 +546,76 @@ describe("@lucidcms/client", () => {
 		},
 	);
 
+	test("calls custom content routes with query values and unwraps JSON data", async () => {
+		const fetchMock = vi
+			.fn<typeof fetch>()
+			.mockResolvedValue(Response.json({ data: [{ id: 1 }] }));
+		const client = createClient({
+			baseUrl: "https://example.com",
+			auth: { type: "apiKey", apiKey: "client-key" },
+			fetch: fetchMock,
+		});
+
+		const response = await client.routes.request<Array<{ id: number }>>({
+			path: "/search/pages",
+			query: { term: "a, b", tags: ["x", "y"], draft: false, page: undefined },
+		});
+
+		expect(response.error).toBeUndefined();
+		expect(response.data).toEqual([{ id: 1 }]);
+		const [url, init] = fetchMock.mock.calls[0] ?? [];
+		expect(String(url)).toBe(
+			"https://example.com/api/v1/content/e/search/pages?term=a%2C+b&tags=x%2Cy&draft=false",
+		);
+		expect(init?.method).toBe("GET");
+		expect(new Headers(init?.headers).get("authorization")).toBe(
+			"ApiKey client-key",
+		);
+		expect(new Headers(init?.headers).get("accept")).toBe("application/json");
+	});
+
+	test("returns text route bodies as strings and still maps JSON errors", async () => {
+		const xml = '<?xml version="1.0"?><feed />';
+		const fetchMock = vi
+			.fn<typeof fetch>()
+			.mockResolvedValueOnce(
+				new Response(xml, { headers: { "content-type": "application/xml" } }),
+			)
+			.mockResolvedValueOnce(
+				Response.json(
+					{ name: "Not found", message: "Missing", status: 404, code: "gone" },
+					{ status: 404 },
+				),
+			);
+		const client = createClient({
+			baseUrl: "https://example.com",
+			auth: { type: "apiKey", apiKey: "client-key" },
+			fetch: fetchMock,
+		});
+
+		const text = await client.routes.request({
+			path: "/feed.xml",
+			responseType: "text",
+		});
+		const missing = await client.routes.request({
+			path: "/feed-2.xml",
+			responseType: "text",
+		});
+
+		expect(text.error).toBeUndefined();
+		expect(text.data).toBe(xml);
+		expect(
+			new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get("accept"),
+		).toBe("*/*");
+		expect(missing.data).toBeUndefined();
+		expect(missing.error).toMatchObject({
+			kind: "http",
+			status: 404,
+			code: "gone",
+			message: "Missing",
+		});
+	});
+
 	test("accepts a full content endpoint base URL without duplicating the content path", async () => {
 		const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
 			new Response(

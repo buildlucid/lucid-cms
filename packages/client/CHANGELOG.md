@@ -8,6 +8,7 @@
 - Added `locale`, `fallbackLocale` and `depth` options to reads.
 - Added `include: ["transcripts"]` to `media.getMultiple` for audio transcripts.
 - Added `previewAttributes`, `recordPreviewTargets` and `getPreviewTarget` for marking fields, bricks and repeater items for visual editing.
+- Added `client.routes.request()` for calling content API routes that plugins and projects add.
 
 ### Breaking Changes:
 

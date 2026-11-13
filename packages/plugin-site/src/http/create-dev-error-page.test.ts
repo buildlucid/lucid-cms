@@ -10,7 +10,7 @@ describe("createDevErrorPage", () => {
 		expect(
 			createDevErrorPage({
 				error,
-				data: { kind: "dev", prefix: "site/", revision: "1" },
+				data: { kind: "dev", prefix: "site/", revision: "1", publicFiles: [] },
 			}),
 		).toContain(VITE_CLIENT);
 		expect(createDevErrorPage({ error, data: null })).not.toContain(

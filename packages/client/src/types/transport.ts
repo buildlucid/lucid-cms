@@ -45,6 +45,9 @@ export type LucidRequestOptions = {
 	retry?: LucidRetryInput;
 };
 
+/** How a successful response body is read: Lucid's JSON `{ data }` envelope, or the body as text. */
+export type LucidResponseType = "json" | "text";
+
 export type LucidRequestDescriptor = {
 	operation: string;
 	method: "GET" | "POST";
@@ -52,6 +55,8 @@ export type LucidRequestDescriptor = {
 	query?: Record<string, unknown>;
 	body?: unknown;
 	request?: LucidRequestOptions;
+	/** Defaults to `json`. Error bodies are read as JSON either way. */
+	responseType?: LucidResponseType;
 	/** Returns the response's rows and pagination as `{ items, pagination }`. */
 	list?: boolean;
 	/** The error code of a 404 that means nothing matched, which returns null data instead of an error. */

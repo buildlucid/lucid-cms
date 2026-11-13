@@ -98,6 +98,11 @@ export const readDocumentRoute = (options: {
 	return {
 		field: options.field,
 		path: typeof value === "string" ? value : undefined,
+		localized:
+			config !== undefined &&
+			"localized" in config &&
+			config.localized === true &&
+			options.localized,
 	};
 };
 

@@ -1,12 +1,32 @@
-import type { ServiceContext } from "../services/types.js";
-import getBaseUrl from "./get-base-url.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 
-/** Resolves `siteUrl` against the CMS's base URL, returning null when no website is configured. */
-const getSiteUrl = (context: ServiceContext): string | null => {
-	const url = context.config.siteUrl;
-	if (!url) return null;
+/** The config values a website's URL is resolved from. */
+export type SiteUrlConfig = Pick<
+	ResolvedLucidConfig,
+	"url" | "siteUrl" | "localization"
+>;
 
-	return new URL(url, getBaseUrl(context)).toString();
+/**
+ * Resolves the website's URL for a content locale against the CMS's `url`: the locale's own
+ * `siteUrl` entry, or the default locale's when it has none or no locale is given. Null when no
+ * website is configured.
+ */
+const getSiteUrl = (
+	config: SiteUrlConfig,
+	locale?: string | null,
+): string | null => {
+	const { siteUrl } = config;
+	if (siteUrl === undefined) return null;
+
+	const { defaultLocale } = config.localization;
+	const value =
+		typeof siteUrl === "string"
+			? siteUrl
+			: ((locale ? siteUrl[locale] : undefined) ??
+				(defaultLocale === null ? undefined : siteUrl[defaultLocale]));
+	if (value === undefined) return null;
+
+	return new URL(value, config.url).toString();
 };
 
 export default getSiteUrl;

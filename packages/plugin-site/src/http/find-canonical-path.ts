@@ -1,6 +1,7 @@
 import { findRoute, type RouterContext } from "rou3";
 import { HTML_CONTENT_TYPE } from "../constants.js";
 import type { SitePage, SiteTrailingSlash } from "../types.js";
+import applyTrailingSlash from "../utils/apply-trailing-slash.js";
 
 /**
  * The path an HTML page request should redirect to, or null when it's already canonical: repeated slashes collapsed and the
@@ -12,10 +13,7 @@ const findCanonicalPath = (props: {
 	router: RouterContext<SitePage>;
 	trailingSlash: SiteTrailingSlash;
 }): string | null => {
-	const collapsed = props.pathname.replace(/\/{2,}/g, "/");
-	const bare = collapsed.length > 1 ? collapsed.replace(/\/$/, "") : collapsed;
-	const canonical =
-		props.trailingSlash === "always" && bare !== "/" ? `${bare}/` : bare;
+	const canonical = applyTrailingSlash(props.pathname, props.trailingSlash);
 	if (canonical === props.pathname) return null;
 
 	const match = findRoute(props.router, "GET", canonical);

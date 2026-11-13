@@ -17,7 +17,7 @@ import {
 	buildRequestHeaders,
 	resolveAuthorizationHeader,
 } from "../utils/transport/headers.js";
-import { parseJsonResponse } from "../utils/transport/response.js";
+import { parseResponse } from "../utils/transport/response.js";
 import {
 	buildRetryDelay,
 	mergeRetryConfig,
@@ -78,6 +78,7 @@ export const createTransport = (
 					requestHeaders: descriptor.request?.headers,
 					authorization: authorization.data,
 					hasBody: descriptor.body !== undefined,
+					responseType: descriptor.responseType,
 				});
 
 				let url = new URL(
@@ -191,7 +192,10 @@ export const createTransport = (
 					if (patched) response = patched;
 				}
 
-				const parsedBody = await parseJsonResponse(response);
+				const parsedBody = await parseResponse(
+					response,
+					descriptor.responseType,
+				);
 				if (!parsedBody.ok) {
 					let parseError = createParseError(
 						"Lucid returned an invalid JSON response.",
@@ -251,6 +255,10 @@ export const createTransport = (
 					}
 
 					return createClientErrorResponse(httpError, response);
+				}
+
+				if (descriptor.responseType === "text") {
+					return { data: parsedBody.data as TData, error: undefined, response };
 				}
 
 				const body = parsedBody.data as { data: unknown; pagination?: unknown };

@@ -586,11 +586,12 @@ export const PageBuilderHeader: Component<{
 		const document = props.state.document();
 		if (props.mode !== "edit" || !collection || !document) return null;
 
+		const locale = documentLocalization.contentLocale() || null;
 		return getLiveDocumentUrl({
-			siteUrl: siteStore.get.siteUrl,
+			siteUrl: siteStore.get.getSiteUrl(locale),
 			environments: collection.publishing.environments,
 			document,
-			locale: documentLocalization.contentLocale() || null,
+			locale,
 		});
 	});
 	const scopedPreviewOnly = createMemo(() => {

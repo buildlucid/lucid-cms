@@ -341,6 +341,11 @@ export type LucidHook<
 	handler: HookServiceHandlers[S][E];
 	/** Lower values execute first. Defaults to zero. */
 	order?: number;
+	/**
+	 * Skips the hook when its event's plugin is not configured, allowing optional cross-plugin
+	 * subscriptions.
+	 */
+	optional?: boolean;
 };
 
 export type LucidHookDocuments<

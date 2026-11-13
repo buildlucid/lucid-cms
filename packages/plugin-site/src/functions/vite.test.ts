@@ -4,7 +4,12 @@ import propTypes from "../content/prop-types.js";
 import type { BuiltSiteData, SiteData, SiteState } from "../types.js";
 import createViteFunction from "./vite.js";
 
-const dev: SiteData = { kind: "dev", prefix: "site/", revision: "1" };
+const dev: SiteData = {
+	kind: "dev",
+	prefix: "site/",
+	revision: "1",
+	publicFiles: [],
+};
 
 const build = (manifest: BuiltSiteData["manifest"]) =>
 	({

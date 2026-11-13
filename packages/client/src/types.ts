@@ -123,6 +123,13 @@ export type {
 	PreviewsResolveResponse,
 } from "./resources/previews.js";
 
+export type {
+	LucidRoutesClient,
+	RoutesQueryValue,
+	RoutesRequestInput,
+	RoutesRequestResponse,
+} from "./resources/routes.js";
+
 export type { MediaFilters, MediaListOptions } from "./types/contracts.js";
 
 export type {
@@ -143,6 +150,7 @@ export type {
 	LucidMiddlewareRequestContext,
 	LucidMiddlewareResponseContext,
 	LucidRequestOptions,
+	LucidResponseType,
 	LucidRetryConfig,
 	LucidRetryInput,
 } from "./types/transport.js";

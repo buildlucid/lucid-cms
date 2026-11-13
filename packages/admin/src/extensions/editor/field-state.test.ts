@@ -95,7 +95,11 @@ describe("extension document route", () => {
 					localized: true,
 				}),
 			);
-			expect(route()).toEqual({ field: "title", path: "English" });
+			expect(route()).toEqual({
+				field: "title",
+				path: "English",
+				localized: true,
+			});
 			set("fields", 0, "translations", "en", "/unsaved-route");
 			expect(route()?.path).toBe("/unsaved-route");
 			set("locale", "fr");
@@ -110,6 +114,7 @@ describe("extension document route", () => {
 		expect(readDocumentRoute({ ...options, field: "title" })).toEqual({
 			field: "title",
 			path: "Shared",
+			localized: false,
 		});
 		expect(readDocumentRoute({ ...options, field: undefined })).toBeUndefined();
 		expect(

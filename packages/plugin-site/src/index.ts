@@ -8,6 +8,10 @@ export type {
 	LocalizedUser,
 } from "@lucidcms/core/types";
 export { default as defineSiteFunction } from "./functions/define-site-function.js";
+export type {
+	SiteStaticFilesHookData,
+	SiteStaticFilesHookMeta,
+} from "./hook-events/index.js";
 export { default as site } from "./plugin.js";
 export type {
 	SiteExtension,
@@ -19,5 +23,6 @@ export type {
 	SitePluginOptions,
 	SitePreview,
 	SiteState,
+	SiteStaticFile,
 	SiteTranslationKey,
 } from "./types.js";

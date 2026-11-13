@@ -1,6 +1,6 @@
 import { aiFeatureAccess } from "@ai-feature-access";
 import type { ConnectionStatus, Settings } from "@types";
-import { createStore } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 
 type AiSettings = NonNullable<Settings["ai"]>;
@@ -9,10 +9,14 @@ export type AiFeature = keyof AiSettings["features"];
 
 type SiteStoreT = {
 	connection: ConnectionStatus | null;
-	/** The website's absolute URL, or null when none is configured. */
+	/** The default locale's website URL, or null when none is configured. */
 	siteUrl: string | null;
+	/** Each content locale's website URL, keyed by locale code. */
+	siteUrls: Record<string, string>;
 	ai: AiSettings;
 	reset: () => void;
+	/** A content locale's website URL, or the default locale's without a locale or a URL of its own. */
+	getSiteUrl: (_locale?: string | null) => string | null;
 	isAiFeatureEnabled: (_feature: AiFeature) => boolean;
 	hasAnyAiFeatureEnabled: () => boolean;
 };
@@ -35,11 +39,16 @@ const defaultAiSettings = (): AiSettings => ({
 const [get, set] = createStore<SiteStoreT>({
 	connection: null,
 	siteUrl: null,
+	siteUrls: {},
 	ai: defaultAiSettings(),
 	reset() {
 		set("connection", null);
 		set("siteUrl", null);
+		set("siteUrls", reconcile({}));
 		set("ai", defaultAiSettings());
+	},
+	getSiteUrl(locale) {
+		return (locale ? this.siteUrls[locale] : undefined) ?? this.siteUrl;
 	},
 	//* When organisation access is unknown, use configuration alone; Lucid still checks remote requests.
 	isAiFeatureEnabled(feature) {
@@ -73,8 +82,10 @@ const siteStore = {
 	setConnection(connection: ConnectionStatus | null) {
 		set("connection", connection);
 	},
-	setSiteUrl(url: string | null | undefined) {
-		set("siteUrl", url ?? null);
+	setSite(site: Settings["site"] | undefined) {
+		set("siteUrl", site?.url ?? null);
+		//* reconciled, as setting an object merges it and would keep locales the response no longer has
+		set("siteUrls", reconcile(site?.locales ?? {}));
 	},
 	setAi(ai: Settings["ai"] | undefined) {
 		set("ai", ai ?? defaultAiSettings());

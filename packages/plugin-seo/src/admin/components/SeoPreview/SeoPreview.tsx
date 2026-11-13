@@ -2,6 +2,7 @@ import { Select } from "@lucidcms/admin/components";
 import {
 	useAdminConfig,
 	useDocumentEditor,
+	useSiteUrl,
 	useTranslation,
 } from "@lucidcms/admin/hooks";
 import type { SlotComponent } from "@lucidcms/admin/types";
@@ -30,6 +31,7 @@ const SeoPreview: SlotComponent<ReturnType<typeof seoPreviewConfig>> = (
 	const { t } = useTranslation();
 	const config = useAdminConfig();
 	const editor = useDocumentEditor();
+	const siteUrl = useSiteUrl(() => editor.locale.current);
 	const [view, setView] = createSignal<PreviewView>("search");
 
 	// ----------------------------------
@@ -49,7 +51,7 @@ const SeoPreview: SlotComponent<ReturnType<typeof seoPreviewConfig>> = (
 		try {
 			return new URL(
 				text(fields.canonicalUrl) || editor.route?.path || "",
-				props.options.siteUrl,
+				siteUrl() ?? undefined,
 			);
 		} catch {
 			return undefined;

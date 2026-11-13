@@ -36,6 +36,7 @@
 - Added `http.serverTiming`, which reports how many database queries each request ran, and how long they took, in a `Server-Timing` header. ([9a13932](https://github.com/buildlucid/lucid-cms/commit/9a13932b428edc9160987cd6de8c58efbbee9826))
 - Job schedules can take a `when` check that skips a run with nothing to do, so quiet minutes store no jobs. ([aa2114d](https://github.com/buildlucid/lucid-cms/commit/aa2114d59ea05f7707a8ec1812c37ef763212133))
 - Seeds can now upload media and import content with media, and a seed that fails deletes the files it stored.
+- Hooks can now set `optional: true` to subscribe to another plugin's events, and are left out when that plugin isn't installed.
 
 ### Breaking Changes:
 

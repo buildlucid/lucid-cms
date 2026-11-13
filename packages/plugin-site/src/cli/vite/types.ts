@@ -1,4 +1,4 @@
-import type { BuiltSiteData } from "../../types.js";
+import type { BuiltSiteData, SitePublicFile } from "../../types.js";
 import type { ResolvedIntegrations } from "../ui/resolve-integrations.js";
 
 /** What a client build produced, which the server build embeds and `site:build` reads. */
@@ -17,6 +17,8 @@ export type SiteViteContext = {
 	extensions: string[];
 	/** The runtime adapter's key. */
 	runtime: string;
+	/** The project's public files, which no page may share a path with. */
+	publicFiles: SitePublicFile[];
 	/** The site directory's path from Vite's root with a trailing slash, set during config resolution. */
 	prefix: string;
 	/** The Vite root, set during config resolution. */

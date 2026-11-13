@@ -7,8 +7,13 @@ const settingsResponseSchema = z.object({
 		.object({
 			url: z.url().nullable().meta({
 				description:
-					"The website's absolute URL, or null when none is configured",
+					"The default locale's website URL, or null when none is configured",
 				example: "https://example.com/",
+			}),
+			locales: z.record(z.string(), z.url()).meta({
+				description:
+					"Each content locale's website URL, keyed by locale code. Locales without their own use the default locale's",
+				example: { en: "https://example.com/", fr: "https://example.fr/" },
 			}),
 		})
 		.optional(),

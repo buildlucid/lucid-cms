@@ -10,6 +10,7 @@ export { usePermissions } from "../hooks/usePermissions/usePermissions.js";
 export * from "../hooks/useQueryState/useQueryState.js";
 export { default as useQueryState } from "../hooks/useQueryState/useQueryState.js";
 export { useSession } from "../hooks/useSession/useSession.js";
+export { useSiteUrl } from "../hooks/useSiteUrl/useSiteUrl.js";
 export {
 	type TableRowId,
 	type TableSelection,

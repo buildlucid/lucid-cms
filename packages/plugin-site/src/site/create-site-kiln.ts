@@ -75,10 +75,11 @@ const createSiteKiln = (props: {
 	} satisfies KilnFunctions;
 
 	const kiln = props.options.kiln ?? {};
+	// What extensions may register sets the entry type, and built-ins must fit it.
 	const merge = <Value>(
 		kind: KilnEntryKind,
 		pick: (source: SiteEntries) => Record<string, Value> | undefined,
-		builtIns?: Record<string, Value>,
+		builtIns?: Record<string, NoInfer<Value>>,
 	) =>
 		mergeKilnEntries({
 			kind,

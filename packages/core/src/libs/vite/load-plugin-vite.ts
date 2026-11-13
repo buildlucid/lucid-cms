@@ -17,6 +17,7 @@ const loadPluginVite = async (props: {
 			config: props.project.config,
 			projectRoot: props.project.projectRoot,
 			runtime: props.project.adapter.key,
+			publicFiles: props.project.resources.files.public,
 		});
 		if (vite) additions.push({ key, ...vite });
 	}

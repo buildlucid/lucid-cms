@@ -76,7 +76,7 @@ const NavigationShell: Component<{
 
 		if (settings.isSuccess) {
 			siteStore.setAi(settings.data.data.ai);
-			siteStore.setSiteUrl(settings.data.data.site?.url);
+			siteStore.setSite(settings.data.data.site);
 		}
 
 		if (connection.isSuccess && settings.isSuccess) setSynced(true);

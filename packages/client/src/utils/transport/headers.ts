@@ -7,6 +7,7 @@ import {
 import type {
 	LucidClientAuth,
 	LucidHeaderFactory,
+	LucidResponseType,
 } from "../../types/transport.js";
 
 /**
@@ -103,11 +104,17 @@ export const buildRequestHeaders = async (input: {
 	requestHeaders?: HeadersInit;
 	authorization: string;
 	hasBody: boolean;
+	responseType?: LucidResponseType;
 }): Promise<Headers> => {
 	const baseHeaders = await resolveHeaders(input.baseHeaders);
 	const headers = mergeHeaders(baseHeaders, input.requestHeaders);
 
-	headers.set(ACCEPT_HEADER, JSON_CONTENT_TYPE);
+	//* text responses can be any format, so they keep an accept header the caller set
+	if (input.responseType !== "text") {
+		headers.set(ACCEPT_HEADER, JSON_CONTENT_TYPE);
+	} else if (!headers.has(ACCEPT_HEADER)) {
+		headers.set(ACCEPT_HEADER, "*/*");
+	}
 	headers.set(AUTHORIZATION_HEADER, input.authorization);
 
 	if (input.hasBody && !headers.has(CONTENT_TYPE_HEADER)) {

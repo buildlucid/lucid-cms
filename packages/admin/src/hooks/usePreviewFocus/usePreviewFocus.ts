@@ -134,6 +134,7 @@ export const usePreviewFocus = (props: {
 			? await findLinkedDocument({
 					url: new URL(href),
 					siteUrl: siteStore.get.siteUrl,
+					siteUrls: siteStore.get.siteUrls,
 					collections: props.collections(),
 				})
 			: null;

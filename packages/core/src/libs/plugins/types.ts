@@ -136,6 +136,8 @@ export type LucidPluginCliHooks = {
 		projectRoot: string;
 		/** The runtime adapter's key, such as `node` or `cloudflare`. */
 		runtime: string;
+		/** Public directory and `sources.public` files, with `path` naming each file on disk and `name` its public path. */
+		publicFiles: ResourceFile[];
 	}) => LucidPluginVite | Promise<LucidPluginVite>;
 };
 

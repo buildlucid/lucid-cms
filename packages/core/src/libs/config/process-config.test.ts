@@ -7,6 +7,9 @@ import defineCollection from "../collection/define-collection.js";
 import field from "../collection/definitions/fields/field.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { defineTable } from "../db/client/table/definition.js";
+import defineHookEvents from "../hooks/define-hook-events.js";
+import defineHook from "../hooks/define-hook.js";
+import type { EffectHookEvent } from "../hooks/types.js";
 import defineContentApiRoute from "../http/define-content-api-route.js";
 import defineJob from "../jobs/define-job.js";
 import { getJobDefinitionRuntime, getJobRegistry } from "../jobs/registry.js";
@@ -30,6 +33,14 @@ const config: LucidConfig = {
 	collections: [],
 	plugins: [],
 };
+
+declare module "../hooks/types.js" {
+	interface PluginHookEvents {
+		configTest: {
+			afterSync: EffectHookEvent<Record<string, never>, { ids: number[] }>;
+		};
+	}
+}
 
 test("processes each config independently", async () => {
 	const requestAdapter = createAdapter("request");
@@ -172,6 +183,49 @@ test("rejects static content-route scopes that cannot be granted", async () => {
 		),
 	).rejects.toThrow(
 		'Content route "GET /missing-collection" uses unavailable scopes: documents:missing:read.',
+	);
+});
+
+test("leaves out optional hooks whose event no configured plugin registers", async () => {
+	const hookEvents = defineHookEvents({
+		key: "configTest",
+		events: { afterSync: "effect" },
+	});
+	const hook = defineHook({
+		service: "configTest",
+		event: "afterSync",
+		optional: true,
+		handler: async () => {},
+	});
+	const options = {
+		resolvedDb: createAdapter("request"),
+		skipValidation: true,
+	};
+
+	const missing = await processConfig({ ...config, hooks: [hook] }, options);
+	const configured = await processConfig(
+		{
+			...config,
+			hooks: [hook],
+			plugins: [{ key: "sync-plugin", hookEvents }],
+		},
+		options,
+	);
+
+	//* config merging copies hooks, so compare them by value
+	expect(missing.hooks).not.toContainEqual(hook);
+	expect(configured.hooks).toContainEqual(hook);
+	await expect(
+		processConfig(
+			{
+				...config,
+				secrets: "a".repeat(64),
+				hooks: [{ ...hook, optional: false }],
+			},
+			{ resolvedDb: createAdapter("request") },
+		),
+	).rejects.toThrow(
+		'Hook event "configTest.afterSync" isn\'t registered by Lucid or a configured plugin.',
 	);
 });
 
@@ -400,6 +454,18 @@ test("site URLs must be http(s) URLs or root paths", async () => {
 	await expect(processSite("https://example.com")).resolves.toBeDefined();
 	await expect(processSite("//elsewhere.example")).rejects.toThrow();
 	await expect(processSite("javascript:alert(1)")).rejects.toThrow();
+
+	const processSiteUrls = (siteUrl: Record<string, string>) =>
+		processConfig(
+			{ ...config, url: "http://localhost:6543", siteUrl },
+			{ resolvedDb: createAdapter("test"), skipValidation: true },
+		);
+	await expect(
+		processSiteUrls({ en: "/", fr: "https://example.fr" }),
+	).resolves.toMatchObject({ siteUrl: { en: "/", fr: "https://example.fr" } });
+	await expect(
+		processSiteUrls({ en: "//elsewhere.example" }),
+	).rejects.toThrow();
 });
 
 test("project configure has the final choice after ordered plugin transforms", async () => {

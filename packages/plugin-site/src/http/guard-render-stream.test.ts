@@ -28,7 +28,7 @@ const guard = async (template: string, development: boolean) =>
 	guardRenderStream(await kiln.renderStream(template), {
 		path: "/",
 		development,
-		data: { kind: "dev", prefix: "", revision: "test" },
+		data: { kind: "dev", prefix: "", revision: "test", publicFiles: [] },
 		signal: new AbortController().signal,
 	});
 

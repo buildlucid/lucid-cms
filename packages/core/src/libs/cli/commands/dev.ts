@@ -212,7 +212,7 @@ const devCommand = async (options?: {
 
 		logServerReady({
 			url: getServerUrl(server.resolvedUrls, server.httpServer?.address()),
-			site: project.config.siteUrl,
+			config: project.config,
 			apiDocs: project.config.http.openAPI.enabled,
 			heading: "Development server ready",
 			elapsed: elapsed(),

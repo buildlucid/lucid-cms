@@ -13,6 +13,7 @@ export { default as getEmailFrom } from "./get-email-from.js";
 export { default as getFilterValues } from "./get-filter-values.js";
 export { default as getLastPage } from "./get-last-page.js";
 export { default as getSiteUrl } from "./get-site-url.js";
+export { default as getSiteUrls } from "./get-site-urls.js";
 export { getNumber, getObject } from "./get-typed-value.js";
 export {
 	default as groupDocumentFilters,

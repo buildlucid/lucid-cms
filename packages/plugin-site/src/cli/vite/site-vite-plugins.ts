@@ -1,4 +1,5 @@
 import type { Plugin } from "vite";
+import type { SitePublicFile } from "../../types.js";
 import type { ResolvedIntegrations } from "../ui/resolve-integrations.js";
 import siteAcceptPlugin from "./site-accept-plugin.js";
 import siteClientBuildPlugin from "./site-client-build-plugin.js";
@@ -13,6 +14,7 @@ const siteVitePlugins = (props: {
 	ui: ResolvedIntegrations | null;
 	/** The runtime adapter's key. */
 	runtime: string;
+	publicFiles: SitePublicFile[];
 }): Plugin[] => {
 	const context: SiteViteContext = {
 		root: props.root,
@@ -23,6 +25,7 @@ const siteVitePlugins = (props: {
 			),
 		],
 		runtime: props.runtime,
+		publicFiles: props.publicFiles,
 		prefix: "",
 		viteRoot: "",
 		clientBuild: null,
