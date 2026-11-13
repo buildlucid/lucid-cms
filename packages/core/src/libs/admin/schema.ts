@@ -2,6 +2,7 @@ import type {
 	AdminConfig,
 	AdminNavigationIcon,
 	DocumentSidebarSectionKey,
+	PreviewToolbarItemKey,
 	ValueFieldType,
 } from "@lucidcms/admin/types";
 import z from "zod";
@@ -116,6 +117,15 @@ const documentSidebarSection = z.enum({
 	requests: "requests",
 	details: "details",
 } satisfies { [Section in DocumentSidebarSectionKey]: Section });
+
+//* keyed by item, so a toolbar item missing here fails the type check
+const previewToolbarItem = z.enum({
+	width: "width",
+	zoom: "zoom",
+	edit: "edit",
+	refresh: "refresh",
+	open: "open",
+} satisfies { [Item in PreviewToolbarItemKey]: Item });
 
 const homeWidgetSize = z.enum(["sm", "md", "lg", "full"]);
 
@@ -256,6 +266,22 @@ export const adminConfigSchema = z
 							.union([
 								z.strictObject({ before: documentSidebarSection }),
 								z.strictObject({ after: documentSidebarSection }),
+							])
+							.optional(),
+					}),
+					z.strictObject({
+						...userSlotBase,
+						slot: z.literal("document.preview"),
+						match: z.strictObject({ collection: key.optional() }).optional(),
+					}),
+					z.strictObject({
+						...userSlotBase,
+						slot: z.literal("document.previewToolbar"),
+						match: z.strictObject({ collection: key.optional() }).optional(),
+						position: z
+							.union([
+								z.strictObject({ before: previewToolbarItem }),
+								z.strictObject({ after: previewToolbarItem }),
 							])
 							.optional(),
 					}),

@@ -12,6 +12,7 @@ declare module "virtual:lucid-admin" {
 		CaptchaWidgetProps,
 		DocumentListSlot,
 		DocumentListSlotProps,
+		DocumentPreviewSlotProps,
 		DocumentSidebarSlot,
 		DocumentSidebarSlotProps,
 		FieldSlot,
@@ -20,6 +21,7 @@ declare module "virtual:lucid-admin" {
 		HomeWidgetSlot,
 		MaintenanceSlot,
 		MaintenanceSlotProps,
+		PreviewToolbarSlotProps,
 	} from "@lucidcms/admin/types";
 	import type { Component } from "solid-js";
 
@@ -82,6 +84,18 @@ declare module "virtual:lucid-admin" {
 			Extract<AdminSlot, { slot: DocumentSidebarSlot }>,
 			Component<DocumentSidebarSlotProps<AdminOptions | undefined>>
 		>
+	>;
+
+	/** The preview's replacement and toolbar slots narrow by `slot`, like the agent's. */
+	export const documentPreviewSlots: Array<
+		| SlotRegistration<
+				Extract<AdminSlot, { slot: DocumentPreviewSlotProps["slot"] }>,
+				Component<DocumentPreviewSlotProps<AdminOptions | undefined>>
+		  >
+		| SlotRegistration<
+				Extract<AdminSlot, { slot: PreviewToolbarSlotProps["slot"] }>,
+				Component<PreviewToolbarSlotProps<AdminOptions | undefined>>
+		  >
 	>;
 
 	export const captchaSlots: Array<

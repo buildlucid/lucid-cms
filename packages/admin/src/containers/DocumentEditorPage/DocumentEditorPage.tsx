@@ -24,6 +24,7 @@ import { CollectionPseudoBrick } from "@/components/CollectionPseudoBrick/Collec
 import DocumentComparisonBar from "@/components/DocumentComparison/DocumentComparisonBar";
 import ReadOnlyDocument from "@/components/DocumentComparison/ReadOnlyDocument";
 import { DocumentPreview } from "@/components/DocumentPreview/DocumentPreview";
+import { findPreviewReplacement } from "@/components/DocumentPreview/utils/find-preview-replacement";
 import { DocumentSidebar } from "@/components/DocumentSidebar/DocumentSidebar";
 import { FixedBricks } from "@/components/FixedBricks/FixedBricks";
 import {
@@ -558,7 +559,8 @@ const DocumentEditorPage: Component<{
 		if (comparison.selectedKey() !== undefined) return "compare";
 		if (
 			props.mode === "edit" &&
-			docState.collection()?.capabilities.preview !== false &&
+			(docState.collection()?.capabilities.preview !== false ||
+				findPreviewReplacement(docState.collectionKey()) !== undefined) &&
 			userPreferencesStore.getCollectionPreviewOpen(docState.collectionKey())
 		) {
 			return "preview";

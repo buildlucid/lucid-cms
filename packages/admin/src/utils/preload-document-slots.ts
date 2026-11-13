@@ -1,5 +1,6 @@
 import {
 	brickSlots,
+	documentPreviewSlots,
 	documentSidebarSlots,
 	fieldSlots,
 } from "virtual:lucid-admin";
@@ -10,9 +11,12 @@ import {
  */
 const preloadDocumentSlots = () =>
 	Promise.allSettled(
-		[...fieldSlots, ...brickSlots, ...documentSidebarSlots].map((entry) =>
-			entry.component.preload(),
-		),
+		[
+			...fieldSlots,
+			...brickSlots,
+			...documentSidebarSlots,
+			...documentPreviewSlots,
+		].map((entry) => entry.component.preload()),
 	);
 
 export default preloadDocumentSlots;

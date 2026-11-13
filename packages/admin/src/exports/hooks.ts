@@ -5,6 +5,7 @@ import {
 export { Permissions } from "../constants/permissions.js";
 export { useAdminConfig } from "../hooks/useAdminConfig/useAdminConfig.js";
 export { useDocumentEditor } from "../hooks/useDocumentEditor/useDocumentEditor.js";
+export { useDocumentPreview } from "../hooks/useDocumentPreview/useDocumentPreview.js";
 export { usePageTitle } from "../hooks/usePageTitle/usePageTitle.js";
 export { usePermissions } from "../hooks/usePermissions/usePermissions.js";
 export * from "../hooks/useQueryState/useQueryState.js";

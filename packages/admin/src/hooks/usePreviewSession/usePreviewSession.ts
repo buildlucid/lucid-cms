@@ -10,7 +10,7 @@ import {
 	on,
 	onCleanup,
 } from "solid-js";
-import type { ResolverState } from "@/components/DocumentPreview/parts/PreviewCanvas";
+import type { PreviewPageState } from "@/components/DocumentPreview/types";
 import type { PreviewBridge } from "@/components/DocumentPreview/utils/preview-bridge";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import type { BuilderPreview } from "@/hooks/useBuilderPreview/useBuilderPreview";
@@ -41,8 +41,8 @@ type Session = {
 };
 
 /**
- * The preview session the frame shows while it's open: made for the document's version and
- * locale, sent the editor's unsaved content as it changes, and replaced before it expires.
+ * Maintains a preview session for the document version and locale, syncing unsaved edits and
+ * renewing before expiry.
  */
 export const usePreviewSession = (props: {
 	preview: BuilderPreview;
@@ -62,7 +62,7 @@ export const usePreviewSession = (props: {
 	let refreshQueued = false;
 	let initialScrollRestore = props.preview.scroll.take();
 	const [url, setUrl] = createSignal<string | null>(null);
-	const [state, setState] = createSignal<ResolverState>("idle");
+	const [state, setState] = createSignal<PreviewPageState>("idle");
 	const [frameLoading, setFrameLoading] = createSignal(false);
 
 	// -------------------------------

@@ -125,6 +125,42 @@ describe("preview page bridge scroll", () => {
 	});
 });
 
+describe("preview page bridge markup", () => {
+	test("sends the page's current markup to the connected builder", () => {
+		const postMessage = vi
+			.spyOn(window.parent, "postMessage")
+			.mockImplementation(() => undefined);
+		const { cleanup } = installPreviewBridge(window, () => []);
+		const parentOrigin = "https://admin.example";
+		document.title = "Pricing";
+		for (const data of [
+			createPreviewMessage({ type: "connect" }),
+			createPreviewMessage({ type: "captureMarkup", requestId: "markup-1" }),
+		]) {
+			window.dispatchEvent(
+				new MessageEvent("message", {
+					source: window.parent,
+					origin: parentOrigin,
+					data,
+				}),
+			);
+		}
+
+		expect(postMessage).toHaveBeenLastCalledWith(
+			createPreviewMessage({
+				type: "markup",
+				requestId: "markup-1",
+				html: document.documentElement.outerHTML,
+			}),
+			parentOrigin,
+		);
+		expect(document.documentElement.outerHTML).toContain(
+			"<title>Pricing</title>",
+		);
+		cleanup();
+	});
+});
+
 describe("preview page bridge announcements", () => {
 	test("says whether the page handles updates, again when that changes or its runtime is torn down", () => {
 		const postMessage = vi

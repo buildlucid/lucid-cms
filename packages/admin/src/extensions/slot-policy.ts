@@ -2,6 +2,7 @@ import type { PermissionRequirement } from "@lucidcms/types";
 import { agentWidgetSlotPolicies } from "../components/AgentWidget/constants.js";
 import { brickSlotPolicies } from "../components/BrickSlots/constants.js";
 import { captchaSlotPolicies } from "../components/CaptchaWidget/constants.js";
+import { documentPreviewSlotPolicies } from "../components/DocumentPreview/constants.js";
 import { documentSidebarSlotPolicies } from "../components/DocumentSidebarSlots/constants.js";
 import { documentListSlotPolicies } from "../components/DocumentSlotCell/constants.js";
 import { fieldSlotPolicies } from "../components/FieldSlots/constants.js";
@@ -15,6 +16,7 @@ export const slotDefinitions = {
 	...homeWidgetSlotPolicies,
 	...documentListSlotPolicies,
 	...documentSidebarSlotPolicies,
+	...documentPreviewSlotPolicies,
 	...fieldSlotPolicies,
 	...captchaSlotPolicies,
 	...maintenanceSlotPolicies,

@@ -4,6 +4,7 @@ import type {
 	InternalCollectionDocument,
 } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
+import { findPreviewReplacement } from "@/components/DocumentPreview/utils/find-preview-replacement";
 import { Permissions } from "@/constants/permissions";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import type api from "@/services/api";
@@ -402,7 +403,9 @@ export function useDocumentUIState(props: {
 			props.document()?.id !== undefined &&
 			(!requiresVersionId || props.versionId() !== undefined) &&
 			props.document()?.isDeleted !== true &&
-			props.collection()?.capabilities.preview === true
+			//* a slot can replace the preview with something that needs no page of the site
+			(props.collection()?.capabilities.preview === true ||
+				findPreviewReplacement(props.collectionKey()) !== undefined)
 		);
 	});
 	const getPreviewOpen = createMemo(

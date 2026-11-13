@@ -18,6 +18,10 @@ import {
 } from "@/preview/protocol";
 
 const CAPTURE_TIMEOUT_MS = 150;
+//* markup can be large, so the page gets longer to send it
+const MARKUP_TIMEOUT_MS = 2000;
+//* how long a markup request waits for a loading page to announce its runtime
+const MARKUP_LOAD_WAIT_MS = 10000;
 const RESTORE_TIMEOUT_MS = 5000;
 //* how long a loaded page has to announce its runtime before it's treated as having none
 const READY_GRACE_MS = 1500;
@@ -27,6 +31,11 @@ const SHOWN_HISTORY = 20;
 type PendingCapture = {
 	requestId: string;
 	resolve: (state: PreviewScrollState | null) => void;
+	timeout: number;
+};
+
+type PendingMarkup = {
+	resolve: (html: string | null) => void;
 	timeout: number;
 };
 
@@ -76,6 +85,8 @@ export const createPreviewBridge = (options?: {
 	onInlineInput?: (target: PreviewTarget, value: string) => void;
 	/** Runs when typing on the page ends, kept or `cancelled`, including when the page goes. */
 	onInlineEnd?: (target: PreviewTarget, cancelled: boolean) => void;
+	/** Runs when a page loads with its runtime or shows an update, so what's read from it can be read again. */
+	onPageChange?: () => void;
 }) => {
 	let frame: HTMLIFrameElement | null = null;
 	let page: FramePage = { state: "loading" };
@@ -93,6 +104,9 @@ export const createPreviewBridge = (options?: {
 	let readyGrace: number | undefined;
 	let requestSequence = 0;
 	let pendingCapture: PendingCapture | null = null;
+	const pendingMarkup = new Map<string, PendingMarkup>();
+	//* markup requests made while the page loads, sent once it's ready or found to have no runtime
+	let awaitingPage: Array<() => void> = [];
 	let pendingRestore: PreviewScrollState | null = null;
 	let restoreTimeout: number | undefined;
 
@@ -203,6 +217,58 @@ export const createPreviewBridge = (options?: {
 		});
 	};
 
+	/** Answers a markup request, with null when the page didn't send any in time. */
+	const settleMarkup = (requestId: string, html: string | null) => {
+		const pending = pendingMarkup.get(requestId);
+		if (!pending) return;
+		window.clearTimeout(pending.timeout);
+		pendingMarkup.delete(requestId);
+		pending.resolve(html);
+	};
+
+	/** Runs the markup requests waiting for the page to finish loading. */
+	const flushAwaitingPage = () => {
+		const waiting = awaitingPage;
+		awaitingPage = [];
+		for (const run of waiting) run();
+	};
+
+	/**
+	 * Asks the page for its current markup, waiting for a loading page to be ready first. Null when
+	 * it has no runtime or doesn't answer in time.
+	 */
+	const captureMarkup = (): Promise<string | null> => {
+		if (page.state === "loading" && frame) {
+			return new Promise((resolve) => {
+				const timeout = window.setTimeout(() => {
+					awaitingPage = awaitingPage.filter((run) => run !== send);
+					resolve(null);
+				}, MARKUP_LOAD_WAIT_MS);
+				const send = () => {
+					window.clearTimeout(timeout);
+					void captureMarkup().then(resolve);
+				};
+				awaitingPage.push(send);
+			});
+		}
+		if (page.state !== "ready" || !getFrameOrigin()) {
+			return Promise.resolve(null);
+		}
+
+		requestSequence += 1;
+		const requestId = `preview-markup-${requestSequence}`;
+		return new Promise((resolve) => {
+			pendingMarkup.set(requestId, {
+				resolve,
+				timeout: window.setTimeout(
+					() => settleMarkup(requestId, null),
+					MARKUP_TIMEOUT_MS,
+				),
+			});
+			postToRuntime({ type: "captureMarkup", requestId });
+		});
+	};
+
 	/** Ends typing on the page, keeping what was typed or not, eg. once the page goes. */
 	const endTyping = (cancelled: boolean) => {
 		const target = typing;
@@ -291,6 +357,7 @@ export const createPreviewBridge = (options?: {
 			page = { state: "static" };
 			if (frame) reportStatic(getPageKey(frame.src));
 			showPending();
+			flushAwaitingPage();
 		}, READY_GRACE_MS);
 	};
 
@@ -321,6 +388,10 @@ export const createPreviewBridge = (options?: {
 			} else {
 				showPending();
 			}
+			if (loaded) {
+				flushAwaitingPage();
+				options?.onPageChange?.();
+			}
 		},
 		unload: () => expectLoad(),
 		scrollState: (message) => {
@@ -328,6 +399,8 @@ export const createPreviewBridge = (options?: {
 				clearCapture(message.state);
 			}
 		},
+		markup: (message) => settleMarkup(message.requestId, message.html),
+		rendered: () => options?.onPageChange?.(),
 		focus: (message) => {
 			options?.onDeselect?.();
 			options?.onFocusField?.(message.target);
@@ -386,6 +459,7 @@ export const createPreviewBridge = (options?: {
 			frame.addEventListener("load", onFrameLoad);
 		},
 		captureScroll,
+		captureMarkup,
 		queueScrollRestore,
 		show,
 		/** Turns edit mode on for a document, or off with null, now and on every page the frame loads. */
@@ -456,10 +530,15 @@ export const createPreviewBridge = (options?: {
 			window.removeEventListener("message", onMessage);
 			frame?.removeEventListener("load", onFrameLoad);
 			clearCapture();
+			for (const requestId of [...pendingMarkup.keys()]) {
+				settleMarkup(requestId, null);
+			}
 			clearReadyGrace();
 			queueScrollRestore(null);
 			pendingRevision = null;
 			frame = null;
+			//* with no frame, waiting requests answer null at once
+			flushAwaitingPage();
 		},
 	};
 };

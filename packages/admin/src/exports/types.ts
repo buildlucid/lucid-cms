@@ -25,6 +25,17 @@ export type {
 	DocumentListSlotProps,
 } from "../components/DocumentSlotCell/types.js";
 export type {
+	DocumentPreviewHandle,
+	DocumentPreviewSlot,
+	DocumentPreviewSlotPlacement,
+	DocumentPreviewSlotProps,
+	PreviewPage,
+	PreviewPageState,
+	PreviewToolbarItemKey,
+	PreviewToolbarPosition,
+	PreviewToolbarSlotProps,
+} from "../components/DocumentPreview/types.js";
+export type {
 	DocumentSidebarPosition,
 	DocumentSidebarSectionKey,
 	DocumentSidebarSlot,

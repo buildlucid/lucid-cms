@@ -110,6 +110,13 @@ export type PreviewPageMessages = {
 	/** Says the page is going away, so updates wait for the next page to announce itself. */
 	unload: NoData;
 	scrollState: { requestId: string; state: PreviewScrollState };
+	/**
+	 * Current page markup, or null if unavailable or missing Lucid's preview script. Parse with
+	 * `DOMParser` to avoid executing scripts.
+	 */
+	markup: { requestId: string; html: string | null };
+	/** Says the page has shown an update, so what's read from it can be read again. */
+	rendered: NoData;
 	/** Asks the builder to open a field, item or brick. */
 	focus: { target: PreviewTarget };
 	/** Says the user cleared the page's selection. */
@@ -132,6 +139,8 @@ export type PreviewPageMessages = {
 export type PreviewBuilderMessages = {
 	connect: NoData;
 	captureScroll: { requestId: string };
+	/** Asks for the page's current markup, which the page answers with `markup`. */
+	captureMarkup: { requestId: string };
 	restoreScroll: { state: PreviewScrollState };
 	/** Says the previewed content changed, either unsaved edits or a save. Revisions only rise within one preview. */
 	update: { revision: number };

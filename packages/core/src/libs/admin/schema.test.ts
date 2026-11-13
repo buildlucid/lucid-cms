@@ -152,6 +152,34 @@ describe("document list slots", () => {
 	});
 });
 
+describe("document preview slots", () => {
+	it("places toolbar items next to built-in items only", () => {
+		const toolbarItem = {
+			key: "inspect",
+			slot: "document.previewToolbar",
+			component: "./Inspect.tsx",
+		};
+		for (const position of [undefined, { before: "edit" }, { after: "open" }])
+			expect(
+				adminConfigSchema.safeParse({ slots: [{ ...toolbarItem, position }] })
+					.success,
+			).toBe(true);
+		for (const slot of [
+			{ ...toolbarItem, position: { before: "inspect" } },
+			{ ...toolbarItem, position: { before: "edit", after: "open" } },
+			{
+				key: "builder",
+				slot: "document.preview",
+				component: "./Builder.tsx",
+				position: { before: "edit" },
+			},
+		])
+			expect(adminConfigSchema.safeParse({ slots: [slot] }).success).toBe(
+				false,
+			);
+	});
+});
+
 describe("home widget slots", () => {
 	const widget = {
 		key: "traffic",

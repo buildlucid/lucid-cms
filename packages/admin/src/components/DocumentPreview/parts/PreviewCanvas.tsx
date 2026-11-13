@@ -4,9 +4,10 @@ import {
 	type Accessor,
 	type Component,
 	createEffect,
-	type JSXElement,
 	createMemo,
+	createRenderEffect,
 	createSignal,
+	type JSXElement,
 	on,
 	onCleanup,
 	onMount,
@@ -14,11 +15,16 @@ import {
 	Show,
 	untrack,
 } from "solid-js";
-import { Portal } from "solid-js/web";
 import Button from "@/components/Button/Button";
+import {
+	type PreviewToolbarItem,
+	usePreviewContext,
+} from "@/hooks/useDocumentPreview/useDocumentPreview";
 import T, { translateAdminCopy } from "@/translations";
+import type { PreviewPageState } from "../types";
 import { PreviewLoading } from "./PreviewLoading";
-import { PreviewToolbar } from "./PreviewToolbar";
+import { PreviewWidthControl } from "./PreviewWidthControl";
+import { PreviewZoomControl } from "./PreviewZoomControl";
 
 export type PreviewWidthSelection =
 	| "fit"
@@ -31,14 +37,6 @@ export type PreviewWidthSelection =
 export type PreviewZoom = "fit" | 25 | 50 | 75 | 100;
 /** A breakpoint the preview can be sized to. */
 export type PreviewWidthOption = { key: string; width: number; label: string };
-/** Where the preview is: making a session, showing the page, or why it can't, eg. a new document that isn't saved yet. */
-export type ResolverState =
-	| "idle"
-	| "loading"
-	| "ready"
-	| "unsaved"
-	| "unavailable"
-	| "error";
 
 const MIN_PREVIEW_WIDTH = 280;
 const MAX_PREVIEW_WIDTH = 2560;
@@ -67,28 +65,22 @@ const defaultBreakpoints: Array<{
 //* how far the page zooms out while a brick is dragged, unless it's already smaller, and how long that takes
 const ZOOMED_OUT_SCALE = 0.5;
 const ZOOM_MS = 320;
+//* room either side of a resizable page for its handles
+const RESIZE_GUTTER = 20;
 
+/**
+ * Displays the preview or its unavailable state on a dotted canvas. Resizable pages have handles
+ * and width/zoom controls; others fill the canvas.
+ */
 export const PreviewCanvas: Component<{
 	frameSrc: Accessor<string | undefined>;
-	resolverState: Accessor<ResolverState>;
+	pageState: Accessor<PreviewPageState>;
 	frameLoading: Accessor<boolean>;
 	setFrameLoading: Setter<boolean>;
 	setFrameRef: (element: HTMLIFrameElement) => void;
 	breakpoints: Accessor<CollectionPreviewBreakpoint[]>;
-	selectedWidth: Accessor<PreviewWidthSelection>;
-	setSelectedWidth: Setter<PreviewWidthSelection>;
-	customWidth: Accessor<number>;
-	setCustomWidth: Setter<number>;
-	zoom: Accessor<PreviewZoom>;
-	setZoom: Setter<PreviewZoom>;
-	editMode: Accessor<boolean>;
-	onToggleEditMode: () => void;
-	actionLoading: Accessor<boolean>;
-	onRefresh: () => void;
-	onOpen: () => void;
+	resizable: boolean;
 	onRetry: () => void;
-	/** Where the preview's controls render, in the page builder header above it. */
-	toolbarMount?: Accessor<HTMLElement | undefined>;
 	/** Zooms the page out, keeping its layout, eg. while a brick is dragged, to show more of where it can go. */
 	zoomedOut?: Accessor<boolean>;
 	/** Runs as zooming out or back in starts and ends, so the page can keep what's dragged or selected in place. */
@@ -111,16 +103,22 @@ export const PreviewCanvas: Component<{
 	let viewportResizeDirection: "left" | "right" = "right";
 
 	// ----------------------------------
-	// State
+	// State & Hooks
+	const context = usePreviewContext();
 	const [canvasWidth, setCanvasWidth] = createSignal(0);
+	const [selectedWidth, setSelectedWidth] =
+		createSignal<PreviewWidthSelection>("fit");
+	const [customWidth, setCustomWidth] = createSignal(768);
+	const [zoom, setZoom] = createSignal<PreviewZoom>("fit");
 	const [viewportResizing, setViewportResizing] = createSignal(false);
 	let zoomFrame: number | undefined;
 	let zooming = false;
 
 	// ----------------------------------
 	// Memos
+	const gutter = () => (props.resizable ? RESIZE_GUTTER : 0);
 	const availableCanvasWidth = createMemo(() =>
-		Math.max(canvasWidth() - 20, 0),
+		Math.max(canvasWidth() - gutter(), 0),
 	);
 	const widthOptions = createMemo((): PreviewWidthOption[] => {
 		const breakpoints = props.breakpoints();
@@ -140,17 +138,17 @@ export const PreviewCanvas: Component<{
 	});
 	//* a breakpoint or custom width, or null while the page fills the canvas
 	const explicitWidth = createMemo(() => {
-		const selection = props.selectedWidth();
-		if (selection === "fit") return null;
-		if (selection === "custom") return props.customWidth();
+		const selection = selectedWidth();
+		if (!props.resizable || selection === "fit") return null;
+		if (selection === "custom") return customWidth();
 		return (
 			widthOptions().find((option) => option.key === selection.key)?.width ??
 			null
 		);
 	});
 	const zoomScale = createMemo(() => {
-		const zoom = props.zoom();
-		if (zoom !== "fit") return zoom / 100;
+		const level = props.resizable ? zoom() : "fit";
+		if (level !== "fit") return level / 100;
 		const width = explicitWidth();
 		if (width === null || availableCanvasWidth() === 0) return 1;
 		return Math.min(1, availableCanvasWidth() / width);
@@ -190,11 +188,9 @@ export const PreviewCanvas: Component<{
 			viewportResizeStartScale;
 		//* fit zoom shrinks any width to fit, so only the canvas limits other zooms
 		const maximumWidth =
-			props.zoom() === "fit"
-				? MAX_PREVIEW_WIDTH
-				: Math.max(maximumLayoutWidth(), 1);
+			zoom() === "fit" ? MAX_PREVIEW_WIDTH : Math.max(maximumLayoutWidth(), 1);
 		const minimumWidth = Math.min(MIN_PREVIEW_WIDTH, maximumWidth);
-		props.setCustomWidth(
+		setCustomWidth(
 			Math.round(
 				Math.min(
 					maximumWidth,
@@ -202,7 +198,7 @@ export const PreviewCanvas: Component<{
 				),
 			),
 		);
-		props.setSelectedWidth("custom");
+		setSelectedWidth("custom");
 	};
 	const stopViewportResize = () => {
 		window.removeEventListener("pointermove", resizeViewport);
@@ -249,12 +245,12 @@ export const PreviewCanvas: Component<{
 		if (!clamp && (width < MIN_PREVIEW_WIDTH || width > MAX_PREVIEW_WIDTH)) {
 			return;
 		}
-		props.setCustomWidth(
+		setCustomWidth(
 			clamp
 				? Math.min(MAX_PREVIEW_WIDTH, Math.max(MIN_PREVIEW_WIDTH, width))
 				: width,
 		);
-		props.setSelectedWidth("custom");
+		setSelectedWidth("custom");
 	};
 	const setZooming = (next: boolean) => {
 		if (zooming === next) return;
@@ -265,6 +261,47 @@ export const PreviewCanvas: Component<{
 		if (zoomFrame !== undefined) cancelAnimationFrame(zoomFrame);
 		zoomFrame = undefined;
 	};
+	const resizeHandle = (direction: "left" | "right") => (
+		<button
+			type="button"
+			aria-label={T()(
+				direction === "left"
+					? "preview.resize.viewport.left"
+					: "preview.resize.viewport.right",
+			)}
+			class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus-ring"
+			onPointerDown={(event) => startViewportResize(direction, event)}
+		>
+			<span class="flex items-center gap-0.5" aria-hidden="true">
+				<span class="h-7 w-px rounded-full bg-muted/80" />
+				<span class="h-7 w-px rounded-full bg-muted/80" />
+			</span>
+		</button>
+	);
+	const sizeItems: PreviewToolbarItem[] = [
+		{
+			key: "width",
+			render: () => (
+				<PreviewWidthControl
+					widthOptions={widthOptions}
+					selectedWidth={selectedWidth}
+					onSelectWidth={setSelectedWidth}
+					layoutWidth={layoutWidth}
+					onWidth={setWidth}
+				/>
+			),
+		},
+		{
+			key: "zoom",
+			render: () => (
+				<PreviewZoomControl
+					zoom={zoom}
+					zoomScale={zoomScale}
+					onZoom={setZoom}
+				/>
+			),
+		},
+	];
 
 	// ----------------------------------
 	// Effects
@@ -306,13 +343,16 @@ export const PreviewCanvas: Component<{
 		),
 	);
 	createEffect(() => {
-		const selection = props.selectedWidth();
+		const selection = selectedWidth();
 		if (
 			typeof selection === "object" &&
 			!widthOptions().some((option) => option.key === selection.key)
 		) {
-			props.setSelectedWidth("fit");
+			setSelectedWidth("fit");
 		}
+	});
+	createRenderEffect(() => {
+		if (props.resizable) context.addToolbarItems(sizeItems);
 	});
 
 	// ----------------------------------
@@ -337,24 +377,23 @@ export const PreviewCanvas: Component<{
 		>
 			<Show
 				when={
-					props.resolverState() === "unsaved" ||
-					props.resolverState() === "unavailable"
+					props.pageState() === "unsaved" || props.pageState() === "unavailable"
 				}
 			>
 				<div class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 p-6 text-center">
 					<h3 class="font-medium text-title">
-						{props.resolverState() === "unsaved"
+						{props.pageState() === "unsaved"
 							? T()("preview.unsaved.title")
 							: T()("preview.unavailable.title")}
 					</h3>
 					<p class="max-w-md text-sm text-body">
-						{props.resolverState() === "unsaved"
+						{props.pageState() === "unsaved"
 							? T()("preview.unsaved.message")
 							: T()("preview.unavailable.message")}
 					</p>
 				</div>
 			</Show>
-			<Show when={props.resolverState() === "error"}>
+			<Show when={props.pageState() === "error"}>
 				<div class="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 text-center">
 					<h3 class="font-medium text-title">{T()("preview.error.title")}</h3>
 					<p class="mt-1 max-w-md text-sm text-body">
@@ -372,22 +411,12 @@ export const PreviewCanvas: Component<{
 				</div>
 			</Show>
 
-			<Show when={props.resolverState() === "ready" && props.frameSrc()}>
+			<Show when={props.pageState() === "ready" && props.frameSrc()}>
 				<div
 					class="relative mx-auto flex h-full"
-					style={{ width: `${visualWidth() + 20}px` }}
+					style={{ width: `${visualWidth() + gutter()}px` }}
 				>
-					<button
-						type="button"
-						aria-label={T()("preview.resize.viewport.left")}
-						class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus-ring"
-						onPointerDown={(event) => startViewportResize("left", event)}
-					>
-						<span class="flex items-center gap-0.5" aria-hidden="true">
-							<span class="h-7 w-px rounded-full bg-muted/80" />
-							<span class="h-7 w-px rounded-full bg-muted/80" />
-						</span>
-					</button>
+					<Show when={props.resizable}>{resizeHandle("left")}</Show>
 					<div
 						class="relative h-full overflow-clip bg-white shadow-raised"
 						style={{ width: `${visualWidth()}px` }}
@@ -416,55 +445,17 @@ export const PreviewCanvas: Component<{
 							<div class="absolute inset-0 z-40 cursor-ew-resize" />
 						</Show>
 					</div>
-					<button
-						type="button"
-						aria-label={T()("preview.resize.viewport.right")}
-						class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus-ring"
-						onPointerDown={(event) => startViewportResize("right", event)}
-					>
-						<span class="flex items-center gap-0.5" aria-hidden="true">
-							<span class="h-7 w-px rounded-full bg-muted/80" />
-							<span class="h-7 w-px rounded-full bg-muted/80" />
-						</span>
-					</button>
+					<Show when={props.resizable}>{resizeHandle("right")}</Show>
 				</div>
 			</Show>
 			<Show
 				when={
-					props.resolverState() === "loading" ||
-					props.resolverState() === "idle" ||
+					props.pageState() === "loading" ||
+					props.pageState() === "idle" ||
 					props.frameLoading()
 				}
 			>
 				<PreviewLoading width={visualWidth() || undefined} />
-			</Show>
-			<Show when={props.toolbarMount?.()} keyed>
-				{(mount) => (
-					<Portal
-						mount={mount}
-						ref={(element) => element.classList.add("contents")}
-					>
-						<PreviewToolbar
-							widthOptions={widthOptions}
-							selectedWidth={props.selectedWidth}
-							onSelectWidth={props.setSelectedWidth}
-							layoutWidth={layoutWidth}
-							onWidth={setWidth}
-							zoom={props.zoom}
-							zoomScale={zoomScale}
-							onZoom={props.setZoom}
-							editMode={props.editMode}
-							onToggleEditMode={props.onToggleEditMode}
-							actionLoading={props.actionLoading}
-							hasPage={() =>
-								props.resolverState() !== "unsaved" &&
-								props.resolverState() !== "unavailable"
-							}
-							onRefresh={props.onRefresh}
-							onOpen={props.onOpen}
-						/>
-					</Portal>
-				)}
 			</Show>
 		</div>
 	);

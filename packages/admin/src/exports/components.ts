@@ -191,6 +191,10 @@ export {
 	type PillVariant,
 } from "../components/Pill/Pill.js";
 export {
+	default as PreviewFrame,
+	type PreviewFrameProps,
+} from "../components/PreviewFrame/PreviewFrame.js";
+export {
 	default as ProgressBar,
 	type ProgressBarProps,
 	type ProgressBarSize,

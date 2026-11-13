@@ -5,7 +5,7 @@ import { createPreviewBridge } from "./preview-bridge";
 const origin = "https://site.example";
 const cleanups: Array<() => void> = [];
 
-const setup = () => {
+const setup = (options?: Parameters<typeof createPreviewBridge>[0]) => {
 	//* the test environment doesn't load frames, so this one stands in for an attached frame and its window
 	const posted = vi.fn();
 	const frameWindow = { postMessage: posted };
@@ -15,7 +15,7 @@ const setup = () => {
 		contentWindow: { value: frameWindow },
 		isConnected: { value: true },
 	});
-	const bridge = createPreviewBridge();
+	const bridge = createPreviewBridge(options);
 	bridge.setFrame(frame);
 	cleanups.push(bridge.cleanup);
 	const receive = (message: Parameters<typeof createPreviewMessage>[0]) =>
@@ -72,5 +72,31 @@ describe("preview bridge", () => {
 			createPreviewMessage({ type: "highlight", target }),
 			origin,
 		);
+	});
+
+	test("reads the page's markup once it's running, and says when it changes", async () => {
+		const onPageChange = vi.fn();
+		const { bridge, posted, receive } = setup({ onPageChange });
+
+		//* asked while the page loads, it's sent once the page is ready
+		bridge.expectLoad(0);
+		const markup = bridge.captureMarkup();
+		expect(posted).not.toHaveBeenCalled();
+		receive({ type: "ready", updates: true, loadedAt: Date.now() });
+		expect(onPageChange).toHaveBeenCalledTimes(1);
+		const request = posted.mock.calls.find(
+			([message]) => message.type === "captureMarkup",
+		)?.[0];
+		expect(request).toMatchObject({ type: "captureMarkup" });
+		receive({ type: "markup", requestId: "other", html: "<html></html>" });
+		receive({
+			type: "markup",
+			requestId: request.requestId,
+			html: "<html><title>Home</title></html>",
+		});
+		expect(await markup).toBe("<html><title>Home</title></html>");
+
+		receive({ type: "rendered" });
+		expect(onPageChange).toHaveBeenCalledTimes(2);
 	});
 });

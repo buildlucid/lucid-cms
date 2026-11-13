@@ -1,6 +1,6 @@
-import { batch } from "solid-js";
+import { batch, createMemo } from "solid-js";
 import { createFieldScope } from "@/extensions/editor/field-scope";
-import type { DocumentEditor } from "@/extensions/editor/types";
+import type { DocumentEditor, EditorBrick } from "@/extensions/editor/types";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import { useDocumentRoute } from "@/hooks/useDocumentRoute/useDocumentRoute";
@@ -9,10 +9,12 @@ import {
 	useFieldScope,
 } from "@/hooks/useFieldScope/useFieldScope";
 import { usePageBuilderState } from "@/hooks/usePageBuilderState/usePageBuilderState";
+import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
+import resolveFieldAccess from "@/utils/resolve-field-access";
 
 /**
- * The open document, for field and brick slots and the components they render.
+ * The open document, for field, brick and preview slots and the components they render.
  * Its properties stay current as the document changes.
  *
  * @example
@@ -46,7 +48,7 @@ export const useDocumentEditor = (): DocumentEditor => {
 	const { documentState, version } = usePageBuilderState();
 	if (!documentState) {
 		throw new Error(
-			"useDocumentEditor() only works inside the document editor, eg. in a field or brick slot.",
+			"useDocumentEditor() only works inside the document editor, eg. in a field, brick or preview slot.",
 		);
 	}
 
@@ -69,6 +71,59 @@ export const useDocumentEditor = (): DocumentEditor => {
 				?.fields ?? [],
 		errors: () => store.get.fieldsErrors,
 		access: () => "editable",
+	});
+	//* handles are kept per brick, so ones a slot holds stay the same while the bricks change around them
+	let brickHandles = new Map<string, EditorBrick>();
+	const createBrick = (
+		brick: { key: string; ref: string; kind: "fixed" | "builder" },
+		config: CollectionBrickConfig,
+	): EditorBrick => {
+		const brickIndex = () =>
+			store.get.bricks.findIndex((stored) => stored.ref === brick.ref);
+		return {
+			...brick,
+			config,
+			fields: createFieldScope(environment, {
+				brickIndex,
+				configs: () => config.fields,
+				fields: () =>
+					store.get.bricks.find((stored) => stored.ref === brick.ref)?.fields ??
+					[],
+				errors: () =>
+					store.get.brickErrors.find(
+						(error) => error.key === brick.key && error.ref === brick.ref,
+					)?.fields,
+				//* a kept handle stops writing once its brick is removed
+				access: () =>
+					brickIndex() === -1
+						? "hidden"
+						: resolveFieldAccess(config.permissions),
+			}),
+		};
+	};
+	const bricks = createMemo(() => {
+		const collection = documentState.collection();
+		const next = new Map<string, EditorBrick>();
+		const list = (["fixed", "builder"] as const).flatMap((kind) => {
+			const configs =
+				kind === "fixed" ? collection?.fixedBricks : collection?.builderBricks;
+			return store.get.bricks
+				.filter((brick) => brick.type === kind)
+				.toSorted((a, b) => a.order - b.order)
+				.flatMap((brick) => {
+					const config = configs?.find((option) => option.key === brick.key);
+					if (!config) return [];
+					const kept = brickHandles.get(brick.ref);
+					const handle =
+						kept?.config === config && kept.kind === kind
+							? kept
+							: createBrick({ key: brick.key, ref: brick.ref, kind }, config);
+					next.set(brick.ref, handle);
+					return [handle];
+				});
+		});
+		brickHandles = next;
+		return list;
 	});
 
 	return {
@@ -114,6 +169,9 @@ export const useDocumentEditor = (): DocumentEditor => {
 				: undefined;
 		},
 		fields,
+		get bricks() {
+			return bricks();
+		},
 		batch: (write) => {
 			store.edits.beginBatch();
 			try {

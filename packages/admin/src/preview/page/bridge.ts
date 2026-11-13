@@ -8,6 +8,7 @@ import {
 	type PreviewMessagePayload,
 	type PreviewPageMessages,
 	type PreviewScrollState,
+	previewProtocolLimits,
 } from "../protocol/index.js";
 import { getPreviewPageKey } from "./context.js";
 import { installPreviewEditing } from "./editing.js";
@@ -88,9 +89,10 @@ export const installPreviewBridge = (
 		);
 		return true;
 	};
-	const updates = createPreviewUpdates(targetWindow, handlers, () =>
-		editing.settle(),
-	);
+	const updates = createPreviewUpdates(targetWindow, handlers, () => {
+		editing.settle();
+		send({ type: "rendered" });
+	});
 
 	const announce = () => {
 		targetWindow.parent.postMessage(
@@ -129,6 +131,14 @@ export const installPreviewBridge = (
 					x: pending?.x ?? targetWindow.scrollX,
 					y: pending?.y ?? targetWindow.scrollY,
 				},
+			});
+		},
+		captureMarkup: (message) => {
+			const html = targetWindow.document.documentElement.outerHTML;
+			send({
+				type: "markup",
+				requestId: message.requestId,
+				html: html.length <= previewProtocolLimits.markup ? html : null,
 			});
 		},
 		restoreScroll: (message) => {

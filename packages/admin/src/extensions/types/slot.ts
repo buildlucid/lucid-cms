@@ -16,6 +16,11 @@ import type {
 	CaptchaWidgetProps,
 } from "../../components/CaptchaWidget/types.js";
 import type {
+	DocumentPreviewSlotPlacement,
+	DocumentPreviewSlotProps,
+	PreviewToolbarSlotProps,
+} from "../../components/DocumentPreview/types.js";
+import type {
 	DocumentSidebarSlotPlacement,
 	DocumentSidebarSlotProps,
 } from "../../components/DocumentSidebarSlots/types.js";
@@ -67,6 +72,7 @@ export type AdminSlot = AdminSlotBase &
 					| HomeWidgetPlacement
 					| DocumentListSlotPlacement
 					| DocumentSidebarSlotPlacement
+					| DocumentPreviewSlotPlacement
 					| (BrickSlotPlacement & { match?: BrickSlotMatch })
 					| { slot: FieldSlot; match?: FieldSlotMatch }
 					| MaintenanceSlotPlacement
@@ -100,6 +106,8 @@ type SlotPropsMap<
 	"agent.transcriptRow": AgentTranscriptRowSlotProps<TOptions>;
 	"home.widget": HomeWidgetProps<TOptions>;
 	"document.sidebar": DocumentSidebarSlotProps<TOptions>;
+	"document.preview": DocumentPreviewSlotProps<TOptions>;
+	"document.previewToolbar": PreviewToolbarSlotProps<TOptions>;
 	"captcha.widget": CaptchaWidgetProps<TOptions>;
 	"maintenance.action": MaintenanceSlotProps<TOptions>;
 } & {

@@ -162,6 +162,8 @@ export type DocumentEditor = {
 	readonly environment: string | undefined;
 	/** The document's own fields, outside bricks. */
 	readonly fields: FieldScope;
+	/** The document's fixed bricks, then its builder bricks, each in order. */
+	readonly bricks: readonly EditorBrick[];
 	/** Records the writes `write` makes as one undo step. */
 	batch: (write: () => void) => void;
 };

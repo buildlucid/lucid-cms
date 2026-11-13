@@ -65,6 +65,7 @@ export const generateRegistry = async (
 		field: [],
 		documentList: [],
 		documentSidebar: [],
+		documentPreview: [],
 		captcha: [],
 		maintenance: [],
 	};

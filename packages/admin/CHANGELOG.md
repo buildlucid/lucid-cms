@@ -6,6 +6,9 @@
 - Added the `captcha.widget` slot for captcha plugins' widgets on public forms.
 - Added the `maintenance.action` slot and `MaintenanceTile` component for plugin maintenance actions on System → Operations.
 - Added the `document.sidebar` slot and `DocumentSidebarSection` component for plugin sections in the document sidebar, placed before or after the built-in ones.
+- Added the `document.preview` slot, which replaces the document preview, with a `PreviewFrame` component and `useDocumentPreview` hook for building your own on the live page.
+- Added the `document.previewToolbar` slot for plugin items in the preview toolbar, placed before or after the built-in ones.
+- `useDocumentEditor()` now returns the document's bricks.
 - Slots no longer hide while queries they read are loading, so they can show their own placeholders, and the document editor loads its slots' code with its own so fields don't shift.
 - Added a `Skeleton` component, which replaces `LoadingState`, and loading buttons now pulse instead of showing a spinner.
 - Added `StateNote` and `CardState` components and an `appearance` option on `QueryBoundary` for empty and error states inside cards.

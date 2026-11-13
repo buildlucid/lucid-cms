@@ -82,6 +82,12 @@ const pageMessageChecks = {
 		hasKeys(message, "requestId", "state") &&
 		isRequestId(message.requestId) &&
 		isPreviewScrollState(message.state),
+	markup: (message) =>
+		hasKeys(message, "requestId", "html") &&
+		isRequestId(message.requestId) &&
+		(message.html === null ||
+			isBoundedString(message.html, previewProtocolLimits.markup)),
+	rendered: (message) => hasKeys(message),
 	focus: (message) =>
 		hasKeys(message, "target") && isPreviewTarget(message.target),
 	deselect: (message) => hasKeys(message),
@@ -113,6 +119,8 @@ const pageMessageChecks = {
 const builderMessageChecks = {
 	connect: (message) => hasKeys(message),
 	captureScroll: (message) =>
+		hasKeys(message, "requestId") && isRequestId(message.requestId),
+	captureMarkup: (message) =>
 		hasKeys(message, "requestId") && isRequestId(message.requestId),
 	restoreScroll: (message) =>
 		hasKeys(message, "state") && isPreviewScrollState(message.state),
