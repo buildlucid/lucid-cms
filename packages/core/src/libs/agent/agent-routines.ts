@@ -1,3 +1,5 @@
+import { copy } from "../i18n/copy.js";
+import type { AdminCopyInput } from "../i18n/types.js";
 import defineRoutine from "./define-routine.js";
 import type { DefineRoutineOptions } from "./types.js";
 
@@ -27,8 +29,8 @@ export const agentRoutines = {
 		options: {
 			/** Defaults to `translations`. */
 			key?: string;
-			/** Defaults to "Keep translations up to date". */
-			name?: string;
+			/** Defaults to "Keep translations up to date", translated for each viewer. */
+			name?: AdminCopyInput;
 			/** Only translates documents in these collections. Defaults to every collection. */
 			collections?: [string, ...string[]];
 			/** Only translates into these locales. Defaults to every locale but each collection's default. */
@@ -39,7 +41,11 @@ export const agentRoutines = {
 	) =>
 		defineRoutine({
 			key: options.key ?? "translations",
-			name: options.name ?? "Keep translations up to date",
+			name:
+				options.name ??
+				copy("admin:core.agents.routines.translations.name", {
+					defaultMessage: "Keep translations up to date",
+				}),
 			instructions: `
 				Documents were just published. Translate them with documents_translate, calling it once per collection with every published document from that collection${options.locales ? ` and locales ${JSON.stringify(options.locales)}` : ""}.
 				Never set overwrite: translations people wrote must stay as they are.

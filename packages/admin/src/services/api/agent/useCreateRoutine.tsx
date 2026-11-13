@@ -4,9 +4,8 @@ import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
-export type RoutineBody = Pick<
+export type RoutineBody = { name: string } & Pick<
 	AgentRoutine,
-	| "name"
 	| "instructions"
 	| "conversationMode"
 	| "modelSelection"

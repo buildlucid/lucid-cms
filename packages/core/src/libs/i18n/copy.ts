@@ -6,6 +6,7 @@ import type {
 	CopyInput,
 	LiteralCopy,
 	RegisteredCopyTranslationKey,
+	ResolvedAdminCopy,
 	ServerCopyDescriptor,
 	TranslatableCopy,
 	TranslationScope,
@@ -190,6 +191,13 @@ export const resolvedAdminCopySchema = z.union([
 	adminCopyDescriptorSchema,
 	literalCopySchema,
 ]);
+
+/**
+ * The text written in config for resolved admin copy: a literal's value or a descriptor's
+ * `defaultMessage`. Config checks use it, as translation keys are checked by translation tooling.
+ */
+export const writtenCopyText = (copy: ResolvedAdminCopy) =>
+	copy.type === "lucid.literal" ? copy.value : copy.defaultMessage;
 
 function defineCopy(
 	prefixedKey: RegisteredAdminCopyKey,

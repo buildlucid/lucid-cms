@@ -15,7 +15,7 @@ import useQueryState, {
 } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
-import T from "@/translations";
+import T, { translateAdminCopy } from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
 import { runStatusFilters } from "@/utils/agent-chat";
 import { getNewChatHref } from "@/utils/home-view";
@@ -99,7 +99,7 @@ const AgentHistoryPage: Component = () => {
 				type: "select",
 				options: routines.data.data.map((routine) => ({
 					value: routine.id,
-					label: routine.name,
+					label: translateAdminCopy(routine.name),
 				})),
 			});
 		}

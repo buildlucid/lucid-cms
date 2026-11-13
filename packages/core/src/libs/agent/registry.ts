@@ -26,3 +26,17 @@ export const getAgents = (
 
 export const getAgent = (config: ResolvedLucidConfig, key: string) =>
 	getAgents(config).find((agent) => agent.key === key);
+
+/**
+ * Returns a routine's code definition, or undefined for user routines, removed keys and disabled
+ * agents.
+ */
+export const getRoutineDefinition = (
+	config: Pick<ResolvedLucidConfig, "ai">,
+	routine: { agent_key: string; key: string | null },
+) =>
+	routine.key === null
+		? undefined
+		: config.ai.agents
+				.find((agent) => agent.key === routine.agent_key)
+				?.routines.find((definition) => definition.key === routine.key);

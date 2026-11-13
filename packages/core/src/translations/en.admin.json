@@ -260,5 +260,6 @@
 	"core.agents.lucid-agent.suggestions.alt-text.message": "Find library images with missing or weak alt text. Suggest alt text for up to 10 of them and ask me before saving any.",
 	"core.agents.lucid-agent.suggestions.draft.title": "Draft a new page",
 	"core.agents.lucid-agent.suggestions.draft.description": "Start a page from a short brief.",
-	"core.agents.lucid-agent.suggestions.draft.message": "Help me draft a new page. Ask me what it is for, then create it as a request I can review."
+	"core.agents.lucid-agent.suggestions.draft.message": "Help me draft a new page. Ask me what it is for, then create it as a request I can review.",
+	"core.agents.routines.translations.name": "Keep translations up to date"
 }

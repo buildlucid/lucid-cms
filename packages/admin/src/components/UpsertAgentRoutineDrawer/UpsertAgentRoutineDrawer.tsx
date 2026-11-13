@@ -22,7 +22,7 @@ import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import Select from "@/components/Select/Select";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
-import T from "@/translations";
+import T, { translateAdminCopy } from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
 import {
 	type RoutineEventDraft,
@@ -124,7 +124,7 @@ const UpsertAgentRoutineDrawer: Component<{
 				const routine = untrack(existing);
 				setAgentKey(routine?.agentKey ?? untrack(agents)[0]?.key);
 				setToolSettings(routine?.toolSettings ?? {});
-				setName(routine?.name ?? "");
+				setName(routine ? translateAdminCopy(routine.name) : "");
 				setInstructions(routine?.instructions ?? "");
 				setConversationMode(routine?.conversationMode ?? "new");
 				setModelSelection(routine?.modelSelection ?? null);

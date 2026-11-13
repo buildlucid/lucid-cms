@@ -6,6 +6,7 @@ import lucidAgent from "../agent/lucid-agent.js";
 import { getAgents } from "../agent/registry.js";
 import type { AgentDefinition } from "../agent/types.js";
 import { copy } from "../i18n/copy.js";
+import type { ResolvedAdminCopy } from "../i18n/types.js";
 import { agentTools } from "../tools/lucid-tools.js";
 import checkAgentDefinitions from "./checks/check-agent-definitions.js";
 import ConfigSchema from "./config-schema.js";
@@ -165,6 +166,15 @@ test("agent and routine keys are unique and schedules must be valid", () => {
 			},
 		]),
 	).toThrow('Routine "seo:weekly-audit" has an invalid schedule.');
+});
+
+test("routine names can be translated, and the text written in config is checked", () => {
+	const named = (name: ResolvedAdminCopy) =>
+		check([{ ...agent, routines: [{ ...routine, name }] }]);
+	expect(named(copy("admin:routines.audit.name"))).not.toThrow();
+	expect(named(copy.literal(" "))).toThrow(
+		'Routine "seo:weekly-audit" needs a name',
+	);
 });
 
 test("routines can run on events alone, but need a schedule or an event", () => {

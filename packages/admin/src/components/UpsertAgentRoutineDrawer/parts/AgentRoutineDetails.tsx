@@ -4,7 +4,7 @@ import AgentMarkdown from "@/components/AgentMarkdown/AgentMarkdown";
 import DetailsList from "@/components/DetailsList/DetailsList";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import api from "@/services/api";
-import T from "@/translations";
+import T, { translateAdminCopy } from "@/translations";
 import { conversationModeLabels, getAgentName } from "@/utils/agent-access";
 import { describeTriggers } from "@/utils/agent-routine-events";
 import helpers from "@/utils/helpers";
@@ -36,7 +36,10 @@ const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 			<DetailsList
 				layout="columns"
 				items={[
-					{ label: T()("common.name"), value: props.routine.name },
+					{
+						label: T()("common.name"),
+						value: translateAdminCopy(props.routine.name),
+					},
 					{
 						label: T()("agent.routine.owner"),
 						value: props.routine.owner

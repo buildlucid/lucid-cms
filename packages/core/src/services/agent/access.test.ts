@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, expect, test, vi } from "vitest";
 import defineAgent from "../../libs/agent/define-agent.js";
 import defineRoutine from "../../libs/agent/define-routine.js";
-import { createTranslationStore } from "../../libs/i18n/index.js";
+import { copy, createTranslationStore } from "../../libs/i18n/index.js";
 import { getAgentPermission } from "../../libs/permission/agent-permissions.js";
 import { Permissions } from "../../libs/permission/definitions.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
@@ -203,7 +203,7 @@ test("personal routines work independently of chats and code routines", async ()
 			userId,
 			name: "Updated audit",
 		}),
-	).toMatchObject({ data: { name: "Updated audit" } });
+	).toMatchObject({ data: { name: copy.literal("Updated audit") } });
 	const run = await runRoutine(context, { id: created.data.id, userId });
 	expect(run.error).toBeUndefined();
 	if (run.error) throw new Error(JSON.stringify(run.error));

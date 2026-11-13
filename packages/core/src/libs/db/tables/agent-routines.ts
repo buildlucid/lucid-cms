@@ -76,6 +76,7 @@ export interface LucidAgentRoutines {
 	/** Only set for routines defined in code. */
 	key: string | null;
 	source: z.infer<typeof agentRoutineSourceSchema>;
+	/** The name typed in the admin, or a code routine's name in the default language. */
 	name: string;
 	instructions: string;
 	conversation_mode: Generated<

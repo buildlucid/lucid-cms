@@ -14,8 +14,11 @@ import resolveRoutineConversation from "../agent/helpers/resolve-routine-convers
 import saveRoutineTools from "../agent/helpers/save-routine-tools.js";
 
 /**
- * Syncs code-defined routines, enabling new ones and rescheduling changes. Preserves pause state
- * and keeps past chats when removing routines.
+ * Syncs code routines, enabling new ones and rescheduling changes. Preserves pause state and past
+ * chats.
+ *
+ * @remarks Stores default-language names for search, sorting, prompts, chat titles and
+ * notifications. The API translates names from their definitions.
  */
 const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 	const AgentRoutines = new AgentRoutinesRepository(context.db);
@@ -51,11 +54,15 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 		agent.routines.map((routine) => ({ agentKey: agent.key, routine })),
 	);
 	const now = new Date().toISOString();
+	const translate = context.translate.forLocale(
+		context.config.translations.defaultLocale,
+	);
 
 	for (const { agentKey, routine } of defined) {
 		const current = existing.data.find(
 			(row) => row.agent_key === agentKey && row.key === routine.key,
 		);
+		const name = translate(routine.name);
 		const next = routine.schedule
 			? nextRoutineOccurrence(routine.schedule)
 			: { error: undefined, data: null };
@@ -77,7 +84,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 					agent_key: agentKey,
 					key: routine.key,
 					source: "code",
-					name: routine.name,
+					name,
 					instructions: routine.instructions,
 					conversation_mode: routine.conversationMode,
 					conversation_id: null,
@@ -124,7 +131,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 			!eventsChanged &&
 			!toolsChanged &&
 			current.conversation_mode === routine.conversationMode &&
-			current.name === routine.name &&
+			current.name === name &&
 			current.instructions === routine.instructions &&
 			isDeepStrictEqual(current.model_selection, routine.model ?? null)
 		) {
@@ -143,7 +150,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 			data: {
 				conversation_mode: routine.conversationMode,
 				conversation_id: conversation.data,
-				name: routine.name,
+				name,
 				instructions: routine.instructions,
 				model_selection: routine.model ?? null,
 				cron: routine.schedule?.cron ?? null,

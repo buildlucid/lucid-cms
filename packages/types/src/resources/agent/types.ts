@@ -818,7 +818,8 @@ export interface AgentRoutine {
 	key: string | null;
 	/** Routines defined in code can only be paused, resumed or run early. */
 	source: AgentRoutineSource;
-	name: string;
+	/** A code routine's name translated for each viewer, or the name its owner typed as literal copy. */
+	name: ResolvedAdminCopy;
 	instructions: string;
 	conversationMode: AgentRoutineConversationMode;
 	/** The saved chat used in reuse mode. Null until the first run, or after deletion. */

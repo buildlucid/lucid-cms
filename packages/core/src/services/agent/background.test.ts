@@ -11,8 +11,13 @@ import {
 import constants from "../../constants/constants.js";
 import defineAgent from "../../libs/agent/define-agent.js";
 import defineRoutine from "../../libs/agent/define-routine.js";
+import { messageText } from "../../libs/agent/input.js";
 import Migration00000014 from "../../libs/db/migrations/00000014-agent.js";
-import { createTranslationStore } from "../../libs/i18n/index.js";
+import {
+	copy,
+	createTranslationStore,
+	createTranslator,
+} from "../../libs/i18n/index.js";
 import * as jobQueue from "../../libs/jobs/enqueue.js";
 import {
 	AgentCompactionsRepository,
@@ -30,6 +35,7 @@ import syncAgentRoutines from "../sync/sync-agent-routines.js";
 import createRoutine from "./create-routine.js";
 import dispatchDueRoutines from "./dispatch-due-routines.js";
 import generateConversationTitle from "./generate-conversation-title.js";
+import getRoutine from "./get-routine.js";
 import enqueueRun from "./helpers/enqueue-run.js";
 import getRoutineTools from "./helpers/get-routine-tools.js";
 import insertConversation from "./helpers/insert-conversation.js";
@@ -548,7 +554,7 @@ describe("code routines", () => {
 			routines: [
 				{
 					...auditRoutine,
-					name: "Monday audit",
+					name: copy.literal("Monday audit"),
 					toolSettings: { collections_list: { requiresConfirmation: true } },
 				},
 			],
@@ -653,6 +659,74 @@ describe("code routines", () => {
 			id: run?.conversation_id ?? "",
 		});
 		expect(conversation.data?.user_id).toBeNull();
+	});
+
+	test("a translated name is stored, titled and prompted in the default language, and read as its copy", async () => {
+		const name = copy("admin:routines.digest.name");
+		const digest = defineRoutine({
+			key: "digest",
+			name,
+			instructions: "Summarise the week.",
+			schedule: { cron: "0 9 * * 5" },
+		});
+		//* a French viewer, so only text with no viewer uses the English default
+		const french = {
+			...context,
+			translate: createTranslator({
+				store: createTranslationStore({
+					defaultLocale: "en",
+					bundles: {
+						en: {
+							admin: { "routines.digest.name": "Weekly digest" },
+							server: {},
+						},
+						fr: {
+							admin: { "routines.digest.name": "Résumé hebdomadaire" },
+							server: {},
+						},
+					},
+				}),
+				locale: "fr",
+			}),
+			config: {
+				...context.config,
+				ai: {
+					...context.config.ai,
+					agents: [{ ...testAgent, routines: [auditRoutine, digest] }],
+				},
+			},
+		};
+		expect((await syncAgentRoutines(french)).error).toBeUndefined();
+		const stored = await Routines.selectSingle({
+			select: ["id", "name"],
+			where: [
+				{ key: "agent_key", operator: "=", value: testAgent.key },
+				{ key: "key", operator: "=", value: digest.key },
+			],
+		});
+		expect(stored.data?.name).toBe("Weekly digest");
+		const id = stored.data?.id ?? "";
+
+		const read = await getRoutine(french, { id, userId });
+		expect(read.data?.name).toEqual({
+			...name,
+			defaultMessage: "Weekly digest",
+		});
+
+		const run = await runRoutine(french, { id, userId });
+		if (run.error) throw run.error;
+		const request = await Messages.selectSingle({
+			select: ["parts"],
+			where: [{ key: "id", operator: "=", value: run.data.runId }],
+		});
+		expect(messageText(request.data?.parts ?? [])).toContain(
+			'Start a run of the "Weekly digest" routine.',
+		);
+		const conversation = await Conversations.selectSingle({
+			select: ["title"],
+			where: [{ key: "id", operator: "=", value: run.data.conversationId }],
+		});
+		expect(conversation.data?.title).toBe("Weekly digest");
 	});
 });
 

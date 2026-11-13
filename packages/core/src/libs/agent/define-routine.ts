@@ -1,4 +1,5 @@
 import dedent from "../../utils/helpers/dedent.js";
+import { normalizeCopy } from "../i18n/copy.js";
 import type { DefineRoutineOptions, RoutineDefinition } from "./types.js";
 
 /**
@@ -11,7 +12,7 @@ const defineRoutine = <const Key extends string>(
 ): RoutineDefinition<Key> => ({
 	type: "routine-definition",
 	key: options.key,
-	name: options.name,
+	name: normalizeCopy(options.name),
 	instructions: dedent(options.instructions),
 	conversationMode: options.conversationMode ?? "new",
 	model: options.model,

@@ -6,7 +6,7 @@ import AgentSidebarCard from "@/components/AgentSidebarCard/AgentSidebarCard";
 import Button from "@/components/Button/Button";
 import Pill from "@/components/Pill/Pill";
 import api from "@/services/api";
-import T from "@/translations";
+import T, { translateAdminCopy } from "@/translations";
 import { getRoutinePause } from "@/utils/agent-access";
 import { markdownPreview } from "@/utils/agent-markdown";
 import { routineEventLabels } from "@/utils/agent-routine-events";
@@ -48,7 +48,7 @@ const AgentRoutineCard: Component<{
 	return (
 		<AgentSidebarCard
 			label={T()("agent.routine.label")}
-			title={props.routine.name}
+			title={translateAdminCopy(props.routine.name)}
 			onClose={props.onClose}
 		>
 			<div class="grid grid-cols-2 gap-2">

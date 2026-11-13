@@ -464,7 +464,7 @@ const agentRoutineResponseSchema = z.object({
 	owner: userDisplaySchema.nullable(),
 	key: z.string().nullable(),
 	source: agentRoutineSourceSchema,
-	name: z.string(),
+	name: resolvedAdminCopySchema,
 	instructions: z.string(),
 	conversationMode: agentRoutineConversationModeSchema,
 	conversationId: z.uuid().nullable(),

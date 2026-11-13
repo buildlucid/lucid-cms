@@ -29,7 +29,7 @@ interface SettingsPropsT {
 const formatSingle = (props: {
 	settings: SettingsPropsT;
 	config: ResolvedLucidConfig;
-	/** Translates agent and tool copy for the current viewer. */
+	/** Translates agent, tool and routine copy for the current viewer. */
 	translate: ServiceContext["translate"];
 	includes: SettingsInclude[] | undefined;
 	authUser?: LucidActor;
@@ -132,7 +132,7 @@ const formatSingle = (props: {
 				})),
 				routines: agent.routines.map((routine) => ({
 					key: routine.key,
-					name: routine.name,
+					name: props.translate(routine.name),
 				})),
 			})),
 		};

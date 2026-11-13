@@ -217,7 +217,8 @@ export type AgentRunnerInstance = {
 export type DefineRoutineOptions<Key extends string> = {
 	/** Stable key, unique within the agent, using lowercase letters, numbers and single hyphens. */
 	key: Key;
-	name: string;
+	/** Routine name translated for each viewer, using the default language in prompts, chat titles and notifications. */
+	name: AdminCopyInput;
 	/** What each run should do. Common indentation is removed, so template literals can be indented. */
 	instructions: string;
 	/** New chats by default. Reuse continues the routine's saved chat, including human follow-ups. */
@@ -256,7 +257,7 @@ export type DefineRoutineOptions<Key extends string> = {
 export type RoutineDefinition<Key extends string = string> = {
 	readonly type: "routine-definition";
 	readonly key: Key;
-	readonly name: string;
+	readonly name: ResolvedAdminCopy;
 	readonly instructions: string;
 	readonly conversationMode: AgentRoutineConversationMode;
 	readonly model?: AiModelSelection;

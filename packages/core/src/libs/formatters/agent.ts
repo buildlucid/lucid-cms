@@ -31,6 +31,7 @@ import { contextLimits } from "../agent/context.js";
 import { getAgents } from "../agent/registry.js";
 import type {
 	ConversationContext,
+	RoutineDefinition,
 	RoutineToolSettings,
 } from "../agent/types.js";
 import { isAiFeatureEnabled } from "../config/ai-features.js";
@@ -42,6 +43,8 @@ import type { LucidAgentMessages } from "../db/tables/agent-messages.js";
 import type { LucidAgentRoutines } from "../db/tables/agent-routines.js";
 import type { LucidAgentRuns } from "../db/tables/agent-runs.js";
 import type { Select } from "../db/types.js";
+import { copy } from "../i18n/copy.js";
+import { hydrateAdminCopyDefaults } from "../i18n/hydrate-admin-copy-defaults.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import { hasAgentPermission } from "../permission/agent-permissions.js";
 import formatter from "./helpers.js";
@@ -301,8 +304,14 @@ const formatRun = (props: { run: RunPropT; usage?: AgentUsage }): AgentRun => ({
 	finishedAt: formatter.formatDate(props.run.finished_at),
 });
 
+/**
+ * Resolves code routine names from their definition and wraps user-defined names as literal copy.
+ */
 const formatRoutine = (props: {
 	routine: Select<LucidAgentRoutines>;
+	definition: RoutineDefinition | undefined;
+	/** Fills in fallback text for a code routine's translated name. */
+	adminTranslations?: Record<string, string>;
 	access: AgentRoutineAccess;
 	toolSettings: RoutineToolSettings;
 	lastRun?: LastRunPropT;
@@ -314,7 +323,9 @@ const formatRoutine = (props: {
 	owner: props.owner ?? null,
 	key: props.routine.key,
 	source: props.routine.source,
-	name: props.routine.name,
+	name: props.definition
+		? hydrateAdminCopyDefaults(props.definition.name, props.adminTranslations)
+		: copy.literal(props.routine.name),
 	instructions: props.routine.instructions,
 	conversationMode: props.routine.conversation_mode,
 	conversationId: props.routine.conversation_id,

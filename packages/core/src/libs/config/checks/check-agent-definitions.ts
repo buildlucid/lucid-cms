@@ -12,7 +12,7 @@ import nextRoutineOccurrence from "../../agent/next-routine-occurrence.js";
 import { isRoutineDefinition } from "../../agent/registry.js";
 import type { AgentFeatures } from "../../agent/types.js";
 import { contentEventsSchema } from "../../events/content-events.js";
-import { resolvedAdminCopySchema } from "../../i18n/copy.js";
+import { resolvedAdminCopySchema, writtenCopyText } from "../../i18n/copy.js";
 
 const featuresSchema = z
 	.object({
@@ -60,10 +60,6 @@ const detailsSchema = z.object({
 	description: resolvedAdminCopySchema,
 });
 
-//* translation keys are checked by translation tooling, so only written text can be checked here
-const copyText = (copy: z.output<typeof resolvedAdminCopySchema>) =>
-	copy.type === "lucid.literal" ? copy.value : copy.defaultMessage;
-
 /** Checks agent and routine keys, details and schedules at config time. */
 const checkAgentDefinitions = (config: {
 	ai: Pick<ResolvedLucidConfig["ai"], "agents">;
@@ -85,8 +81,8 @@ const checkAgentDefinitions = (config: {
 		const details = detailsSchema.safeParse(agent);
 		if (
 			!details.success ||
-			copyText(details.data.name)?.trim() === "" ||
-			copyText(details.data.description)?.trim() === ""
+			writtenCopyText(details.data.name)?.trim() === "" ||
+			writtenCopyText(details.data.description)?.trim() === ""
 		) {
 			throw new Error(`Agent "${agent.key}" needs a name and description.`);
 		}
@@ -100,7 +96,7 @@ const checkAgentDefinitions = (config: {
 
 		for (const [index, suggestion] of suggestions.data.entries()) {
 			for (const [field, copy] of Object.entries(suggestion)) {
-				const value = copyText(copy);
+				const value = writtenCopyText(copy);
 				if (value !== undefined && !value.trim()) {
 					throw new Error(
 						`Agent "${agent.key}" suggestion ${index + 1} needs a ${field}.`,
@@ -197,9 +193,11 @@ const checkAgentDefinitions = (config: {
 
 			routineKeys.add(routine.key);
 
+			const name = resolvedAdminCopySchema.safeParse(routine.name);
+			const nameText = name.success ? writtenCopyText(name.data) : "";
 			if (
-				!routine.name.trim() ||
-				routine.name.length > 255 ||
+				nameText?.trim() === "" ||
+				(nameText?.length ?? 0) > 255 ||
 				!routine.instructions ||
 				routine.instructions.length > 20_000
 			) {

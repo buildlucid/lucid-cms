@@ -1,3 +1,4 @@
+import { getRoutineDefinition } from "../../libs/agent/registry.js";
 import { agentFormatter } from "../../libs/formatters/index.js";
 import { AgentRunsRepository } from "../../libs/repositories/index.js";
 import type { AgentRoutine } from "../../types/response.js";
@@ -31,6 +32,10 @@ const getRoutine: ServiceFn<
 		error: undefined,
 		data: agentFormatter.formatRoutine({
 			routine: routine.data,
+			definition: getRoutineDefinition(context.config, routine.data),
+			adminTranslations: context.translate
+				.forLocale(context.config.translations.defaultLocale)
+				.adminBundle(),
 			access: routine.data.access,
 			toolSettings: tools.data[input.id] ?? {},
 			lastRun: lastRuns.data[0],

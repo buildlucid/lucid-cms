@@ -3,7 +3,7 @@ import { type Component, createMemo, Show } from "solid-js";
 import ActorDisplay from "@/components/ActorDisplay/ActorDisplay";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import Table from "@/components/Table/Table";
-import T from "@/translations";
+import T, { translateAdminCopy } from "@/translations";
 import {
 	getAgentName,
 	getAgentUnavailableReason,
@@ -86,7 +86,7 @@ const AgentRoutineTableRow: Component<{
 		>
 			<Table.Text
 				column="name"
-				text={props.routine.name}
+				text={translateAdminCopy(props.routine.name)}
 				minWidth={260}
 				maxLines={1}
 			/>

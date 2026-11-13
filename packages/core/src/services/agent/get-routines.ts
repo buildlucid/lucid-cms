@@ -1,3 +1,4 @@
+import { getRoutineDefinition } from "../../libs/agent/registry.js";
 import formatter, { agentFormatter } from "../../libs/formatters/index.js";
 import { Permissions } from "../../libs/permission/definitions.js";
 import hasPermission from "../../libs/permission/has-permission.js";
@@ -52,12 +53,18 @@ const getRoutines: ServiceFn<
 	);
 	if (tools.error) return tools;
 
+	const adminTranslations = context.translate
+		.forLocale(context.config.translations.defaultLocale)
+		.adminBundle();
+
 	return {
 		error: undefined,
 		data: {
 			data: routines.data[0].map((routine) =>
 				agentFormatter.formatRoutine({
 					routine,
+					definition: getRoutineDefinition(context.config, routine),
+					adminTranslations,
 					//* keep access labels aligned with getAccessibleRoutine
 					access:
 						routine.source === "code"
