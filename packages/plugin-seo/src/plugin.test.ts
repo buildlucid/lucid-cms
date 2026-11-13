@@ -1,11 +1,11 @@
-import { defineCollection, field } from "@lucidcms/core";
+import { copy, defineCollection, field } from "@lucidcms/core";
 import type { AllHooks, HttpExtension } from "@lucidcms/core/types";
 import { describe, expect, test, vi } from "vitest";
 import seo from "./plugin.js";
 import type { SeoPluginOptions } from "./types.js";
 
 const configure = (
-	options: Pick<SeoPluginOptions, "sitemap" | "robots"> = {},
+	options: Pick<SeoPluginOptions, "sitemap" | "robots" | "indexNow"> = {},
 	extensions: HttpExtension[] = [],
 ) => {
 	const draft = {
@@ -19,7 +19,9 @@ const configure = (
 			}),
 		],
 		access: [] as Array<{ key: string }>,
-		admin: { slots: [] },
+		admin: { slots: [] as Array<{ key: string }> },
+		migrations: [] as Array<{ name: string }>,
+		jobs: [] as Array<{ key: string }>,
 		http: {
 			routes: [] as Array<{ path: string }>,
 			extensions: [...extensions],
@@ -32,8 +34,8 @@ const configure = (
 	return draft;
 };
 
-/** The paths the CMS's own sitemap files are served at, for a final config's `siteUrl`. */
-const servedPaths = (
+/** The routes the CMS's own root files are served at, for a final config's `siteUrl`. */
+const servedRoutes = (
 	extensions: HttpExtension[],
 	siteUrl: string | Record<string, string>,
 ) => {
@@ -54,8 +56,13 @@ const servedPaths = (
 			} as never,
 		);
 	}
-	return app.get.mock.calls.map(([path]) => path);
+	return app.get.mock.calls;
 };
+/** The paths the CMS's own root files are served at, for a final config's `siteUrl`. */
+const servedPaths = (
+	extensions: HttpExtension[],
+	siteUrl: string | Record<string, string>,
+) => servedRoutes(extensions, siteUrl).map(([path]) => path);
 
 describe("seo sitemap and robots registration", () => {
 	test("adds nothing when the sitemap and robots.txt are turned off", () => {
@@ -134,5 +141,146 @@ describe("seo sitemap and robots registration", () => {
 			{ name: "@lucidcms/seo:sitemap", phase: "fallback" },
 			{ name: "site:pages", phase: "fallback" },
 		]);
+	});
+});
+
+describe("seo IndexNow", () => {
+	const key = "test-key-1234";
+	const page = defineCollection({
+		key: "page",
+		mode: "multiple",
+		details: { labels: { singular: "Page", plural: "Pages" } },
+		routing: { field: "path" },
+		fields: [field.text("path")],
+		publishing: {
+			environments: [{ key: "production", label: copy.literal("Production") }],
+		},
+	});
+	const finalConfig = {
+		collections: [page],
+		localization: { locales: [], defaultLocale: null },
+		deploys: [{ key: "production" }],
+	};
+
+	/** Runs the hooks IndexNow registered for an event, with a toolkit that records queued jobs. */
+	const runHooks = async (
+		draft: ReturnType<typeof configure>,
+		event: string,
+		payload: Record<string, unknown>,
+	) => {
+		const enqueueJob = vi.fn(async () => ({
+			error: undefined,
+			data: { jobId: "job", key: "seo:index-now-send", version: 1 },
+		}));
+		for (const hook of draft.hooks.filter((item) => item.event === event)) {
+			await (hook.handler as (props: unknown) => Promise<void>)({
+				...payload,
+				context: { config: finalConfig },
+				toolkit: { jobs: { enqueueJob } },
+			});
+		}
+		return enqueueJob.mock.calls.length;
+	};
+
+	test("refuses keys IndexNow doesn't accept, and IndexNow without the sitemap", () => {
+		expect(() =>
+			seo({ collections: [{ key: "page" }], indexNow: { key: "short" } }),
+		).toThrow(/8 to 128 letters/);
+		expect(() =>
+			seo({
+				collections: [{ key: "page" }],
+				indexNow: { key: "has spaces 123" },
+			}),
+		).toThrow(/8 to 128 letters/);
+		expect(() =>
+			seo({
+				collections: [{ key: "page" }],
+				sitemap: false,
+				indexNow: { key },
+			}),
+		).toThrow(/needs the sitemap/);
+	});
+
+	test("refuses a deploy the config doesn't have", () => {
+		const check = (deploy: string) =>
+			seo({
+				collections: [{ key: "page" }],
+				indexNow: { key, deploy },
+			}).checkCompatibility?.({ config: finalConfig } as never);
+
+		expect(() => check("production")).not.toThrow();
+		expect(() => check("staging")).toThrow(/isn't one of the config's deploys/);
+	});
+
+	test("serves the key file, and adds its job, routes and Operations tile", () => {
+		const draft = configure({ indexNow: { key } });
+		const routes = servedRoutes(draft.http.extensions, "/");
+		const keyFile = routes.find(([path]) => path === `/${key}.txt`);
+		const hono = { header: vi.fn(), body: vi.fn((body: string) => body) };
+
+		expect(keyFile?.[1](hono)).toBe(key);
+		expect(hono.header).toHaveBeenCalledWith(
+			"Content-Type",
+			"text/plain; charset=utf-8",
+		);
+		expect(draft.migrations.map((item) => item.name)).toEqual([
+			"1789100000000-seo-index-now",
+		]);
+		expect(draft.jobs.map((job) => job.key)).toEqual(["seo:index-now-send"]);
+		expect(draft.http.routes.map((route) => route.path)).toContain(
+			"/api/v1/seo/index-now/send",
+		);
+		expect(draft.admin.slots.map((slot) => slot.key)).toContain(
+			"@lucidcms/seo:index-now-send",
+		);
+	});
+
+	test("without a deploy, publishing to or deleting from the listed environment queues a send", async () => {
+		const draft = configure({ indexNow: { key } });
+		const change = (collectionKey: string, change: Record<string, unknown>) =>
+			runHooks(draft, "afterChange", {
+				meta: { collectionKey },
+				data: { ids: [1], change },
+			});
+
+		expect(
+			await change("page", { type: "published", version: "production" }),
+		).toBe(1);
+		expect(
+			await change("page", { type: "unpublished", version: "production" }),
+		).toBe(1);
+		expect(await change("page", { type: "updated", version: "latest" })).toBe(
+			0,
+		);
+		expect(
+			await change("post", { type: "published", version: "production" }),
+		).toBe(0);
+		expect(await change("page", { type: "deleted", permanent: false })).toBe(1);
+		expect(await change("page", { type: "deleted", permanent: true })).toBe(1);
+		expect(await change("post", { type: "deleted", permanent: false })).toBe(0);
+		expect(await runHooks(draft, "afterRunFinish", {})).toBe(0);
+	});
+
+	test("with a deploy, only that deploy's succeeded runs queue a send", async () => {
+		const draft = configure({ indexNow: { key, deploy: "production" } });
+		const finish = (deployKey: string, status: string) =>
+			runHooks(draft, "afterRunFinish", {
+				meta: {},
+				data: { deployKey, runId: 1, status, source: "trigger" },
+			});
+
+		expect(await finish("production", "succeeded")).toBe(1);
+		expect(await finish("production", "triggered")).toBe(0);
+		expect(await finish("production", "timed-out")).toBe(0);
+		expect(await finish("staging", "succeeded")).toBe(0);
+		expect(
+			await runHooks(draft, "afterChange", {
+				meta: { collectionKey: "page" },
+				data: {
+					ids: [1],
+					change: { type: "published", version: "production" },
+				},
+			}),
+		).toBe(0);
 	});
 });

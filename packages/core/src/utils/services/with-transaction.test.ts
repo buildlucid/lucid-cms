@@ -192,3 +192,33 @@ test("work queued for a rollback runs newest first, undoing in reverse", async (
 
 	expect(ran).toEqual(["undo moved", "undo stored"]);
 });
+
+test.each(["committed", "rolled back"])(
+	"a kept savepoint's work queued after it returns still runs when the caller's transaction is %s",
+	async (outcome) => {
+		const ran: string[] = [];
+		let kept: ServiceContext | undefined;
+
+		await withTransaction(context, async (parent) => {
+			await withTransaction(
+				parent,
+				async (transaction) => {
+					kept = transaction;
+					return { error: undefined, data: undefined };
+				},
+				{ isolate: true, ownCallbacks: true },
+			);
+			await kept?.db.afterCommit(async () => {
+				ran.push("committed");
+			});
+			kept?.db.afterRollback(async () => {
+				ran.push("rolled back");
+			});
+			return outcome === "committed"
+				? { error: undefined, data: undefined }
+				: { error: failure, data: undefined };
+		});
+
+		expect(ran).toEqual([outcome]);
+	},
+);

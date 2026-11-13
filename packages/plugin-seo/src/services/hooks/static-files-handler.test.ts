@@ -7,7 +7,7 @@ import {
 import type { ResolvedLucidConfig } from "@lucidcms/core/types";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import seo from "../../plugin.js";
-import type { SitemapEntry } from "../../types.js";
+import type { SeoPluginOptions, SitemapEntry } from "../../types.js";
 import parsePluginOptions from "../parse-plugin-options.js";
 import staticFilesHandler from "./static-files-handler.js";
 
@@ -39,6 +39,7 @@ const runStaticBuild = (
 		siteUrl: "https://example.com",
 		localization: { locales: [], defaultLocale: null },
 	},
+	extra: Pick<SeoPluginOptions, "indexNow"> = {},
 ) =>
 	siteEvents.execute(
 		{
@@ -51,7 +52,9 @@ const runStaticBuild = (
 					{
 						service: "site",
 						event: "staticFiles",
-						handler: staticFilesHandler(parsePluginOptions(given)),
+						handler: staticFilesHandler(
+							parsePluginOptions({ ...given, ...extra }),
+						),
 					},
 				],
 			},
@@ -152,6 +155,19 @@ describe("staticFilesHandler", () => {
 		expect(result.data?.files).toEqual([
 			{ path: "/robots.txt", body: "User-agent: *\nAllow: /\n" },
 		]);
+	});
+
+	test("adds IndexNow's key file when it is on", async () => {
+		mocks.getDocumentEntries.mockResolvedValue(listed([]));
+
+		const result = await runStaticBuild(undefined, {
+			indexNow: { key: "test-key-1234" },
+		});
+
+		expect(result.data?.files).toContainEqual({
+			path: "/test-key-1234.txt",
+			body: "test-key-1234",
+		});
 	});
 
 	test("fails the build instead of writing an empty sitemap", async () => {

@@ -25,12 +25,36 @@ export const sitemap = {
 	/** What file names may contain, the same as collection keys, so they fit in `/sitemap-<name>.xml`. */
 	fileName: /^[a-z0-9_-]+$/,
 } as const;
+
 export const robots = {
 	/** The API key scope the content API route requires. */
 	scope: "robots:read",
 	/** Content API route, beneath `/api/v1/content/e`. */
 	route: "/seo/robots",
 } as const;
+
+export const indexNow = {
+	/** Where URLs are sent unless `indexNow.endpoint` names another IndexNow endpoint. */
+	endpoint: "https://api.indexnow.org/indexnow",
+	/** The most URLs one IndexNow POST may carry. */
+	batchSize: 10_000,
+	/** How long one POST may take before the send stops and is retried. */
+	requestTimeoutMs: 30_000,
+	/** What IndexNow accepts as a key. */
+	key: /^[a-zA-Z0-9-]{8,128}$/,
+	/** Each listed URL with its `lastModified`, and whether it still has to be sent. */
+	urlsTable: "plugin_seo_index_now_urls",
+	/** One row: the last send IndexNow accepted URLs from, and the mark count that orders marks. */
+	stateTable: "plugin_seo_index_now_state",
+	/** Admin route the Operations tile queues a send with. */
+	sendRoute: "/api/v1/seo/index-now/send",
+	/** Admin route the Operations tile reads pending pages and the last send from. */
+	statusRoute: "/api/v1/seo/index-now/status",
+	/** Sends from the tile per user within the window. Each one reads every listed page. */
+	rateLimit: 5,
+	rateLimitWindowMs: 15 * 60 * 1000,
+} as const;
+
 export const fields = {
 	title: "title",
 	description: "description",

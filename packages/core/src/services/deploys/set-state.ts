@@ -6,6 +6,9 @@ import {
 	DeployTriggersRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import executeRunFinishedHooks, {
+	runHookColumns,
+} from "./helpers/execute-run-finished-hooks.js";
 
 /**
  * Disabling drops pending triggers and queued work and prevents new runs. Active host runs
@@ -61,8 +64,15 @@ const setState: ServiceFn<
 			{ key: "deploy_key", operator: "=", value: deploy.key },
 			{ key: "status", operator: "=", value: "queued" },
 		],
+		returning: runHookColumns,
 	});
 	if (cancelled.error) return cancelled;
+	if (cancelled.data) {
+		await executeRunFinishedHooks(context, {
+			run: cancelled.data,
+			status: "cancelled",
+		});
+	}
 
 	return { error: undefined, data: undefined };
 };

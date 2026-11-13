@@ -2401,6 +2401,7 @@ describe("agent runner", () => {
 
 		const chat = await prepare();
 		const logged = vi.spyOn(logger, "error").mockImplementation(() => {});
+		const ranAfterFailure: string[] = [];
 		const failing: ServiceContext = {
 			...context,
 			config: {
@@ -2418,6 +2419,14 @@ describe("agent runner", () => {
 							});
 						},
 					},
+					{
+						service: "agent",
+						event: "afterRunFinish",
+						handler: async ({ data }) => {
+							ranAfterFailure.push(data.runId);
+							return;
+						},
+					},
 				],
 			},
 		};
@@ -2426,6 +2435,8 @@ describe("agent runner", () => {
 			(await cancelRun(failing, { runId: chat.runId, userId })).error,
 		).toBeUndefined();
 		expect(await selectRun(chat.runId)).toMatchObject({ status: "cancelled" });
+		//* a hook that fails doesn't stop the ones after it
+		expect(ranAfterFailure).toEqual([chat.runId]);
 		expect(logged).toHaveBeenCalledWith(
 			expect.objectContaining({ message: "Agent run finished hooks failed" }),
 		);

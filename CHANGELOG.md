@@ -37,6 +37,7 @@
 - Job schedules can take a `when` check that skips a run with nothing to do, so quiet minutes store no jobs. ([aa2114d](https://github.com/buildlucid/lucid-cms/commit/aa2114d59ea05f7707a8ec1812c37ef763212133))
 - Seeds can now upload media and import content with media, and a seed that fails deletes the files it stored.
 - Hooks can now set `optional: true` to subscribe to another plugin's events, and are left out when that plugin isn't installed.
+- Added `deploys.afterRunStart` and `deploys.afterRunFinish` hooks, for running code when a deploy run starts on the host and when it finishes.
 
 ### Breaking Changes:
 
@@ -148,6 +149,7 @@
 - Fixed `/api/oauth/revoke` leaving the connection and its access tokens active, and refusing access tokens. Revoking either token now ends the connection.
 - Fixed every API key and OAuth request writing when it was last used. It is now recorded at most once a minute.
 - Fixed `lucidcms seed` and `jobs:run` waiting forever to be picked from a list when there's no terminal. They now ask for a name.
+- Fixed deleting several documents at once not running `documents.afterChange` hooks.
 
 ## v0.19.0-alpha.0
 

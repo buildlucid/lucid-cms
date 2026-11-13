@@ -5,6 +5,9 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import applyRunUpdate from "./helpers/apply-run-update.js";
 import checkRunStatus from "./helpers/check-run-status.js";
+import executeRunFinishedHooks, {
+	runHookColumns,
+} from "./helpers/execute-run-finished-hooks.js";
 
 /** Checks host status once more before timing out overdue runs and freeing their slots. */
 const expireRuns: ServiceFn<[], undefined> = async (context) => {
@@ -29,9 +32,20 @@ const expireRuns: ServiceFn<[], undefined> = async (context) => {
 					message,
 					finished_at: new Date().toISOString(),
 				},
-				where: [{ key: "id", operator: "=", value: run.id }],
+				where: [
+					{ key: "id", operator: "=", value: run.id },
+					{ key: "status", operator: "in", value: ["starting", "running"] },
+				],
+				returning: runHookColumns,
 			});
 			if (timedOut.error) return timedOut;
+			//* another pass already timed it out
+			if (!timedOut.data) continue;
+
+			await executeRunFinishedHooks(context, {
+				run: timedOut.data,
+				status: "timed-out",
+			});
 			continue;
 		}
 

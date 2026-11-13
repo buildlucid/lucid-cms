@@ -3,12 +3,15 @@ import type constants from "../../constants/constants.js";
 import type {
 	AgentRunOutcome,
 	CollectionTableNames,
+	DeployRunSource,
+	DeployRunStatus,
 	InternalCollectionDocument,
 	Media,
 } from "../../exports/types.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
+import type { LucidErrorData } from "../../types/errors.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -296,6 +299,42 @@ export type AgentRunFinishedHookData = {
 	errorMessage: string | null;
 };
 
+/**
+ * The host accepted a deploy run and Lucid is now waiting on it. Fires once per run, and not for
+ * runs the host reported finished straight away. A hook that throws is logged and doesn't change
+ * the run.
+ */
+export type DeployRunStartedHookData = {
+	deployKey: string;
+	runId: number;
+	/** What started the run, such as a trigger, the schedule or someone in the admin. */
+	source: DeployRunSource;
+	/** The user who started the run, if a person did. */
+	startedByUserId: number | null;
+	/** The agent run that started the run, for the person in `startedByUserId` or for the system. */
+	agentRunId: string | null;
+	/** The host's page for the run, such as its build log, if it gave one. */
+	url: string | null;
+	startedAt: string;
+};
+
+/**
+ * A deploy run's final status was stored. Fires again for the same run when a late host result
+ * replaces a timeout, so check `status` rather than counting calls. A hook that throws is logged
+ * and doesn't change the run.
+ */
+export type DeployRunFinishedHookData = Omit<
+	DeployRunStartedHookData,
+	"startedAt"
+> & {
+	status: Exclude<DeployRunStatus, "queued" | "starting" | "running">;
+	/** How the run finished, such as why it failed. */
+	message: string | null;
+	/** Null for a run cancelled before it started. */
+	startedAt: string | null;
+	finishedAt: string;
+};
+
 /** Mutable data and event metadata. Edit the draft and return nothing, or return replacement data. */
 export type TransformHookPayload<TMeta, TData> = {
 	meta: TMeta;
@@ -447,6 +486,16 @@ type CoreHookEvents = {
 	agent: {
 		afterRunFinish: EffectHookEvent<AgentHookMeta, AgentRunFinishedHookData>;
 	};
+	deploys: {
+		afterRunStart: EffectHookEvent<
+			Record<string, never>,
+			DeployRunStartedHookData
+		>;
+		afterRunFinish: EffectHookEvent<
+			Record<string, never>,
+			DeployRunFinishedHookData
+		>;
+	};
 };
 
 // --------------------------------------------------
@@ -523,6 +572,12 @@ export type HookOptions<
 	event: E;
 	config: ResolvedLucidConfig;
 	collectionInstance?: CollectionDefinition;
+	/**
+	 * Effect hooks only. Runs each hook in its own savepoint and keeps going after one fails,
+	 * passing its error here, so one subscriber's failure never undoes another's work. A failed
+	 * hook's `afterCommit` work is dropped and its `afterRollback` work runs.
+	 */
+	onError?: (error: LucidErrorData) => void;
 };
 
 export type HookPayload<

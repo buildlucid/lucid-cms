@@ -3,6 +3,11 @@ import { getDeployCallbackUrl } from "../../libs/deploys/callback.js";
 import defineDeploy from "../../libs/deploys/define-deploy.js";
 import createDeployTriggerHooks from "../../libs/deploys/trigger-hooks.js";
 import type { DeployProviderInstance } from "../../libs/deploys/types.js";
+import defineHook from "../../libs/hooks/define-hook.js";
+import type {
+	DeployRunFinishedHookData,
+	DeployRunStartedHookData,
+} from "../../libs/hooks/types.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import systemActor from "../../libs/permission/system-actor.js";
 import type { LucidUser } from "../../types/hono.js";
@@ -27,6 +32,40 @@ let context: ServiceContext;
 afterAll(testConfig.destroy);
 
 const trigger = vi.fn<DeployProviderInstance["trigger"]>();
+const finished = vi.fn<(data: DeployRunFinishedHookData) => void>();
+//* when on, writes a row that the failing hook after it must not roll back
+let recordFinishes = false;
+const recordingHook = defineHook({
+	service: "deploys",
+	event: "afterRunFinish",
+	order: -1,
+	handler: async ({ context, data }) => {
+		if (!recordFinishes) return;
+		await context.db.kysely
+			.insertInto("lucid_deploy_triggers")
+			.values({ deploy_key: `finished-${data.runId}` })
+			.execute();
+	},
+});
+//* fails for failed runs, which must still finish
+const finishedHook = defineHook({
+	service: "deploys",
+	event: "afterRunFinish",
+	handler: ({ data }) => {
+		finished(data);
+		if (data.status === "failed") throw new Error("Hook failed");
+	},
+});
+const started = vi.fn<(data: DeployRunStartedHookData) => void>();
+//* always fails, which must never stop the run
+const startedHook = defineHook({
+	service: "deploys",
+	event: "afterRunStart",
+	handler: ({ data }) => {
+		started(data);
+		throw new Error("Hook failed");
+	},
+});
 const cancel = vi.fn<NonNullable<DeployProviderInstance["cancel"]>>();
 const provider: DeployProviderInstance = {
 	type: "deploy-provider",
@@ -59,6 +98,7 @@ beforeAll(async () => {
 		config: {
 			...config,
 			deploys: [production],
+			hooks: [...config.hooks, recordingHook, finishedHook, startedHook],
 			jobs: [...config.jobs, startDeployRunJob],
 			notifications: [
 				...config.notifications,
@@ -109,6 +149,9 @@ beforeAll(async () => {
 beforeEach(async () => {
 	trigger.mockReset();
 	cancel.mockReset();
+	finished.mockReset();
+	started.mockReset();
+	recordFinishes = false;
 	trigger.mockImplementation(async (_context, run) => ({
 		status: "running",
 		externalId: `external-${run.id}`,
@@ -235,6 +278,9 @@ test("turning a deploy off drops its waiting triggers and queued run", async () 
 		{ status: "running" },
 		{ status: "cancelled" },
 	]);
+	expect(finished.mock.calls.map(([data]) => data)).toMatchObject([
+		{ status: "cancelled", startedAt: null },
+	]);
 	expect(
 		await context.db.kysely
 			.selectFrom("lucid_deploy_triggers")
@@ -278,6 +324,111 @@ test("timed out runs free the deploy, and a late result still replaces the timeo
 	expect(await runs()).toMatchObject([
 		{ status: "succeeded" },
 		{ status: "running" },
+	]);
+});
+
+test("finished runs fire deploys.afterRunFinish, and a hook that throws leaves the run and other hooks' work in place", async () => {
+	recordFinishes = true;
+	const first = await run();
+	await report(first.data?.id ?? 0, "failed");
+	const second = await run();
+	await cancelRun(context, { actor: systemActor, id: second.data?.id ?? 0 });
+
+	expect(await runs()).toMatchObject([
+		{ status: "failed" },
+		{ status: "cancelled" },
+	]);
+	expect(finished.mock.calls.map(([data]) => data)).toEqual([
+		{
+			deployKey: "production",
+			runId: first.data?.id,
+			status: "failed",
+			source: "manual",
+			startedByUserId: null,
+			agentRunId: null,
+			url: null,
+			message: null,
+			startedAt: expect.any(String),
+			finishedAt: expect.any(String),
+		},
+		{
+			deployKey: "production",
+			runId: second.data?.id,
+			status: "cancelled",
+			source: "manual",
+			startedByUserId: null,
+			agentRunId: null,
+			url: null,
+			message: "Cancelled on the host.",
+			startedAt: expect.any(String),
+			finishedAt: expect.any(String),
+		},
+	]);
+	expect(
+		await context.db.kysely
+			.selectFrom("lucid_deploy_triggers")
+			.select("deploy_key")
+			.orderBy("id")
+			.execute(),
+	).toEqual([
+		{ deploy_key: `finished-${first.data?.id}` },
+		{ deploy_key: `finished-${second.data?.id}` },
+	]);
+});
+
+test("running runs fire deploys.afterRunStart once, and a hook that throws leaves the run running", async () => {
+	trigger.mockImplementation(async (_context, run) => ({
+		status: "running",
+		externalId: `external-${run.id}`,
+		url: "https://host.test/runs/1",
+	}));
+	const first = await run();
+	const id = first.data?.id ?? 0;
+	await withTransaction(context, (context) =>
+		callback(context, {
+			id,
+			token:
+				new URL(getDeployCallbackUrl(context, id)).searchParams.get("token") ??
+				"",
+			update: { status: "running", message: "Building" },
+		}),
+	);
+
+	expect(await runs()).toMatchObject([{ status: "running" }]);
+	expect(
+		await context.db.kysely
+			.selectFrom("lucid_deploy_runs")
+			.select("message")
+			.where("id", "=", id)
+			.executeTakeFirst(),
+	).toEqual({ message: "Building" });
+	expect(started.mock.calls.map(([data]) => data)).toEqual([
+		{
+			deployKey: "production",
+			runId: id,
+			source: "manual",
+			startedByUserId: null,
+			agentRunId: null,
+			url: "https://host.test/runs/1",
+			startedAt: expect.any(String),
+		},
+	]);
+});
+
+test("a trigger result that is already final fires only deploys.afterRunFinish", async () => {
+	trigger.mockImplementation(async () => ({
+		status: "succeeded",
+		url: "https://host.test/runs/2",
+	}));
+	const first = await run();
+
+	expect(started).not.toHaveBeenCalled();
+	expect(finished.mock.calls.map(([data]) => data)).toMatchObject([
+		{
+			runId: first.data?.id,
+			status: "succeeded",
+			url: "https://host.test/runs/2",
+		},
 	]);
 });
 

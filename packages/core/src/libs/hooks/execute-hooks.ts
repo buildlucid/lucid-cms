@@ -1,9 +1,11 @@
 import { createDraft, enableMapSet, finishDraft } from "immer";
+import type { LucidErrorData } from "../../types/errors.js";
 import runHandler from "../../utils/services/run-handler.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
+import withTransaction from "../../utils/services/with-transaction.js";
 import { copy } from "../i18n/index.js";
 import createToolkit from "../toolkit/create-toolkit.js";
 import type { Toolkit } from "../toolkit/types.js";
@@ -58,17 +60,36 @@ const getOrderedHooks = <
 		);
 };
 
-/** Runs side effects in order, stopping at the first hook that throws. */
+/**
+ * Runs effects in order, stopping on failure. With `onError`, isolates each hook in a savepoint
+ * and continues after reporting errors. Successful hooks merge callbacks into the caller's
+ * transaction.
+ */
 const executeEffectHooks = async <
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
 >(
 	hooks: MatchingHookHandler<S, E>[],
 	args: HookArguments<S, E>,
+	onError?: (error: LucidErrorData) => void,
 ): ServiceResponse<HookData<S, E>> => {
 	for (const handler of hooks) {
-		const result = await runHandler(() => handler(args));
-		if (result.error) return result;
+		if (!onError) {
+			const result = await runHandler(() => handler(args));
+			if (result.error) return result;
+			continue;
+		}
+
+		const result = await withTransaction(
+			args.context,
+			(context) =>
+				runHandler(() =>
+					handler({ ...args, context, toolkit: createToolkit(context) }),
+				),
+			//* a failed hook's queued work goes with it: its commit work is dropped and its undo runs
+			{ isolate: true, ownCallbacks: true },
+		);
+		if (result.error) onError(result.error);
 	}
 
 	return {
@@ -156,7 +177,7 @@ const executeHooks = async <
 		>;
 	}
 
-	return executeEffectHooks(hooks, args) as ServiceResponse<
+	return executeEffectHooks(hooks, args, options.onError) as ServiceResponse<
 		ExecuteHookData<S, E>
 	>;
 };

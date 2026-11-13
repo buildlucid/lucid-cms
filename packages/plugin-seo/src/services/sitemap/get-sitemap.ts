@@ -1,18 +1,11 @@
 import { copy } from "@lucidcms/core";
 import type { ServiceFn } from "@lucidcms/core/types";
-import hookEvents, {
-	type SeoSitemapEntriesHookMeta,
-} from "../../hook-events/index.js";
-import type { SitemapEntry, SitemapReadInput } from "../../types.js";
+import type { SitemapReadInput } from "../../types.js";
 import type { SeoPluginOptionsInternal } from "../parse-plugin-options.js";
 import resolveSiteOrigin from "../resolve-site-origin.js";
 import resolveSiteUrls from "../resolve-site-urls.js";
 import applyTrailingSlash from "./apply-trailing-slash.js";
-import completeEntries from "./complete-entries.js";
-import getDocumentEntries from "./get-document-entries.js";
-import getListedVersion from "./get-listed-version.js";
-import resolveSitemapEnvironment from "./resolve-sitemap-environment.js";
-import resolveSitemapTargets from "./resolve-sitemap-targets.js";
+import getSitemapEntries from "./get-sitemap-entries.js";
 import splitFiles, { type SitemapFileGroup } from "./split-files.js";
 
 /**
@@ -50,49 +43,16 @@ const getSitemap: ServiceFn<
 	if (originRes.error) return originRes;
 	const origin = originRes.data;
 
-	const targetsRes = resolveSitemapTargets(context.config, options);
-	if (targetsRes.error) return targetsRes;
-	const environmentRes = resolveSitemapEnvironment(
-		context.config.collections,
-		input.environment ?? options.sitemap.environment,
-	);
-	if (environmentRes.error) return environmentRes;
-	const environment = environmentRes.data;
-
-	//* concat rather than push(...), which runs out of stack on large collections
-	let entries: SitemapEntry[] = [];
-	let excluded: SeoSitemapEntriesHookMeta["excluded"] = [];
-	for (const target of targetsRes.data) {
-		const version = getListedVersion(target.collection, environment);
-		if (version === null) continue;
-
-		const entriesRes = await getDocumentEntries(context, {
-			target,
-			version,
-			siteUrls,
-		});
-		if (entriesRes.error) return entriesRes;
-		entries = entries.concat(entriesRes.data.entries);
-		excluded = excluded.concat(entriesRes.data.excluded);
-	}
-
-	const hookRes = await hookEvents.execute(context, "sitemapEntries", {
-		meta: {
-			environment,
-			siteUrl: siteUrls.url.href,
-			siteUrls: siteUrls.locales,
-			excluded,
-		},
-		data: { entries },
+	const entriesRes = await getSitemapEntries(context, {
+		options,
+		siteUrls,
+		environment: input.environment ?? options.sitemap.environment,
 	});
-	if (hookRes.error) return hookRes;
-
-	const completedRes = completeEntries(hookRes.data.entries, siteUrls);
-	if (completedRes.error) return completedRes;
+	if (entriesRes.error) return entriesRes;
 
 	return splitFiles(
 		applyTrailingSlash(
-			completedRes.data.filter((entry) => new URL(entry.url).origin === origin),
+			entriesRes.data.filter((entry) => new URL(entry.url).origin === origin),
 			input.trailingSlash,
 		),
 		origin,

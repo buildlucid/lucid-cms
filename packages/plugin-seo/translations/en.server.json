@@ -16,5 +16,12 @@
 	"plugin.seo.toolkit.robots.error.message": "Lucid toolkit could not write robots.txt.",
 	"plugin.seo.robots.disabled": "robots.txt is turned off in the SEO plugin's options.",
 	"plugin.seo.robots.site.url.missing": "Set siteUrl in your Lucid config, so robots.txt knows which site it is for.",
-	"plugin.seo.origin.unknown": "'{{origin}}' isn't one of the configured site origins: {{origins}}."
+	"plugin.seo.origin.unknown": "'{{origin}}' isn't one of the configured site origins: {{origins}}.",
+	"plugin.seo.index.now.disabled": "IndexNow is turned off in the SEO plugin's options.",
+	"plugin.seo.index.now.urls.failed": "Could not read or store the pages to send to IndexNow.",
+	"plugin.seo.index.now.send.retry": "IndexNow could not take the changed pages for {{host}} ({{reason}}). They're sent when the job tries again.",
+	"plugin.seo.index.now.status.error.name": "IndexNow Status Error",
+	"plugin.seo.index.now.status.error.message": "Could not read the pages waiting for IndexNow or the last send.",
+	"plugin.seo.toolkit.index.now.error.name": "SEO Toolkit Error",
+	"plugin.seo.toolkit.index.now.error.message": "Lucid toolkit could not queue the IndexNow send."
 }

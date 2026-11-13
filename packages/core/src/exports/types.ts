@@ -264,6 +264,8 @@ export type {
 	AgentRunFinishedHookData,
 	AllHooks,
 	CollectionHooks,
+	DeployRunFinishedHookData,
+	DeployRunStartedHookData,
 	DocumentAfterFetchHookData,
 	DocumentAfterUpsertHookData,
 	DocumentBeforeUnpublishHookData,

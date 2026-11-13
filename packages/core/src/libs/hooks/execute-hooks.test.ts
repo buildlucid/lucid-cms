@@ -3,6 +3,7 @@ import type { InternalCollectionDocument } from "../../exports/types.js";
 import { LucidError } from "../../utils/errors/index.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
+import withTransaction from "../../utils/services/with-transaction.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import defineCollection from "../collection/define-collection.js";
 import { copy, createTranslationStore } from "../i18n/index.js";
@@ -247,6 +248,58 @@ describe("execute hooks", () => {
 
 		expect(response.error).toMatchObject(error);
 		expect(nextHook).not.toHaveBeenCalled();
+	});
+
+	it("keeps only a successful isolated hook's commit work, and undoes a failed one's", async () => {
+		const ran: string[] = [];
+		const errors: unknown[] = [];
+		const queueWork = (hookContext: ServiceContext, name: string) => {
+			hookContext.db.afterRollback(async () => {
+				ran.push(`${name} undone`);
+			});
+			return hookContext.db.afterCommit(async () => {
+				ran.push(`${name} committed`);
+			});
+		};
+
+		const result = await withTransaction(context, async (transaction) => {
+			await executeHooks(
+				transaction,
+				{
+					service: "media",
+					event: "afterRestore",
+					config: {
+						...context.config,
+						hooks: [
+							{
+								service: "media",
+								event: "afterRestore",
+								handler: async ({ context: hookContext }) => {
+									await queueWork(hookContext, "failed");
+									throw new LucidError({
+										message: copy.literal("Test hook failure"),
+									});
+								},
+							},
+							{
+								service: "media",
+								event: "afterRestore",
+								handler: ({ context: hookContext }) =>
+									queueWork(hookContext, "kept"),
+							},
+						],
+					},
+					onError: (error) => errors.push(error),
+				},
+				{ meta: {}, data: { ids: [1] } },
+			);
+			expect(ran).toEqual(["failed undone"]);
+			return { error: undefined, data: undefined };
+		});
+
+		expect(result.error).toBeUndefined();
+		expect(errors).toHaveLength(1);
+		expect(ran).toEqual(["failed undone", "kept committed"]);
 	});
 
 	it("returns the original data when no transform hooks match", async () => {

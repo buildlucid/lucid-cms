@@ -7,9 +7,8 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 
 /**
- * Runs `agent.afterRunFinish` hooks for a run that has stopped for good. Call in
- * the transaction that finishes the run. Hooks that fail are logged and rolled
- * back on their own, so they never stop the run finishing.
+ * Runs final agent hooks inside the finishing transaction. Isolates failures in savepoints,
+ * logging them without undoing other hooks or preventing completion.
  */
 const executeRunFinishedHooks: ServiceFn<
 	[{ runId: string }],
@@ -35,7 +34,19 @@ const executeRunFinishedHooks: ServiceFn<
 
 				return executeHooks(
 					context,
-					{ service: "agent", event: "afterRunFinish", config: context.config },
+					{
+						service: "agent",
+						event: "afterRunFinish",
+						config: context.config,
+						onError: (error) => {
+							logger.error({
+								error,
+								message: "Agent run finished hooks failed",
+								scope: constants.logScopes.ai,
+								data: { runId: data.runId },
+							});
+						},
+					},
 					{
 						meta: { userId: run.user_id },
 						data: {

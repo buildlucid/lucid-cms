@@ -217,6 +217,7 @@ const execute: ServiceFn<
 				userId: user.id,
 				agentRunId,
 				requestId: request.id,
+				deferEffects: true,
 			});
 			if (deleteRes.error) return deleteRes;
 		}

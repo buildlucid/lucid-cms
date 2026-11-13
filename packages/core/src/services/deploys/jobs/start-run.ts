@@ -15,6 +15,9 @@ import {
 import { LucidError } from "../../../utils/errors/index.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 import applyRunUpdate from "../helpers/apply-run-update.js";
+import executeRunFinishedHooks, {
+	runHookColumns,
+} from "../helpers/execute-run-finished-hooks.js";
 
 type StartRunInput = { runId: number };
 
@@ -39,10 +42,19 @@ const startRun: JobService<StartRunInput> = async ({ context, input }) => {
 				message: context.translate(copy("server:core.deploys.not.configured")),
 				finished_at: new Date().toISOString(),
 			},
-			where: [{ key: "id", operator: "=", value: run.id }],
+			where: [
+				{ key: "id", operator: "=", value: run.id },
+				{ key: "status", operator: "=", value: "starting" },
+			],
+			returning: runHookColumns,
 		});
 		if (failed.error) return failed;
-		return { error: undefined, data: undefined };
+		if (!failed.data) return { error: undefined, data: undefined };
+
+		return executeRunFinishedHooks(context, {
+			run: failed.data,
+			status: "failed",
+		});
 	}
 
 	const override = await DeployOverrides.selectSingle({

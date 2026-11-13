@@ -9,8 +9,8 @@ import invalidateRequests from "../requests/helpers/invalidate-requests.js";
 import checkDocumentAccess from "./checks/check-document-access.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 import executeDeleteHook from "./helpers/execute-delete-hook.js";
-import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 import requiresReview from "./helpers/requires-review.js";
+import notifyChange from "./notify-change.js";
 import nullifyDocumentReferences from "./nullify-document-references.js";
 
 const deleteMultiple: ServiceFn<
@@ -23,6 +23,8 @@ const deleteMultiple: ServiceFn<
 			agentRunId?: string;
 			/** The delete request doing the deleting, which keeps its approval. */
 			requestId?: number;
+			/** Leaves cache invalidation and change notifications to the caller, eg. a request that runs them once every document is done. */
+			deferEffects?: boolean;
 		},
 	],
 	undefined
@@ -206,7 +208,14 @@ const deleteMultiple: ServiceFn<
 			});
 			if (hookAfterRes.error) return hookAfterRes;
 
-			await invalidateContentDocumentCache(context, data.collectionKey);
+			if (!data.deferEffects) {
+				const changed = await notifyChange(context, {
+					change: { type: "deleted", permanent: false },
+					collectionKey: data.collectionKey,
+					ids: data.ids,
+				});
+				if (changed.error) return changed;
+			}
 
 			return {
 				data: undefined,

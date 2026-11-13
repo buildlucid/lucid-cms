@@ -7,6 +7,7 @@ export type { SeoToolkit } from "./toolkit/index.js";
 export type {
 	RobotsReadInput,
 	RobotsRule,
+	SeoIndexNowOptions,
 	SeoPluginOptions,
 	SeoRobotsOptions,
 	SeoSitemapOptions,

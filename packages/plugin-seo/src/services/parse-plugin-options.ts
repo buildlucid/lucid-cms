@@ -1,5 +1,5 @@
 import { LucidError, z } from "@lucidcms/core";
-import { PLUGIN_KEY } from "../constants.js";
+import { indexNow, PLUGIN_KEY } from "../constants.js";
 import type { SeoPluginOptions } from "../types.js";
 
 const keySchema = z.string().trim().min(1);
@@ -64,9 +64,21 @@ const optionsSchema = z.strictObject({
 			}),
 		])
 		.default({}),
+	indexNow: z
+		.strictObject({
+			key: z
+				.string()
+				.regex(indexNow.key, "Use 8 to 128 letters, numbers and hyphens."),
+			deploy: keySchema.optional(),
+			endpoint: z.url({ protocol: /^https?$/ }).default(indexNow.endpoint),
+		})
+		.optional(),
 });
 
 export type SeoPluginOptionsInternal = z.output<typeof optionsSchema>;
+export type SeoIndexNowOptionsInternal = NonNullable<
+	SeoPluginOptionsInternal["indexNow"]
+>;
 
 /** Checks the options when the plugin is created, before any collection is known. */
 const parsePluginOptions = (
@@ -99,6 +111,15 @@ const parsePluginOptions = (
 				message: `Sitemap collection '${key}' isn't one of the SEO plugin's collections.`,
 			});
 		}
+	}
+
+	//* IndexNow sends the pages the sitemap lists
+	if (sitemap === false && parsed.data.indexNow) {
+		throw new LucidError({
+			scope: PLUGIN_KEY,
+			message:
+				"IndexNow sends the pages the sitemap lists, so it needs the sitemap. Turn the sitemap on, or leave out indexNow.",
+		});
 	}
 
 	return parsed.data;

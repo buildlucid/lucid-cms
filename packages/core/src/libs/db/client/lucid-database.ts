@@ -41,7 +41,8 @@ export default class LucidDatabase {
 	private readonly rollbackCallbacks: Array<() => Promise<unknown>> = [];
 	/** The client a transaction was opened from. */
 	private readonly opener?: LucidDatabase;
-
+	/** The opener once `keepCallbacks` runs, so work queued here afterwards goes straight to it. */
+	private keptBy?: LucidDatabase;
 	private constructor(
 		options: LucidDatabaseOptions,
 		internals?: {
@@ -61,26 +62,21 @@ export default class LucidDatabase {
 					new LucidQueryPlugin(options.adapter, this.tables),
 				);
 	}
-
 	static create(options: LucidDatabaseOptions): LucidDatabase {
 		return new LucidDatabase(options);
 	}
-
 	get isTransaction(): boolean {
 		return this.kysely.isTransaction;
 	}
-
 	/** The client outside this one's transaction, for work queued with `afterCommit` that queries once it commits. */
 	get outsideTransaction(): LucidDatabase {
 		return this.opener?.outsideTransaction ?? this;
 	}
-
 	registerTable(definition: TableDefinition | ResolvedTableDefinition) {
 		if ("resolve" in definition) this.tables.register(definition);
 		else this.tables.registerResolved(definition);
 		return this;
 	}
-
 	/** Decodes one row using only codecs registered for the specified table. */
 	decodeTableRow<Row>(tableName: string, row: Row): Row {
 		if (row === null || typeof row !== "object" || Array.isArray(row))
@@ -99,14 +95,12 @@ export default class LucidDatabase {
 
 		return decoded as Row;
 	}
-
 	/** Decodes a table-row array, accepting either driver-native or serialized JSON. */
 	decodeTableRows<Row>(tableName: string, rows: Row[] | string): Row[] {
 		const decodedRows = codecs.json.decode(rows, { adapter: this.adapter });
 		if (!Array.isArray(decodedRows)) return [];
 		return decodedRows.map((row) => this.decodeTableRow(tableName, row));
 	}
-
 	/** Rebinds a raw Kysely client and installs Lucid's query plugin. */
 	withKysely(client: KyselyDB): LucidDatabase {
 		return new LucidDatabase(
@@ -117,7 +111,6 @@ export default class LucidDatabase {
 			},
 		);
 	}
-
 	/** Adds a Kysely plugin to a copy of this client, such as one that counts the queries a request runs. */
 	withPlugin(plugin: KyselyPlugin): LucidDatabase {
 		return new LucidDatabase(
@@ -128,7 +121,6 @@ export default class LucidDatabase {
 			},
 		);
 	}
-
 	/** Rebinds a transaction created by this database's codec-aware client. */
 	withTransaction(client: KyselyDB): LucidDatabase {
 		return new LucidDatabase(
@@ -140,7 +132,6 @@ export default class LucidDatabase {
 			},
 		);
 	}
-
 	/**
 	 * Builds a managed Kysely query. Finish with `many()` or `first()` to execute
 	 * it and optionally validate the returned rows.
@@ -169,7 +160,6 @@ export default class LucidDatabase {
 			run: executeManagedQuery,
 		});
 	}
-
 	/** Executes arbitrary repository work through the shared Lucid envelope. */
 	execute<T>(
 		execute: () => Promise<T>,
@@ -177,7 +167,6 @@ export default class LucidDatabase {
 	): Promise<ManagedExecution<T>> {
 		return executeManagedQuery(execute, options);
 	}
-
 	/**
 	 * Runs `callback` once the current transaction commits, or straight away outside one. Use it for
 	 * side effects other requests shouldn't act on before the change is saved, such as clearing a
@@ -188,9 +177,12 @@ export default class LucidDatabase {
 			await callback();
 			return;
 		}
+		if (this.keptBy) {
+			await this.keptBy.afterCommit(callback);
+			return;
+		}
 		this.commitCallbacks.push(callback);
 	}
-
 	/** Runs the work queued with `afterCommit`. Whoever commits this client's transaction calls it. */
 	async runCommitCallbacks(): Promise<void> {
 		this.rollbackCallbacks.length = 0;
@@ -198,17 +190,19 @@ export default class LucidDatabase {
 			await callback();
 		}
 	}
-
 	/**
 	 * Runs `callback` if the current transaction rolls back, such as to move back a file renamed for
 	 * a change that wasn't saved. Outside a transaction there is nothing to roll back, so it never
 	 * runs. A savepoint rolled back on its own doesn't run it, and its callbacks are dropped if the
-	 * outer transaction commits.
+	 * outer transaction commits, unless the savepoint queues its own with `withOwnCallbacks`.
 	 */
 	afterRollback(callback: () => Promise<unknown>): void {
+		if (this.keptBy) {
+			this.keptBy.afterRollback(callback);
+			return;
+		}
 		if (this.isTransaction) this.rollbackCallbacks.push(callback);
 	}
-
 	/**
 	 * Runs the work queued with `afterRollback`, newest first, so each undo finds things as the work
 	 * after it left them, such as a file moved after it was stored. Whoever rolls back this client's
@@ -219,6 +213,31 @@ export default class LucidDatabase {
 		for (const callback of this.rollbackCallbacks.splice(0).reverse()) {
 			await callback();
 		}
+	}
+	/**
+	 * A client in this one's transaction that queues its own `afterCommit` and `afterRollback` work,
+	 * for a savepoint whose work should only join this transaction's if it's kept. Kept work moves
+	 * across with `keepCallbacks`; work rolled back runs `runRollbackCallbacks` instead.
+	 */
+	withOwnCallbacks(): LucidDatabase {
+		return new LucidDatabase(
+			{ client: this.kysely, adapter: this.adapter },
+			{
+				registry: this.tables,
+				pluginsApplied: true,
+				opener: this,
+			},
+		);
+	}
+	/**
+	 * Moves this client's queued work to the client it was opened from, once its savepoint is kept.
+	 * Work queued here afterwards, such as by a hook that held on to this client, goes there too.
+	 */
+	keepCallbacks(): void {
+		if (!this.opener) return;
+		this.keptBy = this.opener;
+		this.opener.commitCallbacks.push(...this.commitCallbacks.splice(0));
+		this.opener.rollbackCallbacks.push(...this.rollbackCallbacks.splice(0));
 	}
 }
 

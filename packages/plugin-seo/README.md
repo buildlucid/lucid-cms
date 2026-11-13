@@ -52,6 +52,7 @@ The plugin registers its admin components and translations automatically. Previe
 | `sitemap.environment`     | `string`                                                         | The environment to list. Defaults to the one your collections end in.    |
 | `robots`                  | `false \| { rules?: RobotsRule[] }`                              | Serves `/robots.txt`. On by default. `false` turns it off.               |
 | `robots.rules`            | `Array<{ userAgent; allow?; disallow? }>`                        | Groups that replace the default. Each value is a string or a list.       |
+| `indexNow`                | `{ key: string; deploy?: string; endpoint?: string }`            | Sends changed pages to IndexNow. Off unless given. Needs the sitemap.    |
 
 ## Sitemap
 
@@ -72,3 +73,11 @@ The plugin serves a `/robots.txt` that lets every crawler in, keeps them out of 
 It's served and read the same ways as the sitemap: by the CMS, in static builds, with `toolkit.seo.robots.text()`, or at `/api/v1/content/e/seo/robots` with the `robots:read` scope. A `public/robots.txt` or a site page at that path wins.
 
 Don't disallow `noindex` pages. A crawler that can't fetch a page never sees its `noindex`, so the page can stay in search results.
+
+## IndexNow
+
+Give `indexNow` a key of 8 to 128 letters, numbers and hyphens, such as `indexNow: { key: env.INDEXNOW_KEY }`, to tell search engines which pages changed. Each send compares the sitemap's pages with those it stored last time and marks the ones that are new, changed or gone as pending, then sends everything pending. Pages stay pending until IndexNow accepts them, so a send that fails is picked up by the next one. The first send sends every page, and pages on local hosts are never sent.
+
+Without `deploy`, a send follows each publish, unpublish or delete in the sitemap's environment. With `deploy: "production"`, it waits for that deploy's runs to succeed instead. A deploy whose host never reports back, such as a build hook, never succeeds, so send from the IndexNow tile on System → Operations after it's live, or call `toolkit.seo.indexNow.send()`.
+
+Search engines check your key at `/<key>.txt`. The CMS serves it when your `siteUrl` is on its own address, and `site:build` writes it into static builds. Other frontends must serve the file themselves, with the key as its only content.

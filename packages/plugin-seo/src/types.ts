@@ -19,7 +19,27 @@ export interface SeoPluginOptions {
 	 * every crawler in and pointing it at the sitemap. Set to false to turn it off.
 	 */
 	robots?: false | SeoRobotsOptions;
+	/**
+	 * Tells search engines which pages changed through IndexNow: every send submits the sitemap's
+	 * pages that are new, changed or gone since the last one. Off unless given, and needs the sitemap.
+	 */
+	indexNow?: SeoIndexNowOptions;
 }
+
+export type SeoIndexNowOptions = {
+	/** 8 to 128 letters, numbers and hyphens. Served at `/<key>.txt` so search engines can check it. */
+	key: string;
+	/**
+	 * The key of the deploy that puts the site live. Sends then wait for its runs to succeed instead
+	 * of following publishes. Leave it out when published pages are live straight away.
+	 */
+	deploy?: string;
+	/**
+	 * The IndexNow endpoint. Defaults to `https://api.indexnow.org/indexnow`, which shares URLs with
+	 * every search engine that takes part.
+	 */
+	endpoint?: string;
+};
 
 export type SeoRobotsOptions = {
 	/**

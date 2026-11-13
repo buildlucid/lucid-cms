@@ -22,6 +22,7 @@ import cloneVersion from "../documents-versions/clone-version.js";
 import promoteVersion from "../documents-versions/promote-version.js";
 import syncCollections from "../sync/sync-collections.js";
 import deleteMultiplePermanently from "./delete-multiple-permanently.js";
+import deleteMultiple from "./delete-multiple.js";
 import deleteSinglePermanently from "./delete-single-permanently.js";
 import deleteSingle from "./delete-single.js";
 import restoreMultiple from "./restore-multiple.js";
@@ -382,6 +383,33 @@ test("creates one identity and retains it through updates, soft deletion and res
 	expect(await identity(id)).toEqual([
 		{ collection_key: collectionKey, document_id: id, uid: expect.any(String) },
 	]);
+});
+
+test("bulk soft deletion fires one afterChange with every deleted ID", async () => {
+	const ids = [await create(), await create()];
+	const notified: unknown[] = [];
+	const hooks = context.config.hooks;
+	context.config.hooks = [
+		...hooks,
+		{
+			service: "documents",
+			event: "afterChange",
+			handler: async ({ meta, data }) => {
+				notified.push({ collectionKey: meta.collectionKey, ...data });
+			},
+		},
+	];
+	try {
+		expect(
+			(await deleteMultiple(context, { collectionKey, ids, userId: null }))
+				.error,
+		).toBeUndefined();
+		expect(notified).toEqual([
+			{ collectionKey, ids, change: { type: "deleted", permanent: false } },
+		]);
+	} finally {
+		context.config.hooks = hooks;
+	}
 });
 
 test.each(["single", "multiple"] as const)(

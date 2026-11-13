@@ -91,5 +91,16 @@
 	"plugin.seo.pageGuidance.label": "Page guidance",
 	"plugin.seo.pageGuidance.noindex": "Set to exclude from search (noindex).",
 	"plugin.seo.summary.label": "SEO basics",
-	"plugin.seo.summary.help": "Checks the title, description and social image, with a small adjustment for text length. This is an editorial guide, not a search ranking score."
+	"plugin.seo.summary.help": "Checks the title, description and social image, with a small adjustment for text length. This is an editorial guide, not a search ranking score.",
+	"plugin.seo.index.now.maintenance.title": "IndexNow",
+	"plugin.seo.index.now.maintenance.description": "Tell search engines which pages are new, changed or gone since the last send",
+	"plugin.seo.index.now.maintenance.action": "Send Changed Pages",
+	"plugin.seo.index.now.maintenance.status.sent": "{{count}} sent",
+	"plugin.seo.index.now.maintenance.status.never": "Not sent yet",
+	"plugin.seo.index.now.maintenance.status.pending": "{{count}} pending",
+	"plugin.seo.index.now.maintenance.status.error": "Status unavailable",
+	"plugin.seo.index.now.maintenance.modal.title": "Send Changed Pages to IndexNow",
+	"plugin.seo.index.now.maintenance.modal.description": "This sends IndexNow the sitemap's pages that are new, changed or gone since the last send, in the background. Pages that haven't changed aren't sent again.",
+	"plugin.seo.index.now.maintenance.toast.title": "IndexNow send started",
+	"plugin.seo.index.now.maintenance.toast.message": "Changed pages are being sent in the background."
 }

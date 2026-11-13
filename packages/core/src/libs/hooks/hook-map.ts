@@ -39,4 +39,8 @@ export const hookExecutionKinds: CoreHookExecutionKindMap = {
 	agent: {
 		afterRunFinish: "effect",
 	},
+	deploys: {
+		afterRunStart: "effect",
+		afterRunFinish: "effect",
+	},
 };

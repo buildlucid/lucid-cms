@@ -8,10 +8,8 @@ import buildSitemapXml from "../sitemap/build-sitemap-xml.js";
 import getSitemap from "../sitemap/get-sitemap.js";
 
 /**
- * Mirrors the `site.staticFiles` event of `@lucidcms/site`, whose types can't be imported here:
- * the site plugin imports this plugin's types, and the build refuses packages that depend on each
- * other. Keep it in step with the site's `hook-events`. Internal, so it never reaches this
- * package's published types.
+ * Mirrors `site.staticFiles` internally to avoid a circular package dependency. Keep in sync with
+ * the site plugin's `hook-events`; excluded from published types.
  */
 declare module "@lucidcms/core/types" {
 	interface PluginHookEvents {
@@ -25,11 +23,9 @@ declare module "@lucidcms/core/types" {
 }
 
 /**
- * Writes the sitemap, `/sitemap.xml` and every file it lists, and `/robots.txt` into the site
- * plugin's static builds, each while it is on, for the environment the site builds. A static build
- * is one folder, so both are the default locale's origin's, even when a `locale` option puts other
- * locales on their own domains. A sitemap without pages writes no files, and robots.txt then has
- * no `Sitemap:` line. A failure fails the build instead of writing an empty sitemap.
+ * Writes enabled sitemap, robots and IndexNow key files for static builds in the build
+ * environment. Uses the default locale's origin. Empty sitemaps produce no files or robots sitemap
+ * link. Errors fail the build.
  */
 const staticFilesHandler =
 	(
@@ -71,6 +67,13 @@ const staticFilesHandler =
 			});
 			if (robotsRes.error) throw new LucidError(robotsRes.error);
 			data.files.push({ path: "/robots.txt", body: robotsRes.data });
+		}
+
+		if (options.indexNow) {
+			data.files.push({
+				path: `/${options.indexNow.key}.txt`,
+				body: options.indexNow.key,
+			});
 		}
 	};
 
