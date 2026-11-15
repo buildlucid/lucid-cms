@@ -3,7 +3,7 @@ import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
 import getRequestPath from "../helpers/get-request-path.js";
-import { requestData } from "./shared.js";
+import { receivesRequests, requestData } from "./shared.js";
 
 export const closedNotification = defineNotification({
 	key: "requests:closed",
@@ -15,6 +15,7 @@ export const closedNotification = defineNotification({
 		defaultMessage: "A request you are part of is closed or reopened.",
 	}),
 	audience: "recipients",
+	receivable: receivesRequests,
 	defaults: { email: false },
 	data: requestData.extend({ reopened: z.boolean() }),
 	render: ({ data }) => ({

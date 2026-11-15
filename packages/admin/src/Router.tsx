@@ -368,38 +368,22 @@ const AppRouter: Component = () => {
 					<Route
 						path="/review"
 						preload={preloadRoutes(ReviewOverviewRoute)}
-						component={() => (
-							<PermissionGuard permission={Permissions.RequestsRead}>
-								<ReviewOverviewRoute />
-							</PermissionGuard>
-						)}
+						component={() => <ReviewOverviewRoute />}
 					/>
 					<Route
 						path="/requests"
 						preload={preloadRoutes(RequestsListRoute)}
-						component={() => (
-							<PermissionGuard permission={Permissions.RequestsRead}>
-								<RequestsListRoute />
-							</PermissionGuard>
-						)}
+						component={() => <RequestsListRoute />}
 					/>
 					<Route
 						path="/requests/:requestId"
 						preload={preloadRequestRoute(RequestRoute)}
-						component={() => (
-							<PermissionGuard permission={Permissions.RequestsRead}>
-								<RequestRoute />
-							</PermissionGuard>
-						)}
+						component={() => <RequestRoute />}
 					/>
 					<Route
 						path="/requests/:requestId/content/:collectionKey/:documentId"
 						preload={preloadRequestRoute(RequestProposalRoute)}
-						component={() => (
-							<PermissionGuard permission={Permissions.RequestsRead}>
-								<RequestProposalRoute />
-							</PermissionGuard>
-						)}
+						component={() => <RequestProposalRoute />}
 					/>
 					{/* System */}
 					<Route

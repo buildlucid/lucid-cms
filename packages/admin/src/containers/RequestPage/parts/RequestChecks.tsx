@@ -20,16 +20,15 @@ import T from "@/translations";
 import {
 	getAllowedTargets,
 	getBlockerCopy,
+	getWorkflowAllowedCopy,
 	getTargetLabel,
 } from "@/utils/requests";
 import { getRequestRoute } from "@/utils/route-helpers";
 import { RequestCheckRow } from "./RequestCheckRow";
 
 /**
- * One document's checks, grouped by environment: anything blocking it, its
- * workflow stage, and publishes by someone else to acknowledge after
- * comparing. A failed request attempt for the document comes first, with a
- * retry. Only shown while the request is open.
+ * Shows open-request checks by environment: blockers, workflow stage and competing publishes to
+ * acknowledge. Failed execution appears first with a retry action.
  */
 export const RequestChecks: Component<{
 	request: RequestDetails;
@@ -213,29 +212,7 @@ export const RequestChecks: Component<{
 									<RequestCheckRow
 										tone={group.workflowAllowed ? "success" : "warning"}
 										{...(group.workflowAllowed
-											? props.request.type === "create"
-												? {
-														title: T()(
-															"requests.checks.workflow.create.allowed.title",
-														),
-														description: T()(
-															"requests.checks.workflow.create.allowed",
-														),
-													}
-												: {
-														title: T()(
-															"requests.checks.workflow.allowed.title",
-															{
-																target: group.label,
-															},
-														),
-														description: T()(
-															"requests.checks.workflow.allowed",
-															{
-																target: group.label,
-															},
-														),
-													}
+											? getWorkflowAllowedCopy(props.request.type, group.label)
 											: getBlockerCopy(
 													{ code: "workflow", target: group.target.target },
 													props.collection,

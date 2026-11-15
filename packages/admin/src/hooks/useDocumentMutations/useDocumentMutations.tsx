@@ -95,6 +95,34 @@ export function useDocumentMutations(props: {
 		getCollectionName: props.collectionSingularName,
 	});
 
+	//* the proposal holds the changes now, so the editor carries on in it
+	const proposeMutation = api.documents.useProposeSingle({
+		onSuccess: (data) => {
+			brickStore.set("fieldsErrors", []);
+			brickStore.set("brickErrors", []);
+			brickStore.get.captureInitialSnapshot();
+			const documentId = props.documentId();
+			if (documentId === undefined) return;
+			navigate(
+				getRequestRoute({
+					requestId: data.data.requestId,
+					content: { collectionKey: props.collectionKey(), documentId },
+				}),
+			);
+		},
+		onError: (errors) => {
+			if (errors?.status === 409) brickStore.set("contentChanged", true);
+			brickStore.set(
+				"fieldsErrors",
+				getBodyError<FieldError[]>("fields", errors) || [],
+			);
+			brickStore.set(
+				"brickErrors",
+				getBodyError<BrickError[]>("bricks", errors) || [],
+			);
+		},
+	});
+
 	const createSingleVersionMutation = api.documents.useCreateSingleVersion({
 		onSuccess: () => {
 			brickStore.set("fieldsErrors", []);
@@ -222,16 +250,23 @@ export function useDocumentMutations(props: {
 		silent: true,
 	});
 
+	//* a revision proposed in a request opens its proposal, otherwise latest shows what was restored
 	const restoreRevision = api.documents.useRestoreRevision({
-		onSuccess: () => {
+		onSuccess: (data) => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
+			const documentId = props.documentId();
 			navigate(
-				getDocumentRoute("edit", {
-					collectionKey: props.collectionKey(),
-					documentId: props.documentId(),
-					version: "latest",
-				}),
+				data.data.requestId !== null && documentId !== undefined
+					? getRequestRoute({
+							requestId: data.data.requestId,
+							content: { collectionKey: props.collectionKey(), documentId },
+						})
+					: getDocumentRoute("edit", {
+							collectionKey: props.collectionKey(),
+							documentId,
+							version: "latest",
+						}),
 			);
 		},
 		onError: () => {
@@ -309,6 +344,24 @@ export function useDocumentMutations(props: {
 		});
 	};
 
+	/** Proposes the builder's changes to latest in a new or open update request, then opens its proposal. */
+	const proposeDocumentAction = (
+		request: { title: string } | { id: number },
+	) => {
+		const documentId = props.documentId();
+		if (documentId === undefined) return;
+		proposeMutation.action.mutate({
+			collectionKey: props.collectionKey(),
+			documentId,
+			body: {
+				request,
+				bricks: brickHelpers.getUpsertBricks(),
+				fields: brickHelpers.getCollectionPseudoBrickFields(),
+				baseContentId: brickStore.get.baseContentId ?? undefined,
+			},
+		});
+	};
+
 	const publishDocumentAction = async (environment: DocumentVersionType) => {
 		const id = props.documentId();
 		if (id === undefined) return;
@@ -322,7 +375,11 @@ export function useDocumentMutations(props: {
 		});
 	};
 
-	const restoreRevisionAction = async (versionIdOverride?: number) => {
+	/** Restores a revision to latest, or proposes it in a new update request when given its title. */
+	const restoreRevisionAction = async (
+		versionIdOverride?: number,
+		request?: { title: string },
+	) => {
 		const versionId = versionIdOverride ?? props.versionId();
 		const documentId = props.documentId();
 		if (versionId === undefined) {
@@ -338,15 +395,8 @@ export function useDocumentMutations(props: {
 			collectionKey: props.collectionKey(),
 			id: documentId,
 			versionId: versionId,
+			body: request ? { request } : undefined,
 		});
-
-		navigate(
-			getDocumentRoute("edit", {
-				collectionKey: props.collectionKey(),
-				documentId,
-				version: "latest",
-			}),
-		);
 
 		return res;
 	};
@@ -370,6 +420,7 @@ export function useDocumentMutations(props: {
 	return {
 		createDocumentMutation,
 		requestDocumentMutation,
+		proposeMutation,
 		createSingleVersionMutation,
 		updateSingleVersionMutation,
 		checkSingleVersionMutation,
@@ -377,6 +428,7 @@ export function useDocumentMutations(props: {
 		updateWorkflowMutation,
 		upsertDocumentAction,
 		requestDocumentAction,
+		proposeDocumentAction,
 		publishDocumentAction,
 		autoSaveDocument,
 		autoSaveMetadata,

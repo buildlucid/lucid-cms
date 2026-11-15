@@ -12,7 +12,6 @@ import {
 import Input from "@/components/Input/Input";
 import Modal from "@/components/Modal/Modal";
 import Tabs from "@/components/Tabs/Tabs";
-import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -57,7 +56,6 @@ const DeleteDocumentModal: Component<DeleteDocumentProps> = (props) => {
 			userStore.get.hasPermission([permissions.delete]).all;
 		const canRequest =
 			props.collection.mode === "multiple" &&
-			userStore.get.hasPermission([Permissions.RequestsRead]).all &&
 			userStore.get.hasPermission([
 				permissions.delete,
 				permissions.deleteRequest,

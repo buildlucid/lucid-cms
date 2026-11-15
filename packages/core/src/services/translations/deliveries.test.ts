@@ -100,16 +100,9 @@ const savePage = async (title: Record<string, string>) => {
 
 const openRequest = async (documentId: number, locales?: string[]) => {
 	const created = await createRequest(context, {
-		type: "publish",
+		type: "update",
 		title: "Edits",
-		documents: [
-			{
-				collectionKey: collection.key,
-				documentId,
-				source: "latest",
-				targets: ["latest"],
-			},
-		],
+		documents: [{ collectionKey: collection.key, documentId }],
 		locales,
 		user: editor,
 	});
@@ -206,6 +199,61 @@ test("a request limited to French doesn't take German translations", async () =>
 	expect(translated.error?.message).toEqual(
 		expect.objectContaining({ key: "core.translations.locales.invalid" }),
 	);
+});
+
+test("people who propose updates can translate into requests, but not straight into latest", async () => {
+	const documentId = await savePage({ en: "Hello" });
+	const proposer: LucidUser = {
+		...editor,
+		superAdmin: false,
+		permissions: [
+			"ai:translate",
+			`documents:${collection.key}:read`,
+			`documents:${collection.key}:update-request`,
+		],
+	};
+	const input = {
+		collectionKey: collection.key,
+		documentIds: [documentId],
+		targetLocales: ["fr"],
+		user: proposer,
+	};
+
+	//* the permission check comes before anything is spent, so reaching the missing Lucid connection means it passed
+	const requested = await translateDocuments(context, {
+		...input,
+		delivery: "request",
+	});
+	expect(requested.error).toMatchObject({
+		status: 409,
+		message: expect.objectContaining({ key: "core.connection.not.connected" }),
+	});
+	const latest = await translateDocuments(context, {
+		...input,
+		delivery: "latest",
+	});
+	expect(latest.error).toMatchObject({
+		status: 403,
+		message: expect.objectContaining({
+			key: "core.collections.permission.error.message",
+		}),
+	});
+
+	//* readers can't change latest at all, so they can't open requests either
+	const reader = await translateDocuments(context, {
+		...input,
+		delivery: "request",
+		user: {
+			...proposer,
+			permissions: ["ai:translate", `documents:${collection.key}:read`],
+		},
+	});
+	expect(reader.error).toMatchObject({
+		status: 403,
+		message: expect.objectContaining({
+			key: "core.collections.permission.error.message",
+		}),
+	});
 });
 
 test("translations saved straight to latest keep their machine record", async () => {

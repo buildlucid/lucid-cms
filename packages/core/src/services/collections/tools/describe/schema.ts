@@ -111,8 +111,7 @@ export const entrySchema = z.discriminatedUnion("kind", [
 	z.object({
 		kind: z.literal("environment"),
 		key: z.string().meta({
-			description:
-				"Environment key. Publish requests from latest can also target latest itself.",
+			description: "Environment key.",
 		}),
 		label: z.string().meta({ description: "Environment label." }),
 		requires: z.array(z.string()).meta({
@@ -156,13 +155,14 @@ export const outputSchema = z.object({
 							review: z
 								.object({
 									create: z.boolean(),
+									update: z.boolean(),
 									delete: z.boolean(),
 									publish: z.array(z.string()),
 									unpublish: z.array(z.string()),
 								})
 								.meta({
 									description:
-										"Actions that always need an approved request: creating, deleting, and publishing to or unpublishing from these environments.",
+										"Actions that always need an approved request: creating, updating latest, deleting, and publishing to or unpublishing from these environments.",
 								}),
 						})
 						.meta({

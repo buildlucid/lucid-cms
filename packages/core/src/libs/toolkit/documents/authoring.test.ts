@@ -89,6 +89,15 @@ const collection = defineCollection({
 	],
 });
 
+//* every change to latest goes through an update request
+const reviewedCollection = defineCollection({
+	key: "reviewed_authoring",
+	mode: "multiple",
+	details: { labels: { singular: "Guide", plural: "Guides" } },
+	publishing: { review: { update: true } },
+	fields: [field.text("title", { localized: false })],
+});
+
 describe("document authoring toolkit", () => {
 	const fixture = getTestConfig();
 	let context: ServiceContext;
@@ -127,7 +136,7 @@ describe("document authoring toolkit", () => {
 		context = createServiceContext({
 			config: {
 				...config,
-				collections: [collection],
+				collections: [collection, reviewedCollection],
 				localization: {
 					defaultLocale: "en",
 					locales: [
@@ -624,6 +633,68 @@ describe("document authoring toolkit", () => {
 				})
 			).error?.status,
 		).toBe(404);
+	});
+
+	test("proposes changes to existing documents in update requests, which collections that review updates require", async () => {
+		const created = await create("Original");
+		assert(created.data, JSON.stringify(created.error));
+		const target = { collectionKey: collection.key, id: created.data.id };
+
+		const proposed = await toolkit.documents.updateSingle({
+			...target,
+			actor,
+			request: { title: "Retitle" },
+			data: { fields: { title: { en: "Proposed" } } },
+		});
+		assert(proposed.data, JSON.stringify(proposed.error));
+		const requestId = proposed.data.requestId;
+		assert(requestId);
+		expect(proposed.data.version.type).toBe("proposal");
+		expect(
+			(await toolkit.requests.getSingle({ id: requestId })).data?.type,
+		).toBe("update");
+		expect(
+			(await toolkit.documents.getEditable(target)).data?.data.fields.title,
+		).toMatchObject({ en: "Original" });
+		expect(
+			(await toolkit.documents.getEditable({ ...target, requestId })).data?.data
+				.fields.title,
+		).toMatchObject({ en: "Proposed" });
+
+		//* nothing to change opens no request
+		const unchanged = await toolkit.documents.patchSingle({
+			...target,
+			actor,
+			request: { title: "Nothing" },
+			operations: [
+				{ op: "set", path: ["fields", "title", "en"], value: "Original" },
+			],
+		});
+		expect(unchanged.data).toMatchObject({ changed: false });
+		expect(unchanged.data?.requestId).toBeUndefined();
+
+		const reviewed = await toolkit.documents.createSingle({
+			collectionKey: reviewedCollection.key,
+			actor,
+			data: { fields: { title: "Install" } },
+		});
+		assert(reviewed.data, JSON.stringify(reviewed.error));
+		const direct = await toolkit.documents.updateSingle({
+			collectionKey: reviewedCollection.key,
+			id: reviewed.data.id,
+			actor,
+			data: { fields: { title: "Saved directly" } },
+		});
+		expect(direct.error?.status).toBe(403);
+		const requested = await toolkit.documents.updateSingle({
+			collectionKey: reviewedCollection.key,
+			id: reviewed.data.id,
+			actor,
+			request: { title: "Fix the install guide" },
+			data: { fields: { title: "Install Lucid" } },
+		});
+		assert(requested.data, JSON.stringify(requested.error));
+		expect(requested.data.requestId).toBeDefined();
 	});
 
 	test("merges array items that keep their ref with their stored values", async () => {

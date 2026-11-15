@@ -66,10 +66,16 @@ describe("field permissions", () => {
 		const group = getPermissionRegistry(accessConfig(collection)).find(
 			(item) => item.key === "documents:pages",
 		);
-		const subgroups = group?.subgroups?.map((subgroup) => ({
-			key: subgroup.key,
-			permissions: subgroup.permissions.map((permission) => permission.key),
-		}));
+		//* the action subgroups come first, then field and brick subgroups
+		const subgroups = group?.subgroups
+			?.filter(
+				(subgroup) =>
+					subgroup.key === "fields" || subgroup.key.startsWith("bricks:"),
+			)
+			.map((subgroup) => ({
+				key: subgroup.key,
+				permissions: subgroup.permissions.map((permission) => permission.key),
+			}));
 
 		expect(subgroups).toEqual([
 			{
@@ -94,7 +100,7 @@ describe("field permissions", () => {
 		).toBe(true);
 	});
 
-	test("leaves subgroups out when nothing opts in", () => {
+	test("adds no field or brick subgroups when nothing opts in", () => {
 		const collection = defineCollection({
 			key: "pages",
 			mode: "multiple",
@@ -106,6 +112,13 @@ describe("field permissions", () => {
 			(item) => item.key === "documents:pages",
 		);
 
-		expect(group?.subgroups).toBeUndefined();
+		expect(group?.subgroups?.map((subgroup) => subgroup.key)).toEqual([
+			"read",
+			"create",
+			"update",
+			"publish",
+			"review",
+			"delete",
+		]);
 	});
 });

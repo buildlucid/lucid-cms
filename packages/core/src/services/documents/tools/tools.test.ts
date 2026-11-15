@@ -483,7 +483,7 @@ test("proposes updates in one request per chat and leaves latest unchanged", asy
 	});
 	expect(first).toMatchObject({
 		outcome: "requested",
-		request: { type: "publish" },
+		request: { type: "update" },
 	});
 	expect(second.request).toEqual(first.request);
 

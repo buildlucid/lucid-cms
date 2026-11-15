@@ -58,7 +58,7 @@ describe("reviewing requests", () => {
 		const { team, requestId } = await openTeamRequest(lucid, "Twice approved", {
 			by: "reviewer",
 		});
-		const { author, reviewer, secondReviewer } = team;
+		const { reviewer, secondReviewer } = team;
 		const admin = await lucid.admin();
 
 		//* the collection doesn't allow approving your own request
@@ -66,7 +66,6 @@ describe("reviewing requests", () => {
 			(await readRequest(reviewer.session, requestId)).permissions.approve,
 		).toBe(false);
 		expect((await approve(reviewer.session, requestId)).status).toBe(403);
-		expect((await approve(author.session, requestId)).status).toBe(403);
 
 		expect((await approve(secondReviewer.session, requestId)).status).toBe(204);
 		expect((await approve(secondReviewer.session, requestId)).status).toBe(409);

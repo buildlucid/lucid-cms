@@ -4,7 +4,6 @@ import getContentAccess from "../../../../libs/collection/field-access/get-conte
 import { getDocumentShape } from "../../../../libs/collection/helpers/get-document-shape.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
-import { Permissions } from "../../../../libs/permission/definitions.js";
 import hasAccess from "../../../../libs/permission/has-access.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import checkNotHeld from "../../../document-editors/check-not-held.js";
@@ -12,6 +11,7 @@ import getRequestLink from "../../../requests/helpers/get-request-link.js";
 import resolveActorUser from "../../../users/helpers/resolve-actor-user.js";
 import getEditLink from "../../helpers/get-edit-link.js";
 import readDocumentContent from "../../helpers/read-document-content.js";
+import requiresReview from "../../helpers/requires-review.js";
 import resolveContentLocale from "../../helpers/resolve-content-locale.js";
 import writeSingle from "../../write-single.js";
 import linkReferences from "../helpers/link-references.js";
@@ -21,7 +21,7 @@ import type { DocumentWriteToolProps } from "../types.js";
 import buildOperations from "./build-operations.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
-/** Edits a request proposal, or saves latest when direct writes are enabled and no request is supplied. */
+/** Edits a request proposal, or saves latest when direct writes are enabled, no request is supplied and the collection doesn't review updates. */
 const updateDocument: ServiceFn<
 	[{ input: z.output<typeof inputSchema> } & DocumentWriteToolProps],
 	{ output: z.output<typeof outputSchema> }
@@ -54,14 +54,19 @@ const updateDocument: ServiceFn<
 	if (userRes.error) return userRes;
 
 	const user = userRes.data;
-	const requested = !props.direct || input.requestId !== undefined;
+	const requested =
+		!props.direct ||
+		input.requestId !== undefined ||
+		requiresReview(collection, { type: "update" });
 	if (
 		!hasAccess({
 			user,
-			requiredPermissions: [
-				requested
-					? Permissions.RequestsRead
-					: getCollectionPermission(collection.key, "update"),
+			//* the update permission also covers asking by request
+			optionalPermissions: [
+				getCollectionPermission(collection.key, "update"),
+				...(requested
+					? [getCollectionPermission(collection.key, "update-request")]
+					: []),
 			],
 		})
 	) {
@@ -82,7 +87,7 @@ const updateDocument: ServiceFn<
 		collection.key;
 	const requestRes = requested
 		? await resolveRequest(context, {
-				type: "publish",
+				type: "update",
 				document: {
 					collectionKey: collection.key,
 					documentId: input.documentId,

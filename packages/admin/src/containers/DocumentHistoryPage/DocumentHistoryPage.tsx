@@ -187,6 +187,7 @@ const DocumentHistoryPage: Component = () => {
 				</div>
 				<RestoreRevisionModal
 					versionId={() => state.selectedItem()?.id ?? null}
+					latestAccess={state.latestAccess()}
 					state={{
 						open: state.restoreRevisionOpen(),
 						setOpen: state.setRestoreRevisionOpen,

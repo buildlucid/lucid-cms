@@ -1,5 +1,4 @@
 import { copy } from "../../../../libs/i18n/index.js";
-import { Permissions } from "../../../../libs/permission/definitions.js";
 import {
 	type CollectionToolOptions,
 	getPermittedCollectionKeys,
@@ -18,12 +17,13 @@ export const completeRequestAgentTool = (options: CollectionToolOptions = {}) =>
 		title: copy("admin:core.tools.requests_complete.title"),
 		description: ({ mode }) =>
 			mode === "routine"
-				? "Complete an approved request now, publishing, unpublishing, deleting or creating its documents. Changes go live, so only complete requests your instructions call for. To complete one later, use requests_schedule."
-				: "Complete an approved request now, publishing, unpublishing, deleting or creating its documents. Changes go live, so only complete requests the person asked you to. To complete one later, use requests_schedule.",
+				? "Complete an approved request now, creating, updating, publishing, unpublishing or deleting its documents. Changes go live, so only complete requests your instructions call for. To complete one later, use requests_schedule."
+				: "Complete an approved request now, creating, updating, publishing, unpublishing or deleting its documents. Changes go live, so only complete requests the person asked you to. To complete one later, use requests_schedule.",
 		input: inputSchema,
 		output: outputSchema,
 		agent: {
-			permissions: [Permissions.RequestsRead],
+			//* request services only show people the requests they're involved in
+			permissions: [],
 			requiresConfirmation: true,
 		},
 		handler: async ({ context, input, execution }) => {

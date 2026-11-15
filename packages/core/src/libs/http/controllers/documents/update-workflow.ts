@@ -33,7 +33,8 @@ const updateWorkflowController = factory.createHandlers(
 	authenticate(),
 	validate("json", controllerSchemas.updateWorkflow.body),
 	validate("param", controllerSchemas.updateWorkflow.params),
-	collectionPermissions("update"),
+	//* latest's stage needs update and a proposal's needs edit access to its request, which the service checks
+	collectionPermissions("read"),
 	async (c) => {
 		const { collectionKey, id } = c.req.valid("param");
 		const { stage, assigneeIds, versionId } = c.req.valid("json");

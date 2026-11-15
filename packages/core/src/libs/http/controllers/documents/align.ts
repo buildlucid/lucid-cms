@@ -1,4 +1,5 @@
 import { createFactory } from "hono/factory";
+import z from "zod";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { documentVersionServices } from "../../../../services/index.js";
 import { LucidError } from "../../../../utils/errors/index.js";
@@ -9,6 +10,7 @@ import collectionPermissions from "../../middleware/collection-permissions.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import openAPI from "../../openapi/index.js";
+import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
@@ -16,11 +18,11 @@ const factory = createFactory();
 const alignController = factory.createHandlers(
 	openAPI.describeRoute(() => ({
 		description:
-			"Align editable document content with latest or an environment.",
+			"Align editable document content with latest or an environment, or propose aligning latest in a new update request.",
 		tags: ["documents"],
 		summary: "Align Document Version",
 		responses: openAPI.responses({
-			noProperties: true,
+			dataSchema: z.toJSONSchema(controllerSchemas.align.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.align.body),
 		parameters: openAPI.parameters({
@@ -34,7 +36,8 @@ const alignController = factory.createHandlers(
 	authenticate(),
 	validate("param", controllerSchemas.align.params),
 	validate("json", controllerSchemas.align.body),
-	collectionPermissions("update"),
+	//* proposals take request edit access and latest takes update, which the service checks
+	collectionPermissions("read"),
 	async (c) => {
 		const { collectionKey, id, versionId } = c.req.valid("param");
 		const context = createServiceContext(c);
@@ -56,8 +59,8 @@ const alignController = factory.createHandlers(
 		});
 		if (alignRes.error) throw new LucidError(alignRes.error);
 
-		c.status(204);
-		return c.body(null);
+		c.status(200);
+		return c.json(formatAPIResponse(c, { data: alignRes.data }));
 	},
 );
 

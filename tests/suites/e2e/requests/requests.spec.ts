@@ -1,4 +1,5 @@
 import { expect, type Page, requires, test } from "#harness/playwright";
+import { PROPOSED_STORY_KEY } from "#shared/config/collections/proposed-story";
 import { REVIEWED_STORY_KEY } from "#shared/config/collections/reviewed-story";
 import {
 	listDocumentIds,
@@ -7,14 +8,17 @@ import {
 } from "#shared/helpers/documents";
 import {
 	authorPermissions,
+	contributorPermissions,
 	createThroughRequest,
 	readRequest,
 	reviewerPermissions,
 } from "#shared/helpers/requests";
 
-/** The request a page has open, from its address. */
+/** The request a page has open, from its address, including a request's content pages. */
 const requestIdOf = (page: Page) => {
-	const id = Number(new URL(page.url()).pathname.split("/").at(-1));
+	const id = Number(
+		new URL(page.url()).pathname.match(/\/admin\/requests\/(\d+)/)?.[1],
+	);
 	if (!Number.isInteger(id)) {
 		throw new Error(`${page.url()} isn't a request page.`);
 	}
@@ -36,7 +40,11 @@ const approveAndComplete = async (page: Page) => {
 };
 
 test.describe("requests in the admin", () => {
-	requires("harness:outbox", `collection:${REVIEWED_STORY_KEY}`);
+	requires(
+		"harness:outbox",
+		`collection:${REVIEWED_STORY_KEY}`,
+		`collection:${PROPOSED_STORY_KEY}`,
+	);
 	//* each test invites people, which takes a while when every lane runs at once
 	test.slow();
 
@@ -88,6 +96,67 @@ test.describe("requests in the admin", () => {
 			"filter[fields.title]": title,
 		});
 		expect(id).toBeDefined();
+	});
+
+	test("a contributor proposes changes from the builder, and a reviewer lands them in latest", async ({
+		lucid,
+		pageAs,
+	}) => {
+		const admin = await lucid.admin();
+		const id = await createThroughRequest(
+			admin,
+			PROPOSED_STORY_KEY,
+			titled("Install"),
+		);
+		const contributor = await lucid.user({
+			permissions: contributorPermissions(PROPOSED_STORY_KEY),
+		});
+		const reviewer = await lucid.user({
+			permissions: reviewerPermissions(PROPOSED_STORY_KEY),
+		});
+		const contributorPage = await pageAs(contributor.session);
+
+		await contributorPage.goto(
+			`/admin/collections/${PROPOSED_STORY_KEY}/latest/${id}`,
+		);
+		await expect(
+			contributorPage.getByText(/Changes to this proposed story are reviewed/),
+		).toBeVisible();
+		await contributorPage
+			.getByRole("textbox", { name: "Title" })
+			.fill("Install Lucid");
+		await contributorPage
+			.getByRole("button", { name: "Propose Changes", exact: true })
+			.click();
+		const dialog = contributorPage.getByRole("dialog", {
+			name: "Propose Changes",
+		});
+		await expect(
+			dialog.getByRole("textbox", { name: "Request name" }),
+		).toHaveValue(/^Update /);
+		await dialog.getByRole("button", { name: "Send for Review" }).click();
+
+		//* the editor carries on in the proposal, and latest is untouched until the request completes
+		await expect(contributorPage).toHaveURL(
+			new RegExp(`/admin/requests/\\d+/content/${PROPOSED_STORY_KEY}/${id}$`),
+		);
+		const requestId = requestIdOf(contributorPage);
+		await expect(
+			contributorPage.getByRole("textbox", { name: "Title" }),
+		).toHaveValue("Install Lucid");
+		expect(
+			(await readDocument(admin, PROPOSED_STORY_KEY, id)).fields.title,
+		).toBe("Install");
+
+		const reviewerPage = await pageAs(reviewer.session);
+		await reviewerPage.goto(`/admin/requests/${requestId}`);
+		await approveAndComplete(reviewerPage);
+		await expect
+			.poll(
+				async () =>
+					(await readDocument(admin, PROPOSED_STORY_KEY, id)).fields.title,
+			)
+			.toBe("Install Lucid");
 	});
 
 	test("a reviewer's comment holds a request until the author resolves it", async ({
@@ -216,5 +285,36 @@ test.describe("requests in the admin", () => {
 					(await readDocument(admin, REVIEWED_STORY_KEY, id)).isDeleted,
 			)
 			.toBe(true);
+	});
+
+	test("duplicating a story where new ones are reviewed asks for the copy in a create request", async ({
+		lucid,
+		page,
+	}) => {
+		const admin = await lucid.admin();
+		const id = await createThroughRequest(
+			admin,
+			REVIEWED_STORY_KEY,
+			titled("Copied by request"),
+		);
+
+		await page.goto(`/admin/collections/${REVIEWED_STORY_KEY}/latest/${id}`);
+		await page.getByRole("button", { name: "Show Options" }).first().click();
+		await page.getByRole("menuitem", { name: "Duplicate" }).click();
+		const dialog = page.getByRole("alertdialog", {
+			name: "Duplicate Reviewed story?",
+		});
+		await dialog
+			.getByRole("textbox", { name: "Request name" })
+			.fill("Copy the story");
+		await dialog
+			.getByRole("button", { name: "New Request", exact: true })
+			.click();
+		await expect(page).toHaveURL(
+			new RegExp(`/admin/requests/\\d+/content/${REVIEWED_STORY_KEY}/\\d+`),
+		);
+		await expect(page.getByRole("textbox", { name: "Title" })).toHaveValue(
+			"Copied by request",
+		);
 	});
 });

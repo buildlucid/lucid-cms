@@ -343,6 +343,7 @@ const EmailSortableItem: Component<{
 						onClick={() => props.removeSelectedEmail(props.email.id)}
 						disabled={props.disabled}
 						aria-label={T()("common.remove")}
+						tooltip={T()("common.remove")}
 					>
 						<TbOutlineX size={14} />
 					</Button>

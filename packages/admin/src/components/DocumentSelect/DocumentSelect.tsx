@@ -396,6 +396,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 											onClick={openDocuSelectModal}
 											disabled={props.disabled}
 											aria-label={T()("common.edit")}
+											tooltip={T()("common.edit")}
 										>
 											<TbOutlinePencil size={12} />
 										</Button>
@@ -408,6 +409,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										onClick={clearSelection}
 										disabled={props.disabled}
 										aria-label={T()("common.clear")}
+										tooltip={T()("common.clear")}
 									>
 										<TbOutlineX size={14} />
 									</Button>
@@ -563,6 +565,7 @@ const DocumentSortableItem: Component<{
 						}
 						disabled={props.disabled}
 						aria-label={T()("common.remove")}
+						tooltip={T()("common.remove")}
 					>
 						<TbOutlineX size={14} />
 					</Button>

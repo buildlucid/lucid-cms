@@ -2,6 +2,7 @@ import z from "zod";
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
+import { receivesDeploys } from "./shared.js";
 
 /**
  * Success notice keyed per deploy, refreshed on each success.
@@ -19,6 +20,7 @@ export const deploySucceededNotification = defineNotification({
 	level: "success",
 	actionRequired: false,
 	audience: "recipients",
+	receivable: receivesDeploys("read"),
 	defaults: { email: false },
 	data: z.object({
 		deployKey: z.string(),

@@ -12,7 +12,7 @@ import siteStore from "@/store/siteStore/siteStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import brickHelpers from "@/utils/brick-helpers";
-import { getDocumentCreateActions } from "@/utils/requests";
+import { getDocumentCreateActions, getLatestAccess } from "@/utils/requests";
 import { createDocumentLocalization } from "../useDocumentLocalization/useDocumentLocalization";
 import useUserPreference from "../useUserPreference/useUserPreference";
 
@@ -30,6 +30,7 @@ export function useDocumentUIState(props: {
 	heldElsewhere?: Accessor<boolean>;
 	createDocumentMutation?: ReturnType<typeof api.documents.useCreateSingle>;
 	requestDocumentMutation?: ReturnType<typeof api.documents.useRequestSingle>;
+	proposeMutation?: ReturnType<typeof api.documents.useProposeSingle>;
 	createSingleVersionMutation?: ReturnType<
 		typeof api.documents.useCreateSingleVersion
 	>;
@@ -70,6 +71,7 @@ export function useDocumentUIState(props: {
 	});
 
 	const [getDocumentRequestOpen, setDocumentRequestOpen] = createSignal(false);
+	const [getProposeOpen, setProposeOpen] = createSignal(false);
 	const [getPublishOpen, setPublishOpen] = createSignal(false);
 	const [getPublishTarget, setPublishTarget] = createSignal<Exclude<
 		DocumentVersionType,
@@ -94,7 +96,8 @@ export function useDocumentUIState(props: {
 		return (
 			props.createSingleVersionMutation?.action.isPending ||
 			props.createDocumentMutation?.action.isPending ||
-			props.requestDocumentMutation?.action.isPending
+			props.requestDocumentMutation?.action.isPending ||
+			props.proposeMutation?.action.isPending
 		);
 	});
 
@@ -111,7 +114,8 @@ export function useDocumentUIState(props: {
 			props.updateSingleVersionMutation?.errors() ||
 			props.createSingleVersionMutation?.errors() ||
 			props.createDocumentMutation?.errors() ||
-			props.requestDocumentMutation?.errors()
+			props.requestDocumentMutation?.errors() ||
+			props.proposeMutation?.errors()
 		);
 	});
 
@@ -134,15 +138,22 @@ export function useDocumentUIState(props: {
 		return props.collection()?.autoSave;
 	});
 
+	/** How this person changes latest: saving it, proposing changes in an update request, or not at all. */
+	const latestAccess = createMemo(() => getLatestAccess(props.collection()));
+	/** Changes to latest are proposed in an update request instead of saved, so latest isn't held, auto-saved or saved directly. */
+	const isProposing = createMemo(
+		() =>
+			props.mode === "edit" &&
+			props.version() === "latest" &&
+			latestAccess() === "request",
+	);
+
 	/** Proposals follow their request's edit access, which also covers people requesting a document. */
 	const hasUpdateAccess = createMemo(() => {
 		if (props.version() === "proposal")
 			return props.proposalEditable?.() === true;
 
-		const permission = props.collection()?.permissions.update;
-		if (!permission) return false;
-
-		return userStore.get.hasPermission([permission]).all;
+		return latestAccess() !== null;
 	});
 
 	const isAutoSaveActive = createMemo(() => {
@@ -157,6 +168,7 @@ export function useDocumentUIState(props: {
 		if (props.document()?.isDeleted) return false;
 		//* the person saves the agent's or AI translation's changes themselves, once they've reviewed them
 		if (brickStore.get.reviewPending || props.heldElsewhere?.()) return false;
+		if (isProposing()) return false;
 
 		return hasUpdateAccess() && autoSave() && autoSaveUserEnabled();
 	});
@@ -250,19 +262,15 @@ export function useDocumentUIState(props: {
 			: undefined;
 	});
 
-	/** Unpublishing directly needs publish access, while requesting it needs update or unpublish request access. */
+	/** Unpublishing directly needs publish access, while requesting it needs publish or publish request access. */
 	const hasUnpublishPermission = createMemo(() => {
 		const permissions = props.collection()?.permissions;
 		if (!permissions) return false;
 
-		return (
-			userStore.get.hasPermission([permissions.publish]).all ||
-			(userStore.get.hasPermission([Permissions.RequestsRead]).all &&
-				userStore.get.hasPermission([
-					permissions.update,
-					permissions.unpublishRequest,
-				]).some)
-		);
+		return userStore.get.hasPermission([
+			permissions.publish,
+			permissions.publishRequest,
+		]).some;
 	});
 
 	const showDuplicateButton = createMemo(() => {
@@ -336,6 +344,7 @@ export function useDocumentUIState(props: {
 			return false;
 		}
 		if (props.document()?.isDeleted) return false;
+		if (isProposing()) return false;
 
 		return hasUpdateAccess() && props.collection()?.autoSave;
 	});
@@ -363,22 +372,21 @@ export function useDocumentUIState(props: {
 		const permissions = props.collection()?.permissions;
 		if (!permissions) return false;
 
-		return (
-			userStore.get.hasPermission([permissions.delete]).all ||
-			(userStore.get.hasPermission([Permissions.RequestsRead]).all &&
-				userStore.get.hasPermission([permissions.deleteRequest]).all)
-		);
+		return userStore.get.hasPermission([
+			permissions.delete,
+			permissions.deleteRequest,
+		]).some;
 	});
 
-	/**
-	 * Duplicating reads the source and creates a new document
-	 */
+	/** Duplicating reads the source and creates a new document, or requests one where creating isn't allowed. */
 	const hasDuplicatePermission = createMemo(() => {
 		const permissions = props.collection()?.permissions;
 		if (!permissions) return false;
 
-		return userStore.get.hasPermission([permissions.read, permissions.create])
-			.all;
+		return (
+			userStore.get.hasPermission([permissions.read]).all &&
+			createActions().length > 0
+		);
 	});
 
 	const showRestoreRevisionButton = createMemo(() => {
@@ -388,7 +396,8 @@ export function useDocumentUIState(props: {
 		if (props.document()?.isDeleted) return false;
 		if (props.collection()?.revisions.enabled === false) return false;
 		if (props.versionId() === undefined) return false;
-		return true;
+		//* restoring saves latest or proposes it, so it's for people who can do either
+		return latestAccess() !== null;
 	});
 
 	const showPreview = createMemo(() => {
@@ -437,6 +446,8 @@ export function useDocumentUIState(props: {
 		setPreviewOpen,
 		getDocumentRequestOpen,
 		setDocumentRequestOpen,
+		getProposeOpen,
+		setProposeOpen,
 		getPublishOpen,
 		setPublishOpen,
 		getPublishTarget,
@@ -459,6 +470,8 @@ export function useDocumentUIState(props: {
 		showUpsertButton,
 		createActions,
 		hasSavePermission,
+		latestAccess,
+		isProposing,
 		hasPublishPermission,
 		showPublishButton,
 		showDeleteButton,

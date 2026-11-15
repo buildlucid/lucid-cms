@@ -20,6 +20,7 @@ import {
 	approve,
 	approveAndCompleteRequest,
 	openCreateRequest,
+	requestAction,
 	requestChange,
 	requestCreation,
 } from "#shared/helpers/requests";
@@ -214,15 +215,9 @@ describe("document permissions", () => {
 	test("a create request needs create-request in the collection", async ({
 		lucid,
 	}) => {
-		const without = await lucid.user({
-			permissions: ["requests:read", reviewed("read")],
-		});
+		const without = await lucid.user({ permissions: [reviewed("read")] });
 		const withIt = await lucid.user({
-			permissions: [
-				"requests:read",
-				reviewed("read"),
-				reviewed("create-request"),
-			],
+			permissions: [reviewed("read"), reviewed("create-request")],
 		});
 
 		expect((await requestCreate(without.session, "Refused")).status).toBe(403);
@@ -233,11 +228,7 @@ describe("document permissions", () => {
 		lucid,
 	}) => {
 		const { session } = await lucid.user({
-			permissions: [
-				"requests:read",
-				reviewed("read"),
-				reviewed("create-request"),
-			],
+			permissions: [reviewed("read"), reviewed("create-request")],
 		});
 
 		const direct = await session.request({
@@ -249,7 +240,7 @@ describe("document permissions", () => {
 		expect(direct.status).toBe(403);
 	});
 
-	test("delete and unpublish requests need their request permissions", async ({
+	test("delete and unpublish requests need delete-request and publish-request", async ({
 		lucid,
 	}) => {
 		const admin = await lucid.admin();
@@ -258,13 +249,13 @@ describe("document permissions", () => {
 			admin,
 			(await openRequest(admin, "publish", id, ["production"])).body.data.id,
 		);
-		const base = ["requests:read", reviewed("read")];
+		const base = [reviewed("read")];
 		const without = await lucid.user({ permissions: base });
 		const withThem = await lucid.user({
 			permissions: [
 				...base,
 				reviewed("delete-request"),
-				reviewed("unpublish-request"),
+				reviewed("publish-request"),
 			],
 		});
 
@@ -282,27 +273,29 @@ describe("document permissions", () => {
 		).toBe(201);
 	});
 
-	test("approving needs review and the permission for what the request does", async ({
+	test("approving needs review alone, while completing needs the permission for what the request does", async ({
 		lucid,
 	}) => {
 		const admin = await lucid.admin();
-		const base = ["requests:read", reviewed("read")];
+		const base = [reviewed("read")];
 		const creator = await lucid.user({
 			permissions: [...base, reviewed("create")],
 		});
 		const reviewOnly = await lucid.user({
 			permissions: [...base, reviewed("review")],
 		});
-		const reviewer = await lucid.user({
-			permissions: [...base, reviewed("review"), reviewed("create")],
-		});
 		const requested = await requestCreate(admin, "Needs review");
 		expect(requested.status).toBe(201);
 		const { requestId } = requested.body.data;
 
 		expect((await approve(creator.session, requestId)).status).toBe(403);
-		expect((await approve(reviewOnly.session, requestId)).status).toBe(403);
-		expect((await approve(reviewer.session, requestId)).status).toBe(204);
+		expect((await approve(reviewOnly.session, requestId)).status).toBe(204);
+		expect(
+			(await requestAction(reviewOnly.session, requestId, "complete")).status,
+		).toBe(403);
+		expect(
+			(await requestAction(creator.session, requestId, "complete")).status,
+		).toBe(202);
 	});
 
 	test("a reviewer can't review requests in collections they can't review", async ({
@@ -311,7 +304,6 @@ describe("document permissions", () => {
 		const admin = await lucid.admin();
 		const reviewer = await lucid.user({
 			permissions: [
-				"requests:read",
 				reviewed("read"),
 				reviewed("create"),
 				story("read"),
@@ -324,6 +316,61 @@ describe("document permissions", () => {
 		expect(
 			(await approve(reviewer.session, requested.body.data.requestId)).status,
 		).toBe(403);
+	});
+
+	test("duplicating needs create, or create-request to open a create request with the copy", async ({
+		lucid,
+	}) => {
+		const admin = await lucid.admin();
+		const duplicate = (
+			session: Session,
+			collectionKey: string,
+			id: number,
+			request?: { title: string },
+		) =>
+			session.request<{ data: { id: number; requestId: number | null } }>({
+				method: "POST",
+				path: `/api/v1/documents/${collectionKey}/${id}/duplicate`,
+				body: request ? { request } : {},
+			});
+		const storyId = await createDocument(admin, STORY_KEY, titled("Copied"));
+		const reviewedId = await createReviewedStory(admin, "Copied by request");
+		const reader = await lucid.user({ permissions: [story("read")] });
+		const creator = await lucid.user({
+			permissions: [
+				story("read"),
+				story("create"),
+				reviewed("read"),
+				reviewed("create"),
+			],
+		});
+		const requester = await lucid.user({
+			permissions: [reviewed("read"), reviewed("create-request")],
+		});
+
+		expect((await duplicate(reader.session, STORY_KEY, storyId)).status).toBe(
+			403,
+		);
+		const copied = await duplicate(creator.session, STORY_KEY, storyId);
+		expect(copied.status).toBe(200);
+		expect(copied.body.data.requestId).toBeNull();
+
+		//* collections that review new documents only take copies through create requests
+		expect(
+			(await duplicate(creator.session, REVIEWED_STORY_KEY, reviewedId)).status,
+		).toBe(403);
+		expect(
+			(await duplicate(requester.session, REVIEWED_STORY_KEY, reviewedId))
+				.status,
+		).toBe(403);
+		const requested = await duplicate(
+			requester.session,
+			REVIEWED_STORY_KEY,
+			reviewedId,
+			{ title: "Copy the story" },
+		);
+		expect(requested.status).toBe(200);
+		expect(requested.body.data.requestId).not.toBeNull();
 	});
 
 	test("publishing to an environment needs publish", async ({ lucid }) => {

@@ -1,7 +1,7 @@
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
-import { chatHref, routineData } from "./shared.js";
+import { chatHref, receivesAgent, routineData } from "./shared.js";
 
 export const routineNeedsReviewNotification = defineNotification({
 	key: "agent:routine-needs-review",
@@ -19,6 +19,7 @@ export const routineNeedsReviewNotification = defineNotification({
 	level: "warning",
 	actionRequired: true,
 	audience: "recipients",
+	receivable: receivesAgent,
 	data: routineData,
 	render: ({ data }) => ({
 		title: copy("server:core.notifications.agent.routine-needs-review.title", {

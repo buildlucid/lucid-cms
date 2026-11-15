@@ -46,6 +46,7 @@ export type ToolkitDocuments = {
 	) => ReturnType<typeof createSingle<K>>;
 	/**
 	 * Updates latest or a request proposal, preserving omitted values while arrays set membership and order and retained refs merge values.
+	 * Pass `request` to propose the changes in a new update request instead, which collections that review updates require.
 	 *
 	 * @example
 	 * ```ts
@@ -59,6 +60,16 @@ export type ToolkitDocuments = {
 	 *     },
 	 *   },
 	 * });
+	 *
+	 * // Propose the change for review. Latest changes once the request is completed.
+	 * const proposed = await toolkit.documents.updateSingle({
+	 *   collectionKey: "article",
+	 *   id: 1,
+	 *   actor: { type: "user", userId: 4 },
+	 *   data: { fields: { title: { en: "Install Lucid" } } },
+	 *   request: { title: "Fix the install title" },
+	 * });
+	 * proposed.data?.requestId;
 	 * ```
 	 */
 	updateSingle: <K extends string>(
@@ -92,7 +103,7 @@ export type ToolkitDocuments = {
 		input: Parameters<typeof getEditable<K>>[1],
 	) => ReturnType<typeof getEditable<K>>;
 	/**
-	 * Applies ordered operations using nested refs, then validates and saves latest or the proposal selected by `requestId`.
+	 * Applies ordered operations using nested refs, then validates and saves latest, the proposal selected by `requestId`, or a new update request with `request`.
 	 *
 	 * @example
 	 * ```ts

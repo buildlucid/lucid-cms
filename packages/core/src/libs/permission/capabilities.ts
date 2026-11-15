@@ -103,29 +103,102 @@ const externalPermissionScopes: Partial<
 	[Permissions.RequestsRead]: ExternalScopes.RequestsRead,
 };
 
+const directly = copy("admin:permissions.documents.directly");
+const byRequest = copy("admin:permissions.documents.by.request");
+
+/** Each collection permission's checkbox, named within its action's subgroup, eg. Update › Directly. */
 const collectionPermissionDetails = {
-	read: { name: copy("admin:permissions.documents.read") },
-	create: { name: copy("admin:permissions.documents.create") },
+	read: {
+		name: copy("admin:permissions.documents.read"),
+		description: copy("admin:permissions.documents.read.description"),
+	},
+	create: {
+		name: directly,
+		description: copy("admin:permissions.documents.create.direct.description"),
+	},
 	"create-request": {
-		name: copy("admin:permissions.documents.create.request"),
+		name: byRequest,
 		description: copy("admin:permissions.documents.create.request.description"),
 	},
-	update: { name: copy("admin:permissions.documents.update") },
-	delete: { name: copy("admin:permissions.documents.delete") },
-	"delete-request": {
-		name: copy("admin:permissions.documents.delete.request"),
-		description: copy("admin:permissions.documents.delete.request.description"),
+	update: {
+		name: directly,
+		description: copy("admin:permissions.documents.update.direct.description"),
 	},
-	"unpublish-request": {
-		name: copy("admin:permissions.documents.unpublish.request"),
+	"update-request": {
+		name: byRequest,
+		description: copy("admin:permissions.documents.update.request.description"),
+	},
+	restore: {
+		name: copy("admin:permissions.documents.restore"),
+		description: copy("admin:permissions.documents.restore.description"),
+	},
+	publish: {
+		name: directly,
+		description: copy("admin:permissions.documents.publish.direct.description"),
+	},
+	"publish-request": {
+		name: byRequest,
 		description: copy(
-			"admin:permissions.documents.unpublish.request.description",
+			"admin:permissions.documents.publish.request.description",
 		),
 	},
-	restore: { name: copy("admin:permissions.documents.restore") },
-	publish: { name: copy("admin:permissions.documents.publish") },
-	review: { name: copy("admin:permissions.documents.review") },
+	delete: {
+		name: directly,
+		description: copy("admin:permissions.documents.delete.direct.description"),
+	},
+	"delete-request": {
+		name: byRequest,
+		description: copy("admin:permissions.documents.delete.request.description"),
+	},
+	review: {
+		name: copy("admin:permissions.documents.review"),
+		description: copy("admin:permissions.documents.review.description"),
+	},
 } satisfies Record<CollectionPermissionAction, PermissionDetails>;
+
+type CapabilitySubgroup = NonNullable<CapabilityDefinition["subgroup"]>;
+
+const collectionActionSubgroups = {
+	read: {
+		key: "read",
+		details: { name: copy("admin:permissions.documents.read.subgroup") },
+	},
+	create: {
+		key: "create",
+		details: { name: copy("admin:permissions.documents.create.subgroup") },
+	},
+	update: {
+		key: "update",
+		details: { name: copy("admin:permissions.documents.update.subgroup") },
+	},
+	publish: {
+		key: "publish",
+		details: { name: copy("admin:permissions.documents.publish.subgroup") },
+	},
+	delete: {
+		key: "delete",
+		details: { name: copy("admin:permissions.documents.delete.subgroup") },
+	},
+	review: {
+		key: "review",
+		details: { name: copy("admin:permissions.documents.review.subgroup") },
+	},
+} satisfies Record<string, CapabilitySubgroup>;
+
+/** The subgroup each collection permission is listed under, which pairs an action with its request permission. */
+const collectionPermissionSubgroups = {
+	read: collectionActionSubgroups.read,
+	create: collectionActionSubgroups.create,
+	"create-request": collectionActionSubgroups.create,
+	update: collectionActionSubgroups.update,
+	"update-request": collectionActionSubgroups.update,
+	restore: collectionActionSubgroups.update,
+	publish: collectionActionSubgroups.publish,
+	"publish-request": collectionActionSubgroups.publish,
+	delete: collectionActionSubgroups.delete,
+	"delete-request": collectionActionSubgroups.delete,
+	review: collectionActionSubgroups.review,
+} satisfies Record<CollectionPermissionAction, CapabilitySubgroup>;
 
 const getStaticCapabilityGroups = (): CapabilityGroup[] => {
 	return Object.values(PermissionGroups).map((group) => {
@@ -224,8 +297,6 @@ const labelText = (label: AdminCopyInput | undefined, key: string): string => {
 	return normalized?.defaultMessage ?? keyToTitle(key);
 };
 
-type CapabilitySubgroup = NonNullable<CapabilityDefinition["subgroup"]>;
-
 const fieldsSubgroup: CapabilitySubgroup = {
 	key: "fields",
 	details: { name: copy("admin:permissions.documents.fields.subgroup") },
@@ -310,6 +381,7 @@ const getCollectionCapabilityGroups = (
 					details: collectionPermissionDetails[action],
 					core: true,
 					permission,
+					subgroup: collectionPermissionSubgroups[action],
 					external: {
 						scope: getCollectionExternalScope(collection.key, action),
 						userPermission: permission,

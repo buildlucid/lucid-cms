@@ -5,9 +5,7 @@ import { requestServices } from "../../../../services/index.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
-import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
-import permissions from "../../middleware/permissions.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import openAPI from "../../openapi/index.js";
@@ -19,7 +17,7 @@ const factory = createFactory();
 const createSingleController = factory.createHandlers(
 	openAPI.describeRoute(() => ({
 		description:
-			"Create a publish, unpublish or delete request for existing documents, with optional reviewers. Publish requests capture each document's content.",
+			"Create an update, publish, unpublish or delete request for existing documents, with optional reviewers. Update requests copy each document's latest content into a proposal to edit, and publish requests copy the content they publish.",
 		tags: ["requests"],
 		summary: "Create Request",
 		responses: openAPI.responses({
@@ -35,7 +33,6 @@ const createSingleController = factory.createHandlers(
 	})),
 	validateCSRF(),
 	authenticate(),
-	permissions([Permissions.RequestsRead]),
 	validate("json", controllerSchemas.createSingle.body),
 	async (c) => {
 		const body = c.req.valid("json");

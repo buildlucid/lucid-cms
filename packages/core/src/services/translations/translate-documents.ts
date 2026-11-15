@@ -17,6 +17,7 @@ import type {
 } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import checkFeatureEnabled from "../ai/checks/check-feature-enabled.js";
+import getLatestAccess from "../documents/helpers/get-latest-access.js";
 import readDocumentContent from "../documents/helpers/read-document-content.js";
 import getSettings from "./get-settings.js";
 import getRequestProposals from "./helpers/get-request-proposals.js";
@@ -102,15 +103,21 @@ async function translateDocuments(
 	}
 
 	const documentIds = [...new Set(data.documentIds)];
-	//* every delivery changes content, and requests also need request access, so this is checked before anything is spent
+	//* every delivery changes content, so access is checked before anything is spent: saving latest
+	//* needs direct access, the open editor and new requests also take people who propose changes,
+	//* and an existing request's proposals are checked against that request below
+	const latestAccess = getLatestAccess(collection, data.user);
+	const allowed =
+		data.delivery === "latest"
+			? latestAccess === "direct"
+			: data.delivery === "editor"
+				? latestAccess !== null
+				: data.requestId !== undefined || latestAccess !== null;
 	if (
+		!allowed ||
 		!hasAccess({
 			user: data.user,
-			requiredPermissions: [
-				getCollectionPermission(collection.key, "read"),
-				getCollectionPermission(collection.key, "update"),
-				...(data.delivery === "request" ? [Permissions.RequestsRead] : []),
-			],
+			requiredPermissions: [getCollectionPermission(collection.key, "read")],
 		})
 	) {
 		return {

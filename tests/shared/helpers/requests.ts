@@ -13,7 +13,7 @@ import {
 } from "#harness/client";
 import { type DocumentInput, expectStatus } from "./documents.ts";
 
-/** A document for a publish, unpublish or delete request. Publish requests take latest unless given a `source`. */
+/** A document for an update, publish, unpublish or delete request. Publish requests take latest unless given a `source`. */
 export type RequestedDocument = {
 	collectionKey: string;
 	documentId: number;
@@ -52,7 +52,7 @@ export const openCreateRequest = async (
 	return requested.body.data;
 };
 
-/** Asks for a publish, unpublish or delete request, returning the response so a test can check a refusal. */
+/** Asks for an update, publish, unpublish or delete request, returning the response so a test can check a refusal. */
 export const requestChange = (
 	session: Session,
 	type: Exclude<RequestType, "create">,
@@ -74,7 +74,7 @@ export const requestChange = (
 		},
 	});
 
-/** Opens a publish, unpublish or delete request, which must be accepted, and returns its ID. */
+/** Opens an update, publish, unpublish or delete request, which must be accepted, and returns its ID. */
 export const openRequest = async (
 	...args: Parameters<typeof requestChange>
 ): Promise<number> => {
@@ -194,6 +194,49 @@ export const onlyDocument = (request: RequestDetails): RequestDocument => {
 	return document;
 };
 
+/**
+ * Proposes changes to a document's latest content in a new update request, or the open one given
+ * by `request.id`, returning the response so a test can check a refusal.
+ */
+export const proposeChanges = (
+	session: Session,
+	collectionKey: string,
+	documentId: number,
+	input: DocumentInput & {
+		request?: { title: string } | { id: number };
+		baseContentId?: string;
+	},
+) => {
+	const { request, ...body } = input;
+	return session.request<{
+		data: { requestId: number; versionId: number; contentId: string };
+	}>({
+		method: "POST",
+		path: `/api/v1/documents/${collectionKey}/${documentId}/propose`,
+		body: { request: request ?? { title: `Update ${documentId}` }, ...body },
+	});
+};
+
+/** Proposes changes in a new or open update request, which must be accepted, and returns the request's ID. */
+export const openProposal = async (
+	...args: Parameters<typeof proposeChanges>
+): Promise<number> => {
+	const proposed = await proposeChanges(...args);
+	expectStatus(`Proposing changes to document ${args[2]}`, proposed, 201);
+	return proposed.body.data.requestId;
+};
+
+/** Refreshes a publish request's copy of latest from latest, returning the response. */
+export const refreshFromLatest = (
+	session: Session,
+	id: number,
+	requestDocumentId: number,
+) =>
+	session.request({
+		method: "POST",
+		path: `${REQUESTS}/${id}/documents/${requestDocumentId}/refresh`,
+	});
+
 /** Edits a request's own proposal, returning the response. */
 export const editProposal = (
 	session: Session,
@@ -274,24 +317,22 @@ export type RequestTeam = {
 };
 
 /** The permissions an author has on a collection: reading, editing and asking for everything else. */
-export const authorPermissions = (collectionKey: string) => [
-	"requests:read",
-	...[
-		"read",
-		"update",
-		"create-request",
-		"delete-request",
-		"unpublish-request",
-	].map((action) => `documents:${collectionKey}:${action}`),
-];
+export const authorPermissions = (collectionKey: string) =>
+	["read", "update", "create-request", "delete-request", "publish-request"].map(
+		(action) => `documents:${collectionKey}:${action}`,
+	);
+
+/** The permissions a contributor has on a collection: reading, and proposing new documents and edits, like someone suggesting changes to a docs page. */
+export const contributorPermissions = (collectionKey: string) =>
+	["read", "update-request", "create-request"].map(
+		(action) => `documents:${collectionKey}:${action}`,
+	);
 
 /** The permissions a reviewer has on a collection: everything an author does, and approving and completing it. */
-export const reviewerPermissions = (collectionKey: string) => [
-	"requests:read",
-	...["read", "update", "create", "delete", "publish", "review"].map(
+export const reviewerPermissions = (collectionKey: string) =>
+	["read", "update", "create", "delete", "publish", "review"].map(
 		(action) => `documents:${collectionKey}:${action}`,
-	),
-];
+	);
 
 const teams = new WeakMap<Lucid, Map<string, Promise<RequestTeam>>>();
 

@@ -1,6 +1,7 @@
 import type { Collection, DocumentVersionType } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
 import type api from "@/services/api";
+import type { LatestAccess } from "@/utils/requests";
 import type { UseDocumentUIState } from "../useDocumentUIState/useDocumentUIState";
 
 export function useDocumentHistoryUIState(props: {
@@ -18,6 +19,7 @@ export function useDocumentHistoryUIState(props: {
 	const [getPreviewOpen, setPreviewOpen] = createSignal(false);
 
 	const [getDocumentRequestOpen, setDocumentRequestOpen] = createSignal(false);
+	const [getProposeOpen, setProposeOpen] = createSignal(false);
 	const [getPublishOpen, setPublishOpen] = createSignal(false);
 	const [getPublishTarget, setPublishTarget] = createSignal<Exclude<
 		DocumentVersionType,
@@ -77,6 +79,8 @@ export function useDocumentHistoryUIState(props: {
 	const hasSavePermission = createMemo(() => false);
 
 	const hasAutoSavePermission = createMemo(() => false);
+	const latestAccess = createMemo((): LatestAccess => null);
+	const isProposing = createMemo(() => false);
 
 	const hasPublishPermission = createMemo(() => false);
 
@@ -116,6 +120,8 @@ export function useDocumentHistoryUIState(props: {
 		setPreviewOpen,
 		getDocumentRequestOpen,
 		setDocumentRequestOpen,
+		getProposeOpen,
+		setProposeOpen,
 		getPublishOpen,
 		setPublishOpen,
 		getPublishTarget,
@@ -138,6 +144,8 @@ export function useDocumentHistoryUIState(props: {
 		showUpsertButton,
 		createActions,
 		hasSavePermission,
+		latestAccess,
+		isProposing,
 		hasPublishPermission,
 		showPublishButton,
 		showDeleteButton,

@@ -6,15 +6,18 @@ import { UsersRepository } from "../../../libs/repositories/index.js";
 import type { UserDisplay } from "../../../types/response.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type { RequestDocumentRecord } from "../types.js";
+import type { RequestReadFacts } from "./can-read-request.js";
+import requestTypePermissions from "./request-type-permissions.js";
 
-/** Lists request readers eligible for mentions, with optional user and collection-action filters. */
+/**
+ * Lists people who can read a request, with optional user and collection-action filters.
+ * Matches `canReadRequest`: read on every document's collection, plus
+ * `requests:read`, `review` or the type's action on each, or having made or been asked to review it.
+ */
 const getRequestReaders: ServiceFn<
 	[
 		{
-			request: {
-				documents: Array<Pick<RequestDocumentRecord, "collection_key">>;
-			};
+			request: RequestReadFacts;
 			/** Collection actions people also need on every document's collection, eg. to approve. */
 			actions?: CollectionPermissionAction[];
 			ids?: number[];
@@ -32,15 +35,22 @@ const getRequestReaders: ServiceFn<
 		),
 	];
 
+	const onEvery = (action: CollectionPermissionAction) =>
+		collectionKeys.map((key) => getCollectionPermission(key, action));
+
 	const usersRes = await Users.selectMultipleWithPermission({
-		permissions: [
-			Permissions.RequestsRead,
-			...collectionKeys.flatMap((key) =>
-				["read" as const, ...(data.actions ?? [])].map((action) =>
-					getCollectionPermission(key, action),
-				),
-			),
-		],
+		permissions: ["read" as const, ...(data.actions ?? [])].flatMap(onEvery),
+		oneOf: {
+			permissionSets: [
+				[Permissions.RequestsRead],
+				onEvery("review"),
+				onEvery(requestTypePermissions(data.request.type).action),
+			],
+			userIds: [
+				...(data.request.created_by === null ? [] : [data.request.created_by]),
+				...data.request.reviewers.map((reviewer) => reviewer.user_id),
+			],
+		},
 		ids: data.ids,
 		name: data.name,
 		limit: data.limit,

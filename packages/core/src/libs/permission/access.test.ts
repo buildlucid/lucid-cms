@@ -87,17 +87,27 @@ test("role grants put content and agents before administration and destructive a
 		"settings_permissions",
 		"reports",
 	]);
-	expect(groups[0]?.permissions.map((value) => value.key)).toEqual([
-		"documents:pages:read",
-		"documents:pages:create",
-		"documents:pages:create-request",
-		"documents:pages:update",
-		"documents:pages:restore",
-		"documents:pages:review",
-		"documents:pages:publish",
-		"documents:pages:unpublish-request",
-		"documents:pages:delete-request",
-		"documents:pages:delete",
+	//* collection permissions sit in one subgroup per action, each pairing it with its request permission
+	expect(groups[0]?.permissions).toEqual([]);
+	expect(
+		groups[0]?.subgroups?.map((subgroup) => [
+			subgroup.key,
+			subgroup.permissions.map((value) => value.key),
+		]),
+	).toEqual([
+		["read", ["documents:pages:read"]],
+		["create", ["documents:pages:create", "documents:pages:create-request"]],
+		[
+			"update",
+			[
+				"documents:pages:update",
+				"documents:pages:update-request",
+				"documents:pages:restore",
+			],
+		],
+		["publish", ["documents:pages:publish", "documents:pages:publish-request"]],
+		["review", ["documents:pages:review"]],
+		["delete", ["documents:pages:delete", "documents:pages:delete-request"]],
 	]);
 	expect(
 		groups

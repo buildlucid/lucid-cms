@@ -1,5 +1,6 @@
 import type z from "zod";
 import type writeSingle from "../../../services/documents/write-single.js";
+import type { requestDetailsSchema } from "../requests/schema.js";
 import type {
 	documentDataSchema,
 	documentEditableDataSchema,
@@ -42,6 +43,19 @@ export type CollectionDocumentEditable<K extends string = string> =
 	CollectionWrite<K, "editable", DocumentEditableData>;
 export type CollectionDocumentPatch<K extends string = string> =
 	CollectionWrite<K, "patch", DocumentPatch>;
+
+/** Where an update goes: latest by default, an open request's proposal with `requestId`, or a new update request with `request`. */
+export type DocumentWriteDestination =
+	| {
+			/** Edits this request's proposal of the document instead of latest, eg. a create request's new document. */
+			requestId?: number;
+			request?: never;
+	  }
+	| {
+			requestId?: never;
+			/** Proposes the changes in a new update request for people to review. Collections that review updates require it. */
+			request: z.input<typeof requestDetailsSchema>;
+	  };
 
 /** Identifies the saved content without fetching a rendered document. */
 export type DocumentWriteResult = NonNullable<

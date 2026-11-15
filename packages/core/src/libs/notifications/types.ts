@@ -1,7 +1,9 @@
 import type z from "zod";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { NotificationLevel } from "../../types/response.js";
 import type { EmailTemplateInput, EmailTemplateName } from "../email/types.js";
 import type { AdminCopyInput, CopyInput } from "../i18n/types.js";
+import type { PermissionGrant } from "../permission/has-permission.js";
 import type { Permission } from "../permission/types.js";
 
 /** Groups types in the settings and inbox. Share one object across the types it covers. */
@@ -15,6 +17,15 @@ export type NotificationCategory = {
  * A permission sends to everyone holding it, and admins can swap that for a role list.
  */
 export type NotificationAudience = "recipients" | { permission: Permission };
+
+/**
+ * Whether someone could ever receive a type, so their email preferences only list the types that
+ * apply to them. Audience types also need their permission.
+ */
+export type NotificationReceivable = (props: {
+	user: PermissionGrant;
+	config: ResolvedLucidConfig;
+}) => boolean;
 
 export type NotificationRender = {
 	title: CopyInput;
@@ -107,6 +118,8 @@ export type DefineNotificationOptions<
 	/** Requires in-app delivery while allowing users to disable email, defaulting to false. */
 	mandatory?: boolean;
 	audience: NotificationAudience;
+	/** Hides the type from the email preferences of people who can't receive it. Defaults to everyone. */
+	receivable?: NotificationReceivable;
 	/** Validates the data passed on send. */
 	data: Data;
 	/** Starting settings. Both default to true. */
@@ -132,6 +145,7 @@ export type NotificationDefinition<
 	actionRequired: boolean;
 	mandatory: boolean;
 	audience: NotificationAudience;
+	receivable?: NotificationReceivable;
 	data: Data;
 	defaults: {
 		enabled: boolean;

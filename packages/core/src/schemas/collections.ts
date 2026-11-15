@@ -197,11 +197,12 @@ const collectionResponseSchema = z.object({
 		create: z.string(),
 		createRequest: z.string(),
 		update: z.string(),
+		updateRequest: z.string(),
 		delete: z.string(),
 		deleteRequest: z.string(),
-		unpublishRequest: z.string(),
 		restore: z.string(),
 		publish: z.string(),
+		publishRequest: z.string(),
 		review: z.string(),
 	}),
 	migrationStatus: migrationStatusSchema.nullable(),
@@ -289,6 +290,10 @@ const collectionResponseSchema = z.object({
 					description:
 						"Whether new documents can only be created through an approved create request",
 				}),
+				update: z.boolean().meta({
+					description:
+						"Whether latest can only change through an approved update request",
+				}),
 				delete: z.boolean().meta({
 					description:
 						"Whether documents can only be moved to the bin through an approved delete request",
@@ -313,7 +318,7 @@ const collectionResponseSchema = z.object({
 						color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
 						targets: z.array(z.string()).meta({
 							description:
-								"Targets this stage allows: environments, for direct publishing and requests, or latest, for create requests and publish requests to latest",
+								"Targets this stage allows: environments, for direct publishing and requests, or latest, for create and update requests",
 						}),
 						resetTo: z.string().nullable().meta({
 							description:

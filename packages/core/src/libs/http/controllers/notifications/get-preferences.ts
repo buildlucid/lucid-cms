@@ -33,7 +33,7 @@ const getPreferencesController = factory.createHandlers(
 				message: copy("server:core.routes.notifications.error.message"),
 			},
 		})(context, {
-			userId: c.get("auth").id,
+			user: c.get("auth"),
 		});
 		if (result.error) throw new LucidError(result.error);
 

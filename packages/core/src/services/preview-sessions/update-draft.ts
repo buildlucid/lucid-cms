@@ -74,6 +74,7 @@ const updateDraft: ServiceFn<
 		documentId: data.documentId,
 		versionId: data.versionId,
 		authUser: data.user,
+		purpose: "draft",
 	});
 	if (updateContextRes.error) return updateContextRes;
 

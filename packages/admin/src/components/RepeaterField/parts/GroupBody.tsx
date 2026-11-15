@@ -15,6 +15,7 @@ import DeleteDebounceButton from "@/components/DeleteDebounceButton/DeleteDeboun
 import type { DragDropCBT } from "@/components/DragDrop/DragDrop";
 import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
 import Pill from "@/components/Pill/Pill";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import { useFieldAccess } from "@/hooks/useFieldAccess/useFieldAccess";
@@ -217,8 +218,8 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				tabIndex="0"
 			>
 				<div class="flex items-center min-w-0 gap-2">
-					<button
-						type="button"
+					<Tooltip
+						content={T()("common.change.order")}
 						class="text-muted hover:text-primary-hover transition-colors cursor-grab active:cursor-grabbing focus-ring disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
 							props.dragDrop.onDragStart(e, {
@@ -234,12 +235,11 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 							})
 						}
 						onDragOver={(e) => props.dragDrop.onDragOver(e)}
-						aria-label={T()("common.change.order")}
 						draggable={disabled() === false}
 						disabled={disabled()}
 					>
 						<TbOutlineGripHorizontal size={14} />
-					</button>
+					</Tooltip>
 					<div class="min-w-0 flex items-center gap-2">
 						<Pill variant="outline" class="shrink-0">
 							#{props.groupIndex() + 1}
@@ -279,6 +279,9 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						size="xs"
 						shape="square"
 						tabIndex="-1"
+						tooltip={
+							groupOpen() ? T()("builder.collapse") : T()("builder.expand")
+						}
 						class={classNames(
 							"text-muted hover:text-icon-hover transition-all duration-200",
 							{

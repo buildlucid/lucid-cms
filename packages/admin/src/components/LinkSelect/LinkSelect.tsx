@@ -104,6 +104,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 								data-field-action=""
 								onClick={openLinkModal}
 								disabled={props.disabled}
+								tooltip={T()("common.edit")}
 							>
 								<TbOutlinePencil size={12} />
 								<span class="sr-only">{T()("common.edit")}</span>
@@ -115,6 +116,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 								shape="square"
 								onClick={() => props.onChange(null)}
 								disabled={props.disabled}
+								tooltip={T()("common.clear")}
 							>
 								<TbOutlineX size={14} />
 								<span class="sr-only">{T()("common.clear")}</span>

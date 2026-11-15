@@ -13,6 +13,7 @@ import {
 	createDocument,
 	expectStatus,
 	readDocument,
+	saveDocument,
 	titled,
 } from "#shared/helpers/documents";
 import { waitForJob } from "#shared/helpers/jobs";
@@ -21,11 +22,11 @@ import {
 	blockerCodes,
 	createThroughRequest,
 	createWithTeam,
-	editProposal,
 	onlyDocument,
 	openCreateRequest,
 	openRequest,
 	readRequest,
+	refreshFromLatest,
 	requestAction,
 	requestTeam,
 } from "#shared/helpers/requests";
@@ -117,16 +118,19 @@ describe("scheduled requests", () => {
 			expect(
 				(await requestAction(admin, closed.requestId, "close")).status,
 			).toBe(204);
-			for (const { requestId } of [changed, reapproved]) {
+			//* refreshing each copy from edited latest changes what was approved
+			for (const { id, requestId } of [changed, reapproved]) {
 				const request = await readRequest(admin, requestId);
+				await saveDocument(
+					admin,
+					REVIEWED_STORY_KEY,
+					id,
+					titled("Edited after approval"),
+				);
 				expectStatus(
-					`Editing request ${requestId}'s proposal`,
-					await editProposal(
-						admin,
-						onlyDocument(request),
-						titled("Edited after approval"),
-					),
-					200,
+					`Refreshing request ${requestId}'s copy`,
+					await refreshFromLatest(admin, requestId, onlyDocument(request).id),
+					204,
 				);
 			}
 			expect(await readExecution(admin, changed.requestId)).toBeNull();

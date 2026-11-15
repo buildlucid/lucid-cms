@@ -3,7 +3,7 @@ import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
 import getRequestPath from "../helpers/get-request-path.js";
-import { requestData } from "./shared.js";
+import { receivesRequests, requestData } from "./shared.js";
 
 export const mentionedNotification = defineNotification({
 	key: "requests:mentioned",
@@ -15,6 +15,7 @@ export const mentionedNotification = defineNotification({
 		defaultMessage: "Someone mentions you in a request.",
 	}),
 	audience: "recipients",
+	receivable: receivesRequests,
 	data: requestData.extend({ excerpt: z.string() }),
 	render: ({ data }) => ({
 		title: copy("server:core.notifications.requests.mentioned.title", {

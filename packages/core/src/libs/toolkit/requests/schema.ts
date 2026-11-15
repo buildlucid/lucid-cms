@@ -40,7 +40,7 @@ export const requestBodySchema = z.union([
 
 const { body: createBody } = controllerSchemas.createSingle;
 
-/** The title, description and reviewers of a new request, shared by `requests.createSingle` and `documents.createSingle`. */
+/** The title, description and reviewers of a new request, shared by `requests.createSingle` and the documents toolkit's create, update and patch. */
 export const requestDetailsSchema = z.strictObject({
 	title: createBody.shape.title,
 	description: requestBodySchema.optional(),

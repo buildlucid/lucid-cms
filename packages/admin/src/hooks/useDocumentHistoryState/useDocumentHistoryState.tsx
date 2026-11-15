@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from "@solidjs/router";
 import type { DocumentVersion, UserRef } from "@types";
 import { createEffect, createMemo, createSignal } from "solid-js";
-import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -12,7 +11,8 @@ import {
 } from "@/utils/document-ref-helpers";
 import { isInaccessibleError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
-import { getDocumentRoute } from "@/utils/route-helpers";
+import { getLatestAccess } from "@/utils/requests";
+import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import useQueryState, {
 	pagination,
 	sort,
@@ -137,15 +137,14 @@ export function useDocumentHistoryState() {
 			canFetchRevisions() &&
 			selectedRequestTarget() !== undefined &&
 			collectionQuery.data?.data !== undefined &&
-			userStore.get.hasPermission([
-				Permissions.RequestsRead,
-				collectionQuery.data.data.permissions.read,
-			]).all,
+			userStore.get.hasPermission([collectionQuery.data.data.permissions.read])
+				.all,
 	});
 
 	// ------------------------------------------
 	// Memos
 	const collection = createMemo(() => collectionQuery.data?.data);
+	const latestAccess = createMemo(() => getLatestAccess(collection()));
 	const isLoading = createMemo(() => {
 		return (
 			collectionQuery.isLoading ||
@@ -329,7 +328,10 @@ export function useDocumentHistoryState() {
 		if (!permission || !item) return false;
 		if (item.type !== "revision") return false;
 		if (document()?.isDeleted) return false;
-		return userStore.get.hasPermission([permission]).all;
+		//* restoring saves latest or proposes it, so it's for people who can do either
+		return (
+			latestAccess() !== null && userStore.get.hasPermission([permission]).all
+		);
 	});
 	const restoreRevision = api.documents.useRestoreRevision({
 		getCollectionName: collectionSingularName,
@@ -394,21 +396,31 @@ export function useDocumentHistoryState() {
 		if (!canRestoreSelectedItem()) return;
 		setRestoreRevisionOpen(true);
 	};
-	const confirmRestoreRevision = async (versionId: number) => {
+	/** Restores the revision to latest, or opens the update request proposing it. */
+	const confirmRestoreRevision = async (
+		versionId: number,
+		request?: { title: string },
+	) => {
 		const id = documentId();
 		if (!id) return;
 
-		await restoreRevision.action.mutateAsync({
+		const restored = await restoreRevision.action.mutateAsync({
 			collectionKey: collectionKey(),
 			id,
 			versionId,
+			body: request ? { request } : undefined,
 		});
 		navigate(
-			getDocumentRoute("edit", {
-				collectionKey: collectionKey(),
-				documentId: id,
-				version: "latest",
-			}),
+			restored.data.requestId !== null
+				? getRequestRoute({
+						requestId: restored.data.requestId,
+						content: { collectionKey: collectionKey(), documentId: id },
+					})
+				: getDocumentRoute("edit", {
+						collectionKey: collectionKey(),
+						documentId: id,
+						version: "latest",
+					}),
 		);
 	};
 	const cancelRestoreRevision = () => {
@@ -453,6 +465,7 @@ export function useDocumentHistoryState() {
 		handleSelectItem,
 		handleRestoreRevision,
 		confirmRestoreRevision,
+		latestAccess,
 		cancelRestoreRevision,
 		restoreRevisionOpen,
 		setRestoreRevisionOpen,

@@ -245,6 +245,7 @@ const describeCollection: ServiceFn<
 							environmentCount: formatted.publishing.environments.length,
 							review: {
 								create: selected.getData.publishing.review?.create ?? false,
+								update: selected.getData.publishing.review?.update ?? false,
 								delete: selected.getData.publishing.review?.delete ?? false,
 								publish: selected.getData.publishing.review?.publish ?? [],
 								unpublish: selected.getData.publishing.review?.unpublish ?? [],

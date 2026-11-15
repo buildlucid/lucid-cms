@@ -2,8 +2,8 @@ import type { RequestDetails } from "@types";
 import type { Component } from "solid-js";
 import RequestDocumentDraft from "@/components/RequestDocumentDraft/RequestDocumentDraft";
 import RequestDocumentsModal from "@/components/RequestDocumentsModal/RequestDocumentsModal";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import { canAddToRequest } from "@/utils/requests";
 
 /** Picks documents for a new delete request, or for the delete `request` passed in. */
 const RequestDeleteModal: Component<{
@@ -25,11 +25,7 @@ const RequestDeleteModal: Component<{
 			}}
 			canPick={(collection) =>
 				collection.mode === "multiple" &&
-				userStore.get.hasPermission([collection.permissions.read]).all &&
-				userStore.get.hasPermission([
-					collection.permissions.delete,
-					collection.permissions.deleteRequest,
-				]).some
+				canAddToRequest(collection, "delete", props.request)
 			}
 			toDraft={(_document, _collection, ref) => ref}
 			isReady={() => true}

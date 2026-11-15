@@ -19,11 +19,12 @@ export const requestStatusSchema = z.enum([
 ]) satisfies z.ZodType<RequestStatus>;
 
 /**
- * Request kinds for creating documents, publishing or unpublishing environment content, and binning whole documents.
- * @remarks Create requests contain one new document; publish requests can also target latest.
+ * Request kinds for creating documents, changing latest, publishing or unpublishing environment content, and binning whole documents.
+ * @remarks Create requests contain one new document; update requests always land in latest and publish requests move content to environments.
  */
 export const requestTypeSchema = z.enum([
 	"create",
+	"update",
 	"publish",
 	"unpublish",
 	"delete",
@@ -172,7 +173,7 @@ const requestDocumentResponseSchema = z.object({
 	}),
 	source: z.string().nullable().meta({
 		description:
-			"Latest for a proposal, or the environment a snapshot came from. Null for unpublish and delete requests",
+			"Latest for update requests' proposals and publish requests' copies of latest, or the environment a snapshot came from. Null for unpublish and delete requests",
 	}),
 	versionId: z.number().nullable().meta({
 		description:
@@ -212,7 +213,7 @@ const requestResponseSchema = z.object({
 	id: z.number(),
 	type: requestTypeSchema.meta({
 		description:
-			"Create requests request one new document, created once completed. Publish requests move documents to environments, unpublish requests remove them from environments and delete requests move them to the bin",
+			"Create requests request one new document, created once completed. Update requests propose changes to latest, publish requests move documents to environments, unpublish requests remove them from environments and delete requests move them to the bin",
 	}),
 	title: z.string(),
 	description: richTextJSONSchema.nullable(),
@@ -274,6 +275,10 @@ const requestResponseSchema = z.object({
 	}),
 	permissions: z.object({
 		edit: z.boolean(),
+		close: z.boolean().meta({
+			description:
+				"Close it while open. Creators can always close their own requests",
+		}),
 		approve: z.boolean(),
 		complete: z.boolean().meta({
 			description: "Complete now, or set a schedule",
@@ -327,6 +332,9 @@ export const requestOverviewResponseSchema = z.object({
 	create: requestOverviewCountsSchema.meta({
 		description: "Open requests requesting new documents",
 	}),
+	update: requestOverviewCountsSchema.meta({
+		description: "Open requests proposing changes to latest",
+	}),
 	publish: requestOverviewCountsSchema.meta({
 		description: "Open requests publishing existing documents",
 	}),
@@ -351,7 +359,7 @@ export const requestDocumentInputSchema = z.object({
 		.default([])
 		.meta({
 			description:
-				"Publish requests: configured environments, or latest when the source is latest. Unpublish requests: the environments to remove the document from. Delete requests take none.",
+				"Publish requests: configured environments after the source. Unpublish requests: the environments to remove the document from. Update requests always target latest, and delete requests take none.",
 			example: ["staging"],
 		}),
 });
@@ -451,7 +459,7 @@ export const controllerSchemas = {
 					"filter[addable]": queryString.schema.filter(false, {
 						example: "page:1",
 						description:
-							"Open publish requests you can add this collectionKey:documentId document to",
+							"Open update and publish requests you can add this collectionKey:documentId document to. Combine with filter[type] to pick one",
 					}),
 					"filter[createdAt]": queryString.schema.filter(false, {
 						example: "2026-01-01T00:00:00Z",
@@ -557,7 +565,7 @@ export const controllerSchemas = {
 				.optional()
 				.meta({
 					description:
-						"Publish requests from latest that target only latest: limits the request to these content locales, so completing it keeps other locales' edits made meanwhile",
+						"Update requests only: limits the request to these content locales, so completing it keeps other locales' edits made meanwhile",
 					example: ["fr"],
 				}),
 		}),
@@ -590,6 +598,12 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 	removeDocument: {
+		body: undefined,
+		query: noQuery,
+		params: requestDocumentParams,
+		response: undefined,
+	} satisfies ControllerSchema,
+	refreshDocument: {
 		body: undefined,
 		query: noQuery,
 		params: requestDocumentParams,

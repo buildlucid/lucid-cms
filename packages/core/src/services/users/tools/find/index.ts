@@ -1,5 +1,4 @@
 import { copy } from "../../../../libs/i18n/index.js";
-import { Permissions } from "../../../../libs/permission/definitions.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
 import {
 	type CollectionToolOptions,
@@ -54,8 +53,6 @@ export const findUsersAgentTool = (options: CollectionToolOptions = {}) =>
 		readOnly: true,
 		agent: {
 			permissions: [],
-			inputPermissions: ({ input: { query } }) =>
-				query.canReview === undefined ? [] : [Permissions.RequestsRead],
 			parallelSafe: true,
 		},
 		handler: async ({ context, input, execution }) => {

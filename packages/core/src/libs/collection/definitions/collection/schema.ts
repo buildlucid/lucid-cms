@@ -184,6 +184,7 @@ const CollectionConfigSchema = z
 						publish: reviewEnvironmentsSchema.optional(),
 						unpublish: reviewEnvironmentsSchema.optional(),
 						create: z.boolean().default(false).optional(),
+						update: z.boolean().default(false).optional(),
 						delete: z.boolean().default(false).optional(),
 						selfApproval: z
 							.boolean()

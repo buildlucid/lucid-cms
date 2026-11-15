@@ -31,7 +31,7 @@ const close: ServiceFn<
 		!getRequestAccess(context, {
 			request: requestRes.data,
 			user: data.user,
-		}).edit
+		}).close
 	) {
 		return {
 			error: {

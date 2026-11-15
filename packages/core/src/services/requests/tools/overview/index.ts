@@ -1,5 +1,4 @@
 import { copy } from "../../../../libs/i18n/index.js";
-import { Permissions } from "../../../../libs/permission/definitions.js";
 import {
 	type CollectionToolOptions,
 	getPermittedCollectionKeys,
@@ -21,7 +20,8 @@ export const getRequestsOverviewAgentTool = (
 		output: outputSchema,
 		readOnly: true,
 		agent: {
-			permissions: [Permissions.RequestsRead],
+			//* request services only show people the requests they're involved in
+			permissions: [],
 			parallelSafe: true,
 		},
 		handler: async ({ context, execution }) => {

@@ -54,22 +54,31 @@ import { useNavigationGuard } from "@/hooks/useNavigationGuard/useNavigationGuar
 import { PageBuilderStateProvider } from "@/hooks/usePageBuilderState/usePageBuilderState";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import { useStoredVersionRedirect } from "@/hooks/useStoredVersionRedirect/useStoredVersionRedirect";
+import api from "@/services/api";
 import brickStore from "@/store/brickStore/brickStore";
 import navigationStore from "@/store/navigationStore/navigationStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import { formatRelationFilterValue } from "@/utils/document-filter-fields";
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
+import {
+	changesContent,
+	isLatestCopy,
+	isLockedForCreator,
+} from "@/utils/requests";
 import { getRequestRoute } from "@/utils/route-helpers";
 import BuilderSplitHandle from "./parts/BuilderSplitHandle";
 import DetailsColumn from "./parts/DetailsColumn";
-import DocumentChangedBar from "./parts/DocumentChangedBar";
+import DocumentChangedNotice from "./parts/DocumentChangedNotice";
 import DocumentEditorSkeleton, {
 	type DocumentEditorSkeletonLayout,
 } from "./parts/DocumentEditorSkeleton";
 import DocumentHeldModal from "./parts/DocumentHeldModal";
+import DocumentNotice from "./parts/DocumentNotice";
+import DocumentProposingNotice from "./parts/DocumentProposingNotice";
 import { PageBuilderModals } from "./parts/PageBuilderModals";
 
 const DocumentEditorPage: Component<{
@@ -92,6 +101,12 @@ const DocumentEditorPage: Component<{
 		params.versionId ? Number.parseInt(params.versionId, 10) : undefined,
 	);
 	const versionId = createMemo(() => props.versionId?.() ?? routeVersionId());
+	//* the person can change this document within its open request
+	const requestEditable = createMemo(
+		() =>
+			props.request?.()?.status === "open" &&
+			props.requestDocument?.()?.permissions.edit === true,
+	);
 	let snapshotTimeout: ReturnType<typeof setTimeout> | undefined;
 	//* the document and version the builder's content was loaded for, which the router can move on from before it reloads
 	const [hydratedViewKey, setHydratedViewKey] = createSignal<string | null>(
@@ -160,12 +175,19 @@ const DocumentEditorPage: Component<{
 		versionId: versionId,
 		createDocumentMutation: mutations.createDocumentMutation,
 		requestDocumentMutation: mutations.requestDocumentMutation,
+		proposeMutation: mutations.proposeMutation,
 		createSingleVersionMutation: mutations.createSingleVersionMutation,
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
 		publishMutation: mutations.publishMutation,
-		proposalEditable: () =>
-			props.request?.()?.status === "open" &&
-			props.requestDocument?.()?.permissions.edit === true,
+		//* only create and update requests change content, so a publish request's copy of latest is read only
+		proposalEditable: () => {
+			const request = props.request?.();
+			return (
+				request !== undefined &&
+				changesContent(request.type) &&
+				requestEditable()
+			);
+		},
 		heldElsewhere,
 	});
 	//* one tab at a time edits a document, so the agent's other tools can't replace unsaved changes either
@@ -173,11 +195,13 @@ const DocumentEditorPage: Component<{
 		collectionKey: docState.collectionKey,
 		documentId: docState.documentId,
 		requestId: () => props.request?.()?.id ?? null,
+		//* people proposing changes never save latest, so they leave it free for those who do
 		enabled: () =>
 			props.mode === "edit" &&
 			docState.document() !== undefined &&
 			!uiState.isDocumentLocked() &&
-			uiState.hasSavePermission(),
+			uiState.hasSavePermission() &&
+			!uiState.isProposing(),
 	});
 	createEffect(() => setHeldElsewhere(!editors.holding()));
 	const documentLabel = createMemo(() => {
@@ -458,6 +482,30 @@ const DocumentEditorPage: Component<{
 	});
 
 	// ---------------------------------
+	// Queries
+	//* the person's own open update request for this document, which their changes belong in
+	const ownUpdateRequest = api.requests.useGetMultiple({
+		queryParams: {
+			filters: {
+				status: () => "open",
+				type: () => "update",
+				createdBy: () => userStore.get.user?.id,
+				document: () => {
+					const id = docState.documentId();
+					return id === undefined
+						? undefined
+						: formatRelationFilterValue({
+								collectionKey: docState.collectionKey(),
+								id,
+							});
+				},
+			},
+			perPage: 1,
+		},
+		enabled: () => uiState.isProposing(),
+	});
+
+	// ---------------------------------
 	// Memos
 	const [alignOpen, setAlignOpen] = createSignal(false);
 	const loading = createMemo(
@@ -467,12 +515,36 @@ const DocumentEditorPage: Component<{
 			getStateLoading() ||
 			docState.collectionsQuery.isLoading,
 	);
-	const disableWorkflow = createMemo(
-		() =>
+	/** A publish request's copy of latest, which can't be edited but can be refreshed from latest. */
+	const isPublishCopy = createMemo(() => {
+		const request = props.request?.();
+		return (
+			versionType() === "proposal" &&
+			request !== undefined &&
+			isLatestCopy(request.type, props.requestDocument?.())
+		);
+	});
+	/**
+	 * Latest's stage needs update, and a proposal's needs edit access to its request, which a
+	 * publish request's read-only copy of latest has too so it can move on to a stage that publishes.
+	 */
+	const canUpdateWorkflow = createMemo(() => {
+		if (
 			docState.collection()?.locked === true ||
-			docState.document()?.isDeleted === true ||
-			uiState.isBuilderLocked(),
-	);
+			docState.document()?.isDeleted === true
+		) {
+			return false;
+		}
+		if (isPublishCopy()) return requestEditable();
+		if (uiState.isBuilderLocked()) return false;
+		if (versionType() === "proposal") return true;
+
+		const permission = docState.collection()?.permissions.update;
+		return (
+			permission !== undefined && userStore.get.hasPermission([permission]).all
+		);
+	});
+	const disableWorkflow = createMemo(() => !canUpdateWorkflow());
 	const requestLink = createMemo(() => {
 		const request = props.request?.();
 		return request ? getRequestRoute({ requestId: request.id }) : undefined;
@@ -481,13 +553,15 @@ const DocumentEditorPage: Component<{
 		const request = props.request?.();
 		if (!request) return undefined;
 		return T()(
-			versionType() === "proposal"
-				? "requests.proposal.selector"
-				: "requests.snapshot.selector",
+			isPublishCopy()
+				? "requests.copy.selector"
+				: versionType() === "proposal"
+					? "requests.proposal.selector"
+					: "requests.snapshot.selector",
 			{ request: request.title },
 		);
 	});
-	//* latest aligns with environments, proposals also with latest
+	//* latest aligns with environments, proposals also with latest, and publish copies only refresh from latest
 	const alignmentSources = createMemo<AlignmentSource[]>(() => {
 		const document = docState.document();
 		if (!document) return [];
@@ -500,6 +574,7 @@ const DocumentEditorPage: Component<{
 				contentId: document.versions.latest.contentId,
 			});
 		}
+		if (isPublishCopy()) return sources;
 		for (const environment of docState.collection()?.publishing.environments ??
 			[]) {
 			const version = document.versions[environment.key];
@@ -516,19 +591,31 @@ const DocumentEditorPage: Component<{
 		}
 		return sources;
 	});
-	const canAlign = createMemo(
-		() =>
-			(versionType() === "latest" || versionType() === "proposal") &&
-			!uiState.isBuilderLocked() &&
-			alignmentSources().length > 0,
-	);
-	const canUpdateWorkflow = createMemo(() => {
-		const permission = docState.collection()?.permissions.update;
-		return (
-			permission !== undefined &&
-			!disableWorkflow() &&
-			userStore.get.hasPermission([permission]).all
-		);
+	//* people proposing changes align latest through a new update request
+	const canAlign = createMemo(() => {
+		if (alignmentSources().length === 0) return false;
+		if (isPublishCopy()) return requestEditable();
+		if (versionType() === "latest") {
+			return !uiState.isBuilderLocked() && uiState.latestAccess() !== null;
+		}
+		return versionType() === "proposal" && !uiState.isBuilderLocked();
+	});
+	//* creators who lost the permission to change their request are told why it's locked
+	const lockedForCreator = createMemo(() => {
+		const request = props.request?.();
+		return request !== undefined && isLockedForCreator(request);
+	});
+	const ownRequest = createMemo(() => {
+		const request = ownUpdateRequest.data?.data[0];
+		const documentId = docState.documentId();
+		if (!request || documentId === undefined) return undefined;
+		return {
+			title: request.title,
+			href: getRequestRoute({
+				requestId: request.id,
+				content: { collectionKey: docState.collectionKey(), documentId },
+			}),
+		};
 	});
 	const relationVersionType = createMemo(() => {
 		if (versionType() === "revision" || versionType() === "proposal") {
@@ -809,13 +896,6 @@ const DocumentEditorPage: Component<{
 									/>
 								</div>
 							</Show>
-							<Show when={brickStore.get.contentChanged}>
-								<DocumentChangedBar
-									reloading={docState.documentQuery.isFetching}
-									onKeep={() => void keepEdits()}
-									onReload={() => void reloadChangedContent()}
-								/>
-							</Show>
 							<div ref={split.observe} class="flex flex-1">
 								<div
 									class={classnames("flex flex-col", {
@@ -827,6 +907,25 @@ const DocumentEditorPage: Component<{
 										previewing() ? { width: `${split.size()}px` } : undefined
 									}
 								>
+									{/* notices sit above the fields they're about, so previews and comparisons keep their space */}
+									<Show when={uiState.isProposing()}>
+										<DocumentProposingNotice
+											collectionName={docState.collectionSingularName()}
+											ownRequest={ownRequest()}
+										/>
+									</Show>
+									<Show when={lockedForCreator()}>
+										<DocumentNotice>
+											{T()("requests.locked.creator")}
+										</DocumentNotice>
+									</Show>
+									<Show when={brickStore.get.contentChanged}>
+										<DocumentChangedNotice
+											reloading={docState.documentQuery.isFetching}
+											onKeep={() => void keepEdits()}
+											onReload={() => void reloadChangedContent()}
+										/>
+									</Show>
 									<CollectionPseudoBrick
 										fields={collectionFields()}
 										collectionMigrationStatus={
@@ -943,9 +1042,8 @@ const DocumentEditorPage: Component<{
 									<Match when={comparison.open()}>
 										<div class="min-w-0 flex-1 border-s border-border">
 											<Show when={comparison.changed()}>
-												<Alert variant="warning" appearance="bar">
-													<div class="flex items-center justify-between gap-3">
-														<span>{T()("documents.compare.changed")}</span>
+												<DocumentNotice
+													actions={
 														<Button
 															size="xs"
 															variant="outline"
@@ -954,8 +1052,10 @@ const DocumentEditorPage: Component<{
 														>
 															{T()("documents.compare.refresh")}
 														</Button>
-													</div>
-												</Alert>
+													}
+												>
+													{T()("documents.compare.changed")}
+												</DocumentNotice>
 											</Show>
 											<Show
 												when={
@@ -1024,6 +1124,24 @@ const DocumentEditorPage: Component<{
 									versionType() === "latest" &&
 									docState.collection()?.revisions.enabled === true
 								}
+								latestAccess={
+									versionType() === "latest"
+										? uiState.latestAccess()
+										: undefined
+								}
+								onProposed={(requestId) => {
+									const documentId = docState.documentId();
+									if (documentId === undefined) return;
+									navigate(
+										getRequestRoute({
+											requestId,
+											content: {
+												collectionKey: docState.collectionKey(),
+												documentId,
+											},
+										}),
+									);
+								}}
 								refetch={() => docState.documentQuery.refetch()}
 							/>
 						)}
@@ -1036,6 +1154,7 @@ const DocumentEditorPage: Component<{
 							uiState: uiState,
 							navigationGuard: navigationGuard,
 						}}
+						documentLabel={documentLabel()}
 					/>
 					<DocumentHeldModal
 						open={editors.noticeOpen()}

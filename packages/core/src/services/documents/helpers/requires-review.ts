@@ -4,7 +4,7 @@ import type CollectionDefinition from "../../../libs/collection/definitions/coll
 const requiresReview = (
 	collection: CollectionDefinition | undefined,
 	change:
-		| { type: "create" | "delete" }
+		| { type: "create" | "update" | "delete" }
 		| { type: "publish" | "unpublish"; environment: string },
 ): boolean => {
 	const review = collection?.getData.publishing.review;

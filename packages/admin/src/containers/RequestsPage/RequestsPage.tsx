@@ -23,6 +23,7 @@ import RequestDeleteModal from "@/components/RequestDeleteModal/RequestDeleteMod
 import RequestPublishModal from "@/components/RequestPublishModal/RequestPublishModal";
 import RequestTableRow from "@/components/RequestTableRow/RequestTableRow";
 import RequestUnpublishModal from "@/components/RequestUnpublishModal/RequestUnpublishModal";
+import RequestUpdateModal from "@/components/RequestUpdateModal/RequestUpdateModal";
 import Table from "@/components/Table/Table";
 import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
 import { useAgentSession } from "@/hooks/useAgentSession/useAgentSession";
@@ -58,6 +59,7 @@ const RequestsPage: Component = () => {
 	const [createOpen, setCreateOpen] = createSignal(false);
 	const [unpublishOpen, setUnpublishOpen] = createSignal(false);
 	const [deleteOpen, setDeleteOpen] = createSignal(false);
+	const [updateOpen, setUpdateOpen] = createSignal(false);
 	const searchParams = useQueryState({
 		mode: "url",
 		schema: {
@@ -171,6 +173,12 @@ const RequestsPage: Component = () => {
 				actions={
 					<CreateMenu
 						actions={[
+							{
+								type: "button",
+								label: T()("requests.create.update.action"),
+								icon: "pen",
+								onClick: () => setUpdateOpen(true),
+							},
 							{
 								type: "button",
 								label: T()("requests.create.publish.action"),
@@ -381,6 +389,7 @@ const RequestsPage: Component = () => {
 					padding="md"
 				/>
 			</PageLayout.Body>
+			<RequestUpdateModal open={updateOpen()} setOpen={setUpdateOpen} />
 			<RequestPublishModal open={createOpen()} setOpen={setCreateOpen} />
 			<RequestUnpublishModal
 				open={unpublishOpen()}

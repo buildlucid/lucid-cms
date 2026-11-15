@@ -16,7 +16,7 @@ const PROBES = {
 	"documents:page:read": "/api/v1/documents/page/latest",
 	"email:read": "/api/v1/emails",
 	"jobs:read": "/api/v1/jobs",
-	"requests:read": "/api/v1/requests",
+	"integrations:read": "/api/v1/integrations",
 } as const;
 
 type Permission = keyof typeof PROBES;

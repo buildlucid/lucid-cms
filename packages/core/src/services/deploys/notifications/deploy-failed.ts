@@ -2,6 +2,7 @@ import z from "zod";
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
+import { receivesDeploys } from "./shared.js";
 
 /**
  * Failure notice keyed per deploy, resolved by success. Emails eligible recipients unless already
@@ -20,6 +21,7 @@ export const deployFailedNotification = defineNotification({
 	level: "error",
 	actionRequired: false,
 	audience: "recipients",
+	receivable: receivesDeploys("manage"),
 	data: z.object({
 		deployKey: z.string(),
 		name: z.string(),

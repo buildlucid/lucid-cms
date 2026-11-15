@@ -97,13 +97,14 @@ const banner = defineBrick({
 		}),
 	],
 });
-/** The same pages collection on both sites, except the source still has a field the target removed. */
-const pages = (withLegacy: boolean) => {
+/** The same pages collection on both sites, except the source still has a field the target removed, and the target can review updates. */
+const pages = (withLegacy: boolean, reviewUpdates = false) => {
 	const collection = defineCollection({
 		key: "transfer_pages",
 		mode: "multiple",
 		localized: true,
 		details: { labels: { singular: "Page", plural: "Pages" } },
+		publishing: reviewUpdates ? { review: { update: true } } : undefined,
 		bricks: { builder: [banner] },
 		fields: [
 			field.text("title", { localized: true }),
@@ -137,14 +138,18 @@ const notes = (review: boolean) =>
 		fields: [field.text("title")],
 	});
 
-const createSite = async (options: { legacy?: boolean; review?: boolean }) => {
+const createSite = async (options: {
+	legacy?: boolean;
+	review?: boolean;
+	reviewUpdates?: boolean;
+}) => {
 	const fixture = getTestConfig();
 	const config = await fixture.getConfig();
 	const context = createServiceContext({
 		config: {
 			...config,
 			collections: [
-				pages(options.legacy ?? false),
+				pages(options.legacy ?? false, options.reviewUpdates),
 				notes(options.review ?? false),
 			],
 			localization: {
@@ -526,6 +531,95 @@ describe("transfer", () => {
 			).toBe("requested");
 		} finally {
 			await fresh.fixture.destroy();
+		}
+	});
+
+	test("proposes changes where updates are reviewed, once per document even when its links wait for a later pass", async () => {
+		const reviewed = await createSite({ reviewUpdates: true });
+		try {
+			const first = await source.toolkit.documents.createSingle({
+				collectionKey: "transfer_pages",
+				actor,
+				data: { fields: { title: { en: "First" } } },
+			});
+			assert(first.data, JSON.stringify(first.error));
+			const initial = await source.toolkit.transfer.export({
+				actor,
+				select: {
+					documents: [
+						{ collectionKey: "transfer_pages", ids: [first.data.id] },
+					],
+				},
+			});
+			assert(initial.data, JSON.stringify(initial.error));
+			const created = await reviewed.toolkit.transfer.import({
+				actor,
+				file: initial.data,
+			});
+			expect(created.data?.items.map((item) => item.status)).toEqual([
+				"created",
+			]);
+
+			//* the existing page now links to a new one, which the import makes after it
+			const second = await source.toolkit.documents.createSingle({
+				collectionKey: "transfer_pages",
+				actor,
+				data: {
+					fields: {
+						title: { en: "Second" },
+						related: [{ collectionKey: "transfer_pages", id: first.data.id }],
+					},
+				},
+			});
+			assert(second.data, JSON.stringify(second.error));
+			const revised = await source.toolkit.documents.updateSingle({
+				collectionKey: "transfer_pages",
+				id: first.data.id,
+				actor,
+				data: {
+					fields: {
+						title: { en: "First, revised" },
+						related: [{ collectionKey: "transfer_pages", id: second.data.id }],
+					},
+				},
+			});
+			assert(revised.data, JSON.stringify(revised.error));
+			const file = await source.toolkit.transfer.export({
+				actor,
+				select: {
+					documents: [
+						{ collectionKey: "transfer_pages", ids: [first.data.id] },
+					],
+				},
+				linked: true,
+			});
+			assert(file.data, JSON.stringify(file.error));
+			//* the revised page comes first, so its link to the new page is held back until that page is made
+			const documents = [...(file.data.resources.documents ?? [])].toSorted(
+				(a, b) =>
+					Number(b.label === "First, revised") -
+					Number(a.label === "First, revised"),
+			);
+
+			const imported = await reviewed.toolkit.transfer.import({
+				actor,
+				file: {
+					...file.data,
+					resources: { ...file.data.resources, documents },
+				},
+				mode: "upsert",
+			});
+			assert(imported.data, JSON.stringify(imported.error));
+			expect(imported.data.items.map((item) => item.status).toSorted()).toEqual(
+				["created", "requested"],
+			);
+			const requests = await reviewed.toolkit.requests.getMultiple();
+			assert(requests.data, JSON.stringify(requests.error));
+			expect(requests.data.items.map((request) => request.type)).toEqual([
+				"update",
+			]);
+		} finally {
+			await reviewed.fixture.destroy();
 		}
 	});
 });

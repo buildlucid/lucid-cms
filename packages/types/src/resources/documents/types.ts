@@ -788,11 +788,12 @@ export type CollectionPermissionAction =
 	| "create"
 	| "create-request"
 	| "update"
+	| "update-request"
 	| "delete"
 	| "delete-request"
-	| "unpublish-request"
 	| "restore"
 	| "publish"
+	| "publish-request"
 	| "review";
 
 export type CollectionPermission<
@@ -837,6 +838,8 @@ export interface Collection {
 			/** Environments that can only be unpublished from through an approved request. */
 			unpublish: string[];
 			create: boolean;
+			/** Latest can only change through an approved update request. */
+			update: boolean;
 			delete: boolean;
 			selfApproval: boolean;
 			approvals: number;
@@ -847,7 +850,7 @@ export interface Collection {
 				key: string;
 				label: ResolvedAdminCopy;
 				color: WorkflowStageColor;
-				/** Allowed environments for direct publishing or requests, plus `latest` for create requests and publish requests targeting latest. */
+				/** Allowed environments for direct publishing or requests, plus `latest` for create and update requests. */
 				targets: string[];
 				/** Stage to move back to when content changes while in this stage. */
 				resetTo: string | null;
@@ -875,11 +878,12 @@ export interface Collection {
 		create: CollectionPermission<"create">;
 		createRequest: CollectionPermission<"create-request">;
 		update: CollectionPermission<"update">;
+		updateRequest: CollectionPermission<"update-request">;
 		delete: CollectionPermission<"delete">;
 		deleteRequest: CollectionPermission<"delete-request">;
-		unpublishRequest: CollectionPermission<"unpublish-request">;
 		restore: CollectionPermission<"restore">;
 		publish: CollectionPermission<"publish">;
+		publishRequest: CollectionPermission<"publish-request">;
 		review: CollectionPermission<"review">;
 	};
 	migrationStatus?: MigrationStatus | null;

@@ -294,14 +294,14 @@ test("canReview lists people who can approve a request in reach, leaving out its
 			{ tool: agentTools.users.find({ collections: [posts.key] }) },
 		),
 	).toMatchObject({ type: "failed" });
-	//* reading requests needs requests:read, even when finding people doesn't
+	//* people who can't read the request can't see who reviews it
 	expect(
 		await callAgent(
 			reviewer,
 			{ query: { filter: [{ key: "canReview", value: requestId }] } },
 			{ permissions: [] },
 		),
-	).toMatchObject({ type: "forbidden" });
+	).toMatchObject({ type: "failed" });
 	for (const filter of [
 		[{ key: "canReview", value: "latest" }],
 		[

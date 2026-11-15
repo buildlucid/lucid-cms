@@ -5,9 +5,7 @@ import { requestServices } from "../../../../services/index.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
-import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
-import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import openAPI from "../../openapi/index.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
@@ -19,7 +17,7 @@ const factory = createFactory();
 const getMultipleController = factory.createHandlers(
 	openAPI.describeRoute(() => ({
 		description:
-			"Get the requests you can see. A request is visible when you can read every document in it.",
+			"Get the requests you can see. A request is visible when you can read every document in it, and you can read all requests, made it, were asked to review it, or can approve or complete it.",
 		tags: ["requests"],
 		summary: "Get Multiple Requests",
 		responses: openAPI.responses({
@@ -31,7 +29,6 @@ const getMultipleController = factory.createHandlers(
 		}),
 	})),
 	authenticate(),
-	permissions([Permissions.RequestsRead]),
 	validate("query", controllerSchemas.getMultiple.query.string),
 	async (c) => {
 		const formattedQuery = await buildFormattedQuery(

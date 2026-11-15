@@ -51,6 +51,7 @@ import getSingle from "./get-single.js";
 import RequestExecutionError from "./helpers/execution-error.js";
 import scheduleRequest from "./helpers/schedule-request.js";
 import { executeRequestJob } from "./jobs/execute.js";
+import refreshDocument from "./refresh-document.js";
 import removeDocument from "./remove-document.js";
 import reopen from "./reopen.js";
 import unapprove from "./unapprove.js";
@@ -59,6 +60,7 @@ import updateSingle from "./update-single.js";
 import updateTargets from "./update-targets.js";
 
 const fixture = getTestConfig();
+let stamps = 0;
 const collections = [
 	...["request_pages", "request_articles"].map((key) =>
 		defineCollection({
@@ -168,6 +170,27 @@ const collections = [
 			field.text("summary"),
 			field.relation("related", { collection: "reviewed_delete_pages" }),
 		],
+	}),
+	//* every save stamps the title with a count, so a copy that went through the hook again would differ
+	defineCollection({
+		key: "stamped_pages",
+		details: { labels: { singular: "Page", plural: "Pages" } },
+		mode: "multiple",
+		publishing: { environments: [{ key: "staging", label: "Staging" }] },
+		hooks: [
+			{
+				service: "documents",
+				event: "beforeUpsert",
+				handler: async ({ data }) => {
+					stamps += 1;
+					data.fields = [
+						{ key: "title", type: "text", value: `Save ${stamps}` },
+					];
+					return;
+				},
+			},
+		],
+		fields: [field.text("title"), field.text("summary")],
 	}),
 	defineCollection({
 		key: "checked_pages",
@@ -295,7 +318,7 @@ const versionOf = (request: RequestDetails) => {
 	assert(versionId);
 	return versionId;
 };
-const createRequest = async (
+const createPublishRequest = async (
 	documentId: number,
 	targets: string[] = ["staging"],
 	source = "latest",
@@ -309,6 +332,29 @@ const createRequest = async (
 	});
 	assert(created.data, JSON.stringify(created.error));
 	return readRequest(created.data.id);
+};
+/** Opens an update request, whose proposal of latest lands in latest once completed. */
+const createUpdateRequest = async (
+	documentId: number,
+	collectionKey = "request_pages",
+): Promise<RequestDetails> => {
+	const created = await createSingle(context, {
+		type: "update",
+		title: "Copy changes",
+		documents: [{ collectionKey, documentId }],
+		user: creator,
+	});
+	assert(created.data, JSON.stringify(created.error));
+	return readRequest(created.data.id);
+};
+/** Publishes new content to an environment by saving latest and completing a publish request from it. */
+const publishContent = async (
+	documentId: number,
+	summary: string,
+	targets: string[] = ["staging"],
+) => {
+	await editLatest(documentId, summary);
+	return completeNow(await createPublishRequest(documentId, targets));
 };
 const reviewInput = (request: RequestDetails) => ({
 	id: request.id,
@@ -370,7 +416,7 @@ const fieldOf = async (
 };
 
 test("scheduled dispatch commits the request link before notifying a consumer", async () => {
-	const request = await createRequest(await createDocument());
+	const request = await createPublishRequest(await createDocument());
 	await approveRequest(request.id);
 	await context.db.kysely
 		.updateTable("lucid_requests")
@@ -403,7 +449,7 @@ test("scheduled dispatch commits the request link before notifying a consumer", 
 
 test("manual publication replaces a future schedule and its old delivery cannot publish", async () => {
 	const documentId = await createDocument();
-	const request = await createRequest(documentId);
+	const request = await createPublishRequest(documentId);
 	await approveRequest(request.id);
 	const scheduled = await updateSingle(context, {
 		id: request.id,
@@ -435,7 +481,7 @@ test("manual publication replaces a future schedule and its old delivery cannot 
 
 test("a schedule set by the system completes as the system", async () => {
 	const documentId = await createDocument();
-	const request = await createRequest(documentId);
+	const request = await createPublishRequest(documentId);
 	await approveRequest(request.id);
 	const scheduled = await updateSingle(context, {
 		id: request.id,
@@ -457,7 +503,7 @@ test("a schedule set by the system completes as the system", async () => {
 });
 
 test("a failure hook can enrich polling's recovery without duplicate activity", async () => {
-	const request = await createRequest(await createDocument(), [
+	const request = await createPublishRequest(await createDocument(), [
 		"staging",
 		"production",
 	]);
@@ -506,7 +552,7 @@ test("a failure hook can enrich polling's recovery without duplicate activity", 
 
 test("manual publication returns a reusable job receipt and commits with job completion", async () => {
 	const documentId = await createDocument();
-	const request = await createRequest(documentId);
+	const request = await createPublishRequest(documentId);
 	await approveRequest(request.id);
 	const queued = await complete(context, {
 		id: request.id,
@@ -540,7 +586,7 @@ test("manual publication returns a reusable job receipt and commits with job com
 
 test("editing a queued proposal invalidates its job and approval", async () => {
 	const documentId = await createDocument();
-	const request = await createRequest(documentId);
+	const request = await createUpdateRequest(documentId);
 	await approveRequest(request.id);
 	const queued = await complete(context, {
 		id: request.id,
@@ -553,13 +599,13 @@ test("editing a queued proposal invalidates its job and approval", async () => {
 	expect(
 		(await getExecution(context, { id: request.id, user: creator })).data,
 	).toBeNull();
-	expect(await fieldOf(documentId, "summary", "staging")).toBeNull();
+	expect(await fieldOf(documentId, "summary", "latest")).toBe("Original");
 	expect((await readRequest(request.id)).approved).toBe(false);
 });
 
 test("queued publication rechecks whether its actor is still allowed to publish", async () => {
 	const documentId = await createDocument();
-	const request = await createRequest(documentId);
+	const request = await createPublishRequest(documentId);
 	await approveRequest(request.id);
 	const queued = await complete(context, {
 		id: request.id,
@@ -587,7 +633,10 @@ test("queued publication rechecks whether its actor is still allowed to publish"
 
 test("failed publication rolls back targets and retains diagnostics for retry", async () => {
 	const documentId = await createDocument();
-	const request = await createRequest(documentId, ["staging", "production"]);
+	const request = await createPublishRequest(documentId, [
+		"staging",
+		"production",
+	]);
 	const approved = await approveRequest(request.id);
 	const queued = await complete(context, {
 		id: request.id,
@@ -641,7 +690,7 @@ test("failed publication rolls back targets and retains diagnostics for retry", 
 
 test("worker recovery and polling reconcile terminal request failures once", async () => {
 	const documentId = await createDocument();
-	const request = await createRequest(documentId);
+	const request = await createPublishRequest(documentId);
 	await approveRequest(request.id);
 	const queued = await complete(context, {
 		id: request.id,
@@ -681,7 +730,7 @@ test("worker recovery and polling reconcile terminal request failures once", asy
 });
 
 test("execution polling uses request collection permissions", async () => {
-	const request = await createRequest(await createDocument());
+	const request = await createPublishRequest(await createDocument());
 	const unreadable: LucidUser = {
 		...creator,
 		superAdmin: false,
@@ -763,10 +812,13 @@ const alignContent = async (
 	});
 };
 
-test("latest creates a private proposal and only accepts latest and environment destinations", async () => {
+test("update requests edit a private proposal of latest, while publish requests copy latest read only", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id, ["staging", "production"]);
+	const request = await createUpdateRequest(id);
 	expect(member(request).source).toBe("latest");
+	expect(member(request).targets.map((target) => target.target)).toEqual([
+		"latest",
+	]);
 	expect(request.blockers).toEqual([]);
 	await editProposal(request, "Proposed");
 	expect(await fieldOf(id, "summary", "latest")).toBe("Original");
@@ -778,19 +830,40 @@ test("latest creates a private proposal and only accepts latest and environment 
 			member(request).versionId ?? undefined,
 		),
 	).toBe("Proposed");
-	for (const input of [
-		{ source: "latest", targets: [] },
-		{ source: "proposal", targets: ["latest"] },
-		{ source: "staging", targets: ["latest"] },
-		{ source: "production", targets: ["staging"] },
-	]) {
+
+	const publishing = await createPublishRequest(id, ["staging", "production"]);
+	const edited = await updateVersion(context, {
+		collectionKey: "request_pages",
+		documentId: id,
+		versionId: versionOf(publishing),
+		userId: creator.id,
+		authUser: creator,
+		fields: [{ key: "summary", type: "text", value: "Edited copy" }],
+	});
+	expect(edited.error?.status).toBe(403);
+
+	const invalid: Array<{
+		type: "publish" | "update";
+		source?: string;
+		targets: string[];
+	}> = [
+		{ type: "publish", source: "latest", targets: [] },
+		{ type: "publish", source: "latest", targets: ["latest"] },
+		{ type: "publish", source: "proposal", targets: ["staging"] },
+		{ type: "publish", source: "staging", targets: ["latest"] },
+		{ type: "publish", source: "production", targets: ["staging"] },
+		{ type: "update", targets: ["staging"] },
+		{ type: "update", source: "staging", targets: [] },
+	];
+	for (const input of invalid) {
+		const { type, ...document } = input;
 		expect(
 			(
 				await createSingle(context, {
-					type: "publish",
+					type,
 					title: "Invalid",
 					documents: [
-						{ collectionKey: "request_pages", documentId: id, ...input },
+						{ collectionKey: "request_pages", documentId: id, ...document },
 					],
 					user: creator,
 				})
@@ -799,10 +872,10 @@ test("latest creates a private proposal and only accepts latest and environment 
 	}
 });
 
-test("proposal requests replace selected environments and leave latest untouched", async () => {
+test("publish requests publish latest as it was when added and leave latest untouched", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id, ["staging", "production"]);
-	await editProposal(request, "Reviewed proposal");
+	const request = await createPublishRequest(id, ["staging", "production"]);
+	await editLatest(id, "Edited after adding");
 	const approved = await approveRequest(request.id);
 	expect((await readRequest(request.id)).approved).toBe(true);
 	const completed = await completeRequest(request.id);
@@ -810,22 +883,21 @@ test("proposal requests replace selected environments and leave latest untouched
 	expect(member(completed).approvedVersionId).toBe(
 		member(approved).approvedVersionId,
 	);
-	//* the approved snapshot holds the proposal's content, so the proposal is removed
+	//* the approved snapshot holds the copy's content, so the copy is removed
 	expect(member(completed).versionId).toBeNull();
 	expect(member(completed).documentLabel).toBe(member(approved).documentLabel);
-	expect(await fieldOf(id, "summary", "latest")).toBe("Original");
-	expect(await fieldOf(id, "summary", "staging")).toBe("Reviewed proposal");
-	expect(await fieldOf(id, "summary", "production")).toBe("Reviewed proposal");
+	expect(await fieldOf(id, "summary", "latest")).toBe("Edited after adding");
+	expect(await fieldOf(id, "summary", "staging")).toBe("Original");
+	expect(await fieldOf(id, "summary", "production")).toBe("Original");
 });
 
-test("proposals can complete into latest, and every latest edit asks for a review again", async () => {
+test("update requests complete into latest, and every latest edit asks for a review again", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id, ["latest", "staging"]);
+	const request = await createUpdateRequest(id);
 	await editProposal(request, "Proposed");
 	await editLatest(id, "Edited");
 	expect(member(await readRequest(request.id)).targets).toMatchObject([
 		{ target: "latest", changedSinceCreation: true, acknowledged: false },
-		{ target: "staging", changedSinceCreation: false },
 	]);
 	await acknowledge(request, "latest");
 	//* saving latest in place keeps its version, so the acknowledgement is cleared instead
@@ -855,12 +927,12 @@ test("proposals can complete into latest, and every latest edit asks for a revie
 	await acknowledge(request, "latest");
 	await completeNow(request);
 	expect(await fieldOf(id, "summary", "latest")).toBe("Proposed");
-	expect(await fieldOf(id, "summary", "staging")).toBe("Proposed");
+	expect(await fieldOf(id, "summary", "staging")).toBeNull();
 });
 
 test("the latest a request replaces keeps its author as a revision", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id, ["latest"]);
+	const request = await createUpdateRequest(id);
 	await editProposal(request, "Proposed");
 	await approveRequest(request.id);
 	await completeRequest(request.id, reviewer);
@@ -879,7 +951,7 @@ test("the latest a request replaces keeps its author as a revision", async () =>
 
 test("revisions are restored to latest before publishing, and requests' versions are never restored", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id, ["latest"]);
+	const request = await createUpdateRequest(id);
 	await editProposal(request, "Proposed");
 	await approveRequest(request.id);
 	await completeRequest(request.id, reviewer);
@@ -892,7 +964,7 @@ test("revisions are restored to latest before publishing, and requests' versions
 		.where("document_id", "=", id)
 		.where("type", "=", "revision")
 		.executeTakeFirstOrThrow();
-	const proposal = await createRequest(id, ["staging"]);
+	const proposal = await createPublishRequest(id, ["staging"]);
 
 	expect(
 		(
@@ -927,67 +999,42 @@ test("revisions are restored to latest before publishing, and requests' versions
 	);
 });
 
-test("adding latest later asks for a review only when latest changed since the proposal", async () => {
+test("update requests always target latest, and publish requests never do", async () => {
 	const id = await createDocument();
-	const before = await createRequest(id);
-	await editLatest(id, "Edited");
-	const after = await createRequest(id);
-	const addLatest = async (request: RequestDetails) => {
+	const updating = await createUpdateRequest(id);
+	const publishing = await createPublishRequest(id);
+	for (const request of [updating, publishing]) {
 		const result = await updateTargets(context, {
 			id: request.id,
 			requestDocumentId: member(request).id,
 			targets: ["latest", "staging"],
 			user: creator,
 		});
-		assert(!result.error, JSON.stringify(result.error));
-		return member(await readRequest(request.id)).targets.find(
-			(target) => target.target === "latest",
-		);
-	};
-	expect(await addLatest(before)).toMatchObject({
-		target: "latest",
-		changedSinceCreation: true,
-	});
-	expect(await addLatest(after)).toMatchObject({
-		target: "latest",
-		changedSinceCreation: false,
-	});
+		expect(result.error?.status).toBe(400);
+	}
 });
 
-test("parallel proposals and later latest edits remain independent during publication", async () => {
+test("parallel update requests stay independent until one lands in latest", async () => {
 	const id = await createDocument();
-	const first = await createRequest(id);
-	const second = await createRequest(id);
+	const first = await createUpdateRequest(id);
+	const second = await createUpdateRequest(id);
 	expect(member(first).versionId).not.toBe(member(second).versionId);
 	await editProposal(first, "First summary");
 	await editProposal(second, "Second summary");
-	await editLatest(id, "Latest summary");
-	const latest = await readVersionContent(context, {
-		collectionKey: member(first).collectionKey,
-		documentId: id,
-		versionType: "latest",
-	});
-	assert(latest.data);
 	await completeNow(first);
+	expect(await fieldOf(id, "summary", "latest")).toBe("First summary");
 	const changed = await readRequest(second.id);
 	expect(member(changed).targets).toMatchObject([
-		{ target: "staging", changedSinceCreation: true, acknowledged: false },
+		{ target: "latest", changedSinceCreation: true, acknowledged: false },
 	]);
 	expect(changed.blockers).toContainEqual({
 		requestDocumentId: member(changed).id,
 		code: "acknowledge_required",
-		target: "staging",
+		target: "latest",
 	});
-	await acknowledge(changed, "staging");
+	await acknowledge(changed, "latest");
 	await completeNow(second);
-	expect(await fieldOf(id, "summary", "staging")).toBe("Second summary");
-	expect(await fieldOf(id, "summary", "latest")).toBe("Latest summary");
-	const unchanged = await readVersionContent(context, {
-		collectionKey: member(first).collectionKey,
-		documentId: id,
-		versionType: "latest",
-	});
-	expect(unchanged.data?.id).toBe(latest.data.id);
+	expect(await fieldOf(id, "summary", "latest")).toBe("Second summary");
 	expect(
 		await fieldOf(
 			id,
@@ -1000,9 +1047,8 @@ test("parallel proposals and later latest edits remain independent during public
 
 test("acknowledgement holds for the target version, survives proposal edits and rejects stale review", async () => {
 	const id = await createDocument();
-	await completeNow(await createRequest(id));
-	const first = await createRequest(id);
-	const second = await createRequest(id);
+	const first = await createUpdateRequest(id);
+	const second = await createUpdateRequest(id);
 	await editProposal(first, "First proposal");
 	await editProposal(second, "Second proposal");
 	await completeNow(first);
@@ -1014,14 +1060,14 @@ test("acknowledgement holds for the target version, survives proposal edits and 
 	const stale = {
 		id: changed.id,
 		requestDocumentId: member(changed).id,
-		target: "staging",
+		target: "latest",
 		acknowledged: true,
 		ifUnchanged: changed.reviewToken,
 		user: reviewer,
 	};
-	await acknowledge(changed, "staging");
+	await acknowledge(changed, "latest");
 	await approveRequest(second.id);
-	await acknowledge(changed, "staging", false);
+	await acknowledge(changed, "latest", false);
 	const withdrawn = await readRequest(second.id);
 	expect(withdrawn.approved).toBe(false);
 	expect(
@@ -1033,11 +1079,11 @@ test("acknowledgement holds for the target version, survives proposal edits and 
 			)
 			.map((event) => event.type),
 	).toEqual(["target_acknowledged", "target_unacknowledged"]);
-	await acknowledge(changed, "staging");
+	await acknowledge(changed, "latest");
 	const edited = await editProposal(second, "Revised proposal");
 	expect(member(edited).targets[0]).toMatchObject({ acknowledged: true });
 	await approveRequest(second.id);
-	const third = await createRequest(id);
+	const third = await createUpdateRequest(id);
 	await editProposal(third, "Third proposal");
 	await completeNow(third);
 	const republished = await readRequest(second.id);
@@ -1049,21 +1095,19 @@ test("acknowledgement holds for the target version, survives proposal edits and 
 	expect(
 		(await complete(context, { id: second.id, user: creator })).error?.status,
 	).toBe(409);
-	await acknowledge(republished, "staging");
+	await acknowledge(republished, "latest");
 	await completeNow(second);
-	expect(await fieldOf(id, "summary", "staging")).toBe("Revised proposal");
-	expect(await fieldOf(id, "summary", "latest")).toBe("Original");
+	expect(await fieldOf(id, "summary", "latest")).toBe("Revised proposal");
+	expect(await fieldOf(id, "summary", "staging")).toBeNull();
 });
 
 test("a request closed while its target is published asks for review once reopened", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id);
+	const request = await createPublishRequest(id);
 	expect(
 		(await close(context, { id: request.id, user: creator })).error,
 	).toBeUndefined();
-	const publisher = await createRequest(id);
-	await editProposal(publisher, "Published while closed");
-	await completeNow(publisher);
+	await publishContent(id, "Published while closed");
 	expect(
 		(await reopen(context, { id: request.id, user: creator })).error,
 	).toBeUndefined();
@@ -1074,10 +1118,10 @@ test("a request closed while its target is published asks for review once reopen
 	});
 });
 
-test("anyone who can read a request and edit its document can acknowledge a changed target", async () => {
+test("anyone who can read and edit a request can acknowledge a changed target", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id);
-	await completeNow(await createRequest(id));
+	const request = await createPublishRequest(id);
+	await completeNow(await createPublishRequest(id));
 	const changed = await readRequest(request.id);
 	const input = {
 		id: changed.id,
@@ -1098,11 +1142,23 @@ test("anyone who can read a request and edit its document can acknowledge a chan
 		(await acknowledgeTarget(context, { ...input, user: readOnly })).error
 			?.status,
 	).toBe(403);
-	const editor: LucidUser = {
+	//* updating latest isn't enough, as publish requests are edited with publish access
+	const updater: LucidUser = {
 		...readOnly,
 		permissions: [
 			...(readOnly.permissions ?? []),
 			getCollectionPermission("request_pages", "update"),
+		],
+	};
+	expect(
+		(await acknowledgeTarget(context, { ...input, user: updater })).error
+			?.status,
+	).toBe(403);
+	const editor: LucidUser = {
+		...readOnly,
+		permissions: [
+			...(readOnly.permissions ?? []),
+			getCollectionPermission("request_pages", "publish-request"),
 		],
 	};
 	expect(
@@ -1117,10 +1173,8 @@ test("anyone who can read a request and edit its document can acknowledge a chan
 
 test("publishing records activity on other open requests, including targets added later", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id, ["production"]);
-	const publisher = await createRequest(id);
-	await editProposal(publisher, "Published elsewhere");
-	await completeNow(publisher);
+	const request = await createPublishRequest(id, ["production"]);
+	const publisher = await publishContent(id, "Published elsewhere");
 	expect(
 		(await readRequest(publisher.id)).events.some(
 			(event) => event.type === "target_published",
@@ -1144,17 +1198,23 @@ test("publishing records activity on other open requests, including targets adde
 	expect(
 		member(retargeted).targets.find((target) => target.target === "staging"),
 	).toMatchObject({ changedSinceCreation: true, acknowledged: false });
-	expect((await alignContent(retargeted, "staging")).error).toBeUndefined();
+	//* refreshing the copy from latest brings in the published content, but the change still needs acknowledging
+	expect((await alignContent(retargeted, "latest")).error).toBeUndefined();
+	expect(await fieldOf(id, "summary", "proposal", versionOf(retargeted))).toBe(
+		"Published elsewhere",
+	);
 	expect(
 		(await readRequest(request.id)).blockers.some(
 			(blocker) => blocker.code === "acknowledge_required",
 		),
 	).toBe(true);
+	//* a publish request's copy only ever refreshes from latest
+	expect((await alignContent(retargeted, "staging")).error?.status).toBe(400);
 });
 
-test("approval freezes the reviewed proposal, is dismissed when it changes and survives latest edits", async () => {
+test("approval freezes the reviewed proposal and is dismissed when it changes, while publish approvals survive latest edits", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id);
+	const request = await createUpdateRequest(id);
 	const staleReview = reviewInput(request);
 	await editProposal(request, "Edited before approval");
 	expect(
@@ -1169,15 +1229,200 @@ test("approval freezes the reviewed proposal, is dismissed when it changes and s
 	expect(
 		(await complete(context, { id: request.id, user: creator })).error?.status,
 	).toBe(409);
-	await approveRequest(request.id);
+
+	const publishing = await createPublishRequest(id);
+	await approveRequest(publishing.id);
 	await editLatest(id, "Changed latest");
+	expect((await readRequest(publishing.id)).approved).toBe(true);
+	expect((await readRequest(request.id)).approved).toBe(false);
+});
+
+test("refreshing a publish copy from unchanged latest keeps its approval", async () => {
+	const id = await createDocument();
+	const request = await createPublishRequest(id);
+	await editLatest(id, "Fixed in latest");
+	const input = {
+		id: request.id,
+		requestDocumentId: member(request).id,
+		user: creator,
+	};
+	assert(!(await refreshDocument(context, input)).error);
+	expect(await fieldOf(id, "summary", "proposal", versionOf(request))).toBe(
+		"Fixed in latest",
+	);
+	await approveRequest(request.id);
+	assert(!(await refreshDocument(context, input)).error);
 	expect((await readRequest(request.id)).approved).toBe(true);
+});
+
+test("a publisher without update refreshes a publish copy from latest", async () => {
+	const id = await createDocument();
+	const request = await createPublishRequest(id);
+	await editLatest(id, "Fixed in latest");
+	const publisher: LucidUser = {
+		...creator,
+		superAdmin: false,
+		permissions: [
+			Permissions.RequestsRead,
+			getCollectionPermission("request_pages", "read"),
+			getCollectionPermission("request_pages", "publish"),
+		],
+	};
+	const refreshed = await refreshDocument(context, {
+		id: request.id,
+		requestDocumentId: member(request).id,
+		user: publisher,
+	});
+	assert(!refreshed.error, JSON.stringify(refreshed.error));
+	expect(await fieldOf(id, "summary", "proposal", versionOf(request))).toBe(
+		"Fixed in latest",
+	);
+});
+
+test("refreshing a publish copy copies latest as stored, without running save hooks again", async () => {
+	const key = "stamped_pages";
+	const id = await createDocument(key);
+	const request = await createPublishRequest(id, ["staging"], "latest", key);
+	await editLatest(id, "Changed", key);
+	const latest = await readVersionContent(context, {
+		collectionKey: key,
+		documentId: id,
+		versionType: "latest",
+	});
+	assert(latest.data);
+
+	const refreshed = await refreshDocument(context, {
+		id: request.id,
+		requestDocumentId: member(request).id,
+		user: creator,
+	});
+	assert(!refreshed.error, JSON.stringify(refreshed.error));
+	const copy = await readVersionContent(context, {
+		collectionKey: key,
+		documentId: id,
+		versionId: versionOf(request),
+	});
+	expect(copy.data?.contentId).toBe(latest.data.contentId);
+	expect(copy.data?.content).toEqual(latest.data.content);
+});
+
+test("restoring a revision to latest needs update, not just restore", async () => {
+	const id = await createDocument();
+	const original = await readVersionContent(context, {
+		collectionKey: "request_pages",
+		documentId: id,
+		versionType: "latest",
+	});
+	assert(original.data);
+	await editLatest(id, "Later");
+	const restorer: LucidUser = {
+		...creator,
+		superAdmin: false,
+		permissions: [
+			getCollectionPermission("request_pages", "read"),
+			getCollectionPermission("request_pages", "restore"),
+		],
+	};
+	const restored = await restoreRevision(context, {
+		collectionKey: "request_pages",
+		documentId: id,
+		versionId: original.data.id,
+		userId: restorer.id,
+		authUser: restorer,
+	});
+	expect(restored.error?.status).toBe(403);
+	expect(await fieldOf(id, "summary", "latest")).toBe("Later");
+});
+
+test("the addable filter checks the document being added, not only those already in the request", async () => {
+	const page = await createDocument();
+	const article = await createDocument("request_articles");
+	const request = await createUpdateRequest(page);
+	//* updates pages directly but only proposes articles, so another person's request can't take an article
+	const user: LucidUser = {
+		...reviewer,
+		superAdmin: false,
+		permissions: [
+			Permissions.RequestsRead,
+			getCollectionPermission("request_pages", "read"),
+			getCollectionPermission("request_articles", "read"),
+			getCollectionPermission("request_pages", "update"),
+			getCollectionPermission("request_articles", "update-request"),
+		],
+	};
+	const listed = await getMultiple(context, {
+		user,
+		query: {
+			filter: {
+				addable: { value: `request_articles:${article}`, operator: "=" },
+				type: { value: "update", operator: "=" },
+			},
+			page: 1,
+			perPage: 100,
+		},
+	});
+	assert(listed.data, JSON.stringify(listed.error));
+	expect(listed.data.data.map((row) => row.id)).not.toContain(request.id);
+	expect(
+		(
+			await serviceWrapper(addDocuments, { transaction: true })(context, {
+				id: request.id,
+				user,
+				documents: [{ collectionKey: "request_articles", documentId: article }],
+			})
+		).error?.status,
+	).toBe(403);
+});
+
+test("without requests:read, people see the requests they made, review or can act on", async () => {
+	const request = await createUpdateRequest(await createDocument());
+	const pages = (
+		...actions: Array<
+			"read" | "update" | "update-request" | "review" | "publish"
+		>
+	) =>
+		actions.map((action) => getCollectionPermission("request_pages", action));
+	const as = (user: LucidUser, permissions: string[]): LucidUser => ({
+		...user,
+		superAdmin: false,
+		permissions,
+	});
+	//* lists and single reads follow the same rule
+	const sees = async (user: LucidUser) => {
+		const listed = await getMultiple(context, {
+			user,
+			query: { page: 1, perPage: 100 },
+		});
+		assert(listed.data, JSON.stringify(listed.error));
+		const visible = listed.data.data.some((row) => row.id === request.id);
+		const single = await getSingle(context, { id: request.id, user });
+		expect(single.error === undefined).toBe(visible);
+		return visible;
+	};
+
+	expect(await sees(as(reviewer, pages("read")))).toBe(false);
+	//* proposing changes only shows people their own requests
+	expect(await sees(as(reviewer, pages("read", "update-request")))).toBe(false);
+	expect(await sees(as(creator, pages("read", "update-request")))).toBe(true);
+	expect(await sees(as(creator, pages("update-request")))).toBe(false);
+	//* reviewing or updating lets people approve or complete anyone's, but publishing doesn't cover updates
+	expect(await sees(as(reviewer, pages("read", "review")))).toBe(true);
+	expect(await sees(as(reviewer, pages("read", "update")))).toBe(true);
+	expect(await sees(as(reviewer, pages("read", "publish")))).toBe(false);
+
+	const assigned = await updateSingle(context, {
+		id: request.id,
+		user: creator,
+		reviewerIds: [secondReviewer.id],
+	});
+	assert(!assigned.error, JSON.stringify(assigned.error));
+	expect(await sees(as(secondReviewer, pages("read")))).toBe(true);
 });
 
 test("environment sources are immutable snapshots, even when the environment advances", async () => {
 	const id = await createDocument();
-	await completeNow(await createRequest(id, ["staging"]));
-	const request = await createRequest(id, ["production"], "staging");
+	await completeNow(await createPublishRequest(id, ["staging"]));
+	const request = await createPublishRequest(id, ["production"], "staging");
 	expect(member(request).source).toBe("staging");
 	const attemptedEdit = await updateVersion(context, {
 		collectionKey: member(request).collectionKey,
@@ -1188,9 +1433,7 @@ test("environment sources are immutable snapshots, even when the environment adv
 		fields: [{ key: "title", type: "text", value: "Changed" }],
 	});
 	expect(attemptedEdit.error).toBeDefined();
-	const next = await createRequest(id, ["staging"]);
-	await editProposal(next, "Next staging");
-	await completeNow(next);
+	await publishContent(id, "Next staging");
 	expect(await fieldOf(id, "summary", "snapshot", versionOf(request))).toBe(
 		"Original",
 	);
@@ -1204,7 +1447,7 @@ test("environment sources are immutable snapshots, even when the environment adv
 
 test("target changes require new approval while title, reviewer and schedule changes retain it", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id, ["staging"]);
+	const request = await createPublishRequest(id, ["staging"]);
 	const author: LucidUser = {
 		...creator,
 		superAdmin: false,
@@ -1243,7 +1486,7 @@ test("target changes require new approval while title, reviewer and schedule cha
 });
 
 test("adding and removing reviewers is added to the activity", async () => {
-	const request = await createRequest(await createDocument());
+	const request = await createPublishRequest(await createDocument());
 	const setReviewerIds = async (reviewerIds: number[]) => {
 		const updated = await updateSingle(context, {
 			id: request.id,
@@ -1268,7 +1511,7 @@ test("adding and removing reviewers is added to the activity", async () => {
 
 test("comments withdraw approval when posted or reopened, and every comment must be resolved before approving again", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id);
+	const request = await createPublishRequest(id);
 	const body = {
 		type: "doc" as const,
 		content: [
@@ -1333,7 +1576,7 @@ test("comments withdraw approval when posted or reopened, and every comment must
 });
 
 test("replies leave approval alone, go one level deep and are deleted with their thread", async () => {
-	const request = await createRequest(await createDocument());
+	const request = await createPublishRequest(await createDocument());
 	const body = {
 		type: "doc" as const,
 		content: [
@@ -1410,7 +1653,7 @@ test("replies leave approval alone, go one level deep and are deleted with their
 });
 
 test("mentions in comments, descriptions and approval notes are limited to people who can read the request", async () => {
-	const request = await createRequest(await createDocument());
+	const request = await createPublishRequest(await createDocument());
 	const outsider = await context.db.kysely
 		.insertInto("lucid_users")
 		.values({
@@ -1477,7 +1720,7 @@ test("mentions in comments, descriptions and approval notes are limited to peopl
 });
 
 test("editing a description only tells people newly mentioned in it", async () => {
-	const request = await createRequest(await createDocument());
+	const request = await createPublishRequest(await createDocument());
 	const description = (userIds: number[]) => ({
 		type: "doc" as const,
 		content: [
@@ -1526,7 +1769,7 @@ test("editing a description only tells people newly mentioned in it", async () =
 
 test("assignment to-dos clear at the last workflow stage and when the request closes", async () => {
 	const key = "reset_pages";
-	const request = await createRequest(
+	const request = await createPublishRequest(
 		await createDocument(key),
 		["staging"],
 		"latest",
@@ -1572,26 +1815,29 @@ test("assignment to-dos clear at the last workflow stage and when the request cl
 
 test("target, workflow and proposal changes are recorded in the activity", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id);
+	const request = await createPublishRequest(id);
 	await updateTargets(context, {
 		id: request.id,
 		requestDocumentId: member(request).id,
 		user: creator,
 		targets: ["staging", "production"],
 	});
-	await editProposal(request, "First edit");
-	await editProposal(request, "Second edit");
-	const types = (await readRequest(request.id)).events.map(
+	const updating = await createUpdateRequest(id);
+	await editProposal(updating, "First edit");
+	await editProposal(updating, "Second edit");
+	expect(
+		(await readRequest(request.id)).events.map((event) => event.type),
+	).toContain("target_added");
+	const types = (await readRequest(updating.id)).events.map(
 		(event) => event.type,
 	);
-	expect(types).toContain("target_added");
 	//* consecutive edits by one person are recorded once
 	expect(types.filter((type) => type === "proposal_edited")).toHaveLength(1);
 });
 
 test("listing and reading enforce the document's collection permission", async () => {
 	const id = await createDocument("request_articles");
-	const request = await createRequest(
+	const request = await createPublishRequest(
 		id,
 		["staging"],
 		"latest",
@@ -1619,7 +1865,7 @@ test("listing and reading enforce the document's collection permission", async (
 
 test("closing preserves proposal and comments, and reopening restores edit access", async () => {
 	const id = await createDocument();
-	const request = await createRequest(id);
+	const request = await createPublishRequest(id);
 	const body = {
 		type: "doc",
 		content: [
@@ -1670,8 +1916,8 @@ test("closing preserves proposal and comments, and reopening restores edit acces
 
 test("new requests have timestamps and sort by their latest update", async () => {
 	const documentId = await createDocument();
-	const first = await createRequest(documentId);
-	const second = await createRequest(documentId);
+	const first = await createPublishRequest(documentId);
+	const second = await createPublishRequest(documentId);
 	expect(first.updatedAt).toBe(first.createdAt);
 	expect(second.updatedAt).toBe(second.createdAt);
 	const Requests = new RequestsRepository(context.db);
@@ -1715,8 +1961,8 @@ test("new requests have timestamps and sort by their latest update", async () =>
 
 test("the involvesMe filter lists requests the user made or reviews", async () => {
 	const documentId = await createDocument();
-	const reviewed = await createRequest(documentId);
-	const unrelated = await createRequest(documentId);
+	const reviewed = await createPublishRequest(documentId);
+	const unrelated = await createPublishRequest(documentId);
 	const assigned = await updateSingle(context, {
 		id: reviewed.id,
 		user: creator,
@@ -1746,7 +1992,7 @@ test("the involvesMe filter lists requests the user made or reviews", async () =
 
 test("the document filter matches the collection as well as the ID", async () => {
 	const documentId = await createDocument();
-	const held = await createRequest(documentId);
+	const held = await createPublishRequest(documentId);
 	const list = async (value: string) => {
 		const listed = await getMultiple(context, {
 			user: creator,
@@ -1778,8 +2024,8 @@ test("the addable filter lists open publish requests the user can add the docume
 		user: creator,
 	});
 	assert(holding.data, JSON.stringify(holding.error));
-	const open = await createRequest(other);
-	const closed = await createRequest(other);
+	const open = await createPublishRequest(other);
+	const closed = await createPublishRequest(other);
 	expect(
 		(await close(context, { id: closed.id, user: creator })).error,
 	).toBeUndefined();
@@ -1812,19 +2058,20 @@ test("the addable filter lists open publish requests the user can add the docume
 
 test("workflow stages only gate targets that some stage lists", async () => {
 	const id = await createDocument("workflow_pages");
-	const request = await createRequest(
+	const request = await createPublishRequest(
 		id,
-		["latest", "staging"],
+		["staging"],
 		"latest",
 		"workflow_pages",
 	);
-	//* proposals start in draft, which lists nothing, and no stage lists latest
+	//* copies start in draft, which lists nothing, and no stage lists latest
 	expect(request.blockers).toContainEqual({
 		requestDocumentId: member(request).id,
 		code: "workflow",
 		target: "staging",
 	});
-	expect(request.blockers).not.toContainEqual(
+	const updating = await createUpdateRequest(id, "workflow_pages");
+	expect(updating.blockers).not.toContainEqual(
 		expect.objectContaining({ code: "workflow", target: "latest" }),
 	);
 });
@@ -1840,7 +2087,7 @@ test("completing a proposal into latest gives latest the proposal's workflow", a
 	});
 	expect(moved.error).toBeUndefined();
 	//* the proposal starts in draft, which can still complete into latest as no stage lists it
-	const request = await createRequest(id, ["latest"], "latest", key);
+	const request = await createUpdateRequest(id, key);
 	const assigned = await updateWorkflow(context, {
 		collectionKey: key,
 		documentId: id,
@@ -1903,8 +2150,8 @@ test("proposals start with the default workflow, and only their own stage change
 		expect(result.error).toBeUndefined();
 	};
 	await move(latest.data.id, "ready", [creator.id]);
-	const first = await createRequest(id, ["staging"], "latest", key);
-	const second = await createRequest(id, ["staging"], "latest", key);
+	const first = await createPublishRequest(id, ["staging"], "latest", key);
+	const second = await createPublishRequest(id, ["staging"], "latest", key);
 	expect(member(first).workflowStage).toBe("draft");
 	expect(member(second).workflowStage).toBe("draft");
 	const initialWorkflow = await getWorkflow(context, {
@@ -1936,7 +2183,12 @@ test("proposals start with the default workflow, and only their own stage change
 	expect(saved.data?.assignees.map((assignee) => assignee.userId)).toEqual([
 		creator.id,
 	]);
-	const promotion = await createRequest(id, ["production"], "staging", key);
+	const promotion = await createPublishRequest(
+		id,
+		["production"],
+		"staging",
+		key,
+	);
 	expect(member(promotion).workflowStage).toBeNull();
 	expect(promotion.blockers).toEqual([]);
 	await approveRequest(promotion.id);
@@ -1954,8 +2206,8 @@ test("proposals start with the default workflow, and only their own stage change
 test("aligning proposals preserves their workflow and rejects stale replacement requests", async () => {
 	const key = "workflow_pages";
 	const id = await createDocument(key);
-	const first = await createRequest(id, ["staging"], "latest", key);
-	const sibling = await createRequest(id, ["staging"], "latest", key);
+	const first = await createUpdateRequest(id, key);
+	const sibling = await createUpdateRequest(id, key);
 	expect(
 		(
 			await updateWorkflow(context, {
@@ -2011,7 +2263,8 @@ test("aligning proposals preserves their workflow and rejects stale replacement 
 test("aligning latest with an environment retains the old latest as a revision and preserves workflow", async () => {
 	const key = "workflow_pages";
 	const id = await createDocument(key);
-	const request = await createRequest(id, ["staging"], "latest", key);
+	await editLatest(id, "Staging content", key);
+	const request = await createPublishRequest(id, ["staging"], "latest", key);
 	expect(
 		(
 			await updateWorkflow(context, {
@@ -2023,7 +2276,6 @@ test("aligning latest with an environment retains the old latest as a revision a
 			})
 		).error,
 	).toBeUndefined();
-	await editProposal(request, "Staging content");
 	await completeNow(request);
 	await editLatest(id, "Latest edits", key);
 	const latest = await readVersionContent(context, {
@@ -2126,25 +2378,8 @@ test("cross-collection requests publish every document and target without changi
 	assert(created.data, JSON.stringify(created.error));
 	const grouped = await readRequest(created.data.id);
 	expect(grouped.documents).toHaveLength(2);
-	for (const document of grouped.documents) {
-		assert(document.versionId);
-		const edited = await updateVersion(context, {
-			collectionKey: document.collectionKey,
-			documentId: document.documentId,
-			versionId: document.versionId,
-			userId: creator.id,
-			authUser: creator,
-			fields: [
-				{ key: "title", type: "text", value: "Reviewed" },
-				{
-					key: "summary",
-					type: "text",
-					value: `Reviewed ${document.collectionKey}`,
-				},
-			],
-		});
-		expect(edited.error).toBeUndefined();
-	}
+	await editLatest(pageId, "Page edited later");
+	await editLatest(articleId, "Article edited later", "request_articles");
 	const approved = await approveRequest(created.data.id);
 	expect(
 		approved.documents.every(
@@ -2163,10 +2398,14 @@ test("cross-collection requests publish every document and target without changi
 					undefined,
 					document.collectionKey,
 				),
-			).toBe(`Reviewed ${document.collectionKey}`);
+			).toBe(
+				document.collectionKey === "request_pages"
+					? "Page original"
+					: "Article original",
+			);
 		}
 	}
-	expect(await fieldOf(pageId, "summary", "latest")).toBe("Page original");
+	expect(await fieldOf(pageId, "summary", "latest")).toBe("Page edited later");
 	expect(
 		await fieldOf(
 			articleId,
@@ -2175,7 +2414,7 @@ test("cross-collection requests publish every document and target without changi
 			undefined,
 			"request_articles",
 		),
-	).toBe("Article original");
+	).toBe("Article edited later");
 	const listed = await getMultiple(context, {
 		user: creator,
 		query: {
@@ -2195,7 +2434,7 @@ test("cross-collection requests publish every document and target without changi
 test("membership changes dismiss group approval, clean up private versions and reject duplicates", async () => {
 	const pageId = await createDocument();
 	const articleId = await createDocument("request_articles");
-	const request = await createRequest(pageId);
+	const request = await createPublishRequest(pageId);
 	const oldReview = reviewInput(await approveRequest(request.id));
 	const added = await addDocuments(context, {
 		id: request.id,
@@ -2387,7 +2626,7 @@ test.each(["response", "throw"] as const)(
 	},
 );
 
-test("drift review is scoped to its member, and edits to either proposal dismiss approval", async () => {
+test("drift review is scoped to its member, and refreshing either copy dismisses approval", async () => {
 	const firstId = await createDocument();
 	const secondId = await createDocument();
 	const grouped = await createSingle(context, {
@@ -2402,7 +2641,7 @@ test("drift review is scoped to its member, and edits to either proposal dismiss
 		})),
 	});
 	assert(grouped.data, JSON.stringify(grouped.error));
-	const independent = await createRequest(firstId);
+	const independent = await createPublishRequest(firstId);
 	await completeNow(independent);
 	const changed = await readRequest(grouped.data.id);
 	const first = changed.documents.find(
@@ -2432,17 +2671,30 @@ test("drift review is scoped to its member, and edits to either proposal dismiss
 	assert(!acknowledged.error, JSON.stringify(acknowledged.error));
 	await approveRequest(changed.id);
 	assert(second.versionId);
+	await editLatest(secondId, "Edited second latest");
+	const [latest, copy] = await Promise.all([
+		readVersionContent(context, {
+			collectionKey: second.collectionKey,
+			documentId: secondId,
+			versionType: "latest",
+		}),
+		readVersionContent(context, {
+			collectionKey: second.collectionKey,
+			documentId: secondId,
+			versionId: second.versionId,
+		}),
+	]);
+	assert(latest.data && copy.data);
 	expect(
 		(
-			await updateVersion(context, {
+			await align(context, {
 				collectionKey: second.collectionKey,
-				documentId: second.documentId,
+				documentId: secondId,
 				versionId: second.versionId,
-				userId: creator.id,
-				authUser: creator,
-				fields: [
-					{ key: "title", type: "text", value: "Edited second proposal" },
-				],
+				source: "latest",
+				sourceContentId: latest.data.contentId,
+				destinationContentId: copy.data.contentId,
+				user: creator,
 			})
 		).error,
 	).toBeUndefined();
@@ -2513,7 +2765,12 @@ test("one scheduled job publishes mixed proposals and snapshots for the group", 
 	const pageId = await createDocument();
 	const articleId = await createDocument("request_articles");
 	await completeNow(
-		await createRequest(articleId, ["staging"], "latest", "request_articles"),
+		await createPublishRequest(
+			articleId,
+			["staging"],
+			"latest",
+			"request_articles",
+		),
 	);
 	const created = await createSingle(context, {
 		type: "publish",
@@ -2595,7 +2852,10 @@ const requestDocument = async (user: LucidUser, title = "Requested") => {
 	assert(requested.data, JSON.stringify(requested.error));
 	return { id: requested.data.document.id, requestId: requested.data.id };
 };
-const listRequestPages = async (pending: boolean) => {
+const listRequestPages = async (
+	pending: boolean,
+	user: LucidUser = creator,
+) => {
 	const listed = await getDocuments(context, {
 		collectionKey: "create_request_pages",
 		version: "latest",
@@ -2604,11 +2864,35 @@ const listRequestPages = async (pending: boolean) => {
 			page: 1,
 			perPage: 100,
 		},
-		user: creator,
+		user,
 	});
 	assert(listed.data, JSON.stringify(listed.error));
 	return listed.data.documents.map((document) => document.id);
 };
+
+test("creators can close their own requests after losing the permission to change them", async () => {
+	const { requestId } = await requestDocument(creator);
+	const formerRequester: LucidUser = {
+		...creator,
+		superAdmin: false,
+		permissions: (["read", "update-request"] as const).map((action) =>
+			getCollectionPermission("create_request_pages", action),
+		),
+	};
+	const read = await getSingle(context, {
+		id: requestId,
+		user: formerRequester,
+	});
+	assert(read.data, JSON.stringify(read.error));
+	expect(read.data.permissions).toMatchObject({ edit: false, close: true });
+
+	const closed = await close(context, { id: requestId, user: formerRequester });
+	assert(!closed.error, JSON.stringify(closed.error));
+	expect(
+		(await getSingle(context, { id: requestId, user: formerRequester })).data
+			?.permissions,
+	).toMatchObject({ close: false, reopen: false });
+});
 
 test("requested documents are only listed while their create request is open", async () => {
 	const requested = await requestDocument(creator);
@@ -2649,21 +2933,16 @@ test("requested documents only exist as their create request's proposal until co
 
 	expect(await listRequestPages(false)).not.toContain(requested.id);
 	expect(await listRequestPages(true)).toContain(requested.id);
+	//* people who can't read every create request only see the pending documents they asked for
 	const pagesReader: LucidUser = {
 		...reviewer,
 		superAdmin: false,
 		permissions: [getCollectionPermission("create_request_pages", "read")],
 	};
+	expect(await listRequestPages(true, pagesReader)).toEqual([]);
 	expect(
-		(
-			await getDocuments(context, {
-				collectionKey: "create_request_pages",
-				version: "latest",
-				query: { filter: { pending: { value: true } }, page: 1, perPage: 10 },
-				user: pagesReader,
-			})
-		).error?.status,
-	).toBe(403);
+		await listRequestPages(true, { ...pagesReader, id: creator.id }),
+	).toContain(requested.id);
 	expect(
 		(
 			await getDocument(context, {
@@ -2767,6 +3046,7 @@ test("create requests are edited, approved and completed with create access, and
 	assert(asRequester.data, JSON.stringify(asRequester.error));
 	expect(asRequester.data.permissions).toEqual({
 		edit: true,
+		close: true,
 		approve: false,
 		complete: false,
 		reopen: false,
@@ -2859,9 +3139,10 @@ test("create requests are edited, approved and completed with create access, and
 		user: updater,
 	});
 	assert(asUpdater.data, JSON.stringify(asUpdater.error));
+	//* approving only needs review, while editing and completing need create
 	expect(asUpdater.data.permissions).toMatchObject({
 		edit: false,
-		approve: false,
+		approve: true,
 		complete: false,
 	});
 	const asCreator = await getSingle(context, {
@@ -2940,7 +3221,7 @@ test("completing a create request creates the document in latest with its approv
 
 test("requests need every approval their collections ask for, and withdrawing keeps the others", async () => {
 	const id = await createDocument("approval_pages");
-	const request = await createRequest(
+	const request = await createPublishRequest(
 		id,
 		["staging"],
 		"latest",
@@ -2981,10 +3262,8 @@ test("requests need every approval their collections ask for, and withdrawing ke
 });
 
 test("edits clear partial approvals, and mixed requests need the most approvals", async () => {
-	const request = await createRequest(
+	const request = await createUpdateRequest(
 		await createDocument("approval_pages"),
-		["staging"],
-		"latest",
 		"approval_pages",
 	);
 	await approveRequest(request.id);
@@ -3043,7 +3322,7 @@ test("content changes move a stage with resetTo back, for latest and proposals",
 	await editLatest(id, "Changed again", "reset_pages");
 	expect(await latestStage()).toBe("review");
 
-	const request = await createRequest(id, ["staging"], "latest", "reset_pages");
+	const request = await createUpdateRequest(id, "reset_pages");
 	const moved = await updateWorkflow(context, {
 		collectionKey: "reset_pages",
 		documentId: id,
@@ -3112,7 +3391,7 @@ test("create requests aren't gated by stages unless the collection requires crea
 });
 
 test("an earlier approval approves the request once its collections need fewer", async () => {
-	const request = await createRequest(
+	const request = await createPublishRequest(
 		await createDocument("approval_pages"),
 		["staging"],
 		"latest",
@@ -3169,8 +3448,10 @@ const createRemoval = async (
 
 test("unpublish requests remove environments in any order, never latest, and flag other requests", async () => {
 	const documentId = await createDocument();
-	await completeNow(await createRequest(documentId, ["staging", "production"]));
-	const waiting = await createRequest(documentId, ["staging"]);
+	await completeNow(
+		await createPublishRequest(documentId, ["staging", "production"]),
+	);
+	const waiting = await createPublishRequest(documentId, ["staging"]);
 
 	for (const document of [
 		{ targets: ["latest"] },
@@ -3348,9 +3629,10 @@ test("delete requests move documents to the bin with delete access, and requeste
 		approve: false,
 		complete: false,
 	});
+	//* review alone approves, while editing and completing need delete
 	expect(await access(updater)).toMatchObject({
 		edit: false,
-		approve: false,
+		approve: true,
 		complete: false,
 	});
 	expect(await access(deleter)).toMatchObject({
@@ -3374,7 +3656,7 @@ test("delete requests move documents to the bin with delete access, and requeste
 	expect(binned.data.document.isDeleted).toBe(true);
 });
 
-test("unpublish requesters can make and edit their own unpublish requests only", async () => {
+test("publish requesters can make and edit their own unpublish requests only", async () => {
 	const documentId = await createDocument();
 	assert(
 		!(
@@ -3392,7 +3674,7 @@ test("unpublish requesters can make and edit their own unpublish requests only",
 		permissions: [
 			Permissions.RequestsRead,
 			getCollectionPermission("request_pages", "read"),
-			getCollectionPermission("request_pages", "unpublish-request"),
+			getCollectionPermission("request_pages", "publish-request"),
 		],
 	};
 

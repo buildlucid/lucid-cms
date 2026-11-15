@@ -14,11 +14,13 @@ import {
 	approve,
 	approveAndCompleteRequest,
 	blockerCodes,
-	editProposal,
+	contributorPermissions,
 	onlyDocument,
 	openCreateRequest,
+	openProposal,
 	openRequest,
 	readRequest,
+	refreshFromLatest,
 } from "#shared/helpers/requests";
 
 const DOCUMENTS = `/api/v1/documents/${STAGED_STORY_KEY}`;
@@ -116,7 +118,7 @@ describe("workflow stages", () => {
 		expect((await publish()).status).toBe(204);
 	});
 
-	test("gives a publish request's proposal its own stage, whose changes alone withdraw the request's approval", async ({
+	test("gives a publish request's copy of latest its own stage, whose changes alone withdraw the request's approval", async ({
 		lucid,
 	}) => {
 		const admin = await lucid.admin();
@@ -143,13 +145,56 @@ describe("workflow stages", () => {
 		expect((await moveStage(admin, id, STAGES.draft)).status).toBe(204);
 		expect((await readRequest(admin, requestId)).approved).toBe(true);
 
-		//* editing the proposal is a content change, so its stage falls back too
+		//* refreshing the copy from changed latest is a content change, so its stage falls back too
+		await saveDocument(admin, STAGED_STORY_KEY, id, titled("Edited in latest"));
 		expect(
-			(await editProposal(admin, proposal, titled("Edited proposal"))).status,
-		).toBe(200);
+			(await refreshFromLatest(admin, requestId, proposal.id)).status,
+		).toBe(204);
 		const edited = await readRequest(admin, requestId);
 		expect(edited.approved).toBe(false);
 		expect(onlyDocument(edited).workflowStage).toBe(STAGES.review);
 		expect(blockerCodes(edited)).toEqual(["workflow"]);
+	});
+});
+
+describe("workflow stages between people", () => {
+	requires("harness:outbox", `collection:${STAGED_STORY_KEY}`);
+
+	test("lets a contributor move their own update proposal's stage, but not latest's", async ({
+		lucid,
+	}) => {
+		const admin = await lucid.admin();
+		const contributor = await lucid.user({
+			permissions: contributorPermissions(STAGED_STORY_KEY),
+		});
+		const id = await createStagedStory(admin, "Staged by a contributor");
+		const requestId = await openProposal(
+			contributor.session,
+			STAGED_STORY_KEY,
+			id,
+			titled("Staged changes"),
+		);
+		const proposal = onlyDocument(
+			await readRequest(contributor.session, requestId),
+		);
+		//* proposals start in draft, which doesn't list latest, so the request waits for ready
+		expect(blockerCodes(await readRequest(admin, requestId))).toEqual([
+			"workflow",
+		]);
+
+		expect(
+			(await moveStage(contributor.session, id, STAGES.draft)).status,
+		).toBe(403);
+		expect(
+			(
+				await moveStage(
+					contributor.session,
+					id,
+					STAGES.ready,
+					proposal.versionId,
+				)
+			).status,
+		).toBe(204);
+		expect(blockerCodes(await readRequest(admin, requestId))).toEqual([]);
 	});
 });

@@ -4,9 +4,7 @@ import DocumentSidebarSection from "@/components/DocumentSidebarSection/Document
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RequestCompactList from "@/components/RequestCompactList/RequestCompactList";
 import ViewAllLink from "@/components/ViewAllLink/ViewAllLink";
-import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { formatRelationFilterValue } from "@/utils/document-filter-fields";
 
@@ -16,9 +14,7 @@ export const DocumentRequests: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
-	const enabled = () =>
-		props.documentId() !== undefined &&
-		userStore.get.hasPermission([Permissions.RequestsRead]).all;
+	const enabled = () => props.documentId() !== undefined;
 	const documentRef = createMemo(() => {
 		const documentId = props.documentId();
 		if (documentId === undefined) return undefined;

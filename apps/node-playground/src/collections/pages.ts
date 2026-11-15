@@ -63,6 +63,7 @@ const PageCollection = defineCollection({
 			},
 		],
 		review: {
+			create: true,
 			publish: ["production"],
 		},
 		workflow: {

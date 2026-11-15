@@ -1,4 +1,5 @@
 import type { AiModelSelection } from "../ai/types.js";
+import type { CollectionPermissionAction } from "../documents/types.js";
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { ProfilePicture } from "../media/types.js";
 
@@ -23,7 +24,7 @@ export type CorePermission =
 	| "jobs:run"
 	| "jobs:update"
 	| "requests:read"
-	| `documents:${string}:${"read" | "create" | "create-request" | "update" | "delete" | "delete-request" | "unpublish-request" | "restore" | "publish" | "review"}`
+	| `documents:${string}:${CollectionPermissionAction}`
 	| "ai:image-generate"
 	| "ai:audio-generate"
 	| "ai:alt-generate"

@@ -1,8 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import { type Accessor, createEffect, createMemo } from "solid-js";
-import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
-import userStore from "@/store/userStore/userStore";
 import { formatRelationFilterValue } from "@/utils/document-filter-fields";
 import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 
@@ -33,10 +31,7 @@ export const useStoredVersionRedirect = (props: {
 				props.versionType() === "proposal"),
 	);
 	const findsRequest = createMemo(
-		() =>
-			redirecting() &&
-			props.versionId() !== undefined &&
-			userStore.get.hasPermission([Permissions.RequestsRead]).all,
+		() => redirecting() && props.versionId() !== undefined,
 	);
 
 	// ----------------------------------------

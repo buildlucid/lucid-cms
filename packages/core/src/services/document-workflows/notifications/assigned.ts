@@ -1,7 +1,7 @@
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
-import { workflowData, workflowHref } from "./shared.js";
+import { receivesWorkflows, workflowData, workflowHref } from "./shared.js";
 
 export const assignedNotification = defineNotification({
 	key: "workflows:assigned",
@@ -14,6 +14,7 @@ export const assignedNotification = defineNotification({
 	}),
 	actionRequired: true,
 	audience: "recipients",
+	receivable: receivesWorkflows,
 	data: workflowData,
 	render: ({ data }) => ({
 		title: copy("server:core.notifications.workflows.assigned.title", {

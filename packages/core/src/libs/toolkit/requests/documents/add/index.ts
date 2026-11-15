@@ -8,7 +8,7 @@ import { runToolkitService } from "../../../utils.js";
 import type { ToolkitRequestDocument } from "../../types.js";
 import { inputSchema } from "./schema.js";
 
-/** Documents to add to a publish, unpublish or delete request. */
+/** Documents to add to an update, publish, unpublish or delete request, with the fields its type takes. */
 export type ToolkitRequestsDocumentsAddInput<
 	K extends CollectionDocumentKey = CollectionDocumentKey,
 > = Omit<z.input<typeof inputSchema>, "documents"> & {

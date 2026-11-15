@@ -1,4 +1,4 @@
-import type { RequestSummary } from "@types";
+import type { RequestSummary, RequestType } from "@types";
 import {
 	TbOutlineCalendar,
 	TbOutlineCircleCheck,
@@ -37,6 +37,8 @@ interface RequestSelectDrawerProps {
 		setOpen: (state: boolean) => void;
 		/** Only lists requests this document can be added to. Open requests are listed without it. */
 		document?: { collectionKey: string; documentId: number };
+		/** Only lists requests of this type, eg. update requests to add changes to. */
+		type?: RequestType;
 		multiple?: boolean;
 		selected?: number[];
 		/** Details of already selected requests, so confirming them again keeps them. */
@@ -48,7 +50,7 @@ interface RequestSelectDrawerProps {
 	};
 }
 
-/** Picks open requests in a bottom panel, eg. a publish request to add a document to. */
+/** Picks open requests in a bottom panel, eg. a publish or update request to add a document to. */
 const RequestSelectDrawer: Component<RequestSelectDrawerProps> = (props) => {
 	// ----------------------------------------
 	// Render
@@ -65,6 +67,7 @@ const RequestSelectDrawer: Component<RequestSelectDrawerProps> = (props) => {
 			<Drawer.Body>
 				<RequestSelectContent
 					document={props.state.document}
+					type={props.state.type}
 					multiple={props.state.multiple}
 					selected={props.state.selected}
 					selectedRefs={props.state.selectedRefs}
@@ -81,6 +84,7 @@ const RequestSelectDrawer: Component<RequestSelectDrawerProps> = (props) => {
 
 const RequestSelectContent: Component<{
 	document?: { collectionKey: string; documentId: number };
+	type?: RequestType;
 	multiple?: boolean;
 	selected?: number[];
 	selectedRefs?: RequestSummary[];
@@ -123,6 +127,7 @@ const RequestSelectContent: Component<{
 						? `${props.document.collectionKey}:${props.document.documentId}`
 						: undefined,
 				status: () => (props.document ? undefined : "open"),
+				type: () => props.type,
 			},
 		},
 		enabled: () => searchParams.ready(),

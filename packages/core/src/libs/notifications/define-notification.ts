@@ -52,6 +52,7 @@ const defineNotification = <
 	actionRequired: options.actionRequired ?? false,
 	mandatory: options.mandatory ?? false,
 	audience: options.audience,
+	receivable: options.receivable,
 	data: options.data,
 	defaults: {
 		enabled: options.defaults?.enabled ?? true,

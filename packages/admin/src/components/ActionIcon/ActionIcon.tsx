@@ -20,6 +20,7 @@ import {
 	TbOutlineInfoCircle,
 	TbOutlineKey,
 	TbOutlineLanguage,
+	TbOutlineLayoutColumns,
 	TbOutlineLibraryPhoto,
 	TbOutlineLink,
 	TbOutlineLinkOff,
@@ -56,6 +57,7 @@ export type ActionIconName =
 	| "check"
 	| "clock"
 	| "cloud-off"
+	| "columns"
 	| "copy"
 	| "crop"
 	| "download"
@@ -120,6 +122,10 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return <TbOutlineCloudOff class={iconClasses()} size={iconSize()} />;
 			case "clock":
 				return <TbOutlineHistory class={iconClasses()} size={iconSize()} />;
+			case "columns":
+				return (
+					<TbOutlineLayoutColumns class={iconClasses()} size={iconSize()} />
+				);
 			case "copy":
 				return <TbOutlineCopy class={iconClasses()} size={iconSize()} />;
 			case "crop":

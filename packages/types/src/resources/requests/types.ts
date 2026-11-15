@@ -17,8 +17,13 @@ export type RequestExecution = {
 /** Open requests can still change. Completed and closed requests are read only. */
 export type RequestStatus = "open" | "completed" | "closed";
 
-/** Create requests prepare one document; publish and unpublish requests add or remove environment content, while delete requests bin existing documents. */
-export type RequestType = "create" | "publish" | "unpublish" | "delete";
+/** Create requests prepare one document and update requests change existing documents' latest content; publish and unpublish requests add or remove environment content, while delete requests bin existing documents. */
+export type RequestType =
+	| "create"
+	| "update"
+	| "publish"
+	| "unpublish"
+	| "delete";
 
 /** A document to include in a new or existing request. */
 export type RequestDocumentInput = {
@@ -26,7 +31,7 @@ export type RequestDocumentInput = {
 	documentId: number;
 	/** Fixed publish-request source, either latest or a configured environment. */
 	source?: string;
-	/** Publish environments or latest for a latest source, unpublish environments, or no targets for delete requests. */
+	/** Publish environments, or unpublish environments. Update requests always target latest, and delete requests take none. */
 	targets?: string[];
 };
 
@@ -155,8 +160,10 @@ export type RequestCommentResolution = "resolved" | "closed";
 export type RequestCommentReply = RequestEventBase & { body: RichTextJSON };
 
 export type RequestPermissions = {
-	/** Edit proposal content, title, targets and reviewers. */
+	/** Edit the title, targets and reviewers, and create and update requests' proposals. A publish request's copy of latest is refreshed instead. */
 	edit: boolean;
+	/** Close an open request, which creators can always do to their own. */
+	close: boolean;
 	/** Approve, or withdraw an approval. */
 	approve: boolean;
 	/** Complete now, or set a schedule. */
@@ -222,9 +229,9 @@ export type RequestDocument = {
 	documentLabel: string | null;
 	/** In the bin, where it can be restored, or permanently deleted. */
 	deleted: "bin" | "permanent" | null;
-	/** Fixed starting source: latest for a proposal, or an environment for a snapshot. Null for unpublish and delete requests, which capture no content. */
+	/** Fixed starting source: latest for a proposal or a publish request's copy of latest, or an environment for a snapshot. Null for unpublish and delete requests, which capture no content. */
 	source: string | null;
-	/** The request's own proposal, which can be edited, or its read-only snapshot. Proposals are removed once completed. */
+	/** The request's own version: an editable proposal for create and update requests, a read-only copy of latest or snapshot for publish requests. Proposals are removed once completed. */
 	versionId: number | null;
 	/** The content ID of `versionId`, used to check nothing changed before aligning it. */
 	contentId: string | null;

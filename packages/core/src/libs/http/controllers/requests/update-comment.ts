@@ -4,9 +4,7 @@ import { requestServices } from "../../../../services/index.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
-import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
-import permissions from "../../middleware/permissions.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import validate from "../../middleware/validate.js";
 import openAPI from "../../openapi/index.js";
@@ -32,7 +30,6 @@ const updateCommentController = factory.createHandlers(
 	})),
 	validateCSRF(),
 	authenticate(),
-	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.updateComment.params),
 	validate("json", controllerSchemas.updateComment.body),
 	async (c) => {

@@ -860,6 +860,8 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			{
 				/** Users need every permission. Super admins always match. */
 				permissions: string[];
+				/** Users also need one of these: every permission in a set, or to be one of the users. */
+				oneOf?: { permissionSets: string[][]; userIds: number[] };
 				/** Narrows to these users. */
 				ids?: number[];
 				/** Matches full names or usernames. */
@@ -990,11 +992,10 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			])
 			.where("is_deleted", "=", falseValue)
 			.where("is_locked", "=", falseValue)
-			.where(({ and, or, eb, exists, selectFrom }) =>
-				or([
-					eb("super_admin", "=", superAdminValue),
+			.where(({ and, or, eb, exists, selectFrom }) => {
+				const holds = (permissions: string[]) =>
 					and(
-						props.permissions.map((permission) =>
+						permissions.map((permission) =>
 							exists(
 								selectFrom("lucid_user_roles")
 									.innerJoin(
@@ -1012,9 +1013,26 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 									.where("lucid_role_permissions.permission", "=", permission),
 							),
 						),
-					),
-				]),
-			)
+					);
+				const oneOf = props.oneOf;
+
+				return or([
+					eb("super_admin", "=", superAdminValue),
+					and([
+						holds(props.permissions),
+						...(oneOf
+							? [
+									or([
+										...oneOf.permissionSets.map(holds),
+										...(oneOf.userIds.length > 0
+											? [eb("id", "in", oneOf.userIds)]
+											: []),
+									]),
+								]
+							: []),
+					]),
+				]);
+			})
 			.orderBy("username", "asc");
 
 		if (props.ids !== undefined) {

@@ -234,6 +234,7 @@ describe("create requests between people", () => {
 
 		expect((await readRequest(author.session, requestId)).permissions).toEqual({
 			edit: true,
+			close: true,
 			approve: false,
 			complete: false,
 			reopen: false,

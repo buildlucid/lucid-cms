@@ -3,6 +3,7 @@ import type { Collection } from "@types";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/CreateUpdateMediaDrawer";
 import DeleteDocumentModal from "@/components/DeleteDocumentModal/DeleteDocumentModal";
+import DocumentProposeModal from "@/components/DocumentProposeModal/DocumentProposeModal";
 import DocumentPublishModal from "@/components/DocumentPublishModal/DocumentPublishModal";
 import DocumentRequestModal from "@/components/DocumentRequestModal/DocumentRequestModal";
 import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
@@ -18,14 +19,12 @@ import RestoreRevisionModal from "@/components/RestoreRevisionModal/RestoreRevis
 import RichTextVariableSelectDrawer from "@/components/RichTextVariableSelectDrawer/RichTextVariableSelectDrawer";
 import TranslateModal from "@/components/TranslateModal/TranslateModal";
 import UserSelectDrawer from "@/components/UserSelectDrawer/UserSelectDrawer";
-import { Permissions } from "@/constants/permissions";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
 import type { UseDocumentState } from "@/hooks/useDocumentState/useDocumentState";
 import type { UseDocumentUIState } from "@/hooks/useDocumentUIState/useDocumentUIState";
 import type { UseNavigationGuard } from "@/hooks/useNavigationGuard/useNavigationGuard";
 import brickStore from "@/store/brickStore/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import brickHelpers from "@/utils/brick-helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
@@ -37,6 +36,8 @@ export const PageBuilderModals: Component<{
 		uiState: UseDocumentUIState;
 		navigationGuard?: UseNavigationGuard;
 	};
+	/** What the document is called, eg. for the title of a request proposing changes to it. */
+	documentLabel: string;
 }> = (props) => {
 	// ----------------------------------
 	// State & Hooks
@@ -282,23 +283,12 @@ export const PageBuilderModals: Component<{
 					setOpen: props.hooks.uiState.setDuplicateOpen,
 				}}
 				collection={props.hooks.state.collectionQuery?.data?.data as Collection}
-				callbacks={{
-					onSuccess: (documentId) => {
-						navigate(
-							getDocumentRoute("edit", {
-								collectionKey: props.hooks.state.collectionKey(),
-								documentId,
-							}),
-						);
-					},
-				}}
 			/>
 			<TranslateModal
 				open={props.hooks.uiState.getTranslateOpen()}
 				onOpenChange={props.hooks.uiState.setTranslateOpen}
 				collection={props.hooks.state.collection()}
 				documentIds={translateDocumentIds()}
-				canRequest={userStore.get.hasPermission([Permissions.RequestsRead]).all}
 				editor={
 					props.hooks.uiState.hasSavePermission()
 						? {
@@ -328,6 +318,7 @@ export const PageBuilderModals: Component<{
 			/>
 			<RestoreRevisionModal
 				versionId={props.hooks.uiState.getRestoreRevisionVersionId}
+				latestAccess={props.hooks.uiState.latestAccess()}
 				state={{
 					open: props.hooks.uiState.getRestoreRevisionOpen(),
 					setOpen: props.hooks.uiState.setRestoreRevisionOpen,
@@ -335,8 +326,11 @@ export const PageBuilderModals: Component<{
 				loading={props.hooks.mutations.restoreRevision.action.isPending}
 				error={props.hooks.mutations.restoreRevision.errors()?.message}
 				callbacks={{
-					onConfirm: async (versionId) => {
-						await props.hooks.mutations.restoreRevisionAction(versionId);
+					onConfirm: async (versionId, request) => {
+						await props.hooks.mutations.restoreRevisionAction(
+							versionId,
+							request,
+						);
 						props.hooks.uiState.setRestoreRevisionOpen(false);
 						props.hooks.uiState.setRestoreRevisionVersionId(null);
 					},
@@ -361,6 +355,21 @@ export const PageBuilderModals: Component<{
 			<Show when={props.hooks.state.documentId()}>
 				{(documentId) => (
 					<>
+						<DocumentProposeModal
+							open={props.hooks.uiState.getProposeOpen()}
+							setOpen={(open) => {
+								props.hooks.uiState.setProposeOpen(open);
+								if (!open) props.hooks.mutations.proposeMutation.reset();
+							}}
+							document={{
+								collectionKey: props.hooks.state.collectionKey(),
+								documentId: documentId(),
+							}}
+							documentLabel={props.documentLabel}
+							loading={props.hooks.mutations.proposeMutation.action.isPending}
+							error={props.hooks.mutations.proposeMutation.errors()?.message}
+							onConfirm={props.hooks.mutations.proposeDocumentAction}
+						/>
 						<DocumentUnpublishModal
 							open={props.hooks.uiState.getUnpublishOpen()}
 							setOpen={props.hooks.uiState.setUnpublishOpen}

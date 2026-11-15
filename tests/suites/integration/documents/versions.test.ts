@@ -67,7 +67,9 @@ describe("document versions", () => {
 			path: `/api/v1/documents/${STORY_KEY}/${id}/${original?.id}/restore-revision`,
 		});
 
-		expect(restored.status).toBe(204);
+		//* restoring to latest answers with no request, as only proposing a revision opens one
+		expect(restored.status).toBe(200);
+		expect(restored.body).toMatchObject({ data: { requestId: null } });
 		expect((await readDocument(admin, STORY_KEY, id)).fields.title).toBe(
 			"Original",
 		);

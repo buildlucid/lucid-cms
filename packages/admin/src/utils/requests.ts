@@ -110,6 +110,12 @@ export const requestTypes: Record<
 		filter: () => T()("requests.filter.requests"),
 		pill: "blue-subtle",
 	},
+	update: {
+		label: () => T()("requests.type.update"),
+		tooltip: () => T()("requests.type.update.tooltip"),
+		filter: () => T()("requests.filter.update"),
+		pill: "primary-subtle",
+	},
 	unpublish: {
 		label: () => T()("requests.type.unpublish"),
 		tooltip: () => T()("requests.type.unpublish.tooltip"),
@@ -233,7 +239,7 @@ export const getTargetLabel = (
 	);
 };
 
-/** Lists a source's publish destinations in request order, returning none when the request has no source. */
+/** Lists the environments a publish source can move to, in request order, returning none when the request has no source. */
 export const getAllowedTargets = (
 	collection:
 		| { publishing: { environments: Array<{ key: string }> } }
@@ -245,22 +251,129 @@ export const getAllowedTargets = (
 	const environments = (collection?.publishing.environments ?? []).map(
 		(environment) => environment.key,
 	);
-	if (source === "latest") return ["latest", ...environments];
+	if (source === "latest") return environments;
 
 	const index = environments.indexOf(source);
 	return index === -1 ? [] : environments.slice(index + 1);
 };
 
-/** New requests start on the first environment they can move to, as latest is opt in. */
+/** New publish requests start on the first environment they can move to. */
 export const getDefaultTargets = (
 	collection:
 		| { publishing: { environments: Array<{ key: string }> } }
 		| undefined,
 	source: string,
+) => getAllowedTargets(collection, source).slice(0, 1);
+
+/** Whether a request type's proposals are edited, as create and update requests change content while publish requests only move it. */
+export const changesContent = (type: RequestType) =>
+	type === "create" || type === "update";
+
+/**
+ * Resolves direct, proposed or denied access to latest content. Collections requiring update
+ * review allow proposals only.
+ */
+export type LatestAccess = "direct" | "request" | null;
+
+/** Whether a request document is a publish request's copy of latest, which can't be edited but can be refreshed from latest. */
+export const isLatestCopy = (
+	type: RequestType,
+	document: Pick<RequestDocument, "source"> | undefined,
+) => type === "publish" && document?.source === "latest";
+
+/**
+ * The ways a modal can change content, default first: straight away, or in a new update request
+ * for latest. Anyone who can change latest can also propose it. Leave out `latestAccess` for
+ * versions other than latest, which always change straight away.
+ */
+export const getChangeModes = (
+	latestAccess?: LatestAccess,
+): Array<"now" | "request"> => {
+	if (latestAccess === undefined) return ["now"];
+	if (latestAccess === "direct") return ["now", "request"];
+	if (latestAccess === "request") return ["request"];
+	return [];
+};
+
+/**
+ * Whether someone takes part in requests, so the Requests screens are worth showing: they can
+ * read every request, or make, review or complete requests in a collection they can read.
+ * Core shows people the requests they made or were asked to review too.
+ */
+export const canTakePartInRequests = (
+	collections: Array<Pick<Collection, "permissions">>,
 ) =>
-	getAllowedTargets(collection, source)
-		.filter((target) => target !== "latest")
-		.slice(0, 1);
+	userStore.get.hasPermission([Permissions.RequestsRead]).all ||
+	collections.some(
+		({ permissions }) =>
+			userStore.get.hasPermission([permissions.read]).all &&
+			userStore.get.hasPermission([
+				permissions.create,
+				permissions.createRequest,
+				permissions.update,
+				permissions.updateRequest,
+				permissions.publish,
+				permissions.publishRequest,
+				permissions.delete,
+				permissions.deleteRequest,
+				permissions.review,
+			]).some,
+	);
+
+/** Whether the person made an open request but can no longer change it, so screens explain why it's locked. */
+export const isLockedForCreator = (
+	request: Pick<RequestDetails, "status" | "createdBy" | "permissions">,
+) =>
+	request.status === "open" &&
+	!request.permissions.edit &&
+	request.createdBy?.id !== undefined &&
+	request.createdBy.id === userStore.get.user?.id;
+
+/**
+ * Whether someone can add a collection's documents to a request: the action covers anyone's
+ * request, and its request permission covers a new request or one they made, as core checks.
+ */
+export const canAddToRequest = (
+	collection: Collection,
+	action: "update" | "publish" | "delete",
+	request?: Pick<RequestDetails, "createdBy">,
+) => {
+	const own =
+		request === undefined || request.createdBy?.id === userStore.get.user?.id;
+	return (
+		userStore.get.hasPermission([collection.permissions.read]).all &&
+		userStore.get.hasPermission(
+			own
+				? [
+						collection.permissions[action],
+						collection.permissions[`${action}Request`],
+					]
+				: [collection.permissions[action]],
+		).some
+	);
+};
+
+/**
+ * Resolves direct, proposed or denied access to latest content. Collections requiring update
+ * review allow proposals only.
+ */
+export const getLatestAccess = (
+	collection: Collection | undefined,
+): LatestAccess => {
+	if (!collection) return null;
+
+	const { update, updateRequest } = collection.permissions;
+	if (
+		collection.publishing.review?.update !== true &&
+		userStore.get.hasPermission([update]).all
+	) {
+		return "direct";
+	}
+
+	return userStore.get.hasPermission([update, updateRequest]).some
+		? "request"
+		: null;
+};
 
 /**
  * The ways someone can add documents to a collection, default first: create
@@ -278,7 +391,6 @@ export const getDocumentCreateActions = (
 		userStore.get.hasPermission([collection.permissions.create]).all;
 	const canRequest =
 		collection.mode === "multiple" &&
-		userStore.get.hasPermission([Permissions.RequestsRead]).all &&
 		userStore.get.hasPermission([
 			collection.permissions.create,
 			collection.permissions.createRequest,
@@ -290,7 +402,7 @@ export const getDocumentCreateActions = (
 	];
 };
 
-/** The open proposals a document has in each request, with their editable versions. */
+/** The open proposals a document has in create and update requests, with their editable versions. */
 export const getDocumentProposals = (
 	requests: RequestSummary[],
 	document: { collectionKey: string; documentId: number | undefined },
@@ -301,7 +413,9 @@ export const getDocumentProposals = (
 				member.collectionKey === document.collectionKey &&
 				member.documentId === document.documentId,
 		);
-		return member?.source === "latest" && member.versionId !== null
+		return changesContent(request.type) &&
+			member?.source === "latest" &&
+			member.versionId !== null
 			? [{ request, document: member, versionId: member.versionId }]
 			: [];
 	});
@@ -315,6 +429,29 @@ export const getRequestDocumentLabel = (
 ) =>
 	request.documentLabel ||
 	`${helpers.getLocaleValue({ value: collection?.details.labels.singular, fallback: request.collectionKey })} #${request.documentId}`;
+
+/** The copy for a workflow stage that lets a request reach its target. */
+export const getWorkflowAllowedCopy = (
+	type: RequestDetails["type"],
+	target: string,
+): { title: string; description: string } => {
+	if (type === "create") {
+		return {
+			title: T()("requests.checks.workflow.create.allowed.title"),
+			description: T()("requests.checks.workflow.create.allowed"),
+		};
+	}
+	if (type === "update") {
+		return {
+			title: T()("requests.checks.workflow.update.allowed.title"),
+			description: T()("requests.checks.workflow.update.allowed"),
+		};
+	}
+	return {
+		title: T()("requests.checks.workflow.allowed.title", { target }),
+		description: T()("requests.checks.workflow.allowed", { target }),
+	};
+};
 
 export const getBlockerCopy = (
 	blocker: RequestBlocker,
@@ -373,6 +510,12 @@ export const getBlockerCopy = (
 				return {
 					title: T()("requests.blocker.workflow.create.title"),
 					description: T()("requests.blocker.workflow.create"),
+				};
+			}
+			if (type === "update") {
+				return {
+					title: T()("requests.blocker.workflow.update.title"),
+					description: T()("requests.blocker.workflow.update"),
 				};
 			}
 			return {

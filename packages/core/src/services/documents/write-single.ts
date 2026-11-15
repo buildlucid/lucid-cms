@@ -1,5 +1,4 @@
 import { isDeepStrictEqual } from "node:util";
-import type { RichTextJSON } from "@lucidcms/richtext";
 import collections from "../../libs/collection/collections.js";
 import filterReadableData from "../../libs/collection/field-access/filter-readable-data.js";
 import getContentAccess from "../../libs/collection/field-access/get-content-access.js";
@@ -15,7 +14,9 @@ import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import updateVersion from "../documents-versions/update-single.js";
-import createRequest from "../requests/create-single.js";
+import createRequest, {
+	type RequestDetailsInput,
+} from "../requests/create-single.js";
 import checkEmbeddedBrickChanges from "./checks/check-embedded-brick-changes.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 import mergeDocumentData from "./helpers/merge-document-data.js";
@@ -23,8 +24,25 @@ import patchDocumentData from "./helpers/patch-document-data.js";
 import readDocumentContent from "./helpers/read-document-content.js";
 import saveDocument from "./helpers/save-document.js";
 import toDocumentInput from "./helpers/to-document-input.js";
+import proposeSingle from "./propose-single.js";
 
-/** Validates and saves authoring values or patches to latest or request proposals, treating hidden content as unknown, rejecting locked changes and preserving stored restricted content. */
+/** Where changes to an existing document go: latest, a request's proposal, or a new update request. */
+type ExistingTarget =
+	| {
+			/** A request proposal to edit instead of latest. */
+			versionId?: number;
+			request?: never;
+	  }
+	| {
+			versionId?: never;
+			/** Proposes the changes in a new update request instead of saving latest. */
+			request: RequestDetailsInput;
+	  };
+
+/**
+ * Validates and saves authoring values or patches to latest or request proposals, treating hidden content as unknown, rejecting locked changes and preserving stored restricted content.
+ * With `request`, a new document becomes a create request's proposal and changes to an existing one are proposed in a new update request.
+ */
 const writeSingle: ServiceFn<
 	[
 		{
@@ -41,28 +59,20 @@ const writeSingle: ServiceFn<
 					/** Portable identity for the new document, eg. from an import. */
 					uid?: string;
 					/** Saves the document as the proposal of a new create request instead. */
-					request?: {
-						title: string;
-						description?: RichTextJSON | null;
-						reviewerIds?: number[];
-					};
+					request?: RequestDetailsInput;
 			  }
-			| {
+			| ({
 					kind: "update";
 					id: number;
-					/** A request proposal to edit instead of latest. */
-					versionId?: number;
 					ifUnchanged?: DocumentEditToken;
 					data: DocumentData;
-			  }
-			| {
+			  } & ExistingTarget)
+			| ({
 					kind: "patch";
 					id: number;
-					/** A request proposal to edit instead of latest. */
-					versionId?: number;
 					ifUnchanged?: DocumentEditToken;
 					operations: DocumentPatch[];
-			  }
+			  } & ExistingTarget)
 		),
 	],
 	{
@@ -72,7 +82,7 @@ const writeSingle: ServiceFn<
 		version: { id: number; type: string; contentId: string };
 		/** False when the submitted values already match the stored content. */
 		changed: boolean;
-		/** The create request, when the document was requested. */
+		/** The create or update request, when the changes were requested. */
 		requestId?: number;
 	}
 > = (context, input) =>
@@ -200,6 +210,21 @@ const writeSingle: ServiceFn<
 				id = requested.data.document.id;
 				versionId = requested.data.document.versionId;
 				requestId = requested.data.id;
+			} else if (id !== undefined && input.kind !== "create" && input.request) {
+				const proposed = await proposeSingle(context, {
+					collectionKey: input.collectionKey,
+					documentId: id,
+					user: input.authUser ?? systemActor,
+					agentRunId: input.agentRunId,
+					origin: input.origin,
+					request: input.request,
+					skipDocumentWriteClaims: true,
+					...payload.data,
+				});
+				if (proposed.error) return proposed;
+
+				versionId = proposed.data.version.versionId;
+				requestId = proposed.data.requestId;
 			} else if (id !== undefined && versionId !== undefined) {
 				const updated = await updateVersion(context, {
 					collectionKey: input.collectionKey,

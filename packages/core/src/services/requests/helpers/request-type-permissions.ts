@@ -1,40 +1,26 @@
 import type { RequestType } from "../../../libs/db/tables/requests.js";
-import type { CollectionPermissionAction } from "../../../libs/permission/types.js";
+import type { RequestableAction } from "../../../libs/permission/collection-permissions.js";
 
 /**
- * The collection permissions each request type needs. `write` covers making
- * and editing the request, and `ownWrite` also lets its creator edit it.
- * Approving also needs `review`, and `complete` covers completing and
- * scheduling.
+ * Maps request types to actions. Direct permission allows completion and editing any request;
+ * `-request` allows creators to edit their own. Approval requires `review`. Unpublish uses publish
+ * permissions.
  */
-const requestTypePermissions: Record<
-	RequestType,
-	{
-		write: CollectionPermissionAction;
-		ownWrite?: CollectionPermissionAction;
-		approve: CollectionPermissionAction;
-		complete: CollectionPermissionAction;
-	}
-> = {
-	create: {
-		write: "create",
-		ownWrite: "create-request",
-		approve: "create",
-		complete: "create",
-	},
-	publish: { write: "update", approve: "update", complete: "publish" },
-	unpublish: {
-		write: "update",
-		ownWrite: "unpublish-request",
-		approve: "update",
-		complete: "publish",
-	},
-	delete: {
-		write: "delete",
-		ownWrite: "delete-request",
-		approve: "delete",
-		complete: "delete",
-	},
+const requestTypeActions = {
+	create: "create",
+	update: "update",
+	publish: "publish",
+	unpublish: "publish",
+	delete: "delete",
+} as const satisfies Record<RequestType, RequestableAction>;
+
+/** The collection permissions a request type needs, eg. `update` and `update-request` for update requests. */
+const requestTypePermissions = <TType extends RequestType>(type: TType) => {
+	const action = requestTypeActions[type];
+	return {
+		action,
+		request: `${action}-request` as const,
+	};
 };
 
 export default requestTypePermissions;

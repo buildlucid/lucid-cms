@@ -7,8 +7,8 @@ import type { Component } from "solid-js";
 import RequestDocumentDraft from "@/components/RequestDocumentDraft/RequestDocumentDraft";
 import RequestDocumentsModal from "@/components/RequestDocumentsModal/RequestDocumentsModal";
 import RequestTargetCheckboxes from "@/components/RequestTargetCheckboxes/RequestTargetCheckboxes";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import { canAddToRequest } from "@/utils/requests";
 
 type UnpublishDraft = {
 	collectionKey: string;
@@ -44,11 +44,7 @@ const RequestUnpublishModal: Component<{
 			}}
 			canPick={(collection) =>
 				collection.publishing.environments.length > 0 &&
-				userStore.get.hasPermission([collection.permissions.read]).all &&
-				userStore.get.hasPermission([
-					collection.permissions.update,
-					collection.permissions.unpublishRequest,
-				]).some
+				canAddToRequest(collection, "publish", props.request)
 			}
 			toDraft={(document, collection, ref) => {
 				const published = getPublished(document, collection);

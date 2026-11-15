@@ -5,6 +5,7 @@ import {
 	harnessEnv,
 } from "#harness/config";
 import PageCollection from "./collections/page.ts";
+import ProposedStoryCollection from "./collections/proposed-story.ts";
 import RestrictedStoryCollection from "./collections/restricted-story.ts";
 import ReviewedStoryCollection from "./collections/reviewed-story.ts";
 import SettingsCollection from "./collections/settings.ts";
@@ -34,6 +35,7 @@ const sharedCollections = [
 	TeamStoryCollection,
 	StagedStoryCollection,
 	RestrictedStoryCollection,
+	ProposedStoryCollection,
 ];
 
 /**

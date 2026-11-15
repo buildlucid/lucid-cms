@@ -2,7 +2,6 @@ import type z from "zod";
 import { getDocumentShape } from "../../../../libs/collection/helpers/get-document-shape.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
-import { Permissions } from "../../../../libs/permission/definitions.js";
 import hasAccess from "../../../../libs/permission/has-access.js";
 import { documentDataSchema } from "../../../../libs/toolkit/documents/authoring-values-schema.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
@@ -56,10 +55,12 @@ const createDocument: ServiceFn<
 	if (
 		!hasAccess({
 			user,
-			requiredPermissions: [
-				requested
-					? Permissions.RequestsRead
-					: getCollectionPermission(collection.key, "create"),
+			//* the create permission also covers asking by request
+			optionalPermissions: [
+				getCollectionPermission(collection.key, "create"),
+				...(requested
+					? [getCollectionPermission(collection.key, "create-request")]
+					: []),
 			],
 		})
 	) {

@@ -55,8 +55,8 @@ describe("requests limited to some locales", () => {
 		);
 		const requestId = await openRequest(
 			admin,
-			"publish",
-			[{ collectionKey: ARTICLE, documentId: id, targets: ["latest"] }],
+			"update",
+			[{ collectionKey: ARTICLE, documentId: id }],
 			{ locales: ["fr"] },
 		);
 		const request = await readRequest(admin, requestId);
@@ -88,7 +88,7 @@ describe("requests limited to some locales", () => {
 		});
 	});
 
-	test("refuses locales for anything but a publish request from latest into latest, in a localized collection", async ({
+	test("refuses locales for anything but an update request, in a localized collection", async ({
 		lucid,
 	}) => {
 		const admin = await lucid.admin();
@@ -103,14 +103,14 @@ describe("requests limited to some locales", () => {
 		const refusals = await Promise.all([
 			requestChange(
 				admin,
-				"publish",
-				[{ collectionKey: ARTICLE, documentId: article, targets: ["latest"] }],
+				"update",
+				[{ collectionKey: ARTICLE, documentId: article }],
 				{ locales: ["de"] },
 			),
 			requestChange(
 				admin,
-				"publish",
-				[{ collectionKey: STORY_KEY, documentId: story, targets: ["latest"] }],
+				"update",
+				[{ collectionKey: STORY_KEY, documentId: story }],
 				{ locales: ["fr"] },
 			),
 			requestChange(

@@ -30,6 +30,7 @@ const checkSingle: ServiceFn<
 		documentId: data.documentId,
 		versionId: data.versionId,
 		authUser: data.authUser,
+		purpose: "draft",
 	});
 	if (updateContextRes.error) return updateContextRes;
 

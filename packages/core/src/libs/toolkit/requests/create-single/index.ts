@@ -5,17 +5,23 @@ import type {
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
 import { runToolkitService } from "../../utils.js";
-import type { ToolkitRequestDocument } from "../types.js";
+import type { ToolkitRequestDocument, ToolkitRequestType } from "../types.js";
 import { inputSchema } from "./schema.js";
 
-/** A publish, unpublish or delete request to open. */
+/** An update, publish, unpublish or delete request to open, with document fields typed for its type. */
 export type ToolkitRequestsCreateSingleInput<
 	K extends CollectionDocumentKey = CollectionDocumentKey,
-> = Omit<z.input<typeof inputSchema>, "documents"> & {
-	documents: ToolkitRequestDocument<K>[];
-};
+> = {
+	[TType in ToolkitRequestType]: Omit<
+		z.input<typeof inputSchema>,
+		"type" | "documents"
+	> & {
+		type: TType;
+		documents: ToolkitRequestDocument<K, TType>[];
+	};
+}[ToolkitRequestType];
 
-/** Opens a publish, unpublish or delete request for people to review. */
+/** Opens an update, publish, unpublish or delete request for people to review. */
 const createSingle = <K extends CollectionDocumentKey>(
 	context: ServiceContext,
 	input: ToolkitRequestsCreateSingleInput<K>,

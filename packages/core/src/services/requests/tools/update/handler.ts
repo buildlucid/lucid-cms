@@ -92,7 +92,7 @@ const updateRequest: ServiceFn<
 				documentId: change.documentId,
 				source:
 					request.type === "publish" ? (change.source ?? "latest") : undefined,
-				targets: change.targets,
+				targets: change.targets ?? [],
 			})),
 		});
 		if (addRes.error) return addRes;

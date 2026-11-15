@@ -1,7 +1,7 @@
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
-import { chatHref, routineData } from "./shared.js";
+import { chatHref, receivesAgent, routineData } from "./shared.js";
 
 export const routineFailedNotification = defineNotification({
 	key: "agent:routine-failed",
@@ -16,6 +16,7 @@ export const routineFailedNotification = defineNotification({
 	level: "error",
 	actionRequired: true,
 	audience: "recipients",
+	receivable: receivesAgent,
 	data: routineData,
 	render: ({ data }) => ({
 		title: copy("server:core.notifications.agent.routine-failed.title", {

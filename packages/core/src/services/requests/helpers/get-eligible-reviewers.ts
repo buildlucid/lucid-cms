@@ -1,17 +1,14 @@
 import type { UserDisplay } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type { RequestDocumentRecord, RequestRecord } from "../types.js";
 import allowsSelfApproval from "./allows-self-approval.js";
+import type { RequestReadFacts } from "./can-read-request.js";
 import getRequestReaders from "./get-request-readers.js";
-import requestTypePermissions from "./request-type-permissions.js";
 
 /** People who can approve a request, optionally narrowed by name, IDs or a limit. */
 const getEligibleReviewers: ServiceFn<
 	[
 		{
-			request: Pick<RequestRecord, "type" | "created_by"> & {
-				documents: Array<Pick<RequestDocumentRecord, "collection_key">>;
-			};
+			request: Omit<RequestReadFacts, "reviewers">;
 			ids?: number[];
 			name?: string;
 			limit?: number;
@@ -20,8 +17,9 @@ const getEligibleReviewers: ServiceFn<
 	UserDisplay[]
 > = async (context, data) => {
 	const readersRes = await getRequestReaders(context, {
-		request: data.request,
-		actions: [requestTypePermissions[data.request.type].approve, "review"],
+		//* reviewing every collection already lets someone read the request
+		request: { ...data.request, reviewers: [] },
+		actions: ["review"],
 		ids: data.ids,
 		name: data.name,
 		//* one extra in case the creator is filtered out below

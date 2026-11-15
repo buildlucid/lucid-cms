@@ -4,20 +4,20 @@ import type { LucidActor } from "../../../types/hono.js";
 import type { RequestRecord } from "../types.js";
 import requestTypePermissions from "./request-type-permissions.js";
 
-/** Checks the collection access required to edit a request document, including request access for its creator. */
+/** Checks the collection access required to edit a request document: its type's action for anyone's request, or the request permission for its creator. */
 const canWriteDocument = (data: {
 	request: Pick<RequestRecord, "type" | "created_by">;
 	collectionKey: string;
 	user: LucidActor;
 }) => {
-	const { write, ownWrite } = requestTypePermissions[data.request.type];
+	const permissions = requestTypePermissions(data.request.type);
 
 	return hasAccess({
 		user: data.user,
 		optionalPermissions: [
-			getCollectionPermission(data.collectionKey, write),
-			...(ownWrite && data.request.created_by === data.user.id
-				? [getCollectionPermission(data.collectionKey, ownWrite)]
+			getCollectionPermission(data.collectionKey, permissions.action),
+			...(data.request.created_by === data.user.id
+				? [getCollectionPermission(data.collectionKey, permissions.request)]
 				: []),
 		],
 	});

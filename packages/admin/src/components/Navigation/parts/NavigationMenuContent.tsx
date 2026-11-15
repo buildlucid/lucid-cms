@@ -17,7 +17,9 @@ import { aiUsageHref } from "@/utils/ai-usage";
 import { canViewDeploys } from "@/utils/deploys";
 import helpers from "@/utils/helpers";
 import { getHomeView } from "@/utils/home-view";
+import { canOpenSingle } from "@/utils/home-widgets";
 import { isNavigationLinkActive } from "@/utils/navigation";
+import { canTakePartInRequests } from "@/utils/requests";
 import {
 	getNavigationGroups,
 	type NavigationGroup,
@@ -74,7 +76,7 @@ export const NavigationMenuContent: Component<{
 			translations: settings && siteStore.get.isAiFeatureEnabled("translation"),
 			agent:
 				getAgentAccess().all.length > 0 || getAgentAccess().manageAllRoutines,
-			requests: can(Permissions.RequestsRead),
+			requests: canTakePartInRequests(collections.data?.data ?? []),
 			deploys: canViewDeploys() && (deploys.data?.data.length ?? 0) > 0,
 		};
 	});
@@ -84,13 +86,7 @@ export const NavigationMenuContent: Component<{
 			...collectionList.filter((collection) => collection.mode === "multiple"),
 			...collectionList.filter(
 				(collection) =>
-					collection.mode === "single" &&
-					userStore.get.hasPermission([
-						collection.permissions.read,
-						collection.documentId
-							? collection.permissions.update
-							: collection.permissions.create,
-					]).all,
+					collection.mode === "single" && canOpenSingle(collection),
 			),
 		];
 	});

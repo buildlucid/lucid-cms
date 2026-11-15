@@ -11,6 +11,7 @@ import { TEAM_STORY_KEY } from "#shared/config/collections/team-story";
 import {
 	createDocument,
 	readDocument,
+	saveDocument,
 	titled,
 } from "#shared/helpers/documents";
 import { waitForJob } from "#shared/helpers/jobs";
@@ -26,7 +27,7 @@ import {
 	requestTeam,
 } from "#shared/helpers/requests";
 
-/** Opens a request to publish a new story to staging, with its proposal titled `title`. */
+/** Opens a request to publish a new story titled `title` to staging. */
 const openStoryRequest = async (admin: Session, title: string) => {
 	const id = await createDocument(admin, STORY_KEY, titled(title));
 	const requestId = await openRequest(admin, "publish", [
@@ -88,7 +89,10 @@ describe("requests changed from several places at once", () => {
 		const admin = await lucid.admin();
 
 		for (let attempt = 0; attempt < 5; attempt++) {
-			const { requestId } = await openStoryRequest(admin, "Reviewed");
+			const id = await createDocument(admin, STORY_KEY, titled("Reviewed"));
+			const requestId = await openRequest(admin, "update", [
+				{ collectionKey: STORY_KEY, documentId: id },
+			]);
 			const reviewed = await readRequest(admin, requestId);
 
 			await Promise.all([
@@ -136,20 +140,16 @@ describe("requests changed from several places at once", () => {
 	}) => {
 		const admin = await lucid.admin();
 		const id = await createDocument(admin, STORY_KEY, titled("Contested"));
-		const requests = await Promise.all(
-			["One", "Other"].map(async (title) => {
-				const requestId = await openRequest(admin, "publish", [
-					{ collectionKey: STORY_KEY, documentId: id, targets: ["staging"] },
-				]);
-				const request = await readRequest(admin, requestId);
-				expect(
-					(await editProposal(admin, onlyDocument(request), titled(title)))
-						.status,
-				).toBe(200);
-				expect((await approve(admin, requestId)).status).toBe(204);
-				return { title, requestId };
-			}),
-		);
+		//* each request copies latest as it was when it was made
+		const requests: Array<{ title: string; requestId: number }> = [];
+		for (const title of ["One", "Other"]) {
+			await saveDocument(admin, STORY_KEY, id, titled(title));
+			const requestId = await openRequest(admin, "publish", [
+				{ collectionKey: STORY_KEY, documentId: id, targets: ["staging"] },
+			]);
+			expect((await approve(admin, requestId)).status).toBe(204);
+			requests.push({ title, requestId });
+		}
 
 		const completions = await Promise.all(
 			requests.map(({ requestId }) =>

@@ -202,6 +202,7 @@ export const EmailPreviewCard: Component<{
 							shape="square"
 							onClick={() => setPreviewOpen(true)}
 							aria-label={T()("panels.email.preview.title")}
+							tooltip={T()("panels.email.preview.title")}
 						>
 							<TbOutlineEye size={14} />
 						</Button>
@@ -216,6 +217,7 @@ export const EmailPreviewCard: Component<{
 								onClick={onChange()}
 								disabled={props.disabled}
 								aria-label={T()("common.edit")}
+								tooltip={T()("common.edit")}
 							>
 								<TbOutlinePencil size={12} />
 							</Button>
@@ -229,6 +231,7 @@ export const EmailPreviewCard: Component<{
 						onClick={props.onClear}
 						disabled={props.disabled}
 						aria-label={T()("common.clear")}
+						tooltip={T()("common.clear")}
 					>
 						<TbOutlineX size={14} />
 					</Button>

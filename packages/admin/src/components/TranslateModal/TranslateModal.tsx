@@ -57,8 +57,6 @@ export interface TranslateModalProps {
 			},
 		) => void;
 	};
-	/** Whether translations can go into requests, which needs request access. Defaults to true. */
-	canRequest?: boolean;
 	/** Called once translations are filled in or requests are opened. */
 	onSuccess?: () => void;
 }
@@ -95,9 +93,7 @@ const TranslateModal: Component<TranslateModalProps> = (props) => {
 	const navigate = useNavigate();
 	const [locales, setLocales] = createSignal<string[]>([]);
 	const [mode, setMode] = createSignal<Mode>("update");
-	const [delivery, setDelivery] = createSignal<Delivery>(
-		props.canRequest === false ? "editor" : "request",
-	);
+	const [delivery, setDelivery] = createSignal<Delivery>("request");
 	const [note, setNote] = createSignal("");
 
 	// ----------------------------------------
@@ -316,7 +312,7 @@ const TranslateModal: Component<TranslateModalProps> = (props) => {
 		if (props.open) return;
 		setLocales([]);
 		setMode("update");
-		setDelivery(props.canRequest === false ? "editor" : "request");
+		setDelivery("request");
 		setNote("");
 		translate.reset();
 	});
@@ -406,7 +402,7 @@ const TranslateModal: Component<TranslateModalProps> = (props) => {
 					options={modeOptions()}
 					disabled={translate.action.isPending}
 				/>
-				<Show when={props.editor && props.canRequest !== false}>
+				<Show when={props.editor}>
 					<Select
 						id="translate-delivery"
 						name="translate-delivery"

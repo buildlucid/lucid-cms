@@ -26,7 +26,9 @@ import {
 	onlyDocument,
 	openRequest,
 	readRequest,
+	refreshFromLatest,
 	requestAction,
+	requestChange,
 	requestTeam,
 	setTargets,
 } from "#shared/helpers/requests";
@@ -74,7 +76,7 @@ describe("publish requests", () => {
 		).toBe("Edited later");
 	});
 
-	test("asks for a new approval when the proposal changes after it was approved", async ({
+	test("keeps its copy of latest read only, and asks for a new approval once it's refreshed from latest", async ({
 		lucid,
 	}) => {
 		const admin = await lucid.admin();
@@ -86,23 +88,34 @@ describe("publish requests", () => {
 		);
 		expect((await approve(admin, requestId)).status).toBe(204);
 		const approved = await readRequest(admin, requestId);
+		const document = onlyDocument(approved);
 
+		//* publish requests move content, so their copy changes only by refreshing it from latest
 		expect(
-			(
-				await editProposal(
-					admin,
-					onlyDocument(approved),
-					titled("Changed after approval"),
-				)
-			).status,
-		).toBe(200);
+			(await editProposal(admin, document, titled("Edited copy"))).status,
+		).toBe(403);
+		await saveDocument(
+			admin,
+			REVIEWED_STORY_KEY,
+			id,
+			titled("Fixed in latest"),
+		);
+		expect(
+			(await refreshFromLatest(admin, requestId, document.id)).status,
+		).toBe(204);
 
-		const edited = await readRequest(admin, requestId);
-		expect(edited).toMatchObject({ approved: false, approvals: [] });
-		expect(edited.revision).toBeGreaterThan(approved.revision);
+		const refreshed = await readRequest(admin, requestId);
+		expect(refreshed).toMatchObject({ approved: false, approvals: [] });
+		expect(refreshed.revision).toBeGreaterThan(approved.revision);
 		expect((await requestAction(admin, requestId, "complete")).status).toBe(
 			409,
 		);
+		expect((await approve(admin, requestId)).status).toBe(204);
+		await completeRequest(admin, requestId);
+		expect(
+			(await readDocument(admin, REVIEWED_STORY_KEY, id, "production")).fields
+				.title,
+		).toBe("Fixed in latest");
 	});
 
 	test("waits for a target someone else published to be acknowledged, before and after approval", async ({
@@ -158,42 +171,14 @@ describe("publish requests", () => {
 		).toBe("Contested");
 	});
 
-	test("replaces latest with a proposal that targets it, after latest edits made meanwhile are acknowledged", async ({
+	test("never targets latest, which update requests change instead", async ({
 		lucid,
 	}) => {
 		const admin = await lucid.admin();
 		const id = await createStory(admin, "Original");
-		const requestId = await openRequest(
-			admin,
-			"publish",
-			reviewed(id, ["latest"]),
-		);
-		const document = onlyDocument(await readRequest(admin, requestId));
 		expect(
-			(await editProposal(admin, document, titled("Proposed"))).status,
-		).toBe(200);
-		expect((await approve(admin, requestId)).status).toBe(204);
-
-		//* latest is a target, so editing it asks for review again
-		await saveDocument(
-			admin,
-			REVIEWED_STORY_KEY,
-			id,
-			titled("Edited meanwhile"),
-		);
-		const flagged = await readRequest(admin, requestId);
-		expect(flagged.approved).toBe(false);
-		expect(blockerCodes(flagged)).toEqual(["acknowledge_required"]);
-
-		expect(
-			(await acknowledgeTarget(admin, requestId, document.id, "latest")).status,
-		).toBe(204);
-		expect((await approve(admin, requestId)).status).toBe(204);
-		await completeRequest(admin, requestId);
-
-		expect(
-			(await readDocument(admin, REVIEWED_STORY_KEY, id)).fields.title,
-		).toBe("Proposed");
+			(await requestChange(admin, "publish", reviewed(id, ["latest"]))).status,
+		).toBe(400);
 	});
 });
 

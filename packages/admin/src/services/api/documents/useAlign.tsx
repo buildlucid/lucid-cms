@@ -12,25 +12,35 @@ export interface Params {
 		source: string;
 		sourceContentId: string;
 		destinationContentId: string;
+		/** Proposes aligning latest in a new update request instead of saving it. */
+		request?: { title: string };
 	};
 }
 
+type Response = ResponseBody<{ requestId: number | null }>;
+
 const useAlign = (props?: {
-	onSuccess?: () => void;
+	onSuccess?: (response: Response) => void;
 	onError?: (errors: ErrorResponse | undefined) => void;
 }) =>
-	serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
+	serviceHelpers.useMutationWrapper<Params, Response>({
 		mutationFn: (params) =>
-			request({
+			request<Response>({
 				url: `/api/v1/documents/${encodeURIComponent(params.collectionKey)}/${params.documentId}/${params.versionId}/align`,
 				method: "POST",
 				csrf: true,
 				body: params.body,
 			}),
-		getSuccessToast: () => ({
-			title: T()("documents.align.success"),
-			message: T()("documents.align.success.message"),
-		}),
+		getSuccessToast: (response) =>
+			response.data.requestId === null
+				? {
+						title: T()("documents.align.success"),
+						message: T()("documents.align.success.message"),
+					}
+				: {
+						title: T()("toasts.document.propose.title"),
+						message: T()("documents.align.proposed.message"),
+					},
 		invalidates: [queryKeys.documents.all(), queryKeys.requests.all()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

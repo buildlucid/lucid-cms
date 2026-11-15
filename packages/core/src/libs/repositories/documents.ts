@@ -349,6 +349,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			filterOr?: DocumentFilterGroup[];
 			/** List requested documents with an open create request, which only exist as its proposal, instead of created ones. */
 			pending?: boolean;
+			/** Limits pending documents to create requests this user made or was asked to review. */
+			pendingFor?: number;
 			tables: {
 				versions: LucidVersionTableName;
 				documentFields: LucidBrickTableName;
@@ -550,10 +552,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						? eb(
 								`${dynamicConfig.tableName}.create_request_id`,
 								"in",
-								eb
-									.selectFrom("lucid_requests")
-									.select("lucid_requests.id")
-									.where("lucid_requests.status", "=", "open"),
+								this.openRequestIds(props.pendingFor),
 							)
 						: eb(`${dynamicConfig.tableName}.create_request_id`, "is", null),
 				)
@@ -607,10 +606,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						? eb(
 								`${dynamicConfig.tableName}.create_request_id`,
 								"in",
-								eb
-									.selectFrom("lucid_requests")
-									.select("lucid_requests.id")
-									.where("lucid_requests.status", "=", "open"),
+								this.openRequestIds(props.pendingFor),
 							)
 						: eb(`${dynamicConfig.tableName}.create_request_id`, "is", null),
 				)
@@ -1666,5 +1662,27 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			);
 			return eb.and(filterConditions);
 		});
+	}
+	/** Open request IDs, or only those the user made or was asked to review. */
+	private openRequestIds(userId?: number) {
+		const query = this.db
+			.selectFrom("lucid_requests")
+			.select("lucid_requests.id")
+			.where("lucid_requests.status", "=", "open");
+		if (userId === undefined) return query;
+
+		return query.where((eb) =>
+			eb.or([
+				eb("lucid_requests.created_by", "=", userId),
+				eb(
+					"lucid_requests.id",
+					"in",
+					eb
+						.selectFrom("lucid_request_reviewers")
+						.select("lucid_request_reviewers.request_id")
+						.where("lucid_request_reviewers.user_id", "=", userId),
+				),
+			]),
+		);
 	}
 }

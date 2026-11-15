@@ -28,7 +28,9 @@ import notifyChange from "../documents/notify-change.js";
 import invalidateRequests from "../requests/helpers/invalidate-requests.js";
 import recordProposalActivity from "../requests/helpers/record-proposal-activity.js";
 import recordTargetChange from "../requests/helpers/record-target-change.js";
-import getUpdateContext from "./helpers/get-update-context.js";
+import getUpdateContext, {
+	type UpdatePurpose,
+} from "./helpers/get-update-context.js";
 import readStoredContent from "./helpers/read-stored-content.js";
 
 const updateSingle: ServiceFn<
@@ -48,6 +50,10 @@ const updateSingle: ServiceFn<
 			baseContentId?: string;
 			/** The admin tab saving, refused if another tab holds the version. */
 			editorTabId?: string;
+			/** `align` when replacing the content with another version's, which a publish request's copy of latest allows. */
+			purpose?: Extract<UpdatePurpose, "content" | "align">;
+			/** Saves another version's stored content as it is, without `beforeUpsert` transforms or new translation records, so the version holds exactly that content. */
+			exact?: boolean;
 
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
@@ -79,6 +85,7 @@ const updateSingle: ServiceFn<
 				documentId: data.documentId,
 				versionId: data.versionId,
 				authUser: data.authUser,
+				purpose: data.purpose,
 			});
 			if (updateContextRes.error) return updateContextRes;
 
@@ -141,38 +148,43 @@ const updateSingle: ServiceFn<
 						})
 					: contentRes.data;
 
-			// Fire beforeUpsert transform hooks
-			const hookResponse = await executeHooks(
-				context,
-				{
-					service: "documents",
-					event: "beforeUpsert",
-					config: context.config,
-					collectionInstance: updateContextRes.data.collection,
-				},
-				{
-					meta: {
-						collection: updateContextRes.data.collection,
-						collectionKey: data.collectionKey,
-						userId: data.userId,
-						collectionTableNames: updateContextRes.data.tableNames,
-						request: updateContextRes.data.request,
-						execution: {
-							mode: "upsert",
-							action: "update",
-							willPersist: true,
-							origin: data.origin ?? { type: "standard" },
+			// Fire beforeUpsert transform hooks, which an exact copy already went through when it was saved
+			const hookResponse = data.exact
+				? {
+						error: undefined,
+						data: { bricks: content.bricks, fields: content.fields },
+					}
+				: await executeHooks(
+						context,
+						{
+							service: "documents",
+							event: "beforeUpsert",
+							config: context.config,
+							collectionInstance: updateContextRes.data.collection,
 						},
-					},
-					data: {
-						documentId: data.documentId,
-						versionId: data.versionId,
-						versionType: updateContextRes.data.versionType,
-						bricks: content.bricks,
-						fields: content.fields,
-					},
-				},
-			);
+						{
+							meta: {
+								collection: updateContextRes.data.collection,
+								collectionKey: data.collectionKey,
+								userId: data.userId,
+								collectionTableNames: updateContextRes.data.tableNames,
+								request: updateContextRes.data.request,
+								execution: {
+									mode: "upsert",
+									action: "update",
+									willPersist: true,
+									origin: data.origin ?? { type: "standard" },
+								},
+							},
+							data: {
+								documentId: data.documentId,
+								versionId: data.versionId,
+								versionType: updateContextRes.data.versionType,
+								bricks: content.bricks,
+								fields: content.fields,
+							},
+						},
+					);
 			if (hookResponse.error) return hookResponse;
 
 			const checkBrickOrderRes = checkDuplicateOrder(
@@ -209,6 +221,7 @@ const updateSingle: ServiceFn<
 				previous: previousRes.data,
 				collection: updateContextRes.data.collection,
 				skipValidation: true,
+				exact: data.exact,
 			});
 			if (createMultipleBricks.error) return createMultipleBricks;
 

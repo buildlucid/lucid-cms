@@ -23,7 +23,11 @@ import createTargets from "./create-targets.js";
 import getHookRequest from "./get-hook-request.js";
 import resolveTargets from "./resolve-targets.js";
 
-/** Adds a document's targets to a request and captures its source content for publish requests. */
+/**
+ * Adds a document's targets to a request and captures its content: an editable
+ * proposal of latest for update requests, or a read-only copy of the source for
+ * publish requests. Unpublish and delete requests capture nothing.
+ */
 const captureDocument: ServiceFn<
 	[
 		RequestDocumentInput & {
@@ -69,8 +73,14 @@ const captureDocument: ServiceFn<
 		};
 	}
 
-	const source = data.source ?? null;
-	if ((data.request.type === "publish") !== (source !== null)) {
+	//* update requests always copy latest, and only publish requests choose a source
+	const source =
+		data.request.type === "update" ? "latest" : (data.source ?? null);
+	if (
+		data.request.type === "update"
+			? data.source !== undefined && data.source !== "latest"
+			: (data.request.type === "publish") !== (source !== null)
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -179,14 +189,16 @@ const captureDocument: ServiceFn<
 		};
 	}
 
+	//* copies of latest stay proposals, so publish requests can refresh them from latest and keep latest's workflow stage
+	const versionType =
+		source === "latest"
+			? constants.collectionBuilder.publishing.proposalVersionType
+			: constants.collectionBuilder.publishing.snapshotVersionType;
 	const cloneRes = await cloneVersion(context, {
 		collectionKey: data.collectionKey,
 		documentId: data.documentId,
 		fromVersionId: sourceRes.data.id,
-		toVersionType:
-			source === "latest"
-				? constants.collectionBuilder.publishing.proposalVersionType
-				: constants.collectionBuilder.publishing.snapshotVersionType,
+		toVersionType: versionType,
 		userId: data.user.id,
 		agentRunId: data.agentRunId,
 	});
@@ -242,10 +254,7 @@ const captureDocument: ServiceFn<
 			data: {
 				documentId: data.documentId,
 				versionId: cloneRes.data.versionId,
-				versionType:
-					cloneRes.data.sourceVersionType === "latest"
-						? constants.collectionBuilder.publishing.proposalVersionType
-						: constants.collectionBuilder.publishing.snapshotVersionType,
+				versionType,
 				sourceVersionId: sourceRes.data.id,
 				sourceVersionType: source,
 			},

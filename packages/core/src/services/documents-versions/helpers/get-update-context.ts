@@ -7,17 +7,29 @@ import getCurrentCollectionMigrationId from "../../../libs/collection/migration/
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { LucidVersionTable } from "../../../libs/db/tables/index.js";
 import type { Select } from "../../../libs/db/types.js";
-import type { DocumentHookRequest } from "../../../libs/hooks/types.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
-import hasAccess from "../../../libs/permission/has-access.js";
 import systemActor from "../../../libs/permission/system-actor.js";
 import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
 import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkDocumentAccess from "../../documents/checks/check-document-access.js";
-import checkRequestVersionAccess from "../../requests/helpers/check-request-version-access.js";
+import checkRequestVersionAccess, {
+	type RequestVersionOwner,
+} from "../../requests/helpers/check-request-version-access.js";
+import checkLatestAccess from "./check-latest-access.js";
 
+/** What a change to latest or a proposal does, which decides the access it needs. */
+export type UpdatePurpose = "content" | "align" | "workflow" | "draft";
+
+/**
+ * Checks that latest or a request proposal can be changed and reads what the change needs.
+ * - `content` saves content. Latest needs update access in a collection that doesn't review
+ *   updates, and only create and update request proposals take content.
+ * - `align` replaces content with another version. Latest is checked as for `content`, and a
+ *   publish request's copy of latest can be refreshed too.
+ * - `workflow` moves the workflow stage, which collections never review.
+ * - `draft` checks or previews unsaved content, which people proposing changes to latest do too.
+ */
 const getUpdateContext: ServiceFn<
 	[
 		{
@@ -26,6 +38,8 @@ const getUpdateContext: ServiceFn<
 			versionId: number;
 			/** Checks the actor's access. Omit for trusted system writes. */
 			authUser?: LucidActor;
+			/** What the change does. Defaults to `content`. */
+			purpose?: UpdatePurpose;
 		},
 	],
 	{
@@ -36,9 +50,10 @@ const getUpdateContext: ServiceFn<
 		/** Changes with every save, so callers can tell whether the version moved on. */
 		contentId: string;
 		/** The request that owns the version, when it is a proposal. */
-		request?: DocumentHookRequest;
+		request?: RequestVersionOwner;
 	}
 > = async (context, data) => {
+	const purpose = data.purpose ?? "content";
 	const Version = new DocumentVersionsRepository(context.db);
 
 	const collectionRes = await collections.getSingle(context, {
@@ -122,7 +137,7 @@ const getUpdateContext: ServiceFn<
 	);
 	if (versionExistsRes.error) return versionExistsRes;
 
-	let request: DocumentHookRequest | undefined;
+	let request: RequestVersionOwner | undefined;
 	if (
 		versionExistsRes.data.type ===
 		constants.collectionBuilder.publishing.proposalVersionType
@@ -132,33 +147,20 @@ const getUpdateContext: ServiceFn<
 			documentId: data.documentId,
 			versionId: data.versionId,
 			user: data.authUser ?? systemActor,
-			edit: true,
+			edit:
+				purpose === "align" || purpose === "workflow" ? "manage" : "content",
 		});
 		if (accessRes.error) return accessRes;
 
 		request = accessRes.data;
-	} else if (
-		versionExistsRes.data.type === "latest" &&
-		data.authUser &&
-		!hasAccess({
+	} else if (versionExistsRes.data.type === "latest") {
+		const latestRes = checkLatestAccess({
+			collection: collectionRes.data,
 			user: data.authUser,
-			requiredPermissions: [
-				getCollectionPermission(data.collectionKey, "update"),
-			],
-		})
-	) {
-		return {
-			error: {
-				type: "basic" as const,
-				name: copy("server:core.collections.permission.error.name"),
-				message: copy("server:core.collections.permission.error.message", {
-					data: { collection: data.collectionKey, action: "update" },
-				}),
-				status: 403,
-			},
-			data: undefined,
-		};
-	} else if (versionExistsRes.data.type !== "latest") {
+			purpose,
+		});
+		if (latestRes.error) return latestRes;
+	} else {
 		return {
 			error: {
 				type: "basic" as const,

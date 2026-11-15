@@ -23,7 +23,6 @@ import {
 import ImportModal from "@/components/ImportModal/ImportModal";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
-import { Permissions } from "@/constants/permissions";
 import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
 import { createDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
@@ -43,7 +42,7 @@ import {
 	collectionFieldSorts,
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
-import { getDocumentCreateActions } from "@/utils/requests";
+import { getDocumentCreateActions, getLatestAccess } from "@/utils/requests";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import { tabId } from "@/utils/tab-id";
 
@@ -115,11 +114,9 @@ const DocumentsPage: Component = () => {
 	const getCollectionFieldIncludes = createMemo(() =>
 		collectionFieldIncludes(collectionData()),
 	);
-	//* requested documents are listed through their create requests, which need request access
+	//* requested documents are listed through their create requests, which core limits to the ones people can read
 	const canSeeRequests = createMemo(
-		() =>
-			collectionData()?.mode === "multiple" &&
-			userStore.get.hasPermission([Permissions.RequestsRead]).all,
+		() => collectionData()?.mode === "multiple",
 	);
 	const getFilterFields = createMemo(() =>
 		documentFilterPanelFields(collectionData(), {
@@ -307,15 +304,12 @@ const DocumentsPage: Component = () => {
 	const createAction = createMemo(
 		() => getDocumentCreateActions(collectionData())[0],
 	);
-	//* imports add documents, or update ones already here
+	//* imports add documents, or update ones already here, which people who can only propose changes do through update requests
 	const canImport = createMemo(() => {
 		const collection = collectionData();
 		if (collection?.transfer.import !== true || collection.locked) return false;
 
-		return (
-			createAction() !== undefined ||
-			userStore.get.hasPermission([collection.permissions.update]).all
-		);
+		return createAction() !== undefined || getLatestAccess(collection) !== null;
 	});
 	const createActions = createMemo<CreateMenuAction[]>(() => {
 		if (collectionData()?.locked === true) return [];

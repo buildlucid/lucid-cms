@@ -6,10 +6,10 @@ import type {
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import mediaOwnership from "./media-ownership.js";
-import requestCollections from "./request-collections.js";
+import requestReadFacts from "./request-read-facts.js";
 
 /**
- * Loads reference ownership and request collections to check the principal's read access.
+ * Loads reference ownership and request read facts to check the principal's read access.
  * @remarks Without a grant the principal is the system.
  */
 const referenceAccess: ServiceFn<
@@ -25,20 +25,20 @@ const referenceAccess: ServiceFn<
 		canRead: (reference: AgentReferenceInput) => boolean;
 	}
 > = async (context, input) => {
-	const [ownership, collections] = await Promise.all([
+	const [ownership, requests] = await Promise.all([
 		mediaOwnership(context, {
 			mediaIds: input.references.flatMap((reference) =>
 				reference.type === "media" ? [reference.mediaId] : [],
 			),
 		}),
-		requestCollections(context, {
+		requestReadFacts(context, {
 			requestIds: input.references.flatMap((reference) =>
 				reference.type === "request" ? [reference.requestId] : [],
 			),
 		}),
 	]);
 	if (ownership.error) return ownership;
-	if (collections.error) return collections;
+	if (requests.error) return requests;
 
 	return {
 		error: undefined,
@@ -51,9 +51,9 @@ const referenceAccess: ServiceFn<
 						reference.type === "media"
 							? ownership.data.get(reference.mediaId)
 							: undefined,
-					requestCollections:
+					request:
 						reference.type === "request"
-							? collections.data.get(reference.requestId)
+							? requests.data.get(reference.requestId)
 							: undefined,
 					userId: input.userId,
 					grant: input.grant,

@@ -1,19 +1,39 @@
 import { A } from "@solidjs/router";
-import type { Collection, RequestDetails, RequestDocument } from "@types";
+import type {
+	Collection,
+	RequestDetails,
+	RequestDocument,
+	RequestType,
+} from "@types";
 import { TbOutlineExternalLink } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import DocumentThumb from "@/components/DocumentThumb/DocumentThumb";
 import Modal from "@/components/Modal/Modal";
 import { useTargetUpdates } from "@/containers/RequestPage/hooks/useTargetUpdates";
-import T from "@/translations";
+import api from "@/services/api";
+import T, { type TranslationKeys } from "@/translations";
 import helpers from "@/utils/helpers";
-import { getRequestDocumentLabel, getTargetLabel } from "@/utils/requests";
+import {
+	changesContent,
+	getRequestDocumentLabel,
+	getTargetLabel,
+	isLatestCopy,
+} from "@/utils/requests";
 import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import { RequestChecks } from "./RequestChecks";
 import { RequestOverviewRow } from "./RequestOverviewRow";
 import { RequestTargets } from "./RequestTargets";
 import { RequestWorkflowStage } from "./RequestWorkflowStage";
+
+/** The label for each request type's targets row. Delete requests show their own row instead. */
+const targetLabelKeys = {
+	create: "requests.targets.create",
+	update: "requests.targets.update",
+	publish: "requests.targets",
+	unpublish: "requests.targets.unpublish",
+	delete: "requests.targets",
+} as const satisfies Record<RequestType, TranslationKeys>;
 
 export const RequestDocumentCard: Component<{
 	request: RequestDetails;
@@ -39,8 +59,28 @@ export const RequestDocumentCard: Component<{
 				fallback: props.document.collectionKey,
 			}) || props.document.collectionKey,
 	);
+	//* create and update requests' proposals are edited, while a publish request's copy of latest is only refreshed
 	const canEdit = createMemo(
-		() => props.document.source === "latest" && props.document.permissions.edit,
+		() =>
+			changesContent(props.request.type) &&
+			props.document.source === "latest" &&
+			props.document.permissions.edit,
+	);
+	const isCopy = createMemo(() =>
+		isLatestCopy(props.request.type, props.document),
+	);
+	const canRefresh = createMemo(
+		() =>
+			isCopy() &&
+			props.request.status === "open" &&
+			props.document.versionId !== null &&
+			props.document.permissions.edit,
+	);
+	//* proposals and copies of latest open side by side with latest, to see what changes
+	const compareHref = createMemo(() =>
+		props.document.source === "latest" && props.document.versionId !== null
+			? `${getRequestRoute({ requestId: props.request.id, content: props.document })}?compare=latest`
+			: undefined,
 	);
 	const canOpen = createMemo(
 		() =>
@@ -74,12 +114,19 @@ export const RequestDocumentCard: Component<{
 				? T()("requests.document.source.delete")
 				: T()("requests.document.source.unpublish");
 		}
-		return source === "latest"
-			? T()("requests.document.source.proposal")
-			: T()("requests.document.source.snapshot", {
-					source: getTargetLabel(props.collection, source),
-				});
+		if (source === "latest") {
+			return isCopy()
+				? T()("requests.document.source.copy")
+				: T()("requests.document.source.proposal");
+		}
+		return T()("requests.document.source.snapshot", {
+			source: getTargetLabel(props.collection, source),
+		});
 	});
+
+	// ----------------------------------------
+	// Queries & Mutations
+	const refresh = api.requests.useRefreshDocument();
 
 	// ----------------------------------------
 	// Render
@@ -128,6 +175,25 @@ export const RequestDocumentCard: Component<{
 										show: canOpen(),
 									},
 									{
+										label: T()("requests.document.compare"),
+										type: "link",
+										icon: "columns",
+										href: compareHref() ?? "",
+										show: compareHref() !== undefined && canOpen(),
+									},
+									{
+										label: T()("requests.document.refresh"),
+										type: "button",
+										icon: "rotate",
+										show: canRefresh(),
+										loading: refresh.action.isPending,
+										onClick: () =>
+											refresh.action.mutate({
+												id: props.request.id,
+												requestDocumentId: props.document.id,
+											}),
+									},
+									{
 										label: T()("requests.documents.remove"),
 										type: "button",
 										icon: "trash",
@@ -156,15 +222,7 @@ export const RequestDocumentCard: Component<{
 						</RequestOverviewRow>
 					}
 				>
-					<RequestOverviewRow
-						label={
-							props.request.type === "create"
-								? T()("requests.targets.create")
-								: props.request.type === "unpublish"
-									? T()("requests.targets.unpublish")
-									: T()("requests.targets")
-						}
-					>
+					<RequestOverviewRow label={T()(targetLabelKeys[props.request.type])}>
 						<RequestTargets
 							request={props.request}
 							document={props.document}

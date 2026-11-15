@@ -226,6 +226,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 										data-field-action=""
 										onClick={openUserSelectModal}
 										disabled={props.disabled}
+										tooltip={T()("common.edit")}
 									>
 										<TbOutlinePencil size={12} />
 										<span class="sr-only">{T()("common.edit")}</span>
@@ -237,6 +238,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 										shape="square"
 										onClick={clearSelection}
 										disabled={props.disabled}
+										tooltip={T()("common.clear")}
 									>
 										<TbOutlineX size={14} />
 										<span class="sr-only">{T()("common.clear")}</span>
@@ -343,6 +345,7 @@ const UserSortableItem: Component<{
 					onClick={() => props.removeSelectedUser(props.user.id)}
 					disabled={props.disabled}
 					aria-label={T()("common.remove")}
+					tooltip={T()("common.remove")}
 				>
 					<TbOutlineX size={14} />
 				</Button>

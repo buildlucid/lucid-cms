@@ -2,7 +2,7 @@ import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
 import getRequestPath from "../helpers/get-request-path.js";
-import { requestData } from "./shared.js";
+import { receivesRequests, requestData } from "./shared.js";
 
 export const approvalDismissedNotification = defineNotification({
 	key: "requests:approval-dismissed",
@@ -15,6 +15,7 @@ export const approvalDismissedNotification = defineNotification({
 		{ defaultMessage: "A request changed after you approved it." },
 	),
 	audience: "recipients",
+	receivable: receivesRequests,
 	defaults: { email: false },
 	data: requestData,
 	render: ({ data }) => ({

@@ -5,9 +5,11 @@ import { type Accessor, type Component, createMemo, For } from "solid-js";
 import { BrickBody } from "@/components/BrickBody/BrickBody";
 import BrickSlots from "@/components/BrickSlots/BrickSlots";
 import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import type { BrickData } from "@/store/brickStore/brickStore";
+import T from "@/translations";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
 import { getPreviewStructureId } from "@/utils/preview-focus-dom";
@@ -165,7 +167,11 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 					contentLocale={localization.contentLocale() ?? ""}
 				/>
 				<FieldErrorBadge count={errorCount()} />
-				<span
+				<Tooltip
+					as="span"
+					content={
+						brickOpen() ? T()("builder.collapse") : T()("builder.expand")
+					}
 					class="flex size-8 shrink-0 items-center justify-center text-muted"
 					aria-hidden="true"
 				>
@@ -175,7 +181,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 							"rotate-180": brickOpen(),
 						})}
 					/>
-				</span>
+				</Tooltip>
 			</div>
 			{/* Body */}
 			<BrickBody

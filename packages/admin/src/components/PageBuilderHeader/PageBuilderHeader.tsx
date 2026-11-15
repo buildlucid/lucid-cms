@@ -1,4 +1,3 @@
-import { Tooltip } from "@kobalte/core";
 import { A } from "@solidjs/router";
 import { createHotkey, formatForDisplay } from "@tanstack/solid-hotkeys";
 import type {
@@ -38,7 +37,7 @@ import RevokePreviewLinksModal from "@/components/RevokePreviewLinksModal/Revoke
 import SegmentedControl, {
 	type SegmentedControlOption,
 } from "@/components/SegmentedControl/SegmentedControl";
-import { Permissions } from "@/constants/permissions";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import type { UseBuilderEdits } from "@/hooks/useBuilderEdits/useBuilderEdits";
 import type { UseDocumentAutoSave } from "@/hooks/useDocumentAutoSave/useDocumentAutoSave";
@@ -170,9 +169,7 @@ export const PageBuilderHeader: Component<{
 			perPage: 100,
 		},
 		enabled: () =>
-			props.mode === "edit" &&
-			props.state.documentID() !== undefined &&
-			userStore.get.hasPermission([Permissions.RequestsRead]).all,
+			props.mode === "edit" && props.state.documentID() !== undefined,
 	});
 
 	// ----------------------------------
@@ -406,14 +403,14 @@ export const PageBuilderHeader: Component<{
 			const reviewRequired =
 				publishReview?.publish.includes(environment.key) === true;
 
-			//* starting a request only needs edit access, approving and completing are checked later
+			//* starting a request needs publish or its request permission, approving and completing are checked later
 			const canPublish = userStore.get.hasPermission([
 				environment.permissions.publish,
 			]).all;
 			const canCompose = userStore.get.hasPermission([
-				Permissions.RequestsRead,
-				collection.permissions.update,
-			]).all;
+				collection.permissions.publish,
+				collection.permissions.publishRequest,
+			]).some;
 
 			//* only targets some stage lists are gated by the workflow
 			const workflowAllowsTarget =
@@ -536,19 +533,38 @@ export const PageBuilderHeader: Component<{
 	const createDefault = createMemo(() =>
 		props.mode === "create" ? props.state.ui.createActions()[0] : undefined,
 	);
-	const createAlternatives = createMemo((): PublishTriggerAction[] =>
-		createDefault() === "create" &&
-		props.state.ui.createActions().includes("request")
-			? [
-					{
-						label: T()("documents.request.instead"),
-						icon: "send",
-						disabled: props.state.ui.isSaving(),
-						onSelect: () => props.state.ui.setDocumentRequestOpen(true),
-					},
-				]
-			: [],
-	);
+	//* the other way to save: requesting a new document instead of creating it, or proposing unsaved changes to latest, which auto-save would otherwise save first
+	const saveAlternatives = createMemo((): PublishTriggerAction[] => {
+		if (
+			createDefault() === "create" &&
+			props.state.ui.createActions().includes("request")
+		) {
+			return [
+				{
+					label: T()("documents.request.instead"),
+					icon: "send",
+					disabled: props.state.ui.isSaving(),
+					onSelect: () => props.state.ui.setDocumentRequestOpen(true),
+				},
+			];
+		}
+		if (
+			props.mode === "edit" &&
+			props.version?.() === "latest" &&
+			props.state.ui.latestAccess() === "direct" &&
+			!props.state.ui.isAutoSaveActive()
+		) {
+			return [
+				{
+					label: T()("documents.propose.action"),
+					icon: "send",
+					disabled: props.state.ui.saveDisabled(),
+					onSelect: () => props.state.ui.setProposeOpen(true),
+				},
+			];
+		}
+		return [];
+	});
 	const showViewSelector = createMemo(() => {
 		const collection = props.state.collection();
 		if (!collection) return false;
@@ -697,6 +713,10 @@ export const PageBuilderHeader: Component<{
 	const save = () => {
 		if (createDefault() === "request") {
 			props.state.ui.setDocumentRequestOpen(true);
+			return;
+		}
+		if (props.state.ui.isProposing()) {
+			props.state.ui.setProposeOpen(true);
 			return;
 		}
 		props.state.autoSave?.debouncedAutoSave.clear();
@@ -923,25 +943,17 @@ export const PageBuilderHeader: Component<{
 				fallback={
 					<Show when={displayLocale()}>
 						{(locale) => (
-							<Tooltip.Root openDelay={300} placement="bottom">
-								<Tooltip.Trigger
-									as="span"
-									tabIndex={0}
-									aria-label={T()("builder.locale.label", {
-										locale: `${locale().name} (${locale().code})`,
-									})}
-									class="flex size-7 shrink-0 items-center justify-center rounded-md text-icon focus-ring"
-								>
-									<TbOutlineLanguage size={12} />
-								</Tooltip.Trigger>
-								<Tooltip.Portal>
-									<Tooltip.Content class="tooltip-panel">
-										{T()("builder.locale.label", {
-											locale: `${locale().name} (${locale().code})`,
-										})}
-									</Tooltip.Content>
-								</Tooltip.Portal>
-							</Tooltip.Root>
+							//* the shared tooltip, so it sits where the icon buttons' tooltips do
+							<Tooltip
+								as="span"
+								tabIndex={0}
+								content={T()("builder.locale.label", {
+									locale: `${locale().name} (${locale().code})`,
+								})}
+								class="flex size-7 shrink-0 items-center justify-center rounded-md text-icon focus-ring"
+							>
+								<TbOutlineLanguage size={12} />
+							</Tooltip>
 						)}
 					</Show>
 				}
@@ -1085,14 +1097,16 @@ export const PageBuilderHeader: Component<{
 				<PublishTrigger
 					options={publishOptions}
 					onSelect={openPublishOption}
-					actions={createAlternatives()}
+					actions={saveAlternatives()}
 					onSave={save}
 					saveLabel={
 						createDefault() === "request"
 							? T()("documents.request.action")
 							: createDefault() === "create"
 								? T()("common.create")
-								: undefined
+								: props.state.ui.isProposing()
+									? T()("documents.propose.action")
+									: undefined
 					}
 					saveDisabled={props.state.ui.saveDisabled?.()}
 					savePermission={props.state.ui.hasSavePermission?.()}
@@ -1217,7 +1231,8 @@ export const PageBuilderHeader: Component<{
 						>
 							<Show when={!props.previewBar && props.view}>{divider()}</Show>
 							{viewSwitch()}
-							{actions()}
+							{/* the same space each side of the menu, as the save button also sits ps-1 away */}
+							<div class="ps-1 empty:hidden">{actions()}</div>
 							<div
 								class={
 									props.previewBar

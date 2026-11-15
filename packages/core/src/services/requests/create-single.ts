@@ -19,10 +19,13 @@ import notifyMentions from "./helpers/notify-mentions.js";
 import resolveMentions from "./helpers/resolve-mentions.js";
 import setReviewers from "./helpers/set-reviewers.js";
 
-type CreateRequestInput = {
+/** A new request's details, which services that can open a request instead of changing content take as `request`. */
+export type RequestDetailsInput = {
 	title: string;
 	description?: RichTextJSON | null;
 	reviewerIds?: number[];
+};
+type CreateRequestInput = RequestDetailsInput & {
 	user: LucidActor;
 	agentRunId?: string;
 };
@@ -42,12 +45,15 @@ type CreateDocumentRequestInput = CreateRequestInput & {
 type ChangeDocumentsRequestInput = CreateRequestInput & {
 	type: Exclude<RequestType, "create">;
 	documents: RequestDocumentInput[];
-	/** Limits a publish request from latest to these content locales, so completing it keeps other locales' edits made meanwhile. */
+	/** Limits an update request to these content locales, so completing it keeps other locales' edits made meanwhile. */
 	locales?: string[];
+	/** Callers that already hold the documents' write claims, eg. a save that proposes its changes. */
+	skipDocumentWriteClaims?: boolean;
 };
 
 /**
  * Opens a request by capturing existing documents or saving a new document as a create-request proposal.
+ * Update requests capture each document's latest content as an editable proposal.
  * @returns Create requests include the new document and proposal version IDs.
  */
 function createSingle(
@@ -87,7 +93,7 @@ async function createSingle(
 
 		if (
 			data.locales !== undefined &&
-			(data.type !== "publish" ||
+			(data.type !== "update" ||
 				data.locales.length === 0 ||
 				new Set(data.locales).size !== data.locales.length)
 		) {
@@ -114,7 +120,12 @@ async function createSingle(
 
 	const descriptionRes = data.description
 		? await resolveMentions(context, {
-				request: { documents },
+				request: {
+					type: data.type,
+					created_by: data.user.id,
+					documents,
+					reviewers: [],
+				},
 				body: data.description,
 			})
 		: undefined;
@@ -169,6 +180,7 @@ async function createSingle(
 				},
 				user: data.user,
 				agentRunId: data.agentRunId,
+				skipDocumentWriteClaims: data.skipDocumentWriteClaims,
 			});
 			if (captureRes.error) return captureRes;
 		}

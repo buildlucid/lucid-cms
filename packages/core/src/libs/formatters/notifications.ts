@@ -16,6 +16,9 @@ import type { Select } from "../db/types.js";
 import type { Translator } from "../i18n/types.js";
 import resolveTypeSettings from "../notifications/resolve-type-settings.js";
 import type { AnyNotificationDefinition } from "../notifications/types.js";
+import hasPermission, {
+	type PermissionGrant,
+} from "../permission/has-permission.js";
 import formatter from "./helpers.js";
 
 type NotificationRow = Pick<
@@ -128,8 +131,11 @@ const formatTypes = (props: {
 		};
 	});
 
+/** The person's email choice for every type that is on and that they could receive. */
 const formatPreferences = (props: {
 	definitions: AnyNotificationDefinition[];
+	user: PermissionGrant;
+	config: ResolvedLucidConfig;
 	settings: Array<
 		Pick<
 			Select<LucidNotificationTypeSettings>,
@@ -146,7 +152,12 @@ const formatPreferences = (props: {
 			definition,
 			row: props.settings.find((row) => row.type === definition.key),
 		});
-		if (!settings.enabled) return [];
+		const receivable =
+			(definition.audience === "recipients" ||
+				hasPermission(props.user, definition.audience.permission)) &&
+			(definition.receivable?.({ user: props.user, config: props.config }) ??
+				true);
+		if (!settings.enabled || !receivable) return [];
 
 		const preference = props.preferences.find(
 			(row) => row.type === definition.key,

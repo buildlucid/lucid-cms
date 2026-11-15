@@ -1,5 +1,4 @@
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
-import { Permissions } from "../../../libs/permission/definitions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
 import type { CollectionPermissionAction } from "../../../libs/permission/types.js";
 import type { LucidActor } from "../../../types/hono.js";
@@ -7,16 +6,19 @@ import type { RequestPermissions } from "../../../types/response.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import type { RequestRecord } from "../types.js";
 import allowsSelfApproval from "./allows-self-approval.js";
+import canReadRequest, { type RequestReadFacts } from "./can-read-request.js";
 import canWriteDocument from "./can-write-document.js";
 import requestTypePermissions from "./request-type-permissions.js";
 
-/** Determines request actions allowed by the user's permissions across every document's collection. */
+/**
+ * Resolves actions across all included collections. Uses `canReadRequest` for visibility; creators
+ * may close their open requests. Approval requires `review`; completion requires the request
+ * type's action.
+ */
 const getRequestAccess = (
 	context: ServiceContext,
 	data: {
-		request: Pick<RequestRecord, "type" | "status" | "created_by"> & {
-			documents: Array<{ collection_key: string }>;
-		};
+		request: RequestReadFacts & Pick<RequestRecord, "status">;
 		user: LucidActor;
 	},
 ): RequestPermissions & { read: boolean } => {
@@ -39,13 +41,16 @@ const getRequestAccess = (
 			user: data.user,
 		}),
 	);
-	const permissions = requestTypePermissions[data.request.type];
+	const { action } = requestTypePermissions(data.request.type);
 
-	const read =
-		hasAccess({
-			user: data.user,
-			requiredPermissions: [Permissions.RequestsRead],
-		}) && can("read");
+	const read = canReadRequest({
+		request: data.request,
+		userId: data.user.id,
+		grant: {
+			superAdmin: data.user.superAdmin,
+			permissions: data.user.permissions ?? [],
+		},
+	});
 	const open = read && data.request.status === "open";
 	//* super admins can always approve, including their own requests
 	const selfApproval =
@@ -56,8 +61,10 @@ const getRequestAccess = (
 	return {
 		read,
 		edit: open && write,
-		approve: open && can("review") && can(permissions.approve) && selfApproval,
-		complete: open && can(permissions.complete),
+		//* people can always withdraw their own requests, even after losing the permission to change them
+		close: open && (write || data.request.created_by === data.user.id),
+		approve: open && can("review") && selfApproval,
+		complete: open && can(action),
 		reopen: read && data.request.status === "closed" && write,
 	};
 };

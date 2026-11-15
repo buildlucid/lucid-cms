@@ -42,6 +42,7 @@ const getOverview: ServiceFn<
 		error: undefined,
 		data: {
 			create: counts("create"),
+			update: counts("update"),
 			publish: counts("publish"),
 			unpublish: counts("unpublish"),
 			delete: counts("delete"),

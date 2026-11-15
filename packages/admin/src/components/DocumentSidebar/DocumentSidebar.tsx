@@ -19,6 +19,7 @@ export const DocumentSidebar: Component<{
 	refs: Accessor<Refs | undefined>;
 	autoSaveMetadata?: Accessor<DocumentVersionUpdateResponse | null>;
 	documentId: Accessor<number | undefined>;
+	/** Whether the workflow stage and assignees can't change, eg. for people who can't edit this version. */
 	disabled: Accessor<boolean>;
 	mutations: UseDocumentMutations;
 	requestContext?: boolean;

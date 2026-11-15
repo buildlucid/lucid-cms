@@ -2,7 +2,7 @@ import z from "zod";
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
-import { workflowData, workflowHref } from "./shared.js";
+import { receivesWorkflows, workflowData, workflowHref } from "./shared.js";
 
 export const stageChangedNotification = defineNotification({
 	key: "workflows:stage-changed",
@@ -15,6 +15,7 @@ export const stageChangedNotification = defineNotification({
 		{ defaultMessage: "A document assigned to you moves to another stage." },
 	),
 	audience: "recipients",
+	receivable: receivesWorkflows,
 	defaults: { email: false },
 	data: workflowData.extend({ previousStage: z.string() }),
 	render: ({ data }) => ({

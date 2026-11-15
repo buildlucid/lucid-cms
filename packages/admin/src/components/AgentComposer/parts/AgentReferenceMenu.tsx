@@ -14,7 +14,6 @@ import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSele
 import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
 import Menu from "@/components/Menu/Menu";
 import RequestSelectDrawer from "@/components/RequestSelectDrawer/RequestSelectDrawer";
-import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import userStore from "@/store/userStore/userStore";
@@ -70,10 +69,9 @@ const AgentReferenceMenu: Component<{
 		() =>
 			props.features?.documents.attach === true && collectionKeys().length > 0,
 	);
+	//* request search only finds the requests someone can read
 	const canRequests = createMemo(
-		() =>
-			props.features?.requests.attach === true &&
-			userStore.get.hasPermission([Permissions.RequestsRead]).all,
+		() => props.features?.requests.attach === true,
 	);
 	// ----------------------------------------
 	// Functions

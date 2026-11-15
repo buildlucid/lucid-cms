@@ -11,7 +11,6 @@ import {
 import Input from "@/components/Input/Input";
 import Modal from "@/components/Modal/Modal";
 import Tabs from "@/components/Tabs/Tabs";
-import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -56,12 +55,10 @@ const DocumentUnpublishModal: Component<{
 		const canUnpublish =
 			props.collection?.publishing.review?.unpublish.includes(props.target) !==
 				true && userStore.get.hasPermission([permissions.publish]).all;
-		const canRequest =
-			userStore.get.hasPermission([Permissions.RequestsRead]).all &&
-			userStore.get.hasPermission([
-				permissions.update,
-				permissions.unpublishRequest,
-			]).some;
+		const canRequest = userStore.get.hasPermission([
+			permissions.publish,
+			permissions.publishRequest,
+		]).some;
 
 		return (
 			[

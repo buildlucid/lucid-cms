@@ -1,7 +1,6 @@
 import type z from "zod";
 import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
-import { Permissions } from "../../../../libs/permission/definitions.js";
 import hasAccess from "../../../../libs/permission/has-access.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import getRequestLink from "../../../requests/helpers/get-request-link.js";
@@ -45,10 +44,12 @@ const unpublishDocument: ServiceFn<
 	if (
 		!hasAccess({
 			user,
-			requiredPermissions: [
-				requested
-					? Permissions.RequestsRead
-					: getCollectionPermission(collection.key, "publish"),
+			//* the publish permission also covers asking by request
+			optionalPermissions: [
+				getCollectionPermission(collection.key, "publish"),
+				...(requested
+					? [getCollectionPermission(collection.key, "publish-request")]
+					: []),
 			],
 		})
 	) {

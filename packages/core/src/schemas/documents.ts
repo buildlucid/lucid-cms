@@ -18,6 +18,16 @@ import {
 import { richTextJSONSchema } from "./shared/rich-text.js";
 import { userDisplaySchema } from "./shared/user-display.js";
 
+/** A new request's details, for routes that can open one instead of changing content straight away. */
+const requestDetailsSchema = z.object({
+	title: z.string().trim().min(1).max(200).meta({
+		description: "The title of the new request",
+		example: "Fix the install steps",
+	}),
+	description: richTextJSONSchema.nullable().optional(),
+	reviewerIds: z.array(z.number().int().positive()).optional(),
+});
+
 const previewTokenSchema = z.string().meta({
 	description: "An opaque preview token",
 });
@@ -413,8 +423,74 @@ export const controllerSchemas = {
 			}),
 		}),
 	} satisfies ControllerSchema,
+	proposeSingle: {
+		body: z.object({
+			request: z
+				.union([
+					requestDetailsSchema,
+					z.object({
+						id: z.number().int().positive().meta({
+							description:
+								"An open update request to add the document to. It must not already hold the document.",
+							example: 1,
+						}),
+					}),
+				])
+				.meta({
+					description:
+						"A new update request's details, or an open update request to add the document to",
+				}),
+			bricks: z
+				.array(brickInputSchema)
+				.meta({ description: "The proposed bricks" })
+				.optional(),
+			fields: z
+				.array(fieldInputSchema)
+				.meta({ description: "The proposed field values" })
+				.optional(),
+			baseContentId: z.string().min(1).optional().meta({
+				description:
+					"Latest's content ID when the changes were made. When set, the proposal is refused with a 409 if latest has been saved since.",
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+			id: z.string().trim().meta({
+				description: "The document's ID",
+				example: 1,
+			}),
+		}),
+		response: z.object({
+			requestId: z.number().meta({
+				description: "The update request holding the proposal",
+				example: 1,
+			}),
+			versionId: z.number().meta({
+				description: "The proposal's version ID",
+				example: 4,
+			}),
+			contentId: z.string().meta({
+				description: "The proposal's content ID",
+				example: "123e4567-e89b-12d3-a456-426614174000",
+			}),
+		}),
+	} satisfies ControllerSchema,
 	duplicateSingle: {
-		body: undefined,
+		body: z
+			.object({
+				request: requestDetailsSchema.optional().meta({
+					description:
+						"Opens a create request with the copy instead of creating it. Collections that review new documents require it.",
+				}),
+			})
+			.optional(),
 		query: {
 			string: undefined,
 			formatted: undefined,
@@ -433,6 +509,10 @@ export const controllerSchemas = {
 			id: z.number().meta({
 				description: "The duplicated document's ID",
 				example: 2,
+			}),
+			requestId: z.number().nullable().meta({
+				description: "The create request holding the copy, when one was opened",
+				example: null,
 			}),
 		}),
 	} satisfies ControllerSchema,
@@ -1160,6 +1240,10 @@ export const controllerSchemas = {
 			destinationContentId: z.string().min(1).meta({
 				description: "The destination content ID that was compared",
 			}),
+			request: requestDetailsSchema.optional().meta({
+				description:
+					"Aligns latest by proposing it in a new update request instead. Collections that review updates require it.",
+			}),
 		}),
 		query: {
 			string: undefined,
@@ -1179,10 +1263,23 @@ export const controllerSchemas = {
 				example: 2,
 			}),
 		}),
-		response: undefined,
+		response: z.object({
+			requestId: z.number().nullable().meta({
+				description:
+					"The update request proposing the alignment, or null when the version was aligned",
+				example: null,
+			}),
+		}),
 	} satisfies ControllerSchema,
 	restoreRevision: {
-		body: undefined,
+		body: z
+			.object({
+				request: requestDetailsSchema.optional().meta({
+					description:
+						"Proposes the revision in a new update request instead of restoring it to latest. Collections that review updates require it.",
+				}),
+			})
+			.optional(),
 		query: {
 			string: undefined,
 			formatted: undefined,
@@ -1197,11 +1294,17 @@ export const controllerSchemas = {
 				example: 1,
 			}),
 			versionId: z.string().trim().meta({
-				description: "The version ID you want to promote",
+				description: "The revision's version ID",
 				example: 2,
 			}),
 		}),
-		response: undefined,
+		response: z.object({
+			requestId: z.number().nullable().meta({
+				description:
+					"The update request proposing the revision, or null when it was restored to latest",
+				example: null,
+			}),
+		}),
 	} satisfies ControllerSchema,
 	content: {
 		getSingle: {

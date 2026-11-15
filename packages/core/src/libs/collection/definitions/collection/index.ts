@@ -195,6 +195,7 @@ class CollectionDefinition<
 								review.unpublish ?? review.publish,
 							),
 							create: review.create ?? false,
+							update: review.update ?? false,
 							delete: review.delete ?? false,
 							selfApproval:
 								review.selfApproval ??

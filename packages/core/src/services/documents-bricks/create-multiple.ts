@@ -30,6 +30,8 @@ const createMultiple: ServiceFn<
 			collection: CollectionDefinition;
 			authUser?: LucidActor;
 			skipValidation?: boolean;
+			/** Keeps the translation records the content carries, for an exact copy of another version's stored content. */
+			exact?: boolean;
 		},
 	],
 	{ changedLocales: Array<string | null> | null }
@@ -59,12 +61,14 @@ const createMultiple: ServiceFn<
 		? { bricks: previous.preparedBricks, fields: previous.preparedFields }
 		: null;
 
-	stampTranslationSources({
-		collection: data.collection,
-		localization,
-		previous: previousContent,
-		next,
-	});
+	if (!data.exact) {
+		stampTranslationSources({
+			collection: data.collection,
+			localization,
+			previous: previousContent,
+			next,
+		});
+	}
 
 	// -------------------------------------------------------------------------------
 	// validate bricks

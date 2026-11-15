@@ -66,7 +66,7 @@ const getRequestProposals: ServiceFn<
 			documentId: proposal.documentId,
 			versionId: proposal.versionId,
 			user: data.user,
-			edit: true,
+			edit: "content",
 		});
 		if (accessRes.error) return accessRes;
 		locales = accessRes.data.locales;

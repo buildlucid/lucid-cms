@@ -54,11 +54,12 @@ export type DocumentPermissionAction =
 	| "create"
 	| "create-request"
 	| "update"
+	| "update-request"
 	| "delete"
 	| "delete-request"
-	| "unpublish-request"
 	| "restore"
 	| "publish"
+	| "publish-request"
 	| "review";
 export type DocumentPermission<
 	TAction extends DocumentPermissionAction = DocumentPermissionAction,

@@ -3,7 +3,7 @@ import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
 import getRequestPath from "../helpers/get-request-path.js";
-import { requestData } from "./shared.js";
+import { receivesRequests, requestData } from "./shared.js";
 
 export const readyNotification = defineNotification({
 	key: "requests:ready",
@@ -17,6 +17,7 @@ export const readyNotification = defineNotification({
 	level: "success",
 	actionRequired: true,
 	audience: "recipients",
+	receivable: receivesRequests,
 	data: requestData.extend({ scheduled: z.boolean() }),
 	render: ({ data }) => ({
 		title: copy("server:core.notifications.requests.ready.title", {

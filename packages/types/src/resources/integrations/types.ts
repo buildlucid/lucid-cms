@@ -1,18 +1,9 @@
+import type { CollectionPermissionAction } from "../documents/types.js";
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { MediaImagePreview } from "../media/types.js";
 
 export type CoreExternalScope =
-	| `documents:${string}:${
-			| "read"
-			| "create"
-			| "create-request"
-			| "update"
-			| "delete"
-			| "delete-request"
-			| "unpublish-request"
-			| "restore"
-			| "publish"
-			| "review"}`
+	| `documents:${string}:${CollectionPermissionAction}`
 	| "account:read"
 	| "users:list"
 	| "media:read"

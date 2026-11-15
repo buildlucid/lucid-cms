@@ -655,6 +655,7 @@ export type {
 	ToolkitPreviews,
 	ToolkitPreviewsResolveInput,
 	ToolkitRequestDocument,
+	ToolkitRequestType,
 	ToolkitRequests,
 	ToolkitRequestsAcknowledgeInput,
 	ToolkitRequestsApproveInput,

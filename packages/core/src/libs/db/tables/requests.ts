@@ -35,7 +35,7 @@ export const requestsTable = defineTable("lucid_requests", (adapter) => ({
 			schema: requestStatusSchema,
 			type: "text",
 		},
-		/** The content locales a publish request changes, or null for whole documents. */
+		/** The content locales an update request changes, or null for whole documents. */
 		locales: {
 			schema: z.array(z.string()).nullable(),
 			type: "json",
@@ -156,7 +156,7 @@ export interface LucidRequests {
 		RichTextJSON | null
 	>;
 	status: Generated<RequestStatus>;
-	/** The content locales a publish request changes, or null for whole documents. */
+	/** The content locales an update request changes, or null for whole documents. */
 	locales: JSONColumnType<string[] | null, string[] | null, string[] | null>;
 	revision: Generated<number>;
 	/** Set once the current revision has every approval it needs. */

@@ -15,6 +15,7 @@ import useGetMultiple from "./useGetMultiple";
 import useGetMultipleRevisions from "./useGetMultipleRevisions";
 import useGetSingle from "./useGetSingle";
 import useGetWorkflowAssignees from "./useGetWorkflowAssignees";
+import useProposeSingle from "./useProposeSingle";
 import usePublishSingle from "./usePublishSingle";
 import useRequestSingle from "./useRequestSingle";
 import useRestore from "./useRestore";
@@ -41,6 +42,7 @@ const exportObject = {
 	useCreateSingleVersion,
 	useCreateSingle,
 	useRequestSingle,
+	useProposeSingle,
 	usePublishSingle,
 	useUnpublishSingle,
 	useGetSingle,

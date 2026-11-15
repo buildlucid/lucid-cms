@@ -1,7 +1,6 @@
 import type z from "zod";
 import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
-import { Permissions } from "../../../../libs/permission/definitions.js";
 import hasAccess from "../../../../libs/permission/has-access.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import checkNotHeld from "../../../document-editors/check-not-held.js";
@@ -45,10 +44,12 @@ const deleteDocument: ServiceFn<
 	if (
 		!hasAccess({
 			user,
-			requiredPermissions: [
-				requested
-					? Permissions.RequestsRead
-					: getCollectionPermission(collection.key, "delete"),
+			//* the delete permission also covers asking by request
+			optionalPermissions: [
+				getCollectionPermission(collection.key, "delete"),
+				...(requested
+					? [getCollectionPermission(collection.key, "delete-request")]
+					: []),
 			],
 		})
 	) {

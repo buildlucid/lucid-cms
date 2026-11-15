@@ -1,17 +1,21 @@
+import type { RequestType } from "../../../libs/db/tables/requests.js";
 import type { DocumentHookRequest } from "../../../libs/hooks/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { RequestsRepository } from "../../../libs/repositories/index.js";
 import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import canEditDocument from "./can-edit-document.js";
+import changesContent from "./changes-content.js";
 import getHookRequest from "./get-hook-request.js";
 import getRequestAccess from "./get-request-access.js";
 
+/** The request that owns a proposal or snapshot, as hooks see it, with its type. */
+export type RequestVersionOwner = DocumentHookRequest & { type: RequestType };
+
 /**
- * Request proposals and snapshots belong to one request. Reading them needs
- * access to that request, and editing a proposal needs edit access to its
- * document while the request is open. Returns the request and the versions it
- * has captured, so writes can resolve relations within the request.
+ * Checks request access for captured versions. Open create/update proposals require document edit
+ * access; publish copies can only be refreshed or moved through workflow with `manage`. Returns
+ * the request and captured versions for relation resolution.
  */
 const checkRequestVersionAccess: ServiceFn<
 	[
@@ -20,10 +24,10 @@ const checkRequestVersionAccess: ServiceFn<
 			documentId: number;
 			versionId: number;
 			user?: LucidActor;
-			edit?: boolean;
+			edit?: "content" | "manage";
 		},
 	],
-	DocumentHookRequest
+	RequestVersionOwner
 > = async (context, data) => {
 	const Requests = new RequestsRepository(context.db);
 
@@ -60,12 +64,13 @@ const checkRequestVersionAccess: ServiceFn<
 		};
 	}
 
-	const request = getHookRequest(owner);
+	const request = { ...getHookRequest(owner), type: owner.type };
 	if (!data.edit) return { error: undefined, data: request };
 
 	if (
 		owner.source !== "latest" ||
 		owner.source_version_id !== data.versionId ||
+		(data.edit === "content" && !changesContent(owner.type)) ||
 		!canEditDocument({
 			request: owner,
 			collectionKey: data.collectionKey,

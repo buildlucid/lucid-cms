@@ -268,7 +268,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 							</Show>
 							<Button
 								type="button"
-								variant="ghost"
+								variant="outline"
 								size="sm"
 								onClick={openMediaUploadPanel}
 								disabled={props.disabled || !canAddMore()}
@@ -374,6 +374,9 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 											aria-label={T()("media.select.new", {
 												type: props.type || "media",
 											})}
+											tooltip={T()("media.select.new", {
+												type: props.type || "media",
+											})}
 										>
 											<TbOutlinePencil size={12} />
 										</Button>
@@ -386,6 +389,9 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										onClick={clearSelection}
 										disabled={props.disabled}
 										aria-label={T()("media.remove.action", {
+											type: props.type || "media",
+										})}
+										tooltip={T()("media.remove.action", {
 											type: props.type || "media",
 										})}
 									>
@@ -642,6 +648,7 @@ const MediaSortableItem: Component<{
 						onClick={() => props.removeSelectedMedia(props.media.id)}
 						disabled={props.disabled}
 						aria-label={T()("common.remove")}
+						tooltip={T()("common.remove")}
 					>
 						<TbOutlineX size={14} />
 					</Button>

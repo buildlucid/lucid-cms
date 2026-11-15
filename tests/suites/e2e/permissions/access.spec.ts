@@ -67,6 +67,51 @@ test.describe("what people see in the admin", () => {
 		await expect(page).toHaveURL(/\/admin$/);
 	});
 
+	test("a story reader opens a story from the list to view it, rather than an action like exporting it", async ({
+		lucid,
+		pageAs,
+	}) => {
+		const admin = await lucid.admin();
+		const title = `Viewed ${crypto.randomUUID().slice(0, 8)}`;
+		const id = await createDocument(admin, STORY_KEY, {
+			fields: [{ key: "title", type: "text", value: title }],
+		});
+		const { session } = await lucid.user({ permissions: [READ_STORIES] });
+		const page = await pageAs(session);
+
+		await page.goto(`/admin/collections/${STORY_KEY}`);
+		await page
+			.getByRole("row")
+			.filter({ hasText: title })
+			.getByText(title)
+			.click();
+		await expect(page).toHaveURL(
+			new RegExp(`/admin/collections/${STORY_KEY}/latest/${id}(/|\\?|$)`),
+		);
+		await expect(page.getByRole("textbox", { name: "Title" })).toBeDisabled();
+		await expect(page.getByRole("alertdialog")).toHaveCount(0);
+	});
+
+	test("people who can only request stories ask for new ones from the list", async ({
+		lucid,
+		pageAs,
+	}) => {
+		const { session } = await lucid.user({
+			permissions: [READ_STORIES, `documents:${STORY_KEY}:create-request`],
+		});
+		const page = await pageAs(session);
+
+		await page.goto(`/admin/collections/${STORY_KEY}`);
+		await page.getByRole("button", { name: "Create" }).click();
+		await page.getByRole("menuitem", { name: "Request Story" }).click();
+		await expect(page).toHaveURL(
+			new RegExp(`/admin/collections/${STORY_KEY}/latest/create`),
+		);
+		await expect(
+			page.getByRole("button", { name: "Request", exact: true }),
+		).toBeVisible();
+	});
+
 	test("fields people can't read are hidden, and fields they can't change are locked", async ({
 		lucid,
 		pageAs,

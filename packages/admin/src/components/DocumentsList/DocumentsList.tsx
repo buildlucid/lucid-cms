@@ -62,6 +62,7 @@ import {
 	tableHeadColumns,
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
+import { getDocumentCreateActions, getLatestAccess } from "@/utils/requests";
 import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import spawnToast from "@/utils/spawn-toast";
 import { useDocumentOrderSave } from "./hooks/useDocumentOrderSave";
@@ -219,11 +220,10 @@ export const DocumentsList: Component<{
 		const permissions = collectionPermissions();
 		if (!permissions) return false;
 
-		return (
-			userStore.get.hasPermission([permissions.delete]).all ||
-			(userStore.get.hasPermission([Permissions.RequestsRead]).all &&
-				userStore.get.hasPermission([permissions.deleteRequest]).all)
-		);
+		return userStore.get.hasPermission([
+			permissions.delete,
+			permissions.deleteRequest,
+		]).some;
 	});
 	const canUpdateDocuments = createMemo(() => {
 		const permission = collectionPermissions()?.update;
@@ -231,20 +231,25 @@ export const DocumentsList: Component<{
 
 		return userStore.get.hasPermission([permission]).some;
 	});
-	const canDuplicateDocuments = createMemo(() => {
-		const permissions = collectionPermissions();
-		if (!permissions) return false;
-
-		return userStore.get.hasPermission([permissions.read, permissions.create])
-			.all;
-	});
+	//* the editor offers requesting as well, so the button opens the default
+	const createAction = createMemo(() =>
+		props.state.collection?.locked === true
+			? undefined
+			: getDocumentCreateActions(props.state.collection)[0],
+	);
+	//* everyone who can read opens the builder, which locks for people who can't change latest
+	const canChangeLatest = createMemo(
+		() => getLatestAccess(props.state.collection) !== null,
+	);
+	//* copies are created straight away or requested, as new documents are
+	const canDuplicateDocuments = createMemo(() => createAction() !== undefined);
 	const canExportDocuments = createMemo(
 		() =>
 			props.state.collection?.transfer.export === true &&
 			!props.state.showingDeleted() &&
 			!props.state.showingRequests(),
 	);
-	//* translations start from latest content, so bin and request views leave it out
+	//* translations start from latest content, so bin and request views leave it out, and they go into update requests, which people who propose changes open too
 	const canTranslateDocuments = createMemo(() => {
 		const localization = props.state.collection?.localized;
 		const permissions = collectionPermissions();
@@ -255,12 +260,9 @@ export const DocumentsList: Component<{
 			!props.state.showingRequests() &&
 			siteStore.get.isAiFeatureEnabled("translation") &&
 			permissions !== undefined &&
-			userStore.get.hasPermission([
-				Permissions.AiTranslate,
-				Permissions.RequestsRead,
-				permissions.read,
-				permissions.update,
-			]).all
+			canChangeLatest() &&
+			userStore.get.hasPermission([Permissions.AiTranslate, permissions.read])
+				.all
 		);
 	});
 	//* offered without a Lucid connection too, explaining why it can't run when chosen
@@ -363,13 +365,20 @@ export const DocumentsList: Component<{
 				collectionMultiple: collectionName().toLowerCase(),
 				collectionSingle: collectionSingularName().toLowerCase(),
 			}),
-			button: T()("actions.create.document", {
-				collectionSingle: collectionSingularName(),
-			}),
+			button:
+				createAction() === "request"
+					? T()("documents.request.create", { name: collectionSingularName() })
+					: T()("actions.create.document", {
+							collectionSingle: collectionSingularName(),
+						}),
 		};
 	});
 	const createEntryCallback = createMemo(() => {
-		if (props.state.showingDeleted() || props.state.showingRequests()) {
+		if (
+			props.state.showingDeleted() ||
+			props.state.showingRequests() ||
+			createAction() === undefined
+		) {
 			return undefined;
 		}
 		return documentCreateEntry;
@@ -531,11 +540,7 @@ export const DocumentsList: Component<{
 						description={noEntriesCopy()?.description}
 						actions={
 							createEntryCallback() ? (
-								<Button
-									size="sm"
-									onClick={createEntryCallback()}
-									permission={collectionPermissions()?.create}
-								>
+								<Button size="sm" onClick={createEntryCallback()}>
 									{noEntriesCopy()?.button ?? T()("actions.create.entry")}
 								</Button>
 							) : undefined
@@ -678,16 +683,20 @@ export const DocumentsList: Component<{
 										sortOrder: 20,
 									},
 									{
-										label: getActionLabel(T()("common.edit")),
+										label: getActionLabel(
+											canChangeLatest()
+												? T()("common.edit")
+												: T()("common.view"),
+										),
 										type: "link",
-										icon: "pen",
+										icon: canChangeLatest() ? "pen" : "eye",
 										href: getDocumentRoute("edit", {
 											collectionKey: props.state.collection?.key as string,
 											documentId: doc().id,
 										}),
-										permission: collectionPermissions()?.update
+										permission: collectionPermissions()?.read
 											? userStore.get.hasPermission([
-													collectionPermissions()?.update,
+													collectionPermissions()?.read,
 												]).some
 											: false,
 										show:
@@ -745,6 +754,7 @@ export const DocumentsList: Component<{
 											!props.state.showingRequests() &&
 											props.state.collection?.locked !== true &&
 											props.state.collection?.mode === "multiple",
+										excludeFromRowClick: true,
 										sortOrder: 30,
 									},
 									{
@@ -754,6 +764,7 @@ export const DocumentsList: Component<{
 										onClick: () => openExport([doc().id]),
 										permission: true,
 										show: canExportDocuments(),
+										excludeFromRowClick: true,
 										sortOrder: 40,
 									},
 									{
@@ -771,6 +782,7 @@ export const DocumentsList: Component<{
 											: false,
 										show: props.state.showingDeleted() !== false,
 										variant: "primary",
+										excludeFromRowClick: true,
 										sortOrder: 50,
 									},
 									{
@@ -804,6 +816,7 @@ export const DocumentsList: Component<{
 											: false,
 										show: props.state.showingDeleted?.() !== false,
 										variant: "danger",
+										excludeFromRowClick: true,
 										sortOrder: 80,
 									},
 								]}
@@ -830,16 +843,6 @@ export const DocumentsList: Component<{
 						},
 					}}
 					collection={props.state.collection as Collection}
-					callbacks={{
-						onSuccess: (documentId) => {
-							navigate(
-								getDocumentRoute("edit", {
-									collectionKey: collectionKey(),
-									documentId,
-								}),
-							);
-						},
-					}}
 				/>
 				<TranslateModal
 					open={translateOpen()}

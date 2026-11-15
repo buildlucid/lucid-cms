@@ -1,7 +1,7 @@
 import { debounce } from "@solid-primitives/scheduled";
 import classNames from "classnames";
 import { TbOutlineTrash } from "solid-icons/tb";
-import { type Component, createSignal } from "solid-js";
+import { type Component, createMemo, createSignal } from "solid-js";
 import Button from "@/components/Button/Button";
 import T from "@/translations/index";
 
@@ -14,8 +14,16 @@ interface DeleteButtonProps {
 
 const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 	// -------------------------------
-	// State
+	// State & Hooks
 	const [getConfirmRemove, setConfirmRemove] = createSignal<0 | 1>(0);
+
+	// -------------------------------
+	// Memos
+	const label = createMemo(() =>
+		getConfirmRemove() === 1
+			? T()("common.confirmations.delete")
+			: T()("common.delete"),
+	);
 
 	// -------------------------------
 	// Functions
@@ -49,12 +57,8 @@ const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 				setConfirmRemove(1);
 				revertConfigDelete();
 			}}
-			aria-label={
-				getConfirmRemove() === 1
-					? T()("common.confirmations.delete")
-					: T()("common.delete")
-			}
-			tooltip={props.title}
+			aria-label={label()}
+			tooltip={props.title ?? label()}
 			disabled={props.disabled}
 		>
 			<TbOutlineTrash size={14} />

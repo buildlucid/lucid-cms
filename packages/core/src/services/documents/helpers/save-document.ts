@@ -31,7 +31,8 @@ import requiresReview from "./requires-review.js";
 /**
  * Persists a full payload. Callers own the transaction and any existing-document claim.
  * A requested document is saved as its create request's proposal instead of latest,
- * and stays hidden until the request is completed.
+ * and stays hidden until the request is completed. Collections that review updates
+ * refuse saves to an existing document's latest, which go through update requests.
  */
 const saveDocument: ServiceFn<
 	[
@@ -107,6 +108,20 @@ const saveDocument: ServiceFn<
 			error: {
 				type: "basic",
 				message: copy("server:core.documents.create.review.required"),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
+
+	if (
+		data.documentId !== undefined &&
+		requiresReview(collectionRes.data, { type: "update" })
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.documents.update.review.required"),
 				status: 403,
 			},
 			data: undefined,

@@ -35,7 +35,7 @@ const openTranslationRequest: ServiceFn<
 				(entry) => entry.code === data.locale,
 			)?.label ?? data.locale;
 		const createdRes = await createRequest(context, {
-			type: "publish",
+			type: "update",
 			title: context.translate(
 				copy(
 					data.documentIds.length === 1

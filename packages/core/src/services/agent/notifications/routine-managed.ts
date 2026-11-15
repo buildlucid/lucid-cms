@@ -2,6 +2,7 @@ import z from "zod";
 import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
+import { receivesAgent } from "./shared.js";
 
 /** Tells an owner that someone overseeing routines paused, resumed or deleted one of theirs. */
 export const routineManagedNotification = defineNotification({
@@ -19,6 +20,7 @@ export const routineManagedNotification = defineNotification({
 	),
 	level: "info",
 	audience: "recipients",
+	receivable: receivesAgent,
 	defaults: { email: false },
 	data: z.object({
 		name: z.string(),

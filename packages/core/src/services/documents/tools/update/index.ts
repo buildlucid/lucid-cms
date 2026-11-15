@@ -4,6 +4,7 @@ import { getPermittedCollectionKeys } from "../../../../libs/permission/readable
 import defineTool from "../../../../libs/tools/define-tool.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import requiresReview from "../../helpers/requires-review.js";
 import writeChanges from "../helpers/write-changes.js";
 import type { DocumentWriteToolOptions } from "../types.js";
 import updateDocument from "./handler.js";
@@ -20,8 +21,8 @@ export const updateDocumentAgentTool = (
 		description: ({ screen }) =>
 			[
 				options.direct
-					? "Update a document's fields and bricks, sending only what changes. Read it with documents_get first and reuse its refs. Before writing new copy, check collections_describe for the collection's writing instructions. Changes are saved to latest. Pass requestId to change a request's proposal instead, eg. a document waiting in a create request."
-					: "Update a document's fields and bricks, sending only what changes. Read it with documents_get first and reuse its refs. Before writing new copy, check collections_describe for the collection's writing instructions. Changes are proposed in a request for people to review and approve, and this chat's open request for the document is reused. Pass requestId to change a specific request, eg. a document waiting in a create request.",
+					? "Update a document's fields and bricks, sending only what changes. Read it with documents_get first and reuse its refs. Before writing new copy, check collections_describe for the collection's writing instructions. Changes are saved to latest, unless the collection reviews updates, when they're proposed in an update request. Pass requestId to change a request's proposal instead, eg. a document waiting in a create request."
+					: "Update a document's fields and bricks, sending only what changes. Read it with documents_get first and reuse its refs. Before writing new copy, check collections_describe for the collection's writing instructions. Changes are proposed in an update request for people to review and approve, and this chat's open request for the document is reused. Pass requestId to change a specific request, eg. a document waiting in a create request.",
 				screen === "document"
 					? "For the document the person has open in the document builder, use lucid_builder_update instead, which keeps their unsaved changes."
 					: "",
@@ -34,7 +35,14 @@ export const updateDocumentAgentTool = (
 			permissions: [],
 			//* Requests already receive review, so only direct writes need confirmation.
 			requiresConfirmation: options.direct
-				? ({ input }) => input.requestId === undefined
+				? ({ input, config }) =>
+						input.requestId === undefined &&
+						!requiresReview(
+							config.collections.find(
+								(collection) => collection.key === input.collectionKey,
+							),
+							{ type: "update" },
+						)
 				: false,
 			inputPermissions: ({ input: { collectionKey } }) => [
 				getCollectionPermission(collectionKey, "read"),

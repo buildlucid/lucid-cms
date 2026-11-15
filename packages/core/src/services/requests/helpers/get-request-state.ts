@@ -124,7 +124,7 @@ const getRequestState: ServiceFn<
 			//* snapshots have no stage, and stages only gate create requests while the collection requires them
 			const staged =
 				document.source === "latest" &&
-				(data.request.type === "publish" ||
+				(data.request.type !== "create" ||
 					requiresReview(collection, { type: "create" }));
 			const versions = (versionsRes.data ?? []).filter(
 				(version) => version.document_id === document.document_id,

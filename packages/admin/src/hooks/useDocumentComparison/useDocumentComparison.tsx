@@ -8,12 +8,10 @@ import {
 	createSignal,
 	on,
 } from "solid-js";
-import { Permissions } from "@/constants/permissions";
 import { useBuilderSideBySide } from "@/hooks/useBuilderSideBySide/useBuilderSideBySide";
 import api from "@/services/api";
 import { createBrickStore } from "@/store/brickStore/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { formatRelationFilterValue } from "@/utils/document-filter-fields";
 import helpers from "@/utils/helpers";
@@ -42,11 +40,8 @@ export type ComparisonOption = {
 const rememberedViews = new Map<string, string>();
 
 /**
- * Side-by-side state for the page builder. The selected right column version
- * lives in the `compare` search param so it survives moving between editable
- * versions. The displayed right document stays pinned while its current
- * version is queried, so a change elsewhere shows a notice instead of
- * swapping content under the reader.
+ * Stores the comparison version in `compare` across editable-version navigation. Pins displayed
+ * content while checking for updates, showing a notice instead of replacing it.
  */
 export const useDocumentComparison = (props: {
 	state: UseDocumentState;
@@ -83,10 +78,7 @@ export const useDocumentComparison = (props: {
 			},
 			perPage: 100,
 		},
-		enabled: () =>
-			props.available() &&
-			props.state.documentId() !== undefined &&
-			userStore.get.hasPermission([Permissions.RequestsRead]).all,
+		enabled: () => props.available() && props.state.documentId() !== undefined,
 	});
 
 	// ----------------------------------------

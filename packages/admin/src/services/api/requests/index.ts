@@ -12,6 +12,7 @@ import useGetMultiple from "./useGetMultiple";
 import useGetOverview from "./useGetOverview";
 import useGetReviewers from "./useGetReviewers";
 import useGetSingle from "./useGetSingle";
+import useRefreshDocument from "./useRefreshDocument";
 import useRemoveDocument from "./useRemoveDocument";
 import useReopen from "./useReopen";
 import useUnapprove from "./useUnapprove";
@@ -23,6 +24,7 @@ import useUpdateTargets from "./useUpdateTargets";
 const exportObject = {
 	useAddDocuments,
 	useRemoveDocument,
+	useRefreshDocument,
 	useAcknowledgeTarget,
 	useGetMultiple,
 	useGetOverview,

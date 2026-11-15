@@ -32,18 +32,16 @@ export const translateDocumentAgentTool = (
 		input: inputSchema,
 		output: outputSchema,
 		agent: {
-			permissions: options.direct
-				? [Permissions.AiTranslate]
-				: [Permissions.AiTranslate, Permissions.RequestsRead],
+			permissions: [Permissions.AiTranslate],
 			available: ({ config, aiAccess }) =>
 				isAiFeatureEnabled(config, "translation", aiAccess),
 			//* requests already receive review, so only saving to latest needs confirmation
 			requiresConfirmation: options.direct
 				? ({ input }) => input.requestId === undefined
 				: false,
+			//* translating checks update or update-request access by where it delivers
 			inputPermissions: ({ input: { collectionKey } }) => [
 				getCollectionPermission(collectionKey, "read"),
-				getCollectionPermission(collectionKey, "update"),
 			],
 		},
 		//* translating calls Lucid AI for a while, so requests open in their own transactions

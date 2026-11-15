@@ -1,4 +1,7 @@
 import z from "zod";
+import type { NotificationReceivable } from "../../../libs/notifications/types.js";
+import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
+import hasPermission from "../../../libs/permission/has-permission.js";
 import getEditPath from "../../documents/helpers/get-edit-path.js";
 import getRequestPath from "../../requests/helpers/get-request-path.js";
 
@@ -17,3 +20,11 @@ export const workflowHref = (data: z.output<typeof workflowData>) =>
 	data.requestId === null
 		? getEditPath(data.collectionKey, "latest", data.documentId)
 		: getRequestPath(data.requestId, data);
+
+/** People who can be assigned a stage: those who update a collection with a workflow. */
+export const receivesWorkflows: NotificationReceivable = ({ user, config }) =>
+	config.collections.some(
+		(collection) =>
+			collection.getData.publishing.workflow !== undefined &&
+			hasPermission(user, getCollectionPermission(collection.key, "update")),
+	);

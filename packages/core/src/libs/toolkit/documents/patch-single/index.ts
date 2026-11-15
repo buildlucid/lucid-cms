@@ -10,7 +10,7 @@ import type { ToolkitDocumentsPatchSingleInput } from "./types.js";
 
 export type * from "./types.js";
 
-/** Applies ordered operations, then validates and saves latest or the request proposal selected by `requestId`. */
+/** Applies ordered operations, then validates and saves latest, the request proposal selected by `requestId`, or a new update request with `request`. */
 const patchSingle = <K extends string>(
 	context: ServiceContext,
 	input: ToolkitDocumentsPatchSingleInput<K>,
@@ -18,7 +18,7 @@ const patchSingle = <K extends string>(
 	runToolkitService({
 		schema: inputSchema,
 		input,
-		handler: async ({ actor, requestId, ...data }) => {
+		handler: async ({ actor, requestId, request, ...data }) => {
 			const { default: writeSingle } =
 				await import("../../../../services/documents/write-single.js");
 
@@ -27,14 +27,17 @@ const patchSingle = <K extends string>(
 				collectionKey: data.collectionKey,
 				id: data.id,
 				requestId,
-				action: "update",
+				//* proposals check update or update-request access themselves
+				action: request === undefined ? "update" : "read",
 			});
 			if (versionRes.error) return versionRes;
 
 			return writeSingle(context, {
 				...data,
 				...versionRes.data.actor,
-				versionId: versionRes.data.versionId,
+				...(request === undefined
+					? { versionId: versionRes.data.versionId }
+					: { request }),
 				kind: "patch",
 			});
 		},

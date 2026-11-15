@@ -10,18 +10,22 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import Input from "@/components/Input/Input";
 import Modal from "@/components/Modal/Modal";
 import Select from "@/components/Select/Select";
+import Tabs from "@/components/Tabs/Tabs";
 import api from "@/services/api";
 import brickStore from "@/store/brickStore/brickStore";
 import T from "@/translations";
+import { getChangeModes, type LatestAccess } from "@/utils/requests";
 
 export type AlignmentSource = { key: string; label: string; contentId: string };
 
+type AlignMode = ReturnType<typeof getChangeModes>[number];
+
 /**
- * Replaces the open document's content with another version's, chosen from
- * the sources it can align with. Autosave is paused while it is open so a
- * pending save can't write the content being replaced.
+ * Aligns content with a selected version, pausing autosave while open. On latest, the New Request
+ * tab creates and opens an update proposal. Proposal-only users see that tab alone.
  */
 const AlignDocumentModal: Component<{
 	open: boolean;
@@ -31,8 +35,12 @@ const AlignDocumentModal: Component<{
 	destinationContentId: string | undefined;
 	busy: boolean;
 	retainsRevision: boolean;
+	/** How the person changes latest, when latest is being aligned. Left out for proposals, which align straight away. */
+	latestAccess?: LatestAccess;
 	refetch: () => Promise<unknown>;
 	onAligned: () => void;
+	/** Opens the update request that proposes the alignment. */
+	onProposed?: (requestId: number) => void;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -41,6 +49,8 @@ const AlignDocumentModal: Component<{
 	let destinationContentId: string | undefined;
 	let destinationVersionId: number | null = null;
 	const [sourceKey, setSourceKey] = createSignal<string>();
+	const [mode, setMode] = createSignal<AlignMode>("now");
+	const [title, setTitle] = createSignal("");
 	const [confirming, setConfirming] = createSignal(false);
 
 	// ----------------------------------------
@@ -54,6 +64,16 @@ const AlignDocumentModal: Component<{
 
 	// ----------------------------------------
 	// Memos
+	const modes = createMemo(() =>
+		getChangeModes(props.latestAccess).map((value) => ({
+			value,
+			label:
+				value === "now"
+					? T()("documents.align.now")
+					: T()("requests.mode.request"),
+		})),
+	);
+	const proposing = createMemo(() => mode() === "request");
 	const source = createMemo(() =>
 		props.sources.find((source) => source.key === sourceKey()),
 	);
@@ -72,7 +92,7 @@ const AlignDocumentModal: Component<{
 		}
 		setConfirming(true);
 		try {
-			await align.action.mutateAsync({
+			const aligned = await align.action.mutateAsync({
 				collectionKey: props.document.collectionKey,
 				documentId: props.document.id,
 				versionId: destinationVersionId,
@@ -80,10 +100,16 @@ const AlignDocumentModal: Component<{
 					source: selected.key,
 					sourceContentId: selected.contentId,
 					destinationContentId,
+					request: proposing() ? { title: title().trim() } : undefined,
 				},
 			});
-			await props.refetch();
 			props.setOpen(false);
+			const requestId = aligned.data.requestId;
+			if (requestId !== null) {
+				props.onProposed?.(requestId);
+				return;
+			}
+			await props.refetch();
 		} catch {
 			return;
 		} finally {
@@ -103,6 +129,8 @@ const AlignDocumentModal: Component<{
 				destinationContentId = props.destinationContentId;
 				destinationVersionId = props.document.versionId;
 				setSourceKey(props.sources[0]?.key);
+				setMode(modes()[0]?.value ?? "now");
+				setTitle(T()("documents.align.request.default"));
 				align.reset();
 			} else if (!open && hasPaused) {
 				brickStore.set("autoSavePaused", pausedBeforeOpen);
@@ -122,11 +150,23 @@ const AlignDocumentModal: Component<{
 			onOpenChange={(open) => {
 				if (!open && !confirming()) props.setOpen(false);
 			}}
+			above={
+				<Show when={modes().length > 1}>
+					<Tabs.Root
+						stretch={true}
+						value={mode()}
+						onChange={(value) => setMode(value as AlignMode)}
+						items={modes()}
+					/>
+				</Show>
+			}
 		>
 			<Modal.Header>
 				<Modal.Title>{T()("documents.align.title")}</Modal.Title>
 				<Modal.Description>
-					{T()("documents.align.description")}
+					{proposing()
+						? T()("documents.align.request.description")
+						: T()("documents.align.description")}
 				</Modal.Description>
 			</Modal.Header>
 			<Modal.Body>
@@ -143,7 +183,20 @@ const AlignDocumentModal: Component<{
 						if (typeof value === "string") setSourceKey(value);
 					}}
 				/>
-				<Show when={props.retainsRevision}>
+				<Show when={proposing()}>
+					<div class="mt-4">
+						<Input
+							id="align-request-title"
+							name="title"
+							type="text"
+							value={title()}
+							onChange={setTitle}
+							required={true}
+							label={T()("requests.title.label")}
+						/>
+					</div>
+				</Show>
+				<Show when={props.retainsRevision && !proposing()}>
 					<p class="mt-4 text-sm text-body">
 						{T()("documents.align.revision")}
 					</p>
@@ -164,12 +217,15 @@ const AlignDocumentModal: Component<{
 							props.busy ||
 							!source() ||
 							!destinationContentId ||
-							destinationVersionId === null
+							destinationVersionId === null ||
+							(proposing() && !title().trim())
 						}
 						loading={confirming()}
 						onClick={() => void confirm()}
 					>
-						{T()("documents.align.confirm")}
+						{proposing()
+							? T()("documents.propose.submit")
+							: T()("documents.align.confirm")}
 					</Button>
 				</Modal.Actions>
 			</Modal.Footer>

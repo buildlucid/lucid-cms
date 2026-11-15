@@ -14,6 +14,7 @@ import getMultiple from "../../../controllers/requests/get-multiple.js";
 import getOverview from "../../../controllers/requests/get-overview.js";
 import getReviewers from "../../../controllers/requests/get-reviewers.js";
 import getSingle from "../../../controllers/requests/get-single.js";
+import refreshDocument from "../../../controllers/requests/refresh-document.js";
 import removeDocument from "../../../controllers/requests/remove-document.js";
 import reopen from "../../../controllers/requests/reopen.js";
 import unapprove from "../../../controllers/requests/unapprove.js";
@@ -33,6 +34,7 @@ const requestsRoutes = new Hono<LucidHonoGeneric>()
 	.get("/:id/mentionable-users", ...getMentionableUsers)
 	.post("/:id/documents", ...addDocuments)
 	.delete("/:id/documents/:requestDocumentId", ...removeDocument)
+	.post("/:id/documents/:requestDocumentId/refresh", ...refreshDocument)
 	.patch("/:id/documents/:requestDocumentId/targets", ...updateTargets)
 	.patch(
 		"/:id/documents/:requestDocumentId/targets/acknowledgement",

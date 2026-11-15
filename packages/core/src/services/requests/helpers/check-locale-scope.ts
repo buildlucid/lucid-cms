@@ -5,9 +5,8 @@ import type { LocalizationConfig } from "../../../types/config.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
 /**
- * Requests limited to some locales only write those locales' values onto
- * latest, so they capture latest, target only latest, and need a collection
- * that has every one of their locales.
+ * Update requests limited to some locales only write those locales' values
+ * onto latest, so they need a collection that has every one of their locales.
  */
 const checkLocaleScope = (data: {
 	collection: CollectionDefinition;

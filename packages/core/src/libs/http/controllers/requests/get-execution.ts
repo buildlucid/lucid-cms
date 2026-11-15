@@ -5,9 +5,7 @@ import { requestServices } from "../../../../services/index.js";
 import { LucidError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
-import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
-import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -28,7 +26,6 @@ const getExecutionController = factory.createHandlers(
 		}),
 	})),
 	authenticate(),
-	permissions([Permissions.RequestsRead]),
 	validate("param", controllerSchemas.getExecution.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

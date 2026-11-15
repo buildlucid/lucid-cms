@@ -11,7 +11,7 @@ const documentShape = {
 };
 const targetsInput = z.array(z.string().min(1)).meta({
 	description:
-		"See allowedTargets in requests_get. Publish requests from latest can also target latest, which completing replaces with the proposal. Unpublish requests take environments. Delete requests take none.",
+		"See allowedTargets in requests_get. Publish requests take environments after their source, and unpublish requests take the environments to remove documents from. Update requests always target latest, and delete requests take none.",
 });
 
 export const changeSchema = z.discriminatedUnion("type", [
@@ -42,7 +42,7 @@ export const changeSchema = z.discriminatedUnion("type", [
 	z.object({
 		type: z.literal("addDocument"),
 		...documentShape,
-		targets: targetsInput,
+		targets: targetsInput.optional(),
 		source: z.string().min(1).optional().meta({
 			description:
 				"Publish requests only: latest or an environment to publish from. Defaults to latest.",
@@ -60,7 +60,7 @@ export const inputSchema = z.object({
 	requestId: requestIdInput,
 	changes: z.array(changeSchema).min(1).meta({
 		description:
-			"Only the changes to make, eg. [{type:'title',title:'Spring launch'}]. Create requests keep their one document. Document and target changes dismiss approvals.",
+			"Only the changes to make, eg. [{type:'title',title:'Spring launch'}]. Create requests keep their one document, and update requests' targets stay latest. Document and target changes dismiss approvals.",
 	}),
 });
 

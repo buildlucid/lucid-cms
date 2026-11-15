@@ -1,7 +1,5 @@
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
-import { Permissions } from "../../libs/permission/definitions.js";
-import hasAccess from "../../libs/permission/has-access.js";
 import { RequestsRepository } from "../../libs/repositories/index.js";
 import type { LucidUser } from "../../types/hono.js";
 import type { RequestExecution } from "../../types/response.js";
@@ -16,22 +14,6 @@ const getExecution: ServiceFn<
 	RequestExecution | null
 > = async (context, data) => {
 	const Requests = new RequestsRepository(context.db);
-
-	if (
-		!hasAccess({
-			user: data.user,
-			requiredPermissions: [Permissions.RequestsRead],
-		})
-	) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.requests.not.found"),
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
 
 	const executionRes = await Requests.selectExecution({
 		id: data.id,

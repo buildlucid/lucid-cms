@@ -40,8 +40,10 @@ const DOCUMENTS = `/api/v1/documents/${TEAM_STORY_KEY}`;
 const ENVIRONMENTS = ["staging", "production"] as const;
 
 type Environment = (typeof ENVIRONMENTS)[number];
+/** Where a request lands content: latest for create and update requests, or an environment. */
+type Target = Environment | "latest";
 
-/** Who acts: the author, who can only ask, or one of the two reviewers. */
+/** Who acts: the author, who updates latest but asks for every other change, or one of the two reviewers. */
 const PEOPLE = ["author", "reviewer", "secondReviewer"] as const;
 type Person = (typeof PEOPLE)[number];
 
@@ -51,28 +53,28 @@ type Story = {
 	created: boolean;
 	latest: string;
 	published: Partial<Record<Environment, string>>;
-	/** Stands for each environment's version, which every publish replaces. Null when unpublished. */
-	versions: Record<Environment, number | null>;
+	/** Stands for latest's and each environment's version, which every save or publish replaces. Null when unpublished. */
+	versions: Record<Target, number | null>;
 	binned: boolean;
 };
 
 type Request = {
 	id: number;
-	type: "create" | "publish" | "unpublish" | "delete";
+	type: "create" | "update" | "publish" | "unpublish" | "delete";
 	documentId: number;
 	requestDocumentId: number;
 	by: Person;
 	status: "open" | "completed" | "closed";
-	/** What a create or publish request would write. */
+	/** What a create, update or publish request would write. */
 	proposal: string | null;
-	targets: Environment[];
+	targets: Target[];
 	approvals: Set<Person>;
 	approved: boolean;
 	openComments: number;
-	/** Environments that changed since the request was made, which stay changed. */
-	changed: Set<Environment>;
-	/** The environment version each acknowledgement was for. */
-	acknowledged: Map<Environment, number | null>;
+	/** Targets that changed since the request was made, which stay changed. */
+	changed: Set<Target>;
+	/** The target version each acknowledgement was for. */
+	acknowledged: Map<Target, number | null>;
 };
 
 type Model = {
@@ -148,16 +150,32 @@ const storyOf = (model: Model, request: Request) => {
 };
 
 const live = ([, story]: [number, Story]) => story.created && !story.binned;
+/** The environments a publish or unpublish request targets, which never include latest. */
+const environmentsOf = (request: Request) =>
+	request.targets.filter(
+		(target): target is Environment => target !== "latest",
+	);
 const open = (request: Request) => request.status === "open";
+//* only create and update requests' proposals take edits, as publish requests copy latest read only
 const writable = (request: Request) =>
-	open(request) && (request.type === "create" || request.type === "publish");
+	open(request) && (request.type === "create" || request.type === "update");
 
-/** Whether someone may change a request, as the CMS's `edit` permission says. */
-const canWrite = (request: Request, who: Person) =>
-	who !== "author" ||
-	request.type === "publish" ||
-	request.type === "unpublish" ||
-	request.by === "author";
+/**
+ * Whether someone can see a request. Reviewers review every story, while the author sees the
+ * requests they made and every update request, which their update permission lets them complete.
+ */
+const canRead = (request: Request, who: Person) =>
+	who !== "author" || request.type === "update" || request.by === "author";
+
+/**
+ * Whether someone may change a request, as the CMS's `edit` permission says. For these people it
+ * matches `canRead`, so anyone refused can't see the request either and gets "not found".
+ */
+const canWrite = canRead;
+
+/** Whether someone may complete a request: the author can only complete updates, which they can make. */
+const canComplete = (request: Request, who: Person) =>
+	who !== "author" || request.type === "update";
 
 /** Why the model expects a request can't be approved. Only open requests have blockers. */
 const blockersOf = (
@@ -195,11 +213,11 @@ const dismiss = (request: Request) => {
 	}
 };
 
-/** Records an environment changing under every other request for the story. */
-const changeEnvironment = (
+/** Records latest or an environment changing under every other request for the story. */
+const changeTarget = (
 	model: Model,
 	documentId: number,
-	environment: Environment,
+	target: Target,
 	excluding?: Request,
 ) => {
 	for (const request of model.requests) {
@@ -210,9 +228,9 @@ const changeEnvironment = (
 		) {
 			continue;
 		}
-		request.changed.add(environment);
-		request.acknowledged.delete(environment);
-		if (request.targets.includes(environment)) {
+		request.changed.add(target);
+		request.acknowledged.delete(target);
+		if (request.targets.includes(target)) {
 			dismiss(request);
 		}
 	}
@@ -231,7 +249,7 @@ const publishTo = (
 	}
 	story.published[environment] = content;
 	story.versions[environment] = model.nextVersion++;
-	changeEnvironment(model, documentId, environment, by);
+	changeTarget(model, documentId, environment, by);
 };
 
 const unpublishFrom = (
@@ -246,7 +264,7 @@ const unpublishFrom = (
 	}
 	delete story.published[environment];
 	story.versions[environment] = null;
-	changeEnvironment(model, documentId, environment, by);
+	changeTarget(model, documentId, environment, by);
 };
 
 /** Adds an opened request to the model, reading the ID of its document in the request. */
@@ -295,7 +313,7 @@ const openCreate = action<Model, { by: Person; word: string }>({
 			created: false,
 			latest: input.word,
 			published: {},
-			versions: { staging: null, production: null },
+			versions: { latest: null, staging: null, production: null },
 			binned: false,
 		});
 		await track(context, {
@@ -305,6 +323,28 @@ const openCreate = action<Model, { by: Person; word: string }>({
 			by: input.by,
 			proposal: input.word,
 			targets: [],
+		});
+	},
+});
+
+const openUpdate = action<Model, { story: number; by: Person }>({
+	name: "openUpdate",
+	input: fc.record({ story: fc.nat(), by: opener }),
+	when: some(storiesOf, live),
+	run: async (context) => {
+		const { model, input } = context;
+		const [documentId, story] = pick(model.stories, input.story, live);
+		const opened = await requestChange(sessionOf(model, input.by), "update", [
+			{ collectionKey: TEAM_STORY_KEY, documentId },
+		]);
+		expect(opened.status).toBe(201);
+		await track(context, {
+			id: opened.body.data.id,
+			type: "update",
+			documentId,
+			by: input.by,
+			proposal: story.latest,
+			targets: ["latest"],
 		});
 	},
 });
@@ -320,7 +360,7 @@ const openPublish = action<
 		const { model, input } = context;
 		const [documentId, story] = pick(model.stories, input.story, live);
 		//* production needs staging first, so it is always asked for with it
-		const targets: Environment[] = input.production
+		const targets: Target[] = input.production
 			? ["staging", "production"]
 			: ["staging"];
 		const opened = await requestChange(sessionOf(model, input.by), "publish", [
@@ -418,8 +458,9 @@ const editRequestProposal = action<Model, { request: number; word: string }>({
 
 /** Approves a request as someone, checking the CMS answers as the model expects. */
 const approveAs = async (model: Model, request: Request, by: Person) => {
-	const expected =
-		!open(request) || by === "author" || by === request.by
+	const expected = !canRead(request, by)
+		? 404
+		: !open(request) || by === "author" || by === request.by
 			? 403
 			: request.approved ||
 				  request.approvals.has(by) ||
@@ -427,7 +468,10 @@ const approveAs = async (model: Model, request: Request, by: Person) => {
 				? 409
 				: 204;
 
-	const approved = await approve(sessionOf(model, by), request.id);
+	//* reviewers read every request, so the token comes from one even when `by` can't see it
+	const token = (await readRequest(sessionOf(model, "reviewer"), request.id))
+		.reviewToken;
+	const approved = await approve(sessionOf(model, by), request.id, token);
 	expect(approved.status).toBe(expected);
 	if (expected === 204) {
 		request.approvals.add(by);
@@ -503,8 +547,13 @@ const withdrawApproval = action<Model, { request: number; by: Person }>({
 
 /** Completes a request as someone, checking the CMS answers and applies it as the model expects. */
 const completeAs = async (model: Model, request: Request, by: Person) => {
-	const expected =
-		!open(request) || by === "author" ? 403 : request.approved ? 202 : 409;
+	const expected = !canRead(request, by)
+		? 404
+		: !open(request) || !canComplete(request, by)
+			? 403
+			: request.approved
+				? 202
+				: 409;
 
 	const session = sessionOf(model, by);
 	const completed = await requestAction(session, request.id, "complete");
@@ -522,9 +571,15 @@ const completeAs = async (model: Model, request: Request, by: Person) => {
 		case "create":
 			story.created = true;
 			story.latest = request.proposal ?? story.latest;
+			story.versions.latest = model.nextVersion++;
+			break;
+		case "update":
+			story.latest = request.proposal ?? story.latest;
+			story.versions.latest = model.nextVersion++;
+			changeTarget(model, request.documentId, "latest", request);
 			break;
 		case "publish":
-			for (const target of request.targets) {
+			for (const target of environmentsOf(request)) {
 				publishTo(
 					model,
 					request.documentId,
@@ -535,7 +590,7 @@ const completeAs = async (model: Model, request: Request, by: Person) => {
 			}
 			break;
 		case "unpublish":
-			for (const target of request.targets) {
+			for (const target of environmentsOf(request)) {
 				unpublishFrom(model, request.documentId, target, request);
 			}
 			break;
@@ -583,7 +638,7 @@ const closeRequest = action<Model, { request: number; by: Person }>({
 	when: some((model) => model.requests, open),
 	run: async ({ model, input }) => {
 		const request = pick(newestFirst(model), input.request, open);
-		const expected = canWrite(request, input.by) ? 204 : 403;
+		const expected = canWrite(request, input.by) ? 204 : 404;
 
 		const closed = await requestAction(
 			sessionOf(model, input.by),
@@ -610,7 +665,7 @@ const reopenRequest = action<Model, { request: number; by: Person }>({
 			input.request,
 			(request) => request.status === "closed",
 		);
-		const expected = canWrite(request, input.by) ? 204 : 403;
+		const expected = canWrite(request, input.by) ? 204 : 404;
 
 		const reopened = await requestAction(
 			sessionOf(model, input.by),
@@ -637,7 +692,10 @@ const comment = action<Model, { request: number; by: Person }>({
 			request.id,
 			"A question",
 		);
-		expect(posted.status).toBe(204);
+		expect(posted.status).toBe(canRead(request, input.by) ? 204 : 404);
+		if (posted.status !== 204) {
+			return;
+		}
 		request.openComments += 1;
 		dismiss(request);
 	},
@@ -694,7 +752,7 @@ const acknowledge = action<Model, { request: number; by: Person }>({
 		if (!target) {
 			throw new Error(`Request ${request.id} has nothing to acknowledge.`);
 		}
-		const expected = canWrite(request, input.by) ? 204 : 403;
+		const expected = canWrite(request, input.by) ? 204 : 404;
 		const session = sessionOf(model, input.by);
 
 		const acknowledged = await session.request({
@@ -703,7 +761,9 @@ const acknowledge = action<Model, { request: number; by: Person }>({
 			body: {
 				target,
 				acknowledged: true,
-				ifUnchanged: (await readRequest(session, request.id)).reviewToken,
+				ifUnchanged: (
+					await readRequest(sessionOf(model, "reviewer"), request.id)
+				).reviewToken,
 			},
 		});
 		expect(acknowledged.status).toBe(expected);
@@ -722,7 +782,7 @@ const retarget = action<Model, { request: number; production: boolean }>({
 	when: some((model) => model.requests, retargetable),
 	run: async ({ model, input }) => {
 		const request = pick(newestFirst(model), input.request, retargetable);
-		const targets: Environment[] = input.production
+		const targets: Target[] = input.production
 			? ["staging", "production"]
 			: ["staging"];
 
@@ -758,8 +818,10 @@ const saveLatest = action<Model, { story: number; word: string }>({
 			documentId,
 			titled(input.word),
 		);
-		//* requests copied latest when they were made, so they keep their own proposals
+		//* requests copied latest when they were made, so they keep their own proposals, but those landing in latest are told
 		story.latest = input.word;
+		story.versions.latest = model.nextVersion++;
+		changeTarget(model, documentId, "latest");
 	},
 });
 
@@ -920,13 +982,18 @@ describe("request lifecycle", () => {
 					created: true,
 					latest: "first",
 					published: {},
-					versions: { staging: null, production: null },
+					versions: {
+						latest: model.nextVersion++,
+						staging: null,
+						production: null,
+					},
 					binned: false,
 				});
 			},
 			//* actions that move a request on are repeated, so approvals add up faster than changes withdraw them
 			actions: [
 				openCreate,
+				openUpdate,
 				...repeat(openPublish, 2),
 				openUnpublish,
 				openDelete,

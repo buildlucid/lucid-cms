@@ -124,8 +124,9 @@ export const outputSchema = z.object({
 			.object({
 				edit: z.boolean().meta({
 					description:
-						"Change details, documents and targets, close it, or acknowledge changes.",
+						"Change details, documents and targets, or acknowledge changes.",
 				}),
+				close: z.boolean().meta({ description: "Close it while open." }),
 				complete: z
 					.boolean()
 					.meta({ description: "Complete or schedule it once approved." }),

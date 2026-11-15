@@ -13,6 +13,7 @@ export { default as getMultiple } from "./get-multiple.js";
 export { default as getOverview } from "./get-overview.js";
 export { default as getReviewers } from "./get-reviewers.js";
 export { default as getSingle } from "./get-single.js";
+export { default as refreshDocument } from "./refresh-document.js";
 export { default as removeDocument } from "./remove-document.js";
 export { default as reopen } from "./reopen.js";
 export { default as unapprove } from "./unapprove.js";

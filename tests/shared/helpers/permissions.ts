@@ -125,6 +125,8 @@ const CHAT_ACCESS = {
 	some: AGENT_KEYS.map((key) => `agents:${key}:chat`),
 };
 
+const REQUEST_ACCESS = checkedIn("../requests/access.test.ts");
+
 const MEDIA_GENERATION = { some: ["ai:image-generate", "ai:audio-generate"] };
 const NEEDS_DEPLOY = notCovered("Needs a deploy in the setup's config.");
 const NEEDS_TRANSFER = notCovered("Needs a transfer in the setup's config.");
@@ -370,10 +372,13 @@ export const routes = {
 	"DELETE /api/v1/documents/{collectionKey}/{id}/permanent": needs(
 		story("delete"),
 	),
-	"POST /api/v1/documents/{collectionKey}/{id}/duplicate": needs([
-		story("read"),
-		story("create"),
-	]),
+	//* proposing needs update or update-request on top of reading, which the service checks
+	"POST /api/v1/documents/{collectionKey}/{id}/propose": checkedIn(
+		"../requests/update.test.ts",
+	),
+	//* duplicating needs create, or create-request when it opens a request, which the service checks
+	"POST /api/v1/documents/{collectionKey}/{id}/duplicate":
+		checkedIn("documents.test.ts"),
 	"POST /api/v1/documents/{collectionKey}/{id}/publish": needs(
 		[story("read"), story("publish")],
 		{ body: { environment: "staging" } },
@@ -382,9 +387,8 @@ export const routes = {
 		[story("read"), story("publish")],
 		{ body: { environment: "staging" } },
 	),
-	"PATCH /api/v1/documents/{collectionKey}/{id}/workflow": needs(
-		story("update"),
-	),
+	//* latest's stage needs update and a proposal's needs edit access to its request, which the service checks
+	"PATCH /api/v1/documents/{collectionKey}/{id}/workflow": needs(story("read")),
 	"PATCH /api/v1/documents/{collectionKey}/{id}/order": needs(story("update"), {
 		body: { previousDocumentId: null, nextDocumentId: null },
 	}),
@@ -420,8 +424,9 @@ export const routes = {
 			skipAllowed: "It needs a live preview token.",
 		},
 	),
+	//* proposals take request edit access and latest takes update, which the service checks
 	"POST /api/v1/documents/{collectionKey}/{id}/{versionId}/align": needs(
-		story("update"),
+		story("read"),
 		{
 			body: {
 				source: "staging",
@@ -430,6 +435,7 @@ export const routes = {
 			},
 		},
 	),
+	//* restoring to latest also needs update, or update-request to propose it, which the service checks
 	"POST /api/v1/documents/{collectionKey}/{id}/{versionId}/restore-revision":
 		needs(story("restore")),
 	"POST /api/v1/documents/{collectionKey}/{id}/{versionId}/promote-version":
@@ -451,33 +457,36 @@ export const routes = {
 	//* previews are opened with the preview token in the body
 	"POST /api/v1/content/preview": PUBLIC,
 
-	//* requests and review
-	"GET /api/v1/review/overview": needs("requests:read"),
-	"GET /api/v1/requests": needs("requests:read"),
-	"POST /api/v1/requests": needs("requests:read"),
-	"GET /api/v1/requests/overview": needs("requests:read"),
-	"GET /api/v1/requests/{id}": needs("requests:read"),
-	"PATCH /api/v1/requests/{id}": needs("requests:read"),
-	"GET /api/v1/requests/{id}/execution": needs("requests:read"),
-	"GET /api/v1/requests/{id}/reviewers": needs("requests:read"),
-	"GET /api/v1/requests/{id}/mentionable-users": needs("requests:read"),
-	"POST /api/v1/requests/{id}/documents": needs("requests:read"),
-	"DELETE /api/v1/requests/{id}/documents/{requestDocumentId}":
-		needs("requests:read"),
+	//* requests and review: anyone signed in gets through, and services only show people the
+	//* requests they're involved in. `access.test.ts` checks reading, and the request-lifecycle
+	//* simulation checks acting on requests people can't see
+	"GET /api/v1/review/overview": SIGNED_IN,
+	"GET /api/v1/requests": REQUEST_ACCESS,
+	//* opening one needs each document's action or its request permission
+	"POST /api/v1/requests": checkedIn("documents.test.ts"),
+	"GET /api/v1/requests/overview": REQUEST_ACCESS,
+	"GET /api/v1/requests/{id}": REQUEST_ACCESS,
+	"PATCH /api/v1/requests/{id}": REQUEST_ACCESS,
+	"GET /api/v1/requests/{id}/execution": REQUEST_ACCESS,
+	"GET /api/v1/requests/{id}/reviewers": REQUEST_ACCESS,
+	"GET /api/v1/requests/{id}/mentionable-users": REQUEST_ACCESS,
+	"POST /api/v1/requests/{id}/documents": REQUEST_ACCESS,
+	"DELETE /api/v1/requests/{id}/documents/{requestDocumentId}": REQUEST_ACCESS,
+	"POST /api/v1/requests/{id}/documents/{requestDocumentId}/refresh":
+		REQUEST_ACCESS,
 	"PATCH /api/v1/requests/{id}/documents/{requestDocumentId}/targets":
-		needs("requests:read"),
+		REQUEST_ACCESS,
 	"PATCH /api/v1/requests/{id}/documents/{requestDocumentId}/targets/acknowledgement":
-		needs("requests:read"),
-	"POST /api/v1/requests/{id}/approve": needs("requests:read"),
-	"POST /api/v1/requests/{id}/unapprove": needs("requests:read"),
-	"POST /api/v1/requests/{id}/complete": needs("requests:read"),
-	"POST /api/v1/requests/{id}/close": needs("requests:read"),
-	"POST /api/v1/requests/{id}/reopen": needs("requests:read"),
-	"POST /api/v1/requests/{id}/comments": needs("requests:read"),
-	"PATCH /api/v1/requests/{id}/comments/{commentId}": needs("requests:read"),
-	"DELETE /api/v1/requests/{id}/comments/{commentId}": needs("requests:read"),
-	"PATCH /api/v1/requests/{id}/comments/{commentId}/resolution":
-		needs("requests:read"),
+		REQUEST_ACCESS,
+	"POST /api/v1/requests/{id}/approve": REQUEST_ACCESS,
+	"POST /api/v1/requests/{id}/unapprove": REQUEST_ACCESS,
+	"POST /api/v1/requests/{id}/complete": REQUEST_ACCESS,
+	"POST /api/v1/requests/{id}/close": REQUEST_ACCESS,
+	"POST /api/v1/requests/{id}/reopen": REQUEST_ACCESS,
+	"POST /api/v1/requests/{id}/comments": REQUEST_ACCESS,
+	"PATCH /api/v1/requests/{id}/comments/{commentId}": REQUEST_ACCESS,
+	"DELETE /api/v1/requests/{id}/comments/{commentId}": REQUEST_ACCESS,
+	"PATCH /api/v1/requests/{id}/comments/{commentId}/resolution": REQUEST_ACCESS,
 
 	//* media
 	"GET /api/v1/media": checkedIn("ownership.test.ts"),

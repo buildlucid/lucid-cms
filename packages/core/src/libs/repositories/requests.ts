@@ -1,6 +1,9 @@
 import { type ExpressionBuilder, sql } from "kysely";
 import constants from "../../constants/constants.js";
-import type { GetMultipleQueryParams } from "../../schemas/requests.js";
+import {
+	type GetMultipleQueryParams,
+	requestTypeSchema,
+} from "../../schemas/requests.js";
 import parseDocumentRefValue from "../../utils/helpers/parse-document-ref-value.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
@@ -8,7 +11,7 @@ import type {
 	LucidRequestDocuments,
 	LucidRequests,
 } from "../db/tables/index.js";
-import { requestsTable } from "../db/tables/requests.js";
+import { type RequestType, requestsTable } from "../db/tables/requests.js";
 import type { LucidDB, Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
@@ -42,13 +45,26 @@ export interface RequestSummaryQueryResponse extends Pick<
 	reviewers: Array<{ user_id: number }>;
 }
 
-/** Requests are visible to users who can read every included collection. */
+/** Collections a user can add documents to for one request type: anyone's requests with its action, and their own with its request permission. Null skips the check. */
+type RequestEditKeys = { any: string[] | null; own: string[] | null };
+
+/**
+ * Requests are visible to users who can read every included collection and are involved in them.
+ * Collection key lists of null allow every collection, eg. for super admins.
+ */
 type RequestAccess = {
 	userId: number | null;
-	/** Null skips the collection check, eg. for super admins. */
+	/** The collections the user can read. */
 	collectionKeys: string[] | null;
-	/** The collections the user can update, for the addable filter. Null skips the check. */
-	updateKeys: string[] | null;
+	/** How the user can be involved in requests without `requests:read`, or null when they read every request. */
+	involvement: {
+		/** The collections the user can review, which lets them approve any request in them. */
+		reviewKeys: string[] | null;
+		/** The collections the user can complete each request type in. */
+		actionKeys: Record<RequestType, string[] | null>;
+	} | null;
+	/** The collections the user can edit update and publish requests in, for the addable filter. */
+	editKeys: Record<"update" | "publish", RequestEditKeys>;
 };
 
 export default class RequestsRepository extends StaticRepository<"lucid_requests"> {
@@ -149,7 +165,7 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 									),
 							);
 						},
-						//* open publish requests the user can edit that have room for the `collectionKey:documentId` document and don't hold it yet
+						//* open update and publish requests the user can edit that have room for the `collectionKey:documentId` document and don't hold it yet
 						addable: ({ eb, filter }) => {
 							const document = parseDocumentRefValue(filter.value);
 							if (!document) return sql<boolean>`1 = 0`;
@@ -160,11 +176,38 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 									"=",
 									"lucid_requests.id",
 								);
-							const updateKeys = props.access.updateKeys;
+							//* the document being added, and every document already in the request, is in one of these collections
+							const within = (keys: string[] | null) =>
+								keys !== null && !keys.includes(document.collectionKey)
+									? sql<boolean>`1 = 0`
+									: this.within(eb, keys);
+							const editable = (type: "update" | "publish") => {
+								const keys = props.access.editKeys[type];
+								return eb.and([
+									eb("lucid_requests.type", "=", type),
+									eb.or([
+										within(keys.any),
+										props.access.userId === null
+											? sql<boolean>`1 = 0`
+											: eb.and([
+													eb(
+														"lucid_requests.created_by",
+														"=",
+														props.access.userId,
+													),
+													within(keys.own),
+												]),
+									]),
+								]);
+							};
+							const readable =
+								props.access.collectionKeys === null ||
+								props.access.collectionKeys.includes(document.collectionKey);
+							if (!readable) return sql<boolean>`1 = 0`;
 
 							return eb.and([
-								eb("lucid_requests.type", "=", "publish"),
 								eb("lucid_requests.status", "=", "open"),
+								eb.or([editable("update"), editable("publish")]),
 								eb(
 									documents.select(sql<number>`count(*)`.as("count")),
 									"<",
@@ -186,21 +229,6 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 											),
 									),
 								),
-								updateKeys === null
-									? sql<boolean>`1 = 1`
-									: updateKeys.length === 0
-										? sql<boolean>`1 = 0`
-										: eb.not(
-												eb.exists(
-													documents
-														.select(sql.lit(1).as("one"))
-														.where(
-															"lucid_request_documents.collection_key",
-															"not in",
-															updateKeys,
-														),
-												),
-											),
 							]);
 						},
 						approval: ({ eb, filter }) => {
@@ -592,6 +620,18 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 							.whereRef("members.request_id", "=", "lucid_requests.id"),
 					)
 					.as("documents"),
+				this.database.fn
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_request_reviewers")
+							.select(["lucid_request_reviewers.user_id"])
+							.whereRef(
+								"lucid_request_reviewers.request_id",
+								"=",
+								"lucid_requests.id",
+							),
+					)
+					.as("reviewers"),
 			])
 			.where("lucid_request_documents.collection_key", "=", props.collectionKey)
 			.where("lucid_request_documents.document_id", "=", props.documentId)
@@ -616,8 +656,47 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 		eb: ExpressionBuilder<LucidDB, "lucid_requests">,
 		access: RequestAccess,
 	) {
-		if (access.collectionKeys === null) return sql<boolean>`1 = 1`;
-		if (access.collectionKeys.length === 0) return sql<boolean>`1 = 0`;
+		const readable = this.within(eb, access.collectionKeys);
+		if (access.involvement === null) return readable;
+
+		const { reviewKeys, actionKeys } = access.involvement;
+		const userId = access.userId;
+		return eb.and([
+			readable,
+			eb.or([
+				...(userId === null
+					? []
+					: [
+							eb("lucid_requests.created_by", "=", userId),
+							eb.exists(
+								eb
+									.selectFrom("lucid_request_reviewers")
+									.select(sql.lit(1).as("one"))
+									.whereRef(
+										"lucid_request_reviewers.request_id",
+										"=",
+										"lucid_requests.id",
+									)
+									.where("lucid_request_reviewers.user_id", "=", userId),
+							),
+						]),
+				this.within(eb, reviewKeys),
+				...requestTypeSchema.options.map((type) =>
+					eb.and([
+						eb("lucid_requests.type", "=", type),
+						this.within(eb, actionKeys[type]),
+					]),
+				),
+			]),
+		]);
+	}
+	/** True when every document in the request belongs to one of the collections. Null allows any collection. */
+	private within(
+		eb: ExpressionBuilder<LucidDB, "lucid_requests">,
+		collectionKeys: string[] | null,
+	) {
+		if (collectionKeys === null) return sql<boolean>`1 = 1`;
+		if (collectionKeys.length === 0) return sql<boolean>`1 = 0`;
 		return eb.not(
 			eb.exists(
 				eb
@@ -631,7 +710,7 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 					.where(
 						"lucid_request_documents.collection_key",
 						"not in",
-						access.collectionKeys,
+						collectionKeys,
 					),
 			),
 		);

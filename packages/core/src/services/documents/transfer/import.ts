@@ -14,6 +14,7 @@ import type {
 } from "../../../libs/transfer/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkRequestVersionAccess from "../../requests/helpers/check-request-version-access.js";
+import getLatestAccess from "../helpers/get-latest-access.js";
 import readDocumentContent from "../helpers/read-document-content.js";
 import requiresReview from "../helpers/requires-review.js";
 import resolveDocumentActor from "../helpers/resolve-document-actor.js";
@@ -27,8 +28,8 @@ import prepareTransferData from "./helpers/prepare-transfer-data.js";
 import type { DocumentEntry } from "./schema.js";
 
 /**
- * Imports to latest or a create request when review is required. Remaps links and warns about
- * unsupported content.
+ * Imports to latest, or to a create or update request when the collection reviews them. Remaps
+ * links and warns about unsupported content.
  */
 const importDocument: ServiceFn<
 	[TransferImportProps<DocumentEntry>],
@@ -80,23 +81,25 @@ const importDocument: ServiceFn<
 		};
 	}
 
-	const requested =
-		target.kind === "proposal" ||
-		(target.kind === "create" &&
-			requiresReview(collection, { type: "create" }));
-	//* requests check create or create-request access, and proposal edits check request access
+	const createRequested =
+		target.kind === "create" && requiresReview(collection, { type: "create" });
+	//* requests check create or create-request access, existing documents check latest access, and proposal edits check request access
 	const actorRes = await resolveDocumentActor(context, {
 		actor: props.actor,
 		collectionKey: collection.key,
-		action: requested ? "read" : target.kind === "create" ? "create" : "update",
+		action: target.kind === "create" && !createRequested ? "create" : "read",
 	});
 	if (actorRes.error) return actorRes;
 
 	//* checks report what saving would, so the request checks run here too
 	const user = actorRes.data.authUser ?? systemActor;
+	//* changes to existing documents are proposed, one update request per document, where the collection reviews updates or the person can only propose them
+	const latestAccess =
+		target.kind === "update" ? getLatestAccess(collection, user) : undefined;
+	const proposed = latestAccess === "request";
+	const requested = target.kind === "proposal" || proposed || createRequested;
 	if (
-		target.kind === "create" &&
-		requested &&
+		createRequested &&
 		!hasAccess({
 			user,
 			optionalPermissions: [
@@ -109,6 +112,17 @@ const importDocument: ServiceFn<
 			error: {
 				status: 403,
 				message: copy("server:core.requests.create.permission"),
+			},
+			data: undefined,
+		};
+	}
+	if (latestAccess === null) {
+		return {
+			error: {
+				status: 403,
+				message: copy("server:core.collections.permission.error.message", {
+					data: { collection: collection.key, action: "update" },
+				}),
 			},
 			data: undefined,
 		};
@@ -129,7 +143,7 @@ const importDocument: ServiceFn<
 			documentId: target.id,
 			versionId: versionRes.data,
 			user,
-			edit: true,
+			edit: "content",
 		});
 		if (editRes.error) return editRes;
 
@@ -192,6 +206,12 @@ const importDocument: ServiceFn<
 	}
 
 	const warnings = formatLeftOut(context, prepared.leftOut);
+	//* proposals that change nothing open no request, so they stay unchanged
+	const getStatus = (changed: boolean): TransferImportOutcome["status"] => {
+		if (requested && (!proposed || changed)) return "requested";
+		if (target.kind === "create") return "created";
+		return changed ? "updated" : "unchanged";
+	};
 	if (props.dryRun) {
 		let changed = true;
 		//* links held back for entries in the same import would fail validation until those entries exist
@@ -210,14 +230,20 @@ const importDocument: ServiceFn<
 		return {
 			error: undefined,
 			data: {
-				status: requested
-					? "requested"
-					: target.kind === "create"
-						? "created"
-						: changed
-							? "updated"
-							: "unchanged",
+				status: getStatus(changed),
 				id: target.kind === "create" ? null : `${collection.key}:${target.id}`,
+				warnings,
+			},
+		};
+	}
+
+	//* the document already exists, so nothing waits on it: its proposal is made once, when a later pass can make its links
+	if (proposed && target.kind === "update" && props.heldBack()) {
+		return {
+			error: undefined,
+			data: {
+				status: "unchanged",
+				id: `${collection.key}:${target.id}`,
 				warnings,
 			},
 		};
@@ -231,27 +257,26 @@ const importDocument: ServiceFn<
 		origin: { type: "import" },
 		data: dataRes.data,
 	} as const;
+	const request = {
+		title: context.translate(
+			copy("server:core.transfer.documents.request.title", {
+				data: { label: entry.label },
+			}),
+		),
+	};
 	const savedRes =
 		target.kind === "create"
 			? await writeSingle(context, {
 					...write,
 					kind: "create",
 					uid: entry.uid,
-					request: requested
-						? {
-								title: context.translate(
-									copy("server:core.transfer.documents.request.title", {
-										data: { label: entry.label },
-									}),
-								),
-							}
-						: undefined,
+					request: requested ? request : undefined,
 				})
 			: await writeSingle(context, {
 					...write,
 					kind: "update",
 					id: target.id,
-					versionId,
+					...(proposed ? { request } : { versionId }),
 				});
 	if (savedRes.error) return savedRes;
 
@@ -270,13 +295,7 @@ const importDocument: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			status: requested
-				? "requested"
-				: target.kind === "create"
-					? "created"
-					: savedRes.data.changed
-						? "updated"
-						: "unchanged",
+			status: getStatus(savedRes.data.changed),
 			id: `${collection.key}:${savedRes.data.id}`,
 			warnings,
 		},

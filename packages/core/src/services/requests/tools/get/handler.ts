@@ -166,6 +166,7 @@ const getRequest: ServiceFn<
 					...(props.agentKey && {
 						permissions: {
 							edit: request.permissions.edit,
+							close: request.permissions.close,
 							complete: request.permissions.complete,
 							reopen: request.permissions.reopen,
 						},

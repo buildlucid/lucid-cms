@@ -10,15 +10,16 @@ export const getCreatableCollections = (collections: Collection[]) =>
 			!(collection.mode === "single" && collection.documentId),
 	);
 
-/** Collections the user can open. A single also needs permission to edit or create its document. */
+/** Whether someone can open a single collection: read its document, which locks for people who can't change it, or create it. */
+export const canOpenSingle = (collection: Collection) =>
+	userStore.get.hasPermission([collection.permissions.read]).all &&
+	(!!collection.documentId ||
+		userStore.get.hasPermission([collection.permissions.create]).all);
+
+/** Collections the user can open. A single without its document also needs permission to create it. */
 export const getReadableCollections = (collections: Collection[]) =>
 	collections.filter((collection) =>
 		collection.mode === "single"
-			? userStore.get.hasPermission([
-					collection.permissions.read,
-					collection.documentId
-						? collection.permissions.update
-						: collection.permissions.create,
-				]).all
+			? canOpenSingle(collection)
 			: userStore.get.hasPermission([collection.permissions.read]).all,
 	);

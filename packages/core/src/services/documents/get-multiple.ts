@@ -13,6 +13,7 @@ import type { DocumentVersionType } from "../../libs/db/tables/index.js";
 import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
+import { getCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import { Permissions } from "../../libs/permission/definitions.js";
 import hasAccess from "../../libs/permission/has-access.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
@@ -73,22 +74,19 @@ const getMultiple: ServiceFn<
 			pendingFilter === "true" ||
 			pendingFilter === 1 ||
 			pendingFilter === "1");
-	if (
+	//* like request lists, people who can't read every create request see the ones they made or review
+	const pendingFor =
 		pending &&
 		!hasAccess({
 			user: data.user,
-			requiredPermissions: [Permissions.RequestsRead],
+			optionalPermissions: [
+				Permissions.RequestsRead,
+				getCollectionPermission(data.collectionKey, "create"),
+				getCollectionPermission(data.collectionKey, "review"),
+			],
 		})
-	) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.documents.pending.permission"),
-				status: 403,
-			},
-			data: undefined,
-		};
-	}
+			? data.user.id
+			: undefined;
 	const versionType = pending
 		? constants.collectionBuilder.publishing.proposalVersionType
 		: data.version;
@@ -218,6 +216,7 @@ const getMultiple: ServiceFn<
 		{
 			version: versionType,
 			pending,
+			pendingFor,
 			query: data.query,
 			documentFilters,
 			environmentStatusFilters,

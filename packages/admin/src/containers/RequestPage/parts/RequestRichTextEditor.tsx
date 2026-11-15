@@ -124,6 +124,7 @@ export const RequestRichTextEditor: Component<{
 				props.onFocusLeave?.();
 			}}
 		>
+			{/* the form shows focus, so the field inside drops its own border and halo */}
 			<RichText
 				id={props.id}
 				name={props.id}
@@ -134,7 +135,7 @@ export const RequestRichTextEditor: Component<{
 				mentions={searchMentions}
 				extensions={[submitShortcut]}
 				class={classNames(
-					"[&_[data-rich-text]]:rounded-none [&_[data-rich-text]]:border-0 [&_[data-rich-text]]:bg-transparent [&_[data-rich-text-control]]:max-h-60 [&_[data-rich-text-control]]:overflow-y-auto",
+					"[&_[data-rich-text]]:rounded-none [&_[data-rich-text]]:border-0 [&_[data-rich-text]]:bg-transparent [&_[data-rich-text]]:shadow-none! [&_[data-rich-text-control]]:max-h-60 [&_[data-rich-text-control]]:overflow-y-auto",
 					{ "[&_.rich-text-content]:min-h-16": props.variant === "inline" },
 				)}
 			/>

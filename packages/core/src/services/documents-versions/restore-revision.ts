@@ -3,6 +3,7 @@ import getContentAccess from "../../libs/collection/field-access/get-content-acc
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
+import systemActor from "../../libs/permission/system-actor.js";
 import {
 	DocumentsRepository,
 	DocumentVersionsRepository,
@@ -10,11 +11,18 @@ import {
 import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkDocumentAccess from "../documents/checks/check-document-access.js";
+import getLatestAccess from "../documents/helpers/get-latest-access.js";
+import requiresReview from "../documents/helpers/requires-review.js";
+import proposeSingle from "../documents/propose-single.js";
 import upsertSingle from "../documents/upsert-single.js";
+import type { RequestDetailsInput } from "../requests/create-single.js";
 import readStoredContent from "./helpers/read-stored-content.js";
 import promoteVersion from "./promote-version.js";
 
-/** Restores a document's own revision to latest, excluding proposals and snapshots and preserving latest content in fields and bricks the user can't change. */
+/**
+ * Restores a document's own revision to latest, excluding proposals and snapshots and preserving latest content in fields and bricks the user can't change.
+ * With `request`, the revision is proposed in a new update request instead, which collections that review updates require.
+ */
 const restoreRevision: ServiceFn<
 	[
 		{
@@ -23,9 +31,11 @@ const restoreRevision: ServiceFn<
 			userId: number | null;
 			authUser?: LucidActor;
 			collectionKey: string;
+			/** Proposes the revision in a new update request instead of restoring it to latest. */
+			request?: RequestDetailsInput;
 		},
 	],
-	undefined
+	{ requestId: number | null }
 > = async (context, data) => {
 	const Documents = new DocumentsRepository(context.db);
 	const Versions = new DocumentVersionsRepository(context.db);
@@ -114,6 +124,59 @@ const restoreRevision: ServiceFn<
 	);
 	if (versionRes.error) return versionRes;
 
+	if (data.request) {
+		const revisionRes = await readStoredContent(context, {
+			collection: collectionRes.data,
+			documentId: data.documentId,
+			versionId: data.versionId,
+		});
+		if (revisionRes.error) return revisionRes;
+
+		const proposedRes = await proposeSingle(context, {
+			collectionKey: data.collectionKey,
+			documentId: data.documentId,
+			user: data.authUser ?? systemActor,
+			request: data.request,
+			bricks: revisionRes.data?.bricks ?? [],
+			fields: revisionRes.data?.fields ?? [],
+		});
+		if (proposedRes.error) return proposedRes;
+
+		return {
+			error: undefined,
+			data: { requestId: proposedRes.data.requestId },
+		};
+	}
+
+	if (requiresReview(collectionRes.data, { type: "update" })) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.documents.update.review.required"),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
+
+	//* restoring replaces latest, so it needs the same access as saving it, unless the system restores it
+	if (
+		data.authUser &&
+		getLatestAccess(collectionRes.data, data.authUser) !== "direct"
+	) {
+		return {
+			error: {
+				type: "basic",
+				name: copy("server:core.collections.permission.error.name"),
+				message: copy("server:core.collections.permission.error.message", {
+					data: { collection: data.collectionKey, action: "update" },
+				}),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
+
 	if (getContentAccess(collectionRes.data, data.authUser).restricted) {
 		const revisionRes = await readStoredContent(context, {
 			collection: collectionRes.data,
@@ -132,7 +195,7 @@ const restoreRevision: ServiceFn<
 		});
 		if (savedRes.error) return savedRes;
 
-		return { error: undefined, data: undefined };
+		return { error: undefined, data: { requestId: null } };
 	}
 
 	const response = await promoteVersion(context, {
@@ -145,10 +208,7 @@ const restoreRevision: ServiceFn<
 	});
 	if (response.error) return response;
 
-	return {
-		error: undefined,
-		data: undefined,
-	};
+	return { error: undefined, data: { requestId: null } };
 };
 
 export default restoreRevision;

@@ -2,9 +2,8 @@ import type { RequestDocumentInput } from "@lucidcms/types";
 import type { RequestDetails } from "@types";
 import type { Component } from "solid-js";
 import RequestDocumentsModal from "@/components/RequestDocumentsModal/RequestDocumentsModal";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import { getDefaultTargets } from "@/utils/requests";
+import { canAddToRequest, getDefaultTargets } from "@/utils/requests";
 import RequestPublishDraft from "./parts/RequestPublishDraft";
 
 /** Picks documents for a new publish request, or for the publish `request` passed in. */
@@ -28,10 +27,7 @@ const RequestPublishModal: Component<{
 			}}
 			canPick={(collection) =>
 				collection.publishing.environments.length > 0 &&
-				userStore.get.hasPermission([
-					collection.permissions.read,
-					collection.permissions.update,
-				]).all
+				canAddToRequest(collection, "publish", props.request)
 			}
 			toDraft={(_document, collection, ref) => ({
 				...ref,

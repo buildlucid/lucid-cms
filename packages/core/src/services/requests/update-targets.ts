@@ -11,7 +11,6 @@ import checkLocaleScope from "./helpers/check-locale-scope.js";
 import checkPublishedTargets from "./helpers/check-published-targets.js";
 import createTargets from "./helpers/create-targets.js";
 import dismissApproval from "./helpers/dismiss-approval.js";
-import getLatestChange from "./helpers/get-latest-change.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import resolveTargets from "./helpers/resolve-targets.js";
 
@@ -51,6 +50,17 @@ const updateTargets: ServiceFn<
 			error: {
 				type: "basic",
 				message: copy("server:core.requests.create.fixed"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
+	if (request.type === "update") {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.requests.update.fixed"),
 				status: 400,
 			},
 			data: undefined,
@@ -145,18 +155,6 @@ const updateTargets: ServiceFn<
 	});
 	if (addedRes.error) return addedRes;
 
-	//* latest edits are only recorded while latest is a target, so earlier ones are caught here
-	const latestRes =
-		added.includes("latest") && document.source_version_id !== null
-			? await getLatestChange(context, {
-					collectionKey: document.collection_key,
-					documentId: document.document_id,
-					proposalId: document.source_version_id,
-				})
-			: undefined;
-	if (latestRes?.error) return latestRes;
-	const latestChange = latestRes?.data;
-
 	const eventsRes = await RequestEvents.createEvents({
 		data: [
 			...added.map((target) => ({
@@ -173,20 +171,6 @@ const updateTargets: ServiceFn<
 				type: "target_removed" as const,
 				metadata: { requestDocumentId: document.id, target: target.target },
 			})),
-			...(latestChange
-				? [
-						{
-							request_id: request.id,
-							user_id: latestChange.userId,
-							type: "target_published" as const,
-							metadata: {
-								requestDocumentId: document.id,
-								target: "latest",
-								sourceRequestId: null,
-							},
-						},
-					]
-				: []),
 		],
 	});
 	if (eventsRes.error) return eventsRes;

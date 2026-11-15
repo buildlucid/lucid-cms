@@ -1,5 +1,4 @@
 import { copy } from "../../../../libs/i18n/index.js";
-import { Permissions } from "../../../../libs/permission/definitions.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
 import {
 	type CollectionToolOptions,
@@ -13,7 +12,7 @@ import findRequests from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 const description =
-	"Find requests for creating, publishing, unpublishing or deleting documents. Call it without a query to list every open request, most recently changed first, and add filters only to narrow that down. Read one with requests_get for its documents, comments and blockers.";
+	"Find requests for creating, updating, publishing, unpublishing or deleting documents. Call it without a query to list every open request, most recently changed first, and add filters only to narrow that down. Read one with requests_get for its documents, comments and blockers.";
 
 export const findRequestsMcpTool = (options: CollectionToolOptions = {}) =>
 	defineTool({
@@ -50,7 +49,8 @@ export const findRequestsAgentTool = (options: CollectionToolOptions = {}) =>
 		output: outputSchema,
 		readOnly: true,
 		agent: {
-			permissions: [Permissions.RequestsRead],
+			//* request services only show people the requests they're involved in
+			permissions: [],
 			parallelSafe: true,
 		},
 		handler: async ({ context, input, execution }) => {

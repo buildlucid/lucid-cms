@@ -3,7 +3,7 @@ import { copy } from "../../../libs/i18n/copy.js";
 import { notificationCategories } from "../../../libs/notifications/categories.js";
 import defineNotification from "../../../libs/notifications/define-notification.js";
 import getRequestPath from "../helpers/get-request-path.js";
-import { requestData } from "./shared.js";
+import { receivesRequests, requestData } from "./shared.js";
 
 export const failedNotification = defineNotification({
 	key: "requests:failed",
@@ -17,6 +17,7 @@ export const failedNotification = defineNotification({
 	level: "error",
 	actionRequired: true,
 	audience: "recipients",
+	receivable: receivesRequests,
 	email: { delayMinutes: 0 },
 	data: requestData.extend({ message: z.string() }),
 	render: ({ data }) => ({

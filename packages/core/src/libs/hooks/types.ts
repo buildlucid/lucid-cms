@@ -199,7 +199,7 @@ export type RequestCompletedHookData = {
 		documentId: number;
 		/** Null for unpublish and delete requests. */
 		source: string | null;
-		/** Environments for unpublish requests, no targets for delete, and latest or environments for create and publish. */
+		/** Latest for create and update requests, environments for publish and unpublish, and no targets for delete. */
 		targets: string[];
 		versions: Array<{ target: string; versionId: number }>;
 	}>;

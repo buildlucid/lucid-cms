@@ -393,6 +393,7 @@ export const PermissionGroups = Object.freeze({
 				key: Permissions.RequestsRead,
 				details: {
 					name: copy("admin:permissions.requests.read"),
+					description: copy("admin:permissions.requests.read.description"),
 				},
 				core: true,
 			},

@@ -206,7 +206,7 @@ const restoreRevision = action<Model, { story: number; revision: number }>({
 			method: "POST",
 			path: `${DOCUMENTS}/${id}/${revisionIds[index]}/restore-revision`,
 		});
-		expect(restored.status).toBe(204);
+		expect(restored.status).toBe(200);
 
 		const content = story.revisions[index] as string;
 		story.revisions.push(story.latest);

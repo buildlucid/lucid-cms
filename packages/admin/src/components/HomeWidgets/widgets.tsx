@@ -78,18 +78,22 @@ const builtInWidgets: HomeWidget[] = [
 		size: "full",
 		sizes: ["md", "lg", "full"],
 		hidden: false,
-		//* any collection the user can publish from or request new documents in
+		//* any collection they can read and take part in: one they publish from, request new documents in, propose changes to or review
 		available: (context) =>
-			can(Permissions.RequestsRead) &&
 			(context.collections ?? []).some(
 				(collection) =>
-					(collection.publishing.environments.length > 0 &&
-						userStore.get.hasPermission([collection.permissions.read]).all) ||
-					(collection.mode === "multiple" &&
+					userStore.get.hasPermission([collection.permissions.read]).all &&
+					(collection.publishing.environments.length > 0 ||
 						userStore.get.hasPermission([
-							collection.permissions.create,
-							collection.permissions.createRequest,
-						]).some),
+							collection.permissions.update,
+							collection.permissions.updateRequest,
+							collection.permissions.review,
+						]).some ||
+						(collection.mode === "multiple" &&
+							userStore.get.hasPermission([
+								collection.permissions.create,
+								collection.permissions.createRequest,
+							]).some)),
 			),
 		component: ReviewWidget,
 	},

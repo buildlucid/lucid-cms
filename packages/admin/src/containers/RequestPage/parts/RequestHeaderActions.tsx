@@ -188,7 +188,7 @@ export const RequestHeaderActions: Component<{
 						icon: "ban",
 						variant: "danger",
 						onClick: props.onClose,
-						show: props.request.permissions.edit,
+						show: props.request.permissions.close,
 					},
 				]}
 			/>

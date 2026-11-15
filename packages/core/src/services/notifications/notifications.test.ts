@@ -1,10 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, expect, test, vi } from "vitest";
 import constants from "../../constants/constants.js";
+import defineCollection from "../../libs/collection/define-collection.js";
+import field from "../../libs/collection/definitions/fields/field.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import { consumeJob } from "../../libs/jobs/consume/index.js";
 import { enqueueJob } from "../../libs/jobs/enqueue.js";
 import { notifications } from "../../libs/notifications/lucid-notifications.js";
+import { getCollectionPermission } from "../../libs/permission/collection-permissions.js";
+import type { LucidUser } from "../../types/hono.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import { createTestQueueAdapter } from "../../utils/test-helpers/create-jobs-context.js";
@@ -334,6 +338,55 @@ test("turning a type off suppresses it, and mandatory types stay on", async () =
 	expect(still.data?.id).toEqual(expect.any(Number));
 });
 
+const asUser = (
+	id: number,
+	access: Pick<LucidUser, "superAdmin"> &
+		Partial<Pick<LucidUser, "permissions">>,
+): LucidUser => ({
+	id,
+	username: "",
+	email: "",
+	permissions: [],
+	...access,
+});
+
+test("email preferences only list the types people could receive", async () => {
+	const collectionKey = "notified_pages";
+	const withPages: ServiceContext = {
+		...context,
+		config: {
+			...context.config,
+			collections: [
+				defineCollection({
+					key: collectionKey,
+					mode: "multiple",
+					details: { labels: { singular: "Page", plural: "Pages" } },
+					fields: [field.text("title")],
+				}),
+			],
+		},
+	};
+	const typesFor = async (permissions: LucidUser["permissions"]) => {
+		const preferences = await getPreferences(withPages, {
+			user: asUser(bystander, { superAdmin: false, permissions }),
+		});
+		assert(preferences.data, JSON.stringify(preferences.error));
+		return preferences.data.map((entry) => entry.type);
+	};
+
+	const reviewRequested = notifications.requests.reviewRequested.key;
+	expect(await typesFor([])).not.toContain(reviewRequested);
+	expect(
+		await typesFor([getCollectionPermission(collectionKey, "create-request")]),
+	).not.toContain(reviewRequested);
+	expect(
+		await typesFor([
+			getCollectionPermission(collectionKey, "read"),
+			getCollectionPermission(collectionKey, "create-request"),
+		]),
+	).toContain(reviewRequested);
+});
+
 test("delayed emails only reach people who haven't read the notification or opted out", async () => {
 	//* sends whatever earlier tests left due, so only this notification's emails are counted
 	await sweep(reviewDelay + 1);
@@ -344,7 +397,9 @@ test("delayed emails only reach people who haven't read the notification or opte
 		],
 	});
 	expect(optOut.error).toBeUndefined();
-	const preferences = await getPreferences(context, { userId: bystander });
+	const preferences = await getPreferences(context, {
+		user: asUser(bystander, { superAdmin: true }),
+	});
 	expect(
 		preferences.data?.find(
 			(entry) => entry.type === notifications.requests.reviewRequested.key,

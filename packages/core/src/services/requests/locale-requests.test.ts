@@ -20,6 +20,7 @@ import approve from "./approve.js";
 import complete from "./complete.js";
 import createSingle from "./create-single.js";
 import getSingle from "./get-single.js";
+import refreshDocument from "./refresh-document.js";
 
 const fixture = getTestConfig();
 const collection = defineCollection({
@@ -111,22 +112,24 @@ const save = async (
 	return saved.data;
 };
 
-/** Opens a publish request for one document, limited to `locales`. */
+/** Opens a request for one document limited to `locales`: an update request by default, or a publish request. */
 const openLocaleRequest = (props: {
 	documentId: number;
 	locales: string[];
 	collectionKey?: string;
+	type?: "update" | "publish";
 	targets?: string[];
 }) =>
 	createSingle(context, {
-		type: "publish",
+		type: props.type ?? "update",
 		title: "Translation",
 		documents: [
 			{
 				collectionKey: props.collectionKey ?? collection.key,
 				documentId: props.documentId,
-				source: "latest",
-				targets: props.targets ?? ["latest"],
+				...(props.type === "publish"
+					? { source: "latest", targets: props.targets }
+					: {}),
 			},
 		],
 		locales: props.locales,
@@ -225,11 +228,12 @@ test("a French request is flagged when French changes on latest", async () => {
 	);
 });
 
-test("locale-limited requests only target latest", async () => {
+test("only update requests can be limited to locales", async () => {
 	const documentId = await save(undefined, { en: "Yo", fr: "Yo" }, "yo");
 	const created = await openLocaleRequest({
 		documentId,
 		locales: ["fr"],
+		type: "publish",
 		targets: ["published"],
 	});
 	expect(created.error?.message).toEqual(
@@ -283,4 +287,56 @@ test("a locale-limited request only validates its own locales, so new locales tr
 	});
 	assert(edited.data, JSON.stringify(edited.error));
 	await approveRequest(created.data.id);
+});
+
+test("refreshing a publish copy keeps latest's translation records as they are", async () => {
+	const documentId = await save(
+		undefined,
+		{ en: "Original", fr: "Ancien" },
+		"page",
+	);
+	const created = await createSingle(context, {
+		type: "publish",
+		title: "Publish",
+		documents: [
+			{
+				collectionKey: collection.key,
+				documentId,
+				source: "latest",
+				targets: ["published"],
+			},
+		],
+		user: editor,
+	});
+	assert(created.data, JSON.stringify(created.error));
+	const request = await getSingle(context, {
+		id: created.data.id,
+		user: editor,
+	});
+	const document = request.data?.documents[0];
+	assert(document?.versionId, JSON.stringify(request.error));
+
+	//* French is retranslated, then English moves on, so French is out of date on latest
+	await save(documentId, { en: "Original", fr: "Nouveau" }, "page");
+	await save(documentId, { en: "Changed source", fr: "Nouveau" }, "page");
+	const latest = await readVersionContent(context, {
+		collectionKey: collection.key,
+		documentId,
+		versionType: "latest",
+	});
+	assert(latest.data);
+
+	const refreshed = await refreshDocument(context, {
+		id: created.data.id,
+		requestDocumentId: document.id,
+		user: editor,
+	});
+	assert(!refreshed.error, JSON.stringify(refreshed.error));
+	const copy = await readVersionContent(context, {
+		collectionKey: collection.key,
+		documentId,
+		versionId: document.versionId,
+	});
+	expect(copy.data?.contentId).toBe(latest.data.contentId);
+	expect(copy.data?.content).toEqual(latest.data.content);
 });

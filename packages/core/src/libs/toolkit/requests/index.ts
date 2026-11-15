@@ -102,7 +102,8 @@ export type ToolkitRequests = {
 		input: ToolkitRequestsGetReviewersInput,
 	) => ServiceResponse<UserDisplay[]>;
 	/**
-	 * Opens a publish, unpublish or delete request for people to review.
+	 * Opens an update, publish, unpublish or delete request for people to review.
+	 * Update requests copy each document's latest content into a proposal to edit.
 	 *
 	 * @example
 	 * ```ts
@@ -114,6 +115,13 @@ export type ToolkitRequests = {
 	 *   documents: [
 	 *     { collectionKey: "page", documentId: 1, source: "latest", targets: ["production"] },
 	 *   ],
+	 * });
+	 *
+	 * await toolkit.requests.createSingle({
+	 *   actor: { type: "system" },
+	 *   type: "update",
+	 *   title: "Spring copy refresh",
+	 *   documents: [{ collectionKey: "page", documentId: 1 }],
 	 * });
 	 * ```
 	 */

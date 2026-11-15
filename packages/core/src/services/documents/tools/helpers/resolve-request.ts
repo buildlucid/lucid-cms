@@ -31,7 +31,7 @@ const resolveRequest: ServiceFn<
 			document: {
 				collectionKey: string;
 				documentId: number;
-				/** Latest for content changes. Omit for unpublish and delete requests. */
+				/** Latest for update requests. Omit for unpublish and delete requests. */
 				source?: string;
 				targets: string[];
 			};
@@ -51,8 +51,9 @@ const resolveRequest: ServiceFn<
 	const AgentRequestReferences = new AgentRequestReferencesRepository(
 		context.db,
 	);
+	//* changes to a document waiting in a create request go into that request's proposal
 	const types: RequestType[] =
-		data.type === "publish" ? ["publish", "create"] : [data.type];
+		data.type === "update" ? ["update", "create"] : [data.type];
 
 	let requestId = data.requestId;
 	if (requestId === undefined) {

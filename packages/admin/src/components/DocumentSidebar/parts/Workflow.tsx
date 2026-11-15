@@ -21,7 +21,6 @@ import SelectMultiple from "@/components/SelectMultiple/SelectMultiple";
 import UserSelectOption from "@/components/UserSelectOption/UserSelectOption";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
 import api from "@/services/api";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { sameNumericSet } from "@/utils/array-helpers";
 import { findDocumentUserRef } from "@/utils/document-ref-helpers";
@@ -71,11 +70,6 @@ export const Workflow: Component<{
 	const currentAssigneeIds = createMemo(
 		() => workflow()?.assignees.map((assignee) => assignee.userId) ?? [],
 	);
-	const hasUpdatePermission = createMemo(() => {
-		const permission = props.collection()?.permissions.update;
-		if (!permission) return false;
-		return userStore.get.hasPermission([permission]).all;
-	});
 	const stageOptions = createMemo(
 		() =>
 			workflowConfig()?.stages.map((stage) => ({
@@ -106,9 +100,7 @@ export const Workflow: Component<{
 	const updatePending = createMemo(
 		() => props.mutations.updateWorkflowMutation.action.isPending,
 	);
-	const fieldsDisabled = createMemo(
-		() => props.disabled() || !hasUpdatePermission() || updatePending(),
-	);
+	const fieldsDisabled = createMemo(() => props.disabled() || updatePending());
 
 	// ----------------------------------
 	// Functions

@@ -117,6 +117,7 @@ export type PublishingReviewConfig = {
 	publish: string[];
 	unpublish: string[];
 	create: boolean;
+	update: boolean;
 	delete: boolean;
 	selfApproval: boolean;
 	approvals: number;
@@ -162,6 +163,8 @@ export type CollectionPublishingOptions = {
 		unpublish?: string[] | true;
 		/** New documents can only be created through an approved create request. Defaults to false. */
 		create?: boolean;
+		/** Latest can only change through an approved update request, so saves propose changes instead. Defaults to false. */
+		update?: boolean;
 		/** Documents can only be moved to the bin through an approved delete request. Defaults to false. */
 		delete?: boolean;
 		/** Allow the request creator to approve their own request. Defaults to false. */
@@ -182,7 +185,7 @@ export type CollectionPublishingOptions = {
 			color?: PublishingWorkflowStageColor;
 			/**
 			 * Publishing targets allowed by this stage.
-			 * @remarks Environment keys allow direct publishing and requests; "latest" allows create and publish requests to latest; targets absent from every stage are ungated.
+			 * @remarks Environment keys allow direct publishing and requests; "latest" allows create and update requests; targets absent from every stage are ungated.
 			 */
 			targets?: string[];
 			/** Stage to move back to when content changes while in this stage. */

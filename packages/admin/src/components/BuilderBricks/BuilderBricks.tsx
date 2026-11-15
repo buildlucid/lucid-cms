@@ -22,6 +22,7 @@ import Button from "@/components/Button/Button";
 import DeleteDebounceButton from "@/components/DeleteDebounceButton/DeleteDebounceButton";
 import DragDrop, { type DragDropCBT } from "@/components/DragDrop/DragDrop";
 import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import type { BrickData } from "@/store/brickStore/brickStore";
@@ -280,8 +281,8 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				)}
 			>
 				<div class="flex min-w-0 flex-1 items-center gap-2">
-					<button
-						type="button"
+					<Tooltip
+						content={T()("common.change.order")}
 						class="text-muted hover:text-primary-hover transition-colors cursor-grab active:cursor-grabbing focus-ring disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed"
 						onClick={(e) => e.stopPropagation()}
 						onDragStart={(e) =>
@@ -299,11 +300,10 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						}
 						onDragOver={(e) => props.dragDrop.onDragOver(e)}
 						draggable={isDisabled() === false}
-						aria-label={T()("common.change.order")}
 						disabled={isDisabled()}
 					>
 						<TbOutlineGripHorizontal size={14} />
-					</button>
+					</Tooltip>
 					<h3
 						data-preview-focus-label
 						class="flex min-h-8 min-w-0 flex-1 items-center"
@@ -337,7 +337,11 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 							resolveFieldAccess(config()?.permissions) !== "editable"
 						}
 					/>
-					<span
+					<Tooltip
+						as="span"
+						content={
+							brickOpen() ? T()("builder.collapse") : T()("builder.expand")
+						}
 						aria-hidden="true"
 						class={classNames(
 							"flex size-7 shrink-0 items-center justify-center text-muted transition-transform duration-200",
@@ -347,7 +351,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						)}
 					>
 						<TbOutlineChevronUp size={14} />
-					</span>
+					</Tooltip>
 				</div>
 			</div>
 			{/* Body */}

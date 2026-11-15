@@ -18,12 +18,13 @@ const factory = createFactory();
 const duplicateSingleController = factory.createHandlers(
 	openAPI.describeRoute(() => ({
 		description:
-			"Create a new document from the persisted latest version of a source document.",
+			"Create a new document from the persisted latest version of a source document, or open a create request with the copy. Creating needs create, and requesting needs create or create-request.",
 		tags: ["documents"],
 		summary: "Duplicate Document",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.duplicateSingle.response),
 		}),
+		requestBody: openAPI.requestBody(controllerSchemas.duplicateSingle.body),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.duplicateSingle.params,
 			headers: {
@@ -33,14 +34,15 @@ const duplicateSingleController = factory.createHandlers(
 	})),
 	validateCSRF(),
 	authenticate(),
+	validate("json", controllerSchemas.duplicateSingle.body),
 	validate("param", controllerSchemas.duplicateSingle.params),
 	collectionPermissions("read"),
-	collectionPermissions("create"),
 	async (c) => {
+		const body = c.req.valid("json");
 		const { collectionKey, id } = c.req.valid("param");
 		const context = createServiceContext(c);
 
-		const documentId = await serviceWrapper(documentServices.duplicateSingle, {
+		const duplicated = await serviceWrapper(documentServices.duplicateSingle, {
 			transaction: true,
 			defaultError: {
 				type: "basic",
@@ -50,18 +52,13 @@ const duplicateSingleController = factory.createHandlers(
 		})(context, {
 			collectionKey,
 			documentId: Number.parseInt(id, 10),
-			userId: c.get("auth").id,
+			user: c.get("auth"),
+			request: body?.request,
 		});
-		if (documentId.error) throw new LucidError(documentId.error);
+		if (duplicated.error) throw new LucidError(duplicated.error);
 
 		c.status(200);
-		return c.json(
-			formatAPIResponse(c, {
-				data: {
-					id: documentId.data,
-				},
-			}),
-		);
+		return c.json(formatAPIResponse(c, { data: duplicated.data }));
 	},
 );
 

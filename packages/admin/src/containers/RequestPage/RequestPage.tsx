@@ -9,6 +9,7 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
+import Alert from "@/components/Alert/Alert";
 import Button from "@/components/Button/Button";
 import Modal from "@/components/Modal/Modal";
 import PageLayout from "@/components/PageLayout/PageLayout";
@@ -19,6 +20,7 @@ import RequestPublishModal from "@/components/RequestPublishModal/RequestPublish
 import RequestScheduleModal from "@/components/RequestScheduleModal/RequestScheduleModal";
 import RequestTitleModal from "@/components/RequestTitleModal/RequestTitleModal";
 import RequestUnpublishModal from "@/components/RequestUnpublishModal/RequestUnpublishModal";
+import RequestUpdateModal from "@/components/RequestUpdateModal/RequestUpdateModal";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import { requestDocumentLimit } from "@/constants/requests";
 import { useAgentScreen } from "@/hooks/useAgentScreen/useAgentScreen";
@@ -26,6 +28,7 @@ import { usePageTitle } from "@/hooks/usePageTitle/usePageTitle";
 import api from "@/services/api";
 import T from "@/translations";
 import { screenLabel } from "@/utils/agent-screen";
+import { isLockedForCreator } from "@/utils/requests";
 import { tabId } from "@/utils/tab-id";
 import { RequestActivity } from "./parts/RequestActivity";
 import { RequestCommentForm } from "./parts/RequestCommentForm";
@@ -105,6 +108,7 @@ const RequestPage: Component = () => {
 			...data,
 			permissions: {
 				edit: false,
+				close: false,
 				approve: false,
 				complete: false,
 				reopen: false,
@@ -176,6 +180,11 @@ const RequestPage: Component = () => {
 													}
 												/>
 											</Show>
+											<Show when={isLockedForCreator(data())}>
+												<Alert variant="info">
+													{T()("requests.locked.creator")}
+												</Alert>
+											</Show>
 											<RequestDescription request={data()} />
 											<Show when={data().status === "open"}>
 												<RequestReadiness
@@ -243,6 +252,13 @@ const RequestPage: Component = () => {
 									</div>
 								</PageLayout.Body>
 								<Switch>
+									<Match when={data().type === "update"}>
+										<RequestUpdateModal
+											open={addOpen()}
+											setOpen={setAddOpen}
+											request={data()}
+										/>
+									</Match>
 									<Match when={data().type === "publish"}>
 										<RequestPublishModal
 											open={addOpen()}

@@ -103,6 +103,7 @@ const updateSingle: ServiceFn<
 		documentId: data.documentId,
 		versionId,
 		authUser: data.user,
+		purpose: "workflow",
 	});
 	if (editableRes.error) return editableRes;
 

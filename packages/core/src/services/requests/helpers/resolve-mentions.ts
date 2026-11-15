@@ -5,7 +5,7 @@ import {
 } from "@lucidcms/richtext";
 import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type { RequestDocumentRecord } from "../types.js";
+import type { RequestReadFacts } from "./can-read-request.js";
 import getRequestReaders from "./get-request-readers.js";
 
 /**
@@ -16,9 +16,7 @@ import getRequestReaders from "./get-request-readers.js";
 const resolveMentions: ServiceFn<
 	[
 		{
-			request: {
-				documents: Array<Pick<RequestDocumentRecord, "collection_key">>;
-			};
+			request: RequestReadFacts;
 			body: RichTextJSON;
 		},
 	],

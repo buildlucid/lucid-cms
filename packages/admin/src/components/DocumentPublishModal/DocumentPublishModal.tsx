@@ -60,6 +60,7 @@ const DocumentPublishModal: Component<{
 			filters: {
 				addable: () =>
 					`${props.document.collectionKey}:${props.document.documentId}`,
+				type: () => "publish",
 			},
 			perPage: 1,
 		},
@@ -270,6 +271,7 @@ const DocumentPublishModal: Component<{
 					open: pickerOpen(),
 					setOpen: setPickerOpen,
 					document: props.document,
+					type: "publish",
 					selected: existingRefs().map((request) => request.id),
 					selectedRefs: existingRefs(),
 				}}

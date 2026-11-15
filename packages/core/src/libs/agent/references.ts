@@ -1,4 +1,7 @@
 import z from "zod";
+import canReadRequest, {
+	type RequestReadFacts,
+} from "../../services/requests/helpers/can-read-request.js";
 import type {
 	AgentReferenceInput,
 	AgentReferenceSource,
@@ -37,23 +40,15 @@ export const attachmentKey = (reference: AgentReferenceInput) =>
 		? `${referenceKey(reference)}#${reference.focus.brick ?? ""}/${reference.focus.path.join("/")}`
 		: referenceKey(reference);
 
-/** Returns read permissions for a reference, including every collection in a request. */
+/** Returns read permissions for a non-request reference. Requests follow `canReadRequest`. */
 const referenceReadPermissions = (
-	reference: AgentReferenceInput,
-	requestCollections: readonly string[] = [],
+	reference: Exclude<AgentReferenceInput, { type: "request" }>,
 ) => {
 	switch (reference.type) {
 		case "media":
 			return [Permissions.MediaRead];
 		case "document":
 			return [getCollectionPermission(reference.collectionKey, "read")];
-		case "request":
-			return [
-				Permissions.RequestsRead,
-				...requestCollections.map((key) =>
-					getCollectionPermission(key, "read"),
-				),
-			];
 		case "deploy":
 			return [getDeployPermission(reference.deployKey, "read")];
 	}
@@ -67,8 +62,8 @@ export const canReadReference = (props: {
 	reference: AgentReferenceInput;
 	/** The media's ownership. Missing ownership is treated as library media. */
 	ownership?: MediaOwnership;
-	/** The request's collections, for request references. */
-	requestCollections?: readonly string[];
+	/** What a request reference's read check needs. Missing requests can't be read. */
+	request?: RequestReadFacts;
 	userId: number | null;
 	grant?: PermissionGrant;
 }) => {
@@ -80,10 +75,14 @@ export const canReadReference = (props: {
 	}
 
 	const { grant } = props;
-	return (
-		grant === undefined ||
-		referenceReadPermissions(props.reference, props.requestCollections).every(
-			(permission) => hasPermission(grant, permission),
-		)
+	if (grant === undefined) return true;
+	if (props.reference.type === "request") {
+		return (
+			props.request !== undefined &&
+			canReadRequest({ request: props.request, userId: props.userId, grant })
+		);
+	}
+	return referenceReadPermissions(props.reference).every((permission) =>
+		hasPermission(grant, permission),
 	);
 };

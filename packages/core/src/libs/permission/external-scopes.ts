@@ -48,16 +48,18 @@ const documentScopeFactories = {
 		getCollectionExternalScope(collectionKey, "create-request"),
 	DocumentUpdate: (collectionKey: string) =>
 		getCollectionExternalScope(collectionKey, "update"),
+	DocumentUpdateRequest: (collectionKey: string) =>
+		getCollectionExternalScope(collectionKey, "update-request"),
 	DocumentDelete: (collectionKey: string) =>
 		getCollectionExternalScope(collectionKey, "delete"),
 	DocumentDeleteRequest: (collectionKey: string) =>
 		getCollectionExternalScope(collectionKey, "delete-request"),
-	DocumentUnpublishRequest: (collectionKey: string) =>
-		getCollectionExternalScope(collectionKey, "unpublish-request"),
 	DocumentRestore: (collectionKey: string) =>
 		getCollectionExternalScope(collectionKey, "restore"),
 	DocumentPublish: (collectionKey: string) =>
 		getCollectionExternalScope(collectionKey, "publish"),
+	DocumentPublishRequest: (collectionKey: string) =>
+		getCollectionExternalScope(collectionKey, "publish-request"),
 	DocumentReview: (collectionKey: string) =>
 		getCollectionExternalScope(collectionKey, "review"),
 } satisfies DocumentScopeFactories;

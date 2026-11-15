@@ -33,7 +33,7 @@ export const RequestTargets: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
-	//* create requests always land their document in latest, and unpublish requests can only drop environments
+	//* create and update requests always land in latest, so only publish and unpublish requests choose environments
 	const editable = createMemo(
 		() =>
 			(props.request.type === "publish" ||
