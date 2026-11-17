@@ -1,0 +1,4 @@
+{
+	"$comment": "Where each template is written, by name, relative to this package. Templates not listed go to core, which also gets their types.",
+	"forms-submission": "../plugin-forms/emails"
+}

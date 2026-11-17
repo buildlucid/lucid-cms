@@ -5,6 +5,9 @@ import type {
 	GeneratedFieldPermissions,
 } from "./types.js";
 
+/** The `update` setting for values nobody's permissions change: only code acting as the system does. */
+export const systemOnly = "system";
+
 /** Actions a field or brick can opt in to. */
 export const fieldPermissionActions = ["read", "update"] as const;
 
@@ -32,16 +35,18 @@ export const resolveFieldPermissions = (
 	target: FieldPermissionTarget,
 	permissions: FieldPermissions | undefined,
 ): GeneratedFieldPermissions | undefined => {
-	if (permissions?.read !== true && permissions?.update !== true) {
-		return undefined;
-	}
+	const read =
+		permissions?.read === true ? getFieldPermission(target, "read") : undefined;
+	const update =
+		permissions?.update === systemOnly
+			? systemOnly
+			: permissions?.update === true
+				? getFieldPermission(target, "update")
+				: undefined;
+	if (read === undefined && update === undefined) return undefined;
 
 	return {
-		...(permissions.read === true && {
-			read: getFieldPermission(target, "read"),
-		}),
-		...(permissions.update === true && {
-			update: getFieldPermission(target, "update"),
-		}),
+		...(read !== undefined && { read }),
+		...(update !== undefined && { update }),
 	};
 };

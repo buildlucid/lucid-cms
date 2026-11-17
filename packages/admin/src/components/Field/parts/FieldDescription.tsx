@@ -1,10 +1,5 @@
-import { type Component, Show } from "solid-js";
+import { type Component, createEffect, onCleanup, Show } from "solid-js";
 import { FieldDescription as FieldDescriptionText } from "@/components/FieldDescription/FieldDescription";
-import {
-	normalizeFieldErrors,
-	resolveFieldErrorMessage,
-} from "@/utils/error-helpers";
-import { getFieldError } from "@/utils/get-field-error";
 import { useFieldContext } from "../FieldContext";
 
 export interface FieldDescriptionProps {
@@ -13,24 +8,23 @@ export interface FieldDescriptionProps {
 	children?: string;
 }
 
-/** Help text for the field, linked to the control for screen readers. Renders nothing without text. */
+/**
+ * Help text for the field, linked to the control for screen readers. `Field.Label` shows it as a
+ * tooltip, and it only shows beneath the control when there's no label. Renders nothing without text.
+ */
 export const FieldDescription: Component<FieldDescriptionProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
-	const { id, errors, field } = useFieldContext();
+	const { id, field, setDescription, labelled } = useFieldContext();
 
 	// ----------------------------------------
 	// Derived State
 	const text = () => props.children ?? field()?.description;
-	const repeatedByError = () => {
-		const description = text()?.trim();
-		if (!description) return false;
-		const fieldErrors = normalizeFieldErrors(errors());
-		const messages = fieldErrors.length
-			? fieldErrors.map((error) => resolveFieldErrorMessage(error.message))
-			: [getFieldError(errors())];
-		return messages.some((message) => message?.trim() === description);
-	};
+
+	// ----------------------------------------
+	// Effects
+	createEffect(() => setDescription(text() || undefined));
+	onCleanup(() => setDescription(undefined));
 
 	// ----------------------------------------
 	// Render
@@ -38,18 +32,18 @@ export const FieldDescription: Component<FieldDescriptionProps> = (props) => {
 		<Show when={text()}>
 			{(text) => (
 				<Show
-					when={!repeatedByError()}
+					when={labelled()}
 					fallback={
-						<span id={`${id()}-description`} class="sr-only">
-							{text()}
-						</span>
+						<FieldDescriptionText
+							id={id()}
+							describedBy={text()}
+							class={props.class}
+						/>
 					}
 				>
-					<FieldDescriptionText
-						id={id()}
-						describedBy={text()}
-						class={props.class}
-					/>
+					<span id={`${id()}-description`} class="sr-only">
+						{text()}
+					</span>
 				</Show>
 			)}
 		</Show>

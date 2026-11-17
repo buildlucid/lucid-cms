@@ -214,6 +214,8 @@ export type {
 	CaptchaConfig,
 	CaptchaVerification,
 	CaptchaVerifyParams,
+	CaptchaWidgetEventMap,
+	CaptchaWidgetSettings,
 } from "../libs/captcha/types.js";
 export type {
 	DefineDeployOptions,

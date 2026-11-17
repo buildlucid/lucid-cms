@@ -155,10 +155,12 @@ class CollectionDefinition<
 				labels: {
 					singular: normalizeCopy(this.config.details.labels.singular),
 					plural: normalizeCopy(this.config.details.labels.plural),
+					addBrick: normalizeCopy(this.config.details.labels.addBrick) ?? null,
 				},
 				description: normalizeCopy(this.config.details.description) ?? null,
 			},
 			locked: this.config.locked ?? constants.collectionBuilder.locked,
+			actions: { create: this.config.actions?.create ?? true },
 			localized:
 				(this.config.localized ?? constants.collectionBuilder.localized) !==
 				false,

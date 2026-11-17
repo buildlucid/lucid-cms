@@ -384,7 +384,7 @@ export const getLatestAccess = (
 export const getDocumentCreateActions = (
 	collection: Collection | undefined,
 ): Array<"create" | "request"> => {
-	if (!collection) return [];
+	if (!collection || !collection.actions.create) return [];
 
 	const canCreate =
 		collection.publishing.review?.create !== true &&

@@ -5,6 +5,7 @@ import { postgres } from "@lucidcms/postgres";
 import { workerQueues } from "@lucidcms/worker-queues";
 import { harnessEnv } from "#harness/config";
 import { getDatabaseUrl } from "../../shared/config/config.ts";
+import { formsPlugin } from "../../shared/config/fragments/forms.ts";
 import {
 	ArticleCollection,
 	GuideCollection,
@@ -25,6 +26,7 @@ export default defineConfig({
 			collections: [ArticleCollection, GuideCollection, LandingPageCollection],
 			plugins: [
 				pages({ collections: [{ key: LandingPageCollection.key }] }),
+				formsPlugin({ localized: true }),
 				//* host mode runs a stand-in with the same key, as nothing is built to start the thread from
 				workerQueues(),
 			],

@@ -37,6 +37,8 @@ export const FieldRoot: Component<FieldRootProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const [focused, setFocused] = createSignal(false);
+	const [description, setDescription] = createSignal<string>();
+	const [labelled, setLabelled] = createSignal(false);
 	const slotMarkers = useContext(FieldMarkersContext);
 
 	// ----------------------------------------
@@ -74,7 +76,19 @@ export const FieldRoot: Component<FieldRootProps> = (props) => {
 			onFocusOut={() => setFocused(false)}
 		>
 			<FieldContext.Provider
-				value={{ id, required, disabled, errors, focused, field, markers }}
+				value={{
+					id,
+					required,
+					disabled,
+					errors,
+					focused,
+					field,
+					markers,
+					description,
+					setDescription,
+					labelled,
+					setLabelled,
+				}}
 			>
 				{props.children}
 			</FieldContext.Provider>

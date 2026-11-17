@@ -230,6 +230,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 			<FormLabel
 				id={props.id}
 				label={props.copy?.label}
+				description={props.copy?.describedBy}
 				required={props.required}
 				theme={"basic"}
 				altLocaleError={props.altLocaleError}
@@ -402,7 +403,6 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 						</div>
 					</Match>
 					<Match when={isMultiple()}>
-						{/* follows the field's width: narrow places such as the fields column beside the preview list plain rows with compact actions, wider ones card columns */}
 						<div class="@container">
 							<div class="w-full overflow-hidden rounded-md border border-border dotted-background border-dashed @max-[26rem]:rounded-none @max-[26rem]:border-0 @max-[26rem]:[background:none]">
 								<Show when={selectedMediaRefs().length > 0}>

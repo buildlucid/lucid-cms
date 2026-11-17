@@ -61,6 +61,8 @@ config: (env) => ({
 }),
 ```
 
+Forms outside the admin can draw Turnstile with `toolkit.captcha.renderWidget({ action, field })`, which returns its HTML with a small inline script. It writes its token to an input named `field`. Add your website's hostname to the widget's hostnames in the Cloudflare dashboard, and allow `https://challenges.cloudflare.com` for scripts and frames in your website's Content Security Policy.
+
 If Turnstile can't be reached, protected forms are rejected rather than let through. To get back in during an outage, set `captcha.forms` to `false` and redeploy. An environment variable makes this a quick change:
 
 ```typescript

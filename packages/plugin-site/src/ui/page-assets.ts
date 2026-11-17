@@ -1,18 +1,18 @@
 import escapeHtml from "../utils/escape-html.js";
 
 /*
- * The links and script UI components write around them, and moving them into the head of a page rendered in one go.
- * The tags are written and matched here alone, so the two always agree.
+ * The links and scripts UI components and site functions write beside their markup, and moving them into the head of
+ * a page rendered in one go. The tags are written and matched here alone, so the two always agree.
  */
 
-/** Marks what UI components add around them, so whole pages can find it again. */
+/** Marks what they add beside their markup, so whole pages can find it again. */
 const MARK = "data-client-component";
 
-/** A stylesheet or preload link a UI component writes. */
+/** A stylesheet or preload link a UI component or site function writes. */
 export const assetLink = (rel: "stylesheet" | "modulepreload", href: string) =>
 	`<link rel="${rel}" href="${escapeHtml(href)}" ${MARK}>`;
 
-/** The `<client-component>` element's script, which every hydrated component writes. */
+/** A module script, such as the `<client-component>` element's, which every hydrated component writes. */
 export const assetScript = (src: string) =>
 	`<script type="module" src="${escapeHtml(src)}" ${MARK}></script>`;
 

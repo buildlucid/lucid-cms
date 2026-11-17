@@ -13,7 +13,8 @@ import withTransaction from "./with-transaction.js";
 /**
  * Wraps a service with error conversion and optional database transactions.
  * The returned function takes a ServiceContext followed by the service's arguments.
- * Returned errors and thrown LucidErrors roll back a transaction opened here; existing transactions are reused.
+ * Returned errors and thrown LucidErrors roll back a transaction opened here; existing transactions are reused,
+ * or with `isolate` given a savepoint that a failure rolls back.
  *
  * @example
  * ```ts
@@ -38,7 +39,10 @@ const serviceWrapper =
 	async (service: ServiceContext, ...args: T): ServiceResponse<R> => {
 		try {
 			const result = wrapperConfig.transaction
-				? await withTransaction(service, (context) => fn(context, ...args))
+				? await withTransaction(service, (context) => fn(context, ...args), {
+						isolate: wrapperConfig.isolate,
+						ownCallbacks: wrapperConfig.isolate,
+					})
 				: await fn(service, ...args);
 			if (result.error) {
 				return {

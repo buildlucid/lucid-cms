@@ -77,6 +77,8 @@ config: (env) => ({
 }),
 ```
 
+Forms outside the admin can draw reCAPTCHA with `toolkit.captcha.renderWidget({ action, field })`, which returns its HTML with a small inline script. It writes its token to an input named `field`: score keys fetch one as the form sends, and checkbox keys wait for the box to be ticked. Add your website's hostname to the key's domains, and allow Google's reCAPTCHA addresses in your website's Content Security Policy.
+
 If reCAPTCHA can't be reached, protected forms are rejected rather than let through. To get back in during an outage, set `captcha.forms` to `false` and redeploy. An environment variable makes this a quick change:
 
 ```typescript

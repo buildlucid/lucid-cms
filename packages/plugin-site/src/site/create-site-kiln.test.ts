@@ -4,7 +4,7 @@ import type {
 	ServiceContext,
 	Toolkit,
 } from "@lucidcms/core/types";
-import { KilnRenderError, memoryLoader } from "@lucidkiln/core";
+import { KilnRenderError, memoryLoader, safe } from "@lucidkiln/core";
 import { describe, expect, test, vi } from "vitest";
 import { SiteNotFoundError, SiteRedirectError } from "../errors.js";
 import defineSiteFunction from "../functions/define-site-function.js";
@@ -15,6 +15,7 @@ import type {
 	SitePreview,
 	SiteState,
 } from "../types.js";
+import { moveUiAssets } from "../ui/page-assets.js";
 import createSiteConfig from "./create-site-config.js";
 import createSiteKiln from "./create-site-kiln.js";
 import renderOptions from "./render-options.js";
@@ -512,6 +513,26 @@ describe("site kiln options", () => {
 		await expect(
 			site.render("count.kiln", {}, renderOptions(state)),
 		).resolves.toBe("1!:token");
+	});
+
+	test("site functions add browser files beside their markup, which whole pages move into the head once", async () => {
+		const widget = defineSiteFunction(({ assets }) =>
+			safe(`<p>widget</p>${assets.script("/widget.js")}`),
+		);
+		const site = createSiteKiln({
+			config: siteConfig,
+			options: { kiln: { functions: { widget } } },
+			data: built,
+			lookupTranslation: () => undefined,
+			loader: memoryLoader({
+				"page.kiln": "<head></head><body>{{ widget() }}{{ widget() }}</body>",
+			}),
+		});
+
+		const html = await site.render("page.kiln", {}, renderOptions(state));
+		expect(moveUiAssets(html, {})).toBe(
+			'<head><script type="module" src="/widget.js"></script></head><body><p>widget</p><p>widget</p></body>',
+		);
 	});
 
 	test("extensions can't register a built-in or each other's names, while the site's own entries replace anything", async () => {

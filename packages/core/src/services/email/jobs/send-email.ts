@@ -1,4 +1,5 @@
 import z from "zod";
+import constants from "../../../constants/constants.js";
 import { normalizeEmailAttachments } from "../../../libs/email/attachments.js";
 import isEmailSimulated from "../../../libs/email/is-simulated.js";
 import {
@@ -139,6 +140,8 @@ const sendEmail: JobService<z.infer<typeof input>> = async ({
 				html: htmlData ?? "",
 				cc: emailRes.data.cc ?? undefined,
 				bcc: emailRes.data.bcc ?? undefined,
+				replyTo:
+					emailRes.data.headers?.[constants.email.headers.replyTo] ?? undefined,
 				priority: emailRes.data.priority,
 				headers: emailRes.data.headers,
 				attachments: attachmentsRes.data,

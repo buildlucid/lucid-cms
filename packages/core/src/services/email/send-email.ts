@@ -103,7 +103,10 @@ const sendEmail: ServiceFn<
 			subject,
 			template: data.template,
 			priority: data.priority ?? "normal",
-			headers: data.headers ?? null,
+			//* the reply address is a header like any other, kept here for the worker to hand to the adapter
+			headers: data.replyTo
+				? { ...data.headers, [constants.email.headers.replyTo]: data.replyTo }
+				: (data.headers ?? null),
 			cc: data.cc,
 			bcc: data.bcc,
 			data: storedDataRes.data,

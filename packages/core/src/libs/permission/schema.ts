@@ -1,9 +1,10 @@
 import z from "zod";
+import { systemOnly } from "./field-permissions.js";
 
 /** Which permissions Lucid generates for a field, a container of fields or a brick. */
 export const fieldPermissionsSchema = z.strictObject({
 	read: z.boolean().optional(),
-	update: z.boolean().optional(),
+	update: z.union([z.boolean(), z.literal(systemOnly)]).optional(),
 });
 
 /** The generated permissions a field, container or brick requires. */

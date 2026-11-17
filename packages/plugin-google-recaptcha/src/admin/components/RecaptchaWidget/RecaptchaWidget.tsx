@@ -2,30 +2,8 @@ import type { CaptchaWidgetProps } from "@lucidcms/admin/types";
 import { createCaptchaTokenState, loadScript } from "@lucidcms/admin/utils";
 import { type Component, onCleanup, onMount } from "solid-js";
 import { SCRIPT_URL } from "../../../constants.js";
+import type { RecaptchaEnterprise } from "../../../provider-types.js";
 import type { RecaptchaClientOptions } from "../../../types.js";
-
-type RecaptchaEnterprise = {
-	ready: (callback: () => void) => void;
-	execute: (siteKey: string, options: { action: string }) => Promise<string>;
-	render: (
-		container: HTMLElement,
-		parameters: {
-			sitekey: string;
-			action: string;
-			theme: "light" | "dark";
-			callback: (token: string) => void;
-			"expired-callback": () => void;
-			"error-callback": () => void;
-		},
-	) => number;
-	reset: (widgetId: number) => void;
-};
-
-declare global {
-	interface Window {
-		grecaptcha?: { enterprise?: RecaptchaEnterprise };
-	}
-}
 
 /** Score keys place a badge on the page, which only shows while a protected form is open. */
 const setBadgeVisible = (visible: boolean) => {

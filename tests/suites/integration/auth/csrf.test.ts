@@ -19,6 +19,8 @@ const EXEMPT: Partial<Record<RouteKey, string>> = {
 		"Share links are public, so a forged request unlocks nothing the sender can't.",
 	"POST /api/v1/share/{token}/download":
 		"Share links are public, and a forged request can't read the file it gets.",
+	"POST /api/v1/content/e/forms/{key}/submit":
+		"Forms are sent by visitors, so a forged request sends nothing the sender can't.",
 };
 
 describe("cross-site request forgery", () => {

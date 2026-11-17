@@ -1,0 +1,99 @@
+{
+	"name": "@lucidcms/forms",
+	"version": "0.19.0-alpha.0",
+	"description": "The official forms plugin for Lucid CMS",
+	"type": "module",
+	"types": "./dist/server/index.d.mts",
+	"module": "dist/server/index.mjs",
+	"exports": {
+		".": {
+			"types": "./dist/server/index.d.mts",
+			"default": "./dist/server/index.mjs"
+		},
+		"./browser": {
+			"types": "./dist/browser/index.d.mts",
+			"default": "./dist/browser/index.mjs"
+		},
+		"./site": {
+			"types": "./dist/server/site.d.mts",
+			"default": "./dist/server/site.mjs"
+		},
+		"./translations": "./translations",
+		"./emails": "./emails",
+		"./components": {
+			"types": "./dist/admin/components.d.mts",
+			"default": "./src/admin/components/index.ts"
+		},
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"build": "node ../../scripts/build-inline-script.ts src/client/form-script.ts src/shared/form-script.ts && tsc --noEmit && tsdown",
+		"check": "node ../../scripts/build-inline-script.ts src/client/form-script.ts src/shared/form-script.ts --check",
+		"dev": "tsdown --watch"
+	},
+	"files": [
+		"dist/server",
+		"dist/browser",
+		"dist/admin",
+		"translations",
+		"emails",
+		"src",
+		"!src/**/*.test.*"
+	],
+	"author": "Build Lucid Ltd",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/buildlucid/lucid-cms.git",
+		"directory": "packages/plugin-forms"
+	},
+	"keywords": [
+		"CMS",
+		"Lucid CMS",
+		"Forms",
+		"Plugin"
+	],
+	"devDependencies": {
+		"@lucidcms/admin": "0.19.0-alpha.0",
+		"@lucidcms/core": "0.19.0-alpha.0",
+		"@lucidcms/site": "0.19.0-alpha.0",
+		"@lucidkiln/core": "^1.7.1",
+		"@tanstack/solid-query": "^5.105.0",
+		"@types/node": "^24.19.2",
+		"solid-js": "^1.9.18",
+		"tsdown": "^0.23.4",
+		"typescript": "^6.0.3",
+		"zod": "^4.6.6"
+	},
+	"peerDependencies": {
+		"@lucidcms/admin": "0.19.0-alpha.0",
+		"@lucidcms/core": "0.19.0-alpha.0",
+		"@lucidcms/site": "0.19.0-alpha.0",
+		"@lucidkiln/core": "^1.7.1",
+		"@tanstack/solid-query": "^5.101.1",
+		"solid-js": "^1.9.13"
+	},
+	"peerDependenciesMeta": {
+		"@lucidcms/site": {
+			"optional": true
+		},
+		"@lucidkiln/core": {
+			"optional": true
+		}
+	},
+	"dependencies": {
+		"@lucidcms/client": "0.19.0-alpha.0",
+		"hono": "^4.13.14",
+		"kysely": "0.29.7",
+		"solid-icons": "^1.2.0"
+	},
+	"volta": {
+		"node": "26.12.1"
+	},
+	"engines": {
+		"node": ">=24"
+	},
+	"license": "MIT",
+	"publishConfig": {
+		"access": "public"
+	}
+}

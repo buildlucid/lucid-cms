@@ -10,6 +10,10 @@ const emailConstants = Object.freeze({
 		magicLink: "/admin/magic-link/verify",
 		account: "/admin/account",
 	},
+	headers: {
+		/** Where an email's reply address is kept among its stored headers. */
+		replyTo: "Reply-To",
+	},
 	storage: {
 		defaultPreviewFallback: "[REDACTED]",
 		encryptedValueMarker: "__lucid_email_encrypted",

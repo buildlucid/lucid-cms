@@ -88,11 +88,13 @@ const CollectionConfigSchema = z
 			labels: z.strictObject({
 				singular: adminCopyInputSchema,
 				plural: adminCopyInputSchema,
+				addBrick: adminCopyInputSchema.optional(),
 			}),
 			description: adminCopyInputSchema.optional(),
 		}),
 		ai: aiInstructionsSchema.optional(),
 		locked: z.boolean().default(constants.collectionBuilder.locked).optional(),
+		actions: z.strictObject({ create: z.boolean().optional() }).optional(),
 		localized: collectionLocalizationSchema
 			.default(constants.collectionBuilder.localized)
 			.optional(),

@@ -219,7 +219,12 @@ export type CollectionOptions<
 	/** Labels and help text shown to editors. */
 	details: {
 		/** Singular and plural names used throughout the admin. */
-		labels: { singular: AdminCopyInput; plural: AdminCopyInput };
+		labels: {
+			singular: AdminCopyInput;
+			plural: AdminCopyInput;
+			/** What the builder's add button says, when its bricks are something more specific, eg. "Add Field". Defaults to "Add Brick". */
+			addBrick?: AdminCopyInput;
+		};
 		/** Explain what content belongs in this collection. */
 		description?: AdminCopyInput;
 	};
@@ -227,6 +232,14 @@ export type CollectionOptions<
 	ai?: AiInstructionsConfig;
 	/** Prevent document changes, including saves and deletions. Defaults to false. */
 	locked?: boolean;
+	/**
+	 * What people, API clients and agents may do with documents. Code acting as the system still can,
+	 * such as a plugin that writes the collection's documents itself.
+	 */
+	actions?: {
+		/** Whether they can add documents, directly or through a request. Defaults to true. */
+		create?: boolean;
+	};
 	/** Enable content localization or choose a subset of configured locales. Defaults to false. */
 	localized?: CollectionLocalizationConfig;
 	/** Keep previous versions. Omission disables revisions; true keeps them for 30 days. Use retentionDays: false to keep them indefinitely. */
@@ -261,10 +274,15 @@ export type CollectionData = {
 	mode: CollectionOptions["mode"];
 	group: CollectionGroupConfig | null;
 	details: {
-		labels: { singular: ResolvedAdminCopy; plural: ResolvedAdminCopy };
+		labels: {
+			singular: ResolvedAdminCopy;
+			plural: ResolvedAdminCopy;
+			addBrick: ResolvedAdminCopy | null;
+		};
 		description: ResolvedAdminCopy | null;
 	};
 	locked: boolean;
+	actions: { create: boolean };
 	revisions: Required<CollectionRevisionOptions>;
 	localized: boolean;
 	autoSave: boolean;

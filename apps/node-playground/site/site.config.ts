@@ -1,3 +1,4 @@
+import { formsSite } from "@lucidcms/forms/site";
 import type { SiteMode, SitePluginOptions } from "@lucidcms/site";
 import { react } from "@lucidcms/site-react";
 import { solid } from "@lucidcms/site-solid";
@@ -21,6 +22,7 @@ const siteConfig = (env: { SITE_URL: string; SITE_MODE: SiteMode }) =>
 		kiln: {
 			timeZone: "Europe/London",
 			functions,
+			extensions: [formsSite()],
 			globals: { siteUrl: env.SITE_URL },
 		},
 		ui: [react(), solid({ include: ["ui/solid/**"] }), vue(), svelte()],

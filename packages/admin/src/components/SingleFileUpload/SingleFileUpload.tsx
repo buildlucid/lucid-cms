@@ -208,6 +208,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 			<FormLabel
 				id={props.id}
 				label={props.copy?.label}
+				description={props.copy?.describedBy}
 				required={props.required}
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}

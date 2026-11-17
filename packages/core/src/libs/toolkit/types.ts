@@ -50,7 +50,7 @@ export type CoreToolkit = {
 	agent: ToolkitAgent;
 	/** Helpers for resolving request authentication state. */
 	auth: ToolkitAuth;
-	/** Helpers for checking captcha tokens in custom form endpoints. */
+	/** Helpers for drawing captcha widgets and checking their tokens in custom form endpoints. */
 	captcha: ToolkitCaptcha;
 	/** Effective database schemas for custom collection queries. */
 	collections: ToolkitCollections;
@@ -121,6 +121,7 @@ export type * from "./auth/index.js";
 export type * from "./auth/status/index.js";
 export type * from "./captcha/index.js";
 export type * from "./captcha/verify/index.js";
+export type { ToolkitCaptchaRenderWidgetInput } from "./captcha/render-widget/index.js";
 export type * from "./collections/get-schema/index.js";
 export type * from "./collections/index.js";
 export type * from "./deploys/get-single/index.js";

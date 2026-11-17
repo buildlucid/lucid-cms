@@ -5,6 +5,8 @@ export const OUTBOX_ADAPTER_KEY = "harness-outbox";
 export type OutboxEmail = {
 	to: string;
 	subject: string;
+	/** Where replies go, when the email names somewhere other than its sender. */
+	replyTo?: string;
 	template: string;
 	/** What the template was rendered with, including links the CMS never stores. */
 	data: Record<string, unknown>;

@@ -10,33 +10,6 @@ import {
 import { SCRIPT_URL } from "../../../constants.js";
 import type { TurnstileClientOptions } from "../../../types.js";
 
-type Turnstile = {
-	render: (
-		container: HTMLElement,
-		options: {
-			sitekey: string;
-			action: string;
-			theme: "light" | "dark";
-			language: "auto";
-			size: TurnstileClientOptions["size"];
-			appearance: TurnstileClientOptions["appearance"];
-			retry: "never";
-			callback: (token: string) => void;
-			"expired-callback": () => void;
-			"timeout-callback": () => void;
-			"error-callback": () => void;
-		},
-	) => string | undefined;
-	reset: (widgetId: string) => void;
-	remove: (widgetId: string) => void;
-};
-
-declare global {
-	interface Window {
-		turnstile?: Turnstile;
-	}
-}
-
 /** Renders Cloudflare Turnstile and hands its tokens to the protected form. */
 const TurnstileWidget: Component<
 	CaptchaWidgetProps<undefined, TurnstileClientOptions>
@@ -110,9 +83,7 @@ const TurnstileWidget: Component<
 			ref={container}
 			style={{
 				"min-height": reservedHeight(),
-				//* a colour scheme that differs from the iframe's makes the browser paint it white until it loads
 				"color-scheme": "light",
-				//* stops the inline iframe leaving a text-line gap below it, so it fits the reserved height
 				"line-height": "0",
 			}}
 		/>

@@ -78,6 +78,22 @@ const saveDocument: ServiceFn<
 		};
 	}
 
+	//* code acting as the system has no user, and still creates
+	if (
+		data.documentId === undefined &&
+		data.userId !== null &&
+		!collectionRes.data.getData.actions.create
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.documents.create.unavailable"),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
+
 	const [migrationStatusRes, migrationIdRes] = await Promise.all([
 		getMigrationStatus(context, { collection: collectionRes.data }),
 		getCurrentCollectionMigrationId(context, data.collectionKey),

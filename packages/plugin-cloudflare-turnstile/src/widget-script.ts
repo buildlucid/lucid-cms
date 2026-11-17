@@ -1,0 +1,5 @@
+// Built from src/client/widget.ts by scripts/build-inline-script.ts. Don't edit it here.
+
+const script = "(function(){let e=`https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit`,t=document.currentScript?.parentElement,n=()=>new Promise((t,n)=>{if(window.turnstile)return t(window.turnstile);let r=document.querySelector(`script[src=\"${e}\"]`);r||(r=document.createElement(`script`),r.setAttribute(`src`,e),document.head.append(r)),r.addEventListener(`load`,()=>window.turnstile?t(window.turnstile):n()),r.addEventListener(`error`,n)});if(t){let e={};try{e=JSON.parse(t.getAttribute(`data-captcha-settings`)??`{}`)}catch{}let r=[],i=()=>{for(let e of r)e();r=[]},a=n().then(n=>{let r=n.render(t,{sitekey:e.siteKey??``,action:e.action,size:e.size,appearance:e.appearance,\"response-field-name\":e.field,callback:i,\"error-callback\":i,\"timeout-callback\":i});return r===void 0?null:(t.addEventListener(`captcha:reset`,()=>n.reset(r)),()=>n.getResponse(r))}).catch(()=>null);t.addEventListener(`captcha:token`,e=>{e.detail(a.then(e=>{if(e&&!e())return new Promise(e=>r.push(e))}))})}})();";
+
+export default script;

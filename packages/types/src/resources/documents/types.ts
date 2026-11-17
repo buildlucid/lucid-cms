@@ -555,8 +555,8 @@ type RequiredValidation = {
 export type FieldPermissionKeys = {
 	/** Required to see the item, which the admin hides otherwise. */
 	read?: Permission;
-	/** Required to change the item, which the admin shows as read-only otherwise. */
-	update?: Permission;
+	/** Required to change the item, which the admin shows as read-only otherwise. `"system"` when only code changes it. */
+	update?: Permission | "system";
 };
 
 type SharedCollectionFieldConfig<TType extends FieldType> = {
@@ -813,7 +813,12 @@ export interface Collection {
 		order: number | null;
 	} | null;
 	details: {
-		labels: { singular: ResolvedAdminCopy; plural: ResolvedAdminCopy };
+		labels: {
+			singular: ResolvedAdminCopy;
+			plural: ResolvedAdminCopy;
+			/** What the builder's add button says, or null for the default. */
+			addBrick: ResolvedAdminCopy | null;
+		};
 		description: ResolvedAdminCopy | null;
 	};
 	localized:
@@ -824,6 +829,8 @@ export interface Collection {
 		  };
 	revisions: { enabled: boolean; retentionDays: number | false };
 	locked: boolean;
+	/** What people may do with documents. Code acting as the system still can. */
+	actions: { create: boolean };
 	listing: string[];
 	labelFields: string[];
 	autoSave: boolean;

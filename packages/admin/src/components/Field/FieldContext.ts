@@ -14,6 +14,12 @@ export interface FieldContextValue {
 	field: Accessor<EditorField | undefined>;
 	/** The built-in input's label markers, when the field slot replaces it. */
 	markers: Accessor<FieldLabelMarkersProps | undefined>;
+	/** The text `Field.Description` was given, which `Field.Label` shows as a tooltip. */
+	description: Accessor<string | undefined>;
+	setDescription: (description: string | undefined) => void;
+	/** Whether a `Field.Label` is shown, without which the description shows beneath the control. */
+	labelled: Accessor<boolean>;
+	setLabelled: (labelled: boolean) => void;
 }
 
 export const FieldContext = createContext<FieldContextValue>();

@@ -44,6 +44,10 @@ export {
 	default as Checkbox,
 } from "../components/Checkbox/Checkbox.js";
 export {
+	type CodeBlockProps,
+	default as CodeBlock,
+} from "../components/CodeBlock/CodeBlock.js";
+export {
 	type CodeEditorProps,
 	default as CodeEditor,
 } from "../components/CodeEditor/CodeEditor.js";

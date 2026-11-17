@@ -373,25 +373,31 @@ const getCollectionCapabilityGroups = (
 		},
 		core: true,
 		capabilities: [
-			...collectionPermissionActions.map((action): CapabilityDefinition => {
-				const permission = getCollectionPermission(collection.key, action);
+			...collectionPermissionActions
+				.filter(
+					(action) =>
+						collection.getData.actions.create ||
+						(action !== "create" && action !== "create-request"),
+				)
+				.map((action): CapabilityDefinition => {
+					const permission = getCollectionPermission(collection.key, action);
 
-				return {
-					key: permission,
-					details: collectionPermissionDetails[action],
-					core: true,
-					permission,
-					subgroup: collectionPermissionSubgroups[action],
-					external: {
-						scope: getCollectionExternalScope(collection.key, action),
-						userPermission: permission,
-						details: {
-							name: copy(`admin:integrations.scopes.documents.${action}`),
+					return {
+						key: permission,
+						details: collectionPermissionDetails[action],
+						core: true,
+						permission,
+						subgroup: collectionPermissionSubgroups[action],
+						external: {
+							scope: getCollectionExternalScope(collection.key, action),
+							userPermission: permission,
+							details: {
+								name: copy(`admin:integrations.scopes.documents.${action}`),
+							},
 						},
-					},
-					availableToIntegrations: action === "read",
-				};
-			}),
+						availableToIntegrations: action === "read",
+					};
+				}),
 			...getFieldCapabilities(collection),
 		],
 	}));

@@ -7,6 +7,7 @@ import {
 	VERIFY_TIMEOUT,
 } from "./constants.js";
 import type { PluginOptions, TurnstileClientOptions } from "./types.js";
+import widgetScript from "./widget-script.js";
 
 /** Error codes for a missing or bad token, rather than a problem with our setup. */
 const INVALID_TOKEN_CODES = [
@@ -40,6 +41,7 @@ const turnstileCaptchaAdapter = (
 			size: options.size ?? "flexible",
 			appearance: options.appearance ?? "always",
 		} satisfies TurnstileClientOptions,
+		browserWidget: widgetScript,
 		verify: async (context, params) => {
 			if (params.token.length > MAX_TOKEN_LENGTH) {
 				return { success: false, reason: "invalid" };

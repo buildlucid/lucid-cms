@@ -59,6 +59,7 @@ AI features require a subscription with Lucid. This is planned to become publicl
 - [Cloudflare KV](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-kv): registers a Cloudflare KV adapter.
 - [Typesense](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-typesense): indexes collection content with durable jobs, projections and resumable rebuilds.
 - [SEO](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-seo): adds SEO fields to your collections, with previews of search results and social media cards.
+- [Forms](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-forms): adds forms for your website, defined in code or built by editors, with spam protection, emails and stored submissions.
 - [Cloudflare Turnstile](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-turnstile): protects login and other public forms with Cloudflare Turnstile.
 - [Google reCAPTCHA](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-google-recaptcha): protects login and other public forms with Google reCAPTCHA.
 

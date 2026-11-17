@@ -4,6 +4,7 @@
 import { defineConfig, lucidAgent, mcpTools, z } from "@lucidcms/core";
 // import { cloudflareTurnstile } from "@lucidcms/cloudflare-turnstile";
 import { filesystem } from "@lucidcms/filesystem";
+import { forms } from "@lucidcms/forms";
 import { githubAuth } from "@lucidcms/github-auth";
 import { googleAuth } from "@lucidcms/google-auth";
 import { microsoftAuth } from "@lucidcms/microsoft-auth";
@@ -35,6 +36,7 @@ import SimpleCollection from "./src/collections/simple.js";
 import TestCollection from "./src/collections/test.js";
 import deploys from "./src/deploys/index.js";
 import transporter from "./src/email-transporter.js";
+import contactForm from "./src/forms/contact.js";
 import { deployFinishedNotification } from "./src/notifications/deploy-finished.js";
 import fakeCiRoute from "./src/routes/fake-ci.js";
 import searchMediaRoute from "./src/routes/search-media.js";
@@ -373,6 +375,7 @@ export default defineConfig({
 			nodemailer({
 				transporter: transporter,
 			}),
+			forms({ definitions: [contactForm] }),
 			site(siteConfig(env)),
 			// redis({
 			// 	connection: env.REDIS_CONNECTION,

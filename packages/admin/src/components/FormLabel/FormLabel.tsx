@@ -1,6 +1,7 @@
 import classnames from "classnames";
 import { type Component, type JSXElement, Show } from "solid-js";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
+import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
 interface LabelProps {
 	id: string;
@@ -15,14 +16,24 @@ interface LabelProps {
 	fieldColumnIsMissing?: boolean;
 	/** Renders lock and locale markers unless disabled because `startSlot` already supplies them. */
 	markers?: boolean;
+	/** Shown as an info tooltip at the end of the label. Give the control `aria-describedby` for screen readers. */
+	description?: string;
 	/** Before the label text, after any field markers. */
 	startSlot?: JSXElement;
 	rightSlot?: JSXElement;
 }
 
 export const FormLabel: Component<LabelProps> = (props) => {
+	// ----------------------------------
+	// Render
 	return (
-		<Show when={props?.label !== undefined || props.rightSlot !== undefined}>
+		<Show
+			when={
+				props?.label !== undefined ||
+				props.rightSlot !== undefined ||
+				props.description
+			}
+		>
 			<div
 				data-field-label
 				class={classnames(
@@ -63,6 +74,11 @@ export const FormLabel: Component<LabelProps> = (props) => {
 
 				<div class="flex shrink-0 items-center gap-2">
 					<Show when={props.rightSlot}>{props.rightSlot}</Show>
+					<FormTooltip
+						copy={props.description}
+						theme="inline"
+						variant="ghost"
+					/>
 				</div>
 			</div>
 		</Show>

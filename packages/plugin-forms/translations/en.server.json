@@ -1,0 +1,19 @@
+{
+	"plugin.forms.toolkit.error.name": "Forms Toolkit Error",
+	"plugin.forms.toolkit.get.error.message": "Lucid toolkit could not read the form.",
+	"plugin.forms.toolkit.submit.error.message": "Lucid toolkit could not send the form.",
+	"plugin.forms.not.found.name": "Form Not Found",
+	"plugin.forms.not.found": "No form has this key.",
+	"plugin.forms.version.unknown": "Forms can't be read from '{{version}}'. Use one of the forms collection's environments.",
+	"plugin.forms.submit.invalid": "Some answers need another look.",
+	"plugin.forms.submit.too.large": "The form and its files are too large to send.",
+	"plugin.forms.submit.unreadable": "Send the form as JSON or as a posted form.",
+	"plugin.forms.key.duplicate": "Another form already uses this key.",
+	"plugin.forms.key.defined.in.code": "A form defined in the project's code already uses this key.",
+	"plugin.forms.field.name.duplicate": "Another field of this form is already named {{name}}.",
+	"plugin.forms.files.need.storage": "This form takes files, so it must store its submissions.",
+	"plugin.forms.export.error.name": "Export Error",
+	"plugin.forms.export.error.message": "The submissions could not be exported.",
+	"plugin.forms.file.error.name": "File Error",
+	"plugin.forms.file.not.found": "This file isn't part of the submission."
+}

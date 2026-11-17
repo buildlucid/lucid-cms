@@ -654,6 +654,21 @@ export const routes = {
 		"documents:landing-page:update",
 		{ plugin: "pages" },
 	),
+	//* plugins: forms websites read and post without credentials, and their stored submissions
+	"GET /api/v1/content/e/forms/{key}": { ...PUBLIC, plugin: "forms" },
+	"POST /api/v1/content/e/forms/{key}/submit": {
+		...PUBLIC,
+		plugin: "forms",
+		body: {},
+	},
+	"GET /api/v1/forms/submissions/export": needs(
+		"documents:form-submissions:read",
+		{ plugin: "forms", query: { form: "contact" } },
+	),
+	"POST /api/v1/forms/submissions/{id}/files/{mediaId}/download": needs(
+		"documents:form-submissions:read",
+		{ plugin: "forms", params: { id: MISSING_ID, mediaId: MISSING_ID } },
+	),
 	//* plugins: the harness's probe job routes, which every setup registers for job tests
 	"POST /api/v1/harness/jobs": needs("jobs:run", {
 		plugin: "harness-jobs",

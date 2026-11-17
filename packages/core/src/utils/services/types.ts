@@ -85,6 +85,11 @@ export type ServiceProps<T> = {
 export type ServiceWrapperConfig = {
 	/** Start a transaction when supported. Existing transactions are reused. */
 	transaction: boolean;
+	/**
+	 * Inside an existing transaction, runs in a savepoint, so a failure undoes this service's work
+	 * and its `afterRollback` work runs, even when the caller carries on and commits. Defaults to false.
+	 */
+	isolate?: boolean;
 	/** Fallback error details merged with service errors. */
 	defaultError?: Omit<Partial<LucidErrorData>, "zod" | "errors">;
 	/** Log caught exceptions. Defaults to false. */

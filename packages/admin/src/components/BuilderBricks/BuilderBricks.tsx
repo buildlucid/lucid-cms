@@ -35,6 +35,8 @@ import { countFieldErrors } from "@/utils/structural-field-helpers";
 
 interface BuilderBricksProps {
 	brickConfig: CollectionBrickConfig[];
+	/** The collection's own wording for the add button, eg. "Add Field". */
+	addLabel?: Collection["details"]["labels"]["addBrick"];
 	collectionMigrationStatus: Collection["migrationStatus"];
 	collectionKey?: string;
 	documentId?: number;
@@ -94,7 +96,8 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 						}}
 						disabled={isDisabled() || addableBrickConfig().length === 0}
 					>
-						{T()("builder.bricks.add")}
+						{helpers.getLocaleValue({ value: props.addLabel }) ||
+							T()("builder.bricks.add")}
 					</Button>
 				</div>
 				<Switch>
@@ -109,7 +112,6 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 					<Match when={builderBricks().length > 0}>
 						<ol class="w-full">
 							<DragDrop
-								//* moves the brick to where the one dropped on is, as the preview shows while it's dragged
 								sortOrder={(ref, targetRef) => {
 									brickStore.get.moveBrick({
 										brickRef: ref,
@@ -253,7 +255,6 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			}
 			onDragOver={(e) => props.dragDrop.onDragOver(e)}
 		>
-			{/* Header */}
 			<div
 				role="button"
 				tabIndex={0}
@@ -354,7 +355,6 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					</Tooltip>
 				</div>
 			</div>
-			{/* Body */}
 			<BrickBody
 				brickConfig={config()}
 				id={`builder-brick-content-${props.brick.ref}`}

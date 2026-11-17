@@ -25,6 +25,7 @@
 		"job:check-storage": "lucidcms jobs:run core:check-storage"
 	},
 	"dependencies": {
+		"@lucidkiln/core": "^1.7.1",
 		"@lucidcms/github-auth": "*",
 		"@lucidcms/google-auth": "*",
 		"@lucidcms/microsoft-auth": "*",
@@ -35,6 +36,7 @@
 		"@lucidcms/cloudflare-kv": "*",
 		"@lucidcms/cloudflare-queues": "*",
 		"@lucidcms/filesystem": "*",
+		"@lucidcms/forms": "*",
 		"@lucidcms/nodemailer": "*",
 		"@lucidcms/pages": "*",
 		"@lucidcms/redis": "*",

@@ -16,6 +16,7 @@ export const outbox = (url: string | undefined) =>
 					const email: OutboxEmail = {
 						to: params.to,
 						subject: params.subject,
+						replyTo: params.replyTo,
 						template: params.template,
 						data: params.data,
 					};

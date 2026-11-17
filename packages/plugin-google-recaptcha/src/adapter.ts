@@ -7,6 +7,7 @@ import {
 	VERIFY_TIMEOUT,
 } from "./constants.js";
 import type { PluginOptions, RecaptchaClientOptions } from "./types.js";
+import widgetScript from "./widget-script.js";
 
 const assessmentSchema = z.object({
 	tokenProperties: z.object({
@@ -36,6 +37,7 @@ const recaptchaCaptchaAdapter = (
 			siteKey: options.siteKey,
 			mode,
 		} satisfies RecaptchaClientOptions,
+		browserWidget: widgetScript,
 		verify: async (context, params) => {
 			const userIpAddress = options.sendRemoteIp
 				? context.request.ipAddress

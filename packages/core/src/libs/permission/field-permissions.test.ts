@@ -3,6 +3,7 @@ import defineBrick from "../collection/define-brick.js";
 import defineCollection from "../collection/define-collection.js";
 import type CollectionDefinition from "../collection/definitions/collection/index.js";
 import field from "../collection/definitions/fields/field.js";
+import getContentAccess from "../collection/field-access/get-content-access.js";
 import type { AccessConfig } from "./capabilities.js";
 import { getFieldPermission } from "./field-permissions.js";
 import { getPermissionRegistry, isCorePermission } from "./registry.js";
@@ -120,5 +121,47 @@ describe("field permissions", () => {
 			"review",
 			"delete",
 		]);
+	});
+
+	test("locks system-only updates for everyone with an account, without a permission to grant", () => {
+		const collection = defineCollection({
+			key: "orders",
+			mode: "multiple",
+			details: { labels: { singular: "Order", plural: "Orders" } },
+			fields: [
+				field.text("reference", { permissions: { update: "system" } }),
+				field.text("note"),
+			],
+		});
+
+		const superAdmin = getContentAccess(collection, {
+			superAdmin: true,
+			permissions: undefined,
+		});
+		expect(superAdmin.fields.get("reference")).toBe("locked");
+		expect(superAdmin.fields.get("note")).toBe("editable");
+		//* code acting as the system gives no actor
+		expect(getContentAccess(collection, undefined).restricted).toBe(false);
+		expect(
+			getPermissionRegistry(accessConfig(collection))
+				.find((item) => item.key === "documents:orders")
+				?.subgroups?.map((subgroup) => subgroup.key),
+		).not.toContain("fields");
+	});
+
+	test("offers no create permissions for collections people can't add to", () => {
+		const collection = defineCollection({
+			key: "orders",
+			mode: "multiple",
+			details: { labels: { singular: "Order", plural: "Orders" } },
+			actions: { create: false },
+			fields: [field.text("reference")],
+		});
+
+		expect(
+			getPermissionRegistry(accessConfig(collection))
+				.find((item) => item.key === "documents:orders")
+				?.subgroups?.map((subgroup) => subgroup.key),
+		).toEqual(["read", "update", "publish", "review", "delete"]);
 	});
 });

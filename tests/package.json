@@ -17,6 +17,7 @@
 		"@lucidcms/cloudflare-r2": "*",
 		"@lucidcms/core": "*",
 		"@lucidcms/filesystem": "*",
+		"@lucidcms/forms": "*",
 		"@lucidcms/libsql": "*",
 		"@lucidcms/node": "*",
 		"@lucidcms/pages": "*",

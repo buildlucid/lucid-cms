@@ -125,6 +125,7 @@ export const EmailSelect: Component<EmailSelectProps> = (props) => {
 			<FormLabel
 				id={props.id}
 				label={props.copy?.label}
+				description={props.copy?.describedBy}
 				required={props.required}
 				theme={"basic"}
 				altLocaleError={props.altLocaleError}

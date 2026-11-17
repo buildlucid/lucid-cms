@@ -9,7 +9,10 @@
 	},
 	"ignorePatterns": [
 		"packages/client/src/generated",
-		"packages/core/src/libs/email/templates/built-in-schema.ts"
+		"packages/core/src/libs/email/templates/built-in-schema.ts",
+		"packages/plugin-forms/src/shared/form-script.ts",
+		"packages/plugin-cloudflare-turnstile/src/widget-script.ts",
+		"packages/plugin-google-recaptcha/src/widget-script.ts"
 	],
 	"rules": {
 		"array-callback-return": "error",

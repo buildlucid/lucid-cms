@@ -907,7 +907,6 @@ const DocumentEditorPage: Component<{
 										previewing() ? { width: `${split.size()}px` } : undefined
 									}
 								>
-									{/* notices sit above the fields they're about, so previews and comparisons keep their space */}
 									<Show when={uiState.isProposing()}>
 										<DocumentProposingNotice
 											collectionName={docState.collectionSingularName()}
@@ -949,6 +948,7 @@ const DocumentEditorPage: Component<{
 									/>
 									<BuilderBricks
 										brickConfig={builderBrickConfig()}
+										addLabel={docState.collection()?.details.labels.addBrick}
 										collectionMigrationStatus={
 											docState.collection()?.migrationStatus
 										}

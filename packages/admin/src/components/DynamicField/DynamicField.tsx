@@ -220,6 +220,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		const width = fieldConfig()?.ui?.width as number | undefined;
 		return fieldWidthClasses[width ?? 12] ?? fieldWidthClasses[12];
 	});
+	//* fields that draw their own frame rather than a label above a control
+	const isBlock = createMemo(() => {
+		const type = fieldConfig().type;
+		return type === "section" || type === "collapsible" || type === "repeater";
+	});
 	const previewFieldId = createMemo(() => {
 		const config = fieldConfig();
 		if (
@@ -284,7 +289,10 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 							previewFieldId() === undefined ? undefined : ""
 						}
 						id={previewFieldId()}
+						data-field-block={isBlock() ? "" : undefined}
 						class={classNames("w-full relative", widthClass(), {
+							"my-1 border-y border-border py-4 first:mt-0 first:border-t-0 first:pt-0 last:mb-0 last:border-b-0 last:pb-0 [[data-field-block]+&]:mt-0 [[data-field-block]+&]:border-t-0 [[data-field-block]+&]:pt-1":
+								isBlock(),
 							hidden:
 								!activeTab() ||
 								(fieldConfig().type !== "tab" &&

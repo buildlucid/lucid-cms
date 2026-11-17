@@ -90,6 +90,7 @@ const EditorField: Component<EditorFieldProps> = (props) => {
 					<FormLabel
 						id={props.id}
 						label={props.copy?.label}
+						description={props.copy?.describedBy}
 						focused={focused()}
 						required={props.required}
 						theme="basic"

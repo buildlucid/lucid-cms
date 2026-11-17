@@ -9,7 +9,9 @@
 - Lucid now runs on Vite. ([224ed66](https://github.com/buildlucid/lucid-cms/commit/224ed6681d22ac954eab19cccef074e920773f60))
 - Added AI audio generation to the media library, for turning text into speech. ([3cc200e](https://github.com/buildlucid/lucid-cms/commit/3cc200ea3b694c068f9708ac7d140be2d5a07391))
 - Added AI translation, which translates documents into a request per language for review and tracks which translations are out of date. ([d8b9fbc](https://github.com/buildlucid/lucid-cms/commit/d8b9fbc0662f71ce62aff262ce68a8ecbb21d5cc))
-- Fields and bricks can now have their own read and update permissions, so you can control who sees or edits them. ([f28e928](https://github.com/buildlucid/lucid-cms/commit/f28e9283e8f165c0329bea0eccd1964cd65094a5))
+- Fields and bricks can now have their own read and update permissions, so you can control who sees or edits them, with `update: "system"` for values only code changes. ([f28e928](https://github.com/buildlucid/lucid-cms/commit/f28e9283e8f165c0329bea0eccd1964cd65094a5))
+- Added `actions: { create: false }` to collections, for documents only code adds, such as a plugin's own records.
+- Added `details.labels.addBrick` to collections, to reword the builder's add button.
 - Added notifications in the admin and by email. ([8b02c5e](https://github.com/buildlucid/lucid-cms/commit/8b02c5ec47d9b621ef10b0b3efe25acedec9c2e0))
 - Added document import and export, with their media, to move content between Lucid sites, plus `toolkit.transfer` and `defineTransfer` for scripts and plugins. ([0308676](https://github.com/buildlucid/lucid-cms/commit/03086762f322458d13f57f25d5cc30921119de31))
 - Added `toolkit.redirects.resolve()` and a content API route for finding where a missing page moved, with `redirects` in config for plugins to answer from. ([7bf2931](https://github.com/buildlucid/lucid-cms/commit/7bf2931ba82ab48a3e6dd0dd41d5c69b1de084de))
@@ -150,6 +152,7 @@
 - Fixed every API key and OAuth request writing when it was last used. It is now recorded at most once a minute.
 - Fixed `lucidcms seed` and `jobs:run` waiting forever to be picked from a list when there's no terminal. They now ask for a name.
 - Fixed deleting several documents at once not running `documents.afterChange` hooks.
+- Fixed `replyTo` on emails sent with `toolkit.email.send` being dropped before the email was sent.
 
 ## v0.19.0-alpha.0
 

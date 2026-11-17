@@ -178,6 +178,7 @@ test("collection options are correct along with field includes and filters", asy
 				plural: copy("admin:tests.collections.pages.name", {
 					defaultMessage: "Pages",
 				}),
+				addBrick: null,
 			},
 			description: copy("admin:tests.collections.pages.summary", {
 				defaultMessage:
@@ -185,6 +186,7 @@ test("collection options are correct along with field includes and filters", asy
 			}),
 		},
 		locked: false,
+		actions: { create: true },
 		revisions: { enabled: false, retentionDays: 30 },
 		localized: true,
 		autoSave: false,
@@ -574,6 +576,7 @@ test("plain string copy on details and fields is normalised to literal copy", ()
 		labels: {
 			singular: { type: "lucid.literal", value: "Snippet" },
 			plural: { type: "lucid.literal", value: "Snippets" },
+			addBrick: null,
 		},
 		description: { type: "lucid.literal", value: "Reusable content snippets." },
 	});

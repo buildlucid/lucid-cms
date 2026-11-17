@@ -20,6 +20,9 @@
 		{% component "components/card" with { title: "Islands", href: base ~ "/islands" } %}
 			<p>Parts of a page that render on their own, with props, fallbacks and live data.</p>
 		{% endcomponent %}
+		{% component "components/card" with { title: "Forms", href: base ~ "/forms" } %}
+			<p>A form from the forms plugin, drawn on the server and sent in place.</p>
+		{% endcomponent %}
 		{% component "components/card" with { title: "Integrations", href: base ~ "/integrations" } %}
 			<p>OAuth discovery, PKCE authorisation, token refresh and revocation, and a request console for the content API.</p>
 		{% endcomponent %}

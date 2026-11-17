@@ -4,7 +4,10 @@ import type { agentPermissionActions } from "./agent-permissions.js";
 import type { collectionPermissionActions } from "./collection-permissions.js";
 import type { PermissionGroups, Permissions } from "./definitions.js";
 import type { deployPermissionActions } from "./deploy-permissions.js";
-import type { fieldPermissionActions } from "./field-permissions.js";
+import type {
+	fieldPermissionActions,
+	systemOnly,
+} from "./field-permissions.js";
 
 export type StaticPermission = (typeof Permissions)[keyof typeof Permissions];
 
@@ -60,14 +63,19 @@ export type PermissionRequirement =
 export type FieldPermissions = {
 	/** Generates a read permission only when `true`, hiding the field or brick from the admin and document responses for actors who lack it. */
 	read?: boolean;
-	/** Generates an update permission only when `true`, making values read-only for actors who lack it while saves preserve stored values. */
-	update?: boolean;
+	/**
+	 * With `true`, generates update permission and preserves stored values for unauthorized actors.
+	 * `"system"` locks values for all users, including super admins; only system writes may change
+	 * them.
+	 */
+	update?: boolean | typeof systemOnly;
 };
 
 /** The generated permissions a field or brick requires, as collection responses send them. */
 export type GeneratedFieldPermissions = {
 	read?: FieldPermission<"read">;
-	update?: FieldPermission<"update">;
+	/** The permission that changes it, or `"system"` when nobody's does. */
+	update?: FieldPermission<"update"> | typeof systemOnly;
 };
 
 export type PermissionGroupKey = keyof typeof PermissionGroups;

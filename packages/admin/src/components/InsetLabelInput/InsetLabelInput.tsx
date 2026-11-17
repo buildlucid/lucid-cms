@@ -73,6 +73,7 @@ export const InsetLabelInput: Component<{
 				<FormLabel
 					id={props.id}
 					label={props.copy?.label}
+					description={props.copy?.describedBy}
 					focused={inputFocus()}
 					required={props.required}
 					theme={"full"}
@@ -112,7 +113,6 @@ export const InsetLabelInput: Component<{
 						props.onBlur?.();
 					}}
 				/>
-				{/* Show Password */}
 				<Show when={props.type === "password"}>
 					<button
 						type="button"

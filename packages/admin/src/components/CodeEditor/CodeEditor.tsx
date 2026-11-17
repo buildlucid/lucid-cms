@@ -20,13 +20,9 @@ import {
 } from "solid-js";
 import Field from "@/components/Field/Field";
 import Menu from "@/components/Menu/Menu";
-import themeStore from "@/store/themeStore/themeStore";
 import T from "@/translations";
-import { getCodeMirrorTheme } from "@/utils/codemirror-theme";
-import {
-	getCodeLanguageLabel,
-	loadCodeLanguageExtension,
-} from "./utils/code-field-languages";
+import { getCodeLanguageLabel } from "./utils/code-field-languages";
+import createCodeAppearance from "./utils/create-code-appearance";
 
 export interface CodeEditorProps extends JSX.AriaAttributes {
 	id: string;
@@ -181,10 +177,8 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 
 	createEditorReadonly(editorView, () => props.disabled ?? false);
 
-	const languageCompartment = new Compartment();
 	const placeholderCompartment = new Compartment();
 	const lintCompartment = new Compartment();
-	const themeCompartment = new Compartment();
 
 	const reconfigureSetup = createExtension(basicSetup);
 	//* a value from elsewhere, eg. undo, replaces the document, and the editor's own undo history with it, so that can't work against text that is no longer there
@@ -202,12 +196,13 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 		}),
 	);
 	createExtension(keymap.of([indentWithTab]));
-	createExtension(languageCompartment.of([]));
 	createExtension(placeholderCompartment.of([]));
 	createExtension(lintCompartment.of([]));
-	createExtension(
-		themeCompartment.of(getCodeMirrorTheme(themeStore.resolved())),
-	);
+	createCodeAppearance({
+		editorView,
+		createExtension,
+		language: () => props.language,
+	});
 	createExtension(EditorView.lineWrapping);
 	createExtension(
 		Prec.highest(
@@ -272,27 +267,6 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 
 	// ----------------------------------------
 	// Effects
-	let languageLoadId = 0;
-	createEffect(() => {
-		const view = editorView();
-		const language = props.language;
-		if (!view) return;
-
-		const loadId = ++languageLoadId;
-		loadCodeLanguageExtension(language)
-			.then((extension) => {
-				if (loadId !== languageLoadId) return;
-				view.dispatch({
-					effects: languageCompartment.reconfigure(extension ?? []),
-				});
-			})
-			.catch(() => {
-				if (loadId !== languageLoadId) return;
-				view.dispatch({
-					effects: languageCompartment.reconfigure([]),
-				});
-			});
-	});
 	let lintLoadId = 0;
 	createEffect(() => {
 		const view = editorView();
@@ -322,15 +296,6 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 				if (loadId !== lintLoadId) return;
 				view.dispatch({ effects: lintCompartment.reconfigure([]) });
 			});
-	});
-	createEffect(() => {
-		const view = editorView();
-		const theme = themeStore.resolved();
-		if (!view) return;
-
-		view.dispatch({
-			effects: themeCompartment.reconfigure(getCodeMirrorTheme(theme)),
-		});
 	});
 	createEffect(() => {
 		const view = editorView();

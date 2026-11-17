@@ -1,4 +1,4 @@
-import type { Component, JSXElement } from "solid-js";
+import { type Component, type JSXElement, onCleanup } from "solid-js";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import { useFieldContext } from "../FieldContext";
 
@@ -10,11 +10,20 @@ export interface FieldLabelProps {
 	children?: JSXElement;
 }
 
-/** The field's label, with the built-in input's markers when a field slot replaces it. */
+/**
+ * The field's label, with the built-in input's markers when a field slot replaces it, and the
+ * field's description as a tooltip.
+ */
 export const FieldLabel: Component<FieldLabelProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
-	const { id, required, focused, field, markers } = useFieldContext();
+	const { id, required, focused, field, markers, description, setLabelled } =
+		useFieldContext();
+
+	// ----------------------------------------
+	// Lifecycle
+	setLabelled(true);
+	onCleanup(() => setLabelled(false));
 
 	// ----------------------------------------
 	// Render
@@ -31,6 +40,7 @@ export const FieldLabel: Component<FieldLabelProps> = (props) => {
 			fieldColumnIsMissing={markers()?.fieldColumnIsMissing}
 			startSlot={props.start}
 			rightSlot={props.end}
+			description={description()}
 			class={props.class}
 		/>
 	);

@@ -1,0 +1,26 @@
+{% extends "layouts/localized" %}
+
+{% export paths = localePaths() %}
+
+{% block title %}Forms | {{ parent() }}{% endblock %}
+
+{% block content %}
+	<h1>Forms</h1>
+	<p class="lead">Forms from the forms plugin. Plain HTML with no styles, and a small inline script that sends each in place.</p>
+
+	<h2>Contact</h2>
+	<p>Defined in code.</p>
+	{{ form("contact") }}
+
+	{# Built in the Forms collection by the forms seed; each is left out until it exists. #}
+	<h2>Newsletter</h2>
+	{{ form("newsletter") }}
+
+	<h2>Job application</h2>
+	<p>Takes a file and sends two emails.</p>
+	{{ form("job-application") }}
+
+	<h2>Event booking</h2>
+	<p>Goes to another page once sent.</p>
+	{{ form("event-booking") }}
+{% endblock %}

@@ -1,7 +1,13 @@
 import { type RenderInfo, withRender } from "@lucidkiln/core";
-import type { SiteState } from "../types.js";
+import type { SiteFunctionContext, SiteState } from "../types.js";
+import { assetLink, assetScript } from "../ui/page-assets.js";
 import type { SiteReadFunctions } from "./create-read-functions.js";
 import type { SiteFunctionSource } from "./site-function-source.js";
+
+const assets: SiteFunctionContext["assets"] = {
+	script: assetScript,
+	style: (href) => assetLink("stylesheet", href),
+};
 
 /** Gives a site function this Kiln's built-in reads, bound to the calling render. */
 const bindSiteFunction = (
@@ -17,6 +23,7 @@ const bindSiteFunction = (
 				path: render.state.path,
 				locale: render.state.locale,
 				tagCache: (...tags) => render.tagCache(...tags),
+				assets,
 				functions: {
 					document: (collection, options) =>
 						reads.document.call(render, collection, options),

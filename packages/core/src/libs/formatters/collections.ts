@@ -137,6 +137,7 @@ const formatSingle = (props: {
 			labels: {
 				singular: collectionData.details.labels.singular,
 				plural: collectionData.details.labels.plural,
+				addBrick: collectionData.details.labels.addBrick,
 			},
 			description: collectionData.details.description,
 		},
@@ -148,6 +149,7 @@ const formatSingle = (props: {
 			: false,
 		revisions: collectionData.revisions,
 		locked: collectionData.locked,
+		actions: collectionData.actions,
 		listing: props.collection.listing.filter(
 			(fieldKey) => access?.fields.get(fieldKey) !== "hidden",
 		),

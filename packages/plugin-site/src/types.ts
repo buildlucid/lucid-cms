@@ -248,6 +248,16 @@ export type SiteFunctionContext = {
 	locale: string;
 	/** Tags the cached section this call runs in, for reads the built-in functions don't make. */
 	tagCache: (...tags: string[]) => void;
+	/**
+	 * HTML tags for browser files the function's markup needs. Put them in the markup it returns,
+	 * so they are cached with it: pages rendered in one go move each into `<head>` once, and
+	 * streamed pages keep them beside the markup.
+	 */
+	assets: {
+		/** A module script, which browsers run once however many times it is on the page. */
+		script: (src: string) => string;
+		style: (href: string) => string;
+	};
 	/** The built-in template functions, handling the site version, previews and cache tags. */
 	functions: {
 		document: <Key extends CollectionDocumentKey>(

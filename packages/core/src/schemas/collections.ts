@@ -96,6 +96,11 @@ const collectionResponseSchema = z.object({
 					defaultMessage: "Pages",
 				},
 			}),
+			addBrick: resolvedAdminCopySchema.nullable().meta({
+				description:
+					"What the builder's add button says, or null for the default",
+				example: null,
+			}),
 		}),
 		description: resolvedAdminCopySchema.nullable().meta({
 			description: "Description text for the collection",
@@ -144,6 +149,13 @@ const collectionResponseSchema = z.object({
 	locked: z.boolean().meta({
 		description: "Whether the collection structure is locked from editing",
 		example: false,
+	}),
+	actions: z.object({
+		create: z.boolean().meta({
+			description:
+				"Whether people can add documents. When false, only code acting as the system does",
+			example: true,
+		}),
 	}),
 	listing: z.array(z.string()).meta({
 		description: "Field keys included in the document listing columns",
