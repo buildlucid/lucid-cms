@@ -14,6 +14,7 @@ import getWorkerSecrets from "./services/get-worker-secrets.js";
 import inspectorPortLogsPlugin from "./services/inspector-port-logs-plugin.js";
 import listOptimizeEntries from "./services/list-optimize-entries.js";
 import loadDevEnv from "./services/load-dev-env.js";
+import mergeWorkerConfig from "./services/merge-worker-config.js";
 import renderWorkerHandlers from "./services/render-worker-handlers.js";
 import type { CloudflareRuntimeAdapter } from "./types.js";
 
@@ -86,25 +87,31 @@ export const ${AGENT_RUNS_EXPORT} = createAgentRuns(build);
 			inspectorPortLogsPlugin(),
 			cloudflare({
 				viteEnvironment: { name: "ssr" },
-				// Receives `cloudflare.config.ts`, or the plugin's defaults, and returns Lucid's additions, which the plugin
-				// merges over it.
-				config: (base) =>
-					createWorkerConfig({
-						// Without its own config, the plugin names the Worker from the package or folder, or the name Workers
-						// Builds sets.
-						name: ownsWorker ? base.name : (options?.worker?.name ?? base.name),
-						compatibilityDate: ownsWorker
-							? base.compatibilityDate
-							: (options?.worker?.compatibilityDate ??
-								DEFAULT_COMPATIBILITY_DATE),
-						entrypoint: workerEntryId,
-						role: project.config.role,
-						options,
-						artifacts: project.artifacts.prepare,
-						secrets: getWorkerSecrets(project, { deploy }),
-						worker: base,
-						remote,
-					}),
+				// Receives `cloudflare.config.ts`, or the plugin's defaults, and returns it with Lucid's settings added.
+				config: (loaded) => ({
+					...loaded,
+					worker: mergeWorkerConfig(
+						loaded.worker,
+						createWorkerConfig({
+							// Without its own config, the plugin names the Worker from the package or folder, or the name
+							// Workers Builds sets.
+							name: ownsWorker
+								? loaded.worker.name
+								: (options?.worker?.name ?? loaded.worker.name),
+							compatibilityDate: ownsWorker
+								? loaded.worker.compatibilityDate
+								: (options?.worker?.compatibilityDate ??
+									DEFAULT_COMPATIBILITY_DATE),
+							entrypoint: workerEntryId,
+							role: project.config.role,
+							options,
+							artifacts: project.artifacts.prepare,
+							secrets: getWorkerSecrets(project, { deploy }),
+							worker: loaded.worker,
+							remote,
+						}),
+					),
+				}),
 			}),
 		];
 	},

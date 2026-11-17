@@ -1,5 +1,5 @@
 import type { WorkerConfig } from "@cloudflare/config";
-import type { PluginConfig } from "@cloudflare/vite-plugin";
+import type { WorkerConfig as ParsedWorkerConfig } from "@cloudflare/vite-plugin";
 import { LucidError } from "@lucidcms/core/runtime";
 import type { LucidRole, RuntimeArtifactCustom } from "@lucidcms/core/types";
 import constants, {
@@ -14,18 +14,17 @@ import {
 import defaultResourceName from "../utils/default-resource-name.js";
 import getArtifactBindings from "../utils/get-artifact-bindings.js";
 
-/** The entry Worker settings the Cloudflare Vite plugin merges over `cloudflare.config.ts`, or its defaults without one. */
-export type EntryWorkerConfig = Exclude<
-	NonNullable<PluginConfig["config"]>,
-	(...args: never[]) => unknown
->;
-type WorkerEnv = NonNullable<EntryWorkerConfig["env"]>;
+type WorkerEnv = NonNullable<ParsedWorkerConfig["env"]>;
 /** The Durable Object exports Lucid declares, which suit both the Vite plugin's config and `cloudflare.config.ts`. */
 type LucidExports = Record<
 	string,
 	{ type: "durable-object"; storage: "sqlite" }
 >;
-type WorkerTriggers = NonNullable<EntryWorkerConfig["triggers"]>;
+type WorkerTriggers = NonNullable<ParsedWorkerConfig["triggers"]>;
+/** Lucid's Worker settings, which `mergeWorkerConfig` combines with the Worker's own. */
+export type LucidWorkerConfig = Omit<ParsedWorkerConfig, "exports"> & {
+	exports: LucidExports;
+};
 type LucidTrigger = Extract<
 	WorkerTriggers[number],
 	{ type: "scheduled" | "queue" }
@@ -51,7 +50,7 @@ const createWorkerConfig = (props: {
 	};
 	/** Connects Lucid's bindings to their deployed resources during development, for `--remote`. */
 	remote?: boolean;
-}): Omit<EntryWorkerConfig, "exports"> & { exports: LucidExports } => {
+}): LucidWorkerConfig => {
 	const dev = props.remote ? { dev: { remote: true } } : {};
 	const bindings = normalizeCloudflareBindings(
 		mergeCloudflareBindings(

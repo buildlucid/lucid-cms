@@ -5,6 +5,7 @@ import constants from "../constants.js";
 import isCloudflareAdapter from "../utils/is-cloudflare-adapter.js";
 import createWorkerConfig from "./create-worker-config.js";
 import getWorkerSecrets from "./get-worker-secrets.js";
+import mergeWorkerConfig from "./merge-worker-config.js";
 
 /** Loads the Lucid project and adds its required settings for `withLucid`, wrapping the host's Worker entry and preserving the Worker's own settings. */
 const resolveLucidWorker = async (
@@ -46,17 +47,7 @@ const resolveLucidWorker = async (
 		}),
 		worker,
 	});
-	return {
-		...worker,
-		entrypoint,
-		compatibilityFlags: [
-			...(lucid.compatibilityFlags ?? []),
-			...(worker.compatibilityFlags ?? []),
-		],
-		env: { ...lucid.env, ...worker.env },
-		exports: { ...lucid.exports, ...worker.exports },
-		triggers: [...(lucid.triggers ?? []), ...(worker.triggers ?? [])],
-	};
+	return mergeWorkerConfig(worker, lucid);
 };
 
 export default resolveLucidWorker;
