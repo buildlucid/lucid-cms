@@ -19,12 +19,7 @@ const PasskeyButton: Component<PasskeyButtonProps> = (props) => {
 			type="button"
 			variant={props.variant ?? "outline"}
 			size="lg"
-			class={
-				props.variant === "primary"
-					? "w-full"
-					: // matches ProviderButton's text colour, which is quieter than the outline variant
-						"w-full text-body! hover:text-secondary-foreground!"
-			}
+			class="w-full"
 			loading={props.loading}
 			disabled={props.disabled}
 			onClick={props.onClick}

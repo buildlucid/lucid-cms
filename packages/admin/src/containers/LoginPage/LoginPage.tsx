@@ -193,11 +193,10 @@ const LoginPage: Component = () => {
 								/>
 							</Show>
 							<Show when={showMagicLinkOption()}>
-								{/* matches ProviderButton's text colour, which is quieter than the outline variant */}
 								<Link
 									variant="outline"
 									size="lg"
-									class="w-full text-body! hover:text-secondary-foreground!"
+									class="w-full"
 									href={`/admin/magic-link${location.search}`}
 								>
 									<TbOutlineMail class="size-4 mr-3" />
